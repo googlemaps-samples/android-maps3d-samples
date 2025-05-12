@@ -21,17 +21,15 @@ for cinematic fly-throughs, the ability to add 3D markers and models to the map,
 
 This repository provides a collection of sample applications to help you get started and explore the capabilities of the Maps3D SDK:
 
-* **[Maps3DSamples/ApiDemos/kotlin-app](Maps3DSamples/ApiDemos/kotlin-app)**: This module showcases the fundamental API features using Kotlin and traditional
+* **[Maps3DSamples/ApiDemos](Maps3DSamples/ApiDemos)**: This module showcases the fundamental API features using Kotlin and traditional
 Android Views. It's a great starting point to understand core concepts like map instantiation, camera manipulation, and adding various map objects.
-* **[Maps3DSamples/ApiDemos/kotlin-compose-app](Maps3DSamples/ApiDemos/kotlin-compose-app)**: For developers using Jetpack Compose, this sample demonstrates
-how to integrate the Maps3D SDK into a declarative UI. It utilizes helper classes to bridge the SDK's View-based nature with Compose, offering a more modern
-approach to building UIs with 3D maps. *(Note: Coming soon!)*
-* **Demos**: The repository also includes several more complex demo applications that illustrate more advanced use cases and integrations of the Maps3D library,
-providing inspiration for building sophisticated 3D mapping applications. *(Note: Coming soon!).*
+* **[Maps3DSamples/advanced](Maps3DSamples/advanced)**: For developers using Jetpack Compose, this sample demonstrates
+how to integrate the Maps3D SDK into a declarative UI. It utilizes helper classes to bridge the SDK's View-based SDK with Compose, offering a more modern
+approach to building UIs with 3D maps.
 
-## Samples in this repo
+## View-based Kotlin Samples
 
-This repo contains the following samples:
+[Maps3DSamples/ApiDemos]This repo contains the following samples:
 
 **[Maps3DSamples/ApiDemos/kotlin-app](Maps3DSamples/ApiDemos/kotlin-app)**: Demonstrates various features of the **Maps3D SDK for Android**
 using Kotlin and Android Views. This module includes examples for:
@@ -44,6 +42,12 @@ using Kotlin and Android Views. This module includes examples for:
 
 The [Maps3DSamples/ApiDemos/common](Maps3DSamples/ApiDemos/common) module contains shared utilities and layouts.
 
+## Jetpack Compose Samples
+
+**[Maps3DSamples/advanced](Maps3DSamples/advanced)** demonstrates options for integrating the Maps3D SDK into a Jetpack Compose UI.
+It also has [Map3dViewModel](Maps3DSamples/advanced/app/src/main/java/com/example/advancedmaps3dsamples/common/Map3dViewModel.kt) which demonstrates how to
+create an abstract base class for view models needing to interact with the Maps3DView via a GoogleMap3D.
+
 ## Requirements
 
 To run the samples, you will need:
@@ -51,6 +55,7 @@ To run the samples, you will need:
 - To [sign up with Google Maps Platform] and enable **Maps3D API for Android**. 
 - An [API key] associated with the project above. Follow the [API key instructions] if you're new to the process.
 - Copy `Maps3DSamples/ApiDemos/local.defaults.properties` to `Maps3DSamples/ApiDemos/secrets.properties` and set the value of `MAPS3D_API_KEY` to your API key.
+- (for the advanced sample, copy `Maps3DSamples/advanced/local.defaults.properties` to `Maps3DSamples/advanced/secrets.properties` and set the value of `MAPS3D_API_KEY` to your API key.)
 - All samples require up-to-date versions of the Android build tools and the Android support repository.
 
 ## Running the sample(s)
@@ -60,7 +65,7 @@ To run the samples, you will need:
     git clone https://github.com/googlemaps-samples/android-maps3d-samples.git
     ```
 2.  In the welcome screen of Android Studio, select "Open".
-3.  Navigate to the root directory of this cloned repository and select it, or navigate into a specific sample directory, `Maps3DSamples/ApiDemos`, and open it as a project.
+3.  Navigate to the root directory of this cloned repository and select it, or navigate into a specific sample directory, open either of the base projects,`Maps3DSamples/ApiDemos` or `Maps3DSamples/advanced`.
 
 Alternatively, use the `gradlew build` command within a sample's directory to build the project directly or download an APK
 under [releases](https://github.com/googlemaps/android-maps3d-samples/releases) (if available for the specific sample).

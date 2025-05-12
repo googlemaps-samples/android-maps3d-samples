@@ -6,9 +6,6 @@ plugins {
 }
 
 android {
-    lint {
-        sarifOutput = file("$buildDir/reports/lint-results.sarif")
-    }
     namespace = "com.example.maps3dkotlin"
     compileSdk = 35
 
@@ -17,7 +14,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0.0"
+        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -65,7 +62,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("com.google.android.gms:play-services-maps3d:0.0.1")
+    implementation(libs.play.services.maps3d)
 
     implementation(project(":common"))
 }

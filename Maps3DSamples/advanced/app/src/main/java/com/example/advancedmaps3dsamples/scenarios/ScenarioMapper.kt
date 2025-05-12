@@ -1,0 +1,411 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package com.example.advancedmaps3dsamples.scenarios
+
+import android.graphics.Color
+import android.util.Log
+import com.example.advancedmaps3dsamples.utils.toHeading
+import com.example.advancedmaps3dsamples.utils.toRange
+import com.example.advancedmaps3dsamples.utils.toRoll
+import com.example.advancedmaps3dsamples.utils.toTilt
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps3d.Map3DOptions
+import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.Camera
+import com.google.android.gms.maps3d.model.CollisionBehavior
+import com.google.android.gms.maps3d.model.FlyAroundOptions
+import com.google.android.gms.maps3d.model.FlyToOptions
+import com.google.android.gms.maps3d.model.LatLngAltitude
+import com.google.android.gms.maps3d.model.Map3DMode
+import com.google.android.gms.maps3d.model.MarkerOptions
+import com.google.android.gms.maps3d.model.ModelOptions
+import com.google.android.gms.maps3d.model.PolylineOptions
+import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyAroundOptions
+import com.google.android.gms.maps3d.model.flyToOptions
+import com.google.android.gms.maps3d.model.latLngAltitude
+import com.google.android.gms.maps3d.model.markerOptions
+import com.google.android.gms.maps3d.model.modelOptions
+import com.google.android.gms.maps3d.model.orientation
+import com.google.android.gms.maps3d.model.polylineOptions
+import com.google.android.gms.maps3d.model.vector3D
+import com.google.maps.android.ktx.utils.toLatLngList
+import java.util.UUID
+
+private const val TAG = "ScenarioMapper"
+
+/**
+ * Parses a comma-separated string of "key=value" pairs into a map. Example:
+ * "lat=39.65,lng=-105.02,alt=550.2" -> {"lat": "39.65", "lng": "-105.02", "alt": "550.2"}
+ */
+fun String.toAttributesMap(): Map<String, String> {
+  // Trim whitespace around the string and commas/semicolons just in case
+  val trimmedString = this.trim().trimEnd(';').trimEnd(',')
+  if (trimmedString.isBlank()) {
+    return emptyMap()
+  }
+  return trimmedString
+    .split(",")
+    .map { it.trim() }
+    .filter { it.contains("=") }
+    .associate { part ->
+      val (key, value) = part.split("=", limit = 2)
+      key.trim() to value.trim()
+    }
+}
+
+/** Helper to safely get a Double value from the attributes map. */
+fun Map<String, String>.getDouble(key: String, default: Double = 0.0): Double {
+  return this[key]?.toDoubleOrNull() ?: default
+}
+
+/** Helper to safely get a Long value from the attributes map. */
+fun Map<String, String>.getLong(key: String, default: Long = 0L): Long {
+  return this[key]?.toLongOrNull() ?: default
+}
+
+/** Helper to safely get a Double value from the attributes map. */
+fun Map<String, String>.getInt(key: String, default: Int = 0): Int {
+  return this[key]?.toIntOrNull() ?: default
+}
+
+/** Helper to safely get a String value from the attributes map. */
+fun Map<String, String>.getString(key: String, default: String = ""): String {
+  return this[key] ?: default
+}
+
+// --- Object Converters ---
+
+fun Map<String, String>.toLatLngAltitude(): LatLngAltitude {
+  return latLngAltitude {
+    latitude = getDouble("lat")
+    longitude = getDouble("lng")
+    // Use 'alt' directly now, assuming it represents the final desired altitude
+    altitude = getDouble("alt", 0.0) // Provide a default altitude if needed
+  }
+}
+
+fun Map<String, String>.toCamera(): Camera {
+  return camera {
+    center = this@toCamera.toLatLngAltitude()
+    heading = getDouble("hdg").toHeading()
+    tilt = getDouble("tilt", 45.0).toTilt()
+    range = getDouble("range", 1500.0).toRange()
+    roll = getDouble("roll", 0.0).toRoll()
+  }
+}
+
+fun String.toCamera(): Camera {
+  return this.toAttributesMap().toCamera()
+}
+
+fun Map<String, String>.toDuration(): Long {
+  // Use "dur" as the key for duration
+  return getLong("dur", 1000) // Default duration 1000ms
+}
+
+fun String.toFlyTo(): FlyToOptions {
+  val attributes = this.toAttributesMap()
+  return flyToOptions {
+    endCamera = attributes.toCamera()
+    durationInMillis = attributes.toDuration()
+  }
+}
+
+fun String.toFlyAround(): FlyAroundOptions {
+  val attributes = this.toAttributesMap()
+  return flyAroundOptions {
+    center = attributes.toCamera() // Fly around the camera position defined in the string
+    durationInMillis = attributes.toDuration()
+    // Use "count" as the key for rounds
+    rounds = attributes.getDouble("count", 1.0) // Default 1 round
+  }
+}
+
+fun String.toDelay(): Long {
+  val attributes = this.toAttributesMap()
+  return attributes.toDuration()
+}
+
+@Map3DMode
+fun String.toMap3DMode(): Int {
+  return when (this.lowercase()) {
+    "hybrid" -> Map3DMode.HYBRID
+    "satellite" -> Map3DMode.SATELLITE
+    else -> {
+      Log.w(TAG, "Unsupported map mode '$this', defaulting to SATELLITE.")
+      Map3DMode.SATELLITE
+    }
+  }
+}
+
+fun String.toAnimation(): List<AnimationStep> {
+  val stepsString = this.trim().trimEnd(';')
+  if (stepsString.isBlank()) {
+    return emptyList()
+  }
+  return buildList<AnimationStep> {
+    stepsString.split(";").forEach { step ->
+      val trimmedStep = step.trim()
+      if (trimmedStep.contains('=')) {
+        val (key, value) = trimmedStep.split("=", limit = 2)
+        when (key.trim().lowercase()) {
+          "flyto" -> add(FlyToStep(value.toFlyTo()))
+          "delay" -> add(DelayStep(value.toDelay()))
+          "flyaround" -> add(FlyAroundStep(value.toFlyAround()))
+          else -> Log.w(TAG, "Unsupported animation step type: $key")
+        }
+      } else {
+        Log.w(TAG, "Ignoring invalid animation step format: $step")
+      }
+    }
+  }
+}
+
+fun String.toMaps3DOptions(): Map3DOptions {
+  var camera: Camera? = null
+  var mode: Int = Map3DMode.SATELLITE
+
+  val optionsString = this.trim().trimEnd(';')
+  if (optionsString.isBlank()) {
+    Log.w(TAG, "Empty initialState string provided for Map3DOptions")
+    // Return default options
+    return Map3DOptions(defaultUiDisabled = true)
+  }
+
+  optionsString.split(";").forEach { option ->
+    val trimmedOption = option.trim()
+    if (trimmedOption.contains('=')) {
+      val (label, value) = trimmedOption.split("=", limit = 2)
+      when (label.trim().lowercase()) {
+        "mode" -> {
+          mode = value.trim().toMap3DMode()
+        }
+        "camera" -> {
+          camera = value.trim().toCamera()
+        }
+        else -> Log.w(TAG, "Unsupported Map3DOption key: $label")
+      }
+    } else {
+      Log.w(TAG, "Ignoring invalid Map3DOption format: $option")
+    }
+  }
+
+  // Use defaults if camera is not specified in the string
+  val defaultCameraPos = latLngAltitude {
+    latitude = 0.0
+    longitude = 0.0
+    altitude = 10_000_000.0
+  }
+
+  return Map3DOptions(
+    defaultUiDisabled = true,
+    centerLat = camera?.center?.latitude ?: defaultCameraPos.latitude,
+    centerLng = camera?.center?.longitude ?: defaultCameraPos.longitude,
+    centerAlt = camera?.center?.altitude ?: defaultCameraPos.altitude,
+    heading = camera?.heading ?: 0.0,
+    tilt = camera?.tilt ?: 0.0, // Default tilt 0 for initial state
+    roll = camera?.roll ?: 0.0,
+    range = camera?.range ?: 10_000_000.0, // Default range wide view
+    minHeading = 0.0,
+    maxHeading = 360.0,
+    minTilt = 0.0,
+    maxTilt = 90.0,
+    bounds = null,
+    mapMode = mode,
+    mapId = null,
+  )
+}
+
+fun String.toMarkers(): List<MarkerOptions> {
+  val markersString = this.trim().trimEnd(';')
+  if (markersString.isBlank()) {
+    return emptyList()
+  }
+  return markersString.split(";").mapNotNull { markerStr ->
+    val attributes = markerStr.toAttributesMap()
+    // Basic validation: requires lat, lng
+    if (attributes.containsKey("lat") && attributes.containsKey("lng")) {
+      markerOptions {
+        collisionBehavior = CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL
+        position = attributes.toLatLngAltitude()
+        isExtruded = true
+        isDrawnWhenOccluded = true // Consider if this is always desired
+        label = attributes.getString("label", "Marker") // Default label
+        zIndex = attributes.getInt("z", 1) // Default zIndex
+        this.altitudeMode = parseAltitudeMode(attributes.getString("altMode"))
+      }
+    } else {
+      Log.w(TAG, "Skipping invalid marker definition (missing lat/lng): $markerStr")
+      null // Skip invalid marker definitions
+    }
+  }
+}
+
+fun String.toModels(): List<ModelOptions> {
+  val modelsString = this.trim().trimEnd(';')
+  if (modelsString.isBlank()) {
+    return emptyList()
+  }
+  return modelsString.split(";").mapNotNull { modelStr ->
+    val attributes = modelStr.toAttributesMap()
+    // Basic validation: require id, lat, lng, url
+    val modelId = attributes.getString("id")
+    val url = attributes.getString("url")
+    if (
+      modelId.isNotBlank() &&
+        url.isNotBlank() &&
+        attributes.containsKey("lat") &&
+        attributes.containsKey("lng")
+    ) {
+      try {
+        modelOptions {
+          id = modelId // Set the ID within the options
+          position = attributes.toLatLngAltitude()
+          this.url = url // Use 'this.url' to avoid conflict if needed
+          altitudeMode = parseAltitudeMode(attributes.getString("altMode"))
+          // Parse scale - allow uniform scale via 'scale' or individual axes
+          val uniformScale = attributes.getDouble("scale", -1.0) // Use -1 to check if set
+          scale =
+            if (uniformScale >= 0) {
+              vector3D {
+                x = uniformScale
+                y = uniformScale
+                z = uniformScale
+              }
+            } else {
+              vector3D {
+                x = attributes.getDouble("scaleX", 1.0) // Default scale 1.0
+                y = attributes.getDouble("scaleY", 1.0)
+                z = attributes.getDouble("scaleZ", 1.0)
+              }
+            }
+          // Parse orientation
+          orientation = orientation {
+            heading = attributes.getDouble("hdg", 0.0) // Default 0
+            tilt = attributes.getDouble("tilt", 0.0) // Default 0
+            roll = attributes.getDouble("roll", 0.0) // Default 0
+          }
+          // Add other ModelOptions properties here if needed
+        }
+      } catch (e: Exception) {
+        Log.e(TAG, "Error parsing model definition: $modelStr", e)
+        null // Skip models that cause parsing errors
+      }
+    } else {
+      Log.w(TAG, "Skipping invalid model definition (missing id, url, lat, or lng): $modelStr")
+      null // Skip invalid model definitions
+    }
+  }
+}
+
+fun String.toPolylines(): List<PolylineOptions> {
+  return split(";").flatMap { it.toPolyline() }
+}
+
+/**
+ * Parses an encoded polyline string into a List containing a single PolylineOptions object.
+ * Assumes the input string 'this' is a valid encoded polyline compatible with
+ * the assumed 'String.toLatLngList()' decoder function.
+ *
+ * @return A List containing one PolylineOptions object, or an empty list if
+ * the input is blank, decoding fails, or the decoded polyline has fewer than 2 points.
+ */
+fun String.toPolyline(idp: String? = null): List<PolylineOptions> {
+  val id = idp ?: UUID.randomUUID().toString()
+
+  val encodedPolyline = this.trim()
+  if (encodedPolyline.isBlank()) {
+    Log.w(TAG, "Input polyline string is blank.")
+    return emptyList()
+  }
+
+  // 1. Decode the encoded string using the assumed extension function
+  val decodedLatLngs: List<LatLng> = try {
+    // IMPORTANT: Replace this with the actual call to your decoder function if the import path is different
+    encodedPolyline.toLatLngList()
+  } catch (e: Exception) {
+    Log.e(TAG, "Failed to decode polyline string: '$encodedPolyline'", e)
+    return emptyList()
+  }
+
+  // 2. Validate decoded points
+  if (decodedLatLngs.size < 2) {
+    Log.w(TAG, "Decoded polyline has fewer than 2 points (${decodedLatLngs.size}). Cannot create PolylineOptions.")
+    return emptyList()
+  }
+
+  // 3. Convert LatLng to LatLngAltitude (assuming Clamp to Mesh behavior)
+  // Altitude value is often ignored when using CLAMP_TO_GROUND or CLAMP_TO_MESH
+  val points3d: List<LatLngAltitude> = decodedLatLngs.map { latLng ->
+    latLngAltitude {
+      latitude = latLng.latitude
+      longitude = latLng.longitude
+      altitude = 0.0 // Altitude typically ignored for clamping modes
+    }
+  }
+
+  // red = 0x87, green = 0xf5, blue = 0xff
+  val color =  0xff_87_f5_ff.toInt()
+
+  // 4. Create PolylineOptions
+  val polylineOptions = polylineOptions {
+    this.id = id
+    this.coordinates = points3d
+    strokeColor = color
+    strokeWidth = 7.0
+    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+    zIndex = 5
+    outerColor = color
+    outerWidth = 1.0
+  }
+
+  val polylineOptionsBackground = polylineOptions {
+    this.id = id + "_background"
+    this.coordinates = points3d
+    strokeColor = Color.argb(128, 0, 0, 0)
+    strokeWidth = 13.0
+    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+    zIndex = 2
+    outerColor = color
+    outerWidth = 1.0
+  }
+
+  // 5. Return a list containing the single PolylineOptions
+  Log.d(TAG, "Successfully created PolylineOptions with ${points3d.size} points.")
+  return listOf(polylineOptions, polylineOptionsBackground)
+}
+
+// --- Helper Functions ---
+
+/** Parses AltitudeMode string, defaulting to CLAMP_TO_GROUND */
+@AltitudeMode
+private fun parseAltitudeMode(altModeString: String): Int {
+  return when (altModeString.lowercase()) {
+    "absolute" -> AltitudeMode.ABSOLUTE
+    "relative_to_ground" -> AltitudeMode.RELATIVE_TO_GROUND
+    "relative_to_mesh" -> AltitudeMode.RELATIVE_TO_MESH
+    "clamp_to_ground" -> AltitudeMode.CLAMP_TO_GROUND
+    else -> {
+      if (altModeString.isNotEmpty()) {
+        Log.w(
+          TAG,
+          "Ignoring unrecognized altitude mode '$altModeString', defaulting to CLAMP_TO_GROUND",
+        )
+      }
+      AltitudeMode.CLAMP_TO_GROUND
+    }
+  }
+}
