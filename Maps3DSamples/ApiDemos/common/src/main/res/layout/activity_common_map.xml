@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map3d="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/map_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/top_bar"
+        style="@style/Widget.MaterialComponents.Toolbar.Primary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="@string/feature_title_overview_hello_3d_map"
+        app:titleTextColor="?attr/colorOnPrimary"
+        android:fitsSystemWindows="true"
+        />
+
+    <com.google.android.gms.maps3d.Map3DView
+        android:id="@+id/map3dView"
+        map3d:mode="hybrid"
+        map3d:centerLat="40.748392"
+        map3d:centerLng="-73.986060"
+        map3d:centerAlt="175"
+        map3d:heading="26"
+        map3d:tilt="67"
+        map3d:range="4000"
+        map3d:roll="0"
+        map3d:minAltitude="0"
+        map3d:maxAltitude="1000000"
+        map3d:minHeading="0"
+        map3d:maxHeading="360"
+        map3d:minTilt="0"
+        map3d:maxTilt="90"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/top_bar"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/reset_view_button"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/restart_alt_24px"
+        android:contentDescription="@string/reset_view"
+        android:visibility="gone"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/snapshot_button"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/photo_camera_24px"
+        android:contentDescription="@string/snapshot_camera"
+        android:visibility="gone"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/stop_button"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/stop_24px"
+        android:contentDescription="@string/stop_camera"
+        android:visibility="gone"
+        />
+
+    <androidx.constraintlayout.helper.widget.Flow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintEnd_toEndOf="@+id/map3dView"
+        app:layout_constraintBottom_toBottomOf="@+id/map3dView"
+        app:flow_wrapMode="chain"
+        app:flow_horizontalStyle="packed"
+        app:flow_horizontalBias="0"
+        app:flow_horizontalGap="8dp"
+        app:constraint_referenced_ids="stop_button,reset_view_button,snapshot_button"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

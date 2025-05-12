@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Maps 3D Samples</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <!--
+    Distance in feet, formatted to 0 decimal places.
+    For example, 1234.56 feet will be formatted as "1,235 ft".
+    -->
+    <string name="in_feet" translatable="false">%1$,.0f ft</string>
+
+    <!--
+    Distance in miles, formatted to 1 decimal place.
+    For example, 1.2345 miles will be formatted as "1.2 miles".
+    -->
+    <string name="in_miles" translatable="false">%1$,.1f miles</string>
+
+    <!--
+    Distance in meters, formatted to 0 decimal places.
+    For example, 1234.56 meters will be formatted as "1,235 m".
+    -->
+    <string name="in_meters" translatable="false">%1$,.0f m</string>
+
+    <!--
+    Distance in kilometers, formatted to 1 decimal place.
+    For example, 1.2345 kilometers will be formatted as "1.2 km".
+    -->
+    <string name="in_kilometers" translatable="false">%1$,.1f km</string>
+
+</resources>

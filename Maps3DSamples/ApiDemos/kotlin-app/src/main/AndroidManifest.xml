@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Maps3DSamples"
+        tools:targetApi="31">
+
+        <meta-data
+            android:name="com.google.android.geo.maps3d.API_KEY"
+            android:value="${MAPS3D_API_KEY}"
+            />
+
+        <activity
+            android:name=".mainactivity.MainActivity"
+            android:exported="true"
+            android:label="@string/title_activity_main"
+            android:theme="@style/Theme.Maps3DSamples">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".hellomap.HelloMapActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_overview_hello_3d_map"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".cameracontrols.CameraControlsActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_camera_controls"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".markers.MarkersActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_markers"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".polygons.PolygonsActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_polygons"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".polylines.PolylinesActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_polylines"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".models.ModelsActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_3d_models"
+            android:exported="true"
+            />
+
+    </application>
+
+</manifest>

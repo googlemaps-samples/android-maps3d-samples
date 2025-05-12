@@ -1,0 +1,44 @@
+<resources>
+    <string name="app_name">Maps 3D Samples</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="samples_menu_title">3D Maps SDK Samples</string>
+
+    <string name="feature_title_overview_hello_3d_map">Hello 3D Maps</string>
+    <string name="feature_title_camera_controls">Camera controls and restrictions</string>
+    <string name="feature_title_map_interactions">Map interactions</string>
+    <string name="feature_title_markers">Markers</string>
+    <string name="feature_title_polygons">Polygons</string>
+    <string name="feature_title_polylines">Polylines</string>
+    <string name="feature_title_3d_models">3D models</string>
+
+    <string name="feature_not_implemented">Coming soon!</string>
+
+    <!-- Camera controls labels -->
+    <string name="cam_lat_label">Lat: %1$.6f°</string>
+    <string name="cam_lng_label">Lng: %1$.6f°</string>
+    <string name="cam_alt_label">Alt: %1$.0fm</string>
+    <string name="cam_hdg_label">Heading: %1$.0f°</string>
+    <string name="cam_tlt_label">Tilt: %1$.0f°</string>
+    <string name="cam_rng_label">Range: %1$.0fm</string>
+
+    <string name="camera_state_label">Camera State</string>
+    <string name="fly_around">Fly around center</string>
+    <!-- Fly to the Empire State Building -->
+    <string name="fly_to">Fly to ESB 🏢</string>
+
+    <string name="camera_activate_restriction">Restrict camera</string>
+    <string name="camera_remove_restriction">Remove restriction</string>
+
+    <string name="camera_show_restriction">Show restriction</string>
+    <string name="camera_hide_restriction">Hide restriction</string>
+    <string name="map_mode_hybrid">Hybrid</string>
+    <string name="map_mode_satellite">Satellite</string>
+    <string name="camera_roll_label">Roll</string>
+    <string name="reset_roll_content_description">Reset roll to zero</string>
+    <string name="camera_roll_label_dynamic">Roll: %1$.0f°</string>
+    <string name="reset_view">Reset view</string>
+    <string name="snapshot_camera">Snapshot</string>
+    <string name="stop_camera">Stop camera animations</string>
+
+</resources>
