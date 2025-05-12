@@ -48,7 +48,7 @@ class MarkersActivity : SampleBaseActivity() {
 
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
         super.onMap3DViewReady(googleMap3D)
-        googleMap3D.setMapMode(Map3DMode.SATELLITE)
+        googleMap3D.setMapMode(Map3DMode.HYBRID)
 
         // Marker 1: Absolute
         googleMap3D.addMarker(markerOptions {
@@ -61,6 +61,10 @@ class MarkersActivity : SampleBaseActivity() {
             altitudeMode = AltitudeMode.ABSOLUTE
             isExtruded = true
             isDrawnWhenOccluded = true
+
+            //  The marker should always be displayed regardless of collision. Markers with
+            //  OPTIONAL_AND_HIDES_LOWER_PRIORITY collision behavior or the default map labels that
+            //  overlap with this marker will be hidden.
             collisionBehavior = CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL
         })
 
@@ -75,6 +79,12 @@ class MarkersActivity : SampleBaseActivity() {
             altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
             isExtruded = true
             isDrawnWhenOccluded = true
+
+    // The marker should only be displayed if it does not overlap with other markers.
+    // If two markers of this type would overlap, the one with the higher draw order is
+    // shown. If they have the same draw order, the one with the lower vertical screen
+    // position is shown.
+            collisionBehavior = CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY
         })
 
         // Marker 3: Clamped to Ground
@@ -90,6 +100,9 @@ class MarkersActivity : SampleBaseActivity() {
             altitudeMode = AltitudeMode.CLAMP_TO_GROUND
             isExtruded = true
             isDrawnWhenOccluded = true
+
+            // The marker should always be displayed regardless of collision
+            collisionBehavior = CollisionBehavior.REQUIRED
         })
 
         // Marker 4: Relative to Mesh
@@ -103,6 +116,7 @@ class MarkersActivity : SampleBaseActivity() {
             altitudeMode = AltitudeMode.RELATIVE_TO_MESH
             isExtruded = true
             isDrawnWhenOccluded = true
+            // collisionBehavior defaults to CollisionBehavior.REQUIRED
         })
     }
 }
