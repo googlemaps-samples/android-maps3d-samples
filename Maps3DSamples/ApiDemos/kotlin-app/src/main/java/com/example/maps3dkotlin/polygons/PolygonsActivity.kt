@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//   http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
+import com.google.android.gms.maps3d.model.Hole
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
@@ -87,8 +88,28 @@ class PolygonsActivity : SampleBaseActivity() {
             .split("\n")
             .map { line -> line.split(",").map { it.trim().toDouble() } }
             .map { coords ->
-                latLngAltitude { latitude = coords[0]; longitude = coords[1]; altitude = museumAltitude }
+                latLngAltitude {
+                    latitude = coords[0]; longitude = coords[1]; altitude = museumAltitude
+                }
             }
+
+        private val zooHole = """
+                39.7498, -104.9535
+                39.7498, -104.9525
+                39.7488, -104.9525
+                39.7488, -104.9535
+                39.7498, -104.9535""".trimIndent()
+            .lines()
+            .map { it.split(",").map(String::trim).map(String::toDouble) }
+            .map { (lat, lng) ->
+                latLngAltitude {
+                    latitude = lat
+                    longitude = lng
+                    altitude = 0.0
+                }
+            }
+            .let { Hole(it) }
+
 
         private val zooOutline = """
             39.7508987, -104.9565381
@@ -124,14 +145,15 @@ class PolygonsActivity : SampleBaseActivity() {
             39.7511173, -104.9527187
             39.7511091, -104.9546445
             39.7508987, -104.9565381""".trimIndent()
-                .split("\n")
-                .map { line -> line.split(",").map { it.trim().toDouble() } }
-                .map { coords ->
-                    latLngAltitude { latitude = coords[0]; longitude = coords[1]; altitude = 0.0 }
-                }
+            .split("\n")
+            .map { line -> line.split(",").map { it.trim().toDouble() } }
+            .map { coords ->
+                latLngAltitude { latitude = coords[0]; longitude = coords[1]; altitude = 0.0 }
+            }
 
         val zooPolygonOptions = polygonOptions {
             outerCoordinates = zooOutline
+            innerCoordinates = listOf(zooHole)
             fillColor = Color.argb(70, 255, 255, 0)
             strokeColor = Color.GREEN
             strokeWidth = 3.0
