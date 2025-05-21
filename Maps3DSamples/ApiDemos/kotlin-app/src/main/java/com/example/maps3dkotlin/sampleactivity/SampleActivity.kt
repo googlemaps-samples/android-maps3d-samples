@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//   http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,11 @@ package com.example.maps3dkotlin.sampleactivity
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.annotation.CallSuper
-import androidx.core.view.WindowCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.example.maps3dcommon.R
 import com.example.maps3dkotlin.common.DEFAULT_CAMERA
 import com.example.maps3dkotlin.common.toCameraString
@@ -118,8 +121,21 @@ abstract class SampleBaseActivity : Activity(), OnMap3DViewReadyCallback {
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContentView(R.layout.activity_common_map)
+        val rootView = findViewById<View>(R.id.map_container)
+
+        ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
+            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val navigationBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+
+            view.updatePadding(
+                top = view.paddingTop + statusBarInsets.top,
+                bottom = view.paddingBottom + navigationBarInsets.bottom
+            )
+
+            WindowInsetsCompat.CONSUMED
+        }
 
         findViewById<MaterialToolbar>(R.id.top_bar).title = title
 
@@ -131,7 +147,7 @@ abstract class SampleBaseActivity : Activity(), OnMap3DViewReadyCallback {
             setOnClickListener {
                 snapshot()
             }
-            visibility = android.view.View.VISIBLE
+            visibility = View.VISIBLE
         }
 
         recenterButton = findViewById<MaterialButton>(R.id.reset_view_button).apply {
@@ -143,7 +159,7 @@ abstract class SampleBaseActivity : Activity(), OnMap3DViewReadyCallback {
                     }
                 )
             }
-            visibility = android.view.View.VISIBLE
+            visibility = View.VISIBLE
         }
     }
 

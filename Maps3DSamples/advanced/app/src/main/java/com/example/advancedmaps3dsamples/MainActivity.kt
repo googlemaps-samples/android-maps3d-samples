@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//   http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -65,7 +68,9 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     Column(
                         modifier =
-                            Modifier.padding(innerPadding)
+                            Modifier
+                                .padding(innerPadding)
+                                .windowInsetsPadding(WindowInsets.navigationBars)
                                 .fillMaxSize() // Make the column take up the whole screen
                                 .padding(16.dp), // Add some overall padding to the column
                         verticalArrangement = Arrangement.spacedBy(8.dp), // Add vertical spacing between items
@@ -74,13 +79,14 @@ class MainActivity : ComponentActivity() {
                             Sample(
                                 sample = sample,
                                 onClick = { launchActivity(sample.clazz) },
-                                modifier = Modifier.fillMaxWidth(), // Make each button take the full width
+                                modifier = Modifier.fillMaxWidth(),
                             )
                         }
                     }
                 }
             }
         }
+
     }
 
     private fun launchActivity(clazz: Class<*>) {

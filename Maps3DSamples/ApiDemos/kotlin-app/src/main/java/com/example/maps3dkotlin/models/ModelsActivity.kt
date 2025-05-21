@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//   http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,16 +54,16 @@ import kotlin.time.Duration.Companion.milliseconds
 class ModelsActivity : SampleBaseActivity() {
     override val TAG = this::class.java.simpleName
     override val initialCamera =
-    camera {
-        center = latLngAltitude {
-            latitude = 47.133971
-            longitude = 11.333161
-            altitude = 2200.0
+        camera {
+            center = latLngAltitude {
+                latitude = 47.133971
+                longitude = 11.333161
+                altitude = 2200.0
+            }
+            heading = 221.0
+            tilt = 25.0
+            range = 30_000.0
         }
-        heading = 221.0
-        tilt = 25.0
-        range = 30_000.0
-    }
 
     private var animationSequenceJob : Job? = null
 
@@ -143,46 +143,39 @@ class ModelsActivity : SampleBaseActivity() {
     }
 
     private suspend fun runAnimationSequence(googleMap3D: GoogleMap3D) {
-            delay(1_500.milliseconds)
+        delay(1_500.milliseconds)
 
-            // Fly to the plane model and wait until the animation is finished
-            awaitCameraUpdate(
-                controller = googleMap3D,
-                cameraUpdate = flyToOptions {
-                    endCamera = camera {
-                        center = latLngAltitude {
-                            latitude = 47.133971
-                            longitude = 11.333161
-                            altitude = 2200.0
-                        }
-                        heading = 221.4
-                        tilt = 65.0
-                        range = 1200.0
-                    }
-                    durationInMillis = 3_500
-                }.toCameraUpdate()
-            )
-
-            delay(500.milliseconds)
-
-            awaitCameraUpdate(
-                controller = googleMap3D,
-                cameraUpdate = flyAroundOptions {
-                    center = camera {
-                        center = latLngAltitude {
-                            latitude = 47.133971
-                            longitude = 11.333161
-                            altitude = 2200.0
-                        }
-                        heading = 221.4
-                        tilt = 65.0
-                        range = 1200.0
-                    }
-                    durationInMillis = 3_500
-                    rounds = 0.5
-                }.toCameraUpdate()
-            )
+        val camera = camera {
+            center = latLngAltitude {
+                latitude = 47.133971
+                longitude = 11.333161
+                altitude = 2200.0
+            }
+            heading = 221.4
+            tilt = 75.0
+            range = 700.0
         }
+
+        // Fly to the plane model and wait until the animation is finished
+        awaitCameraUpdate(
+            controller = googleMap3D,
+            cameraUpdate = flyToOptions {
+                endCamera = camera
+                durationInMillis = 3_500
+            }.toCameraUpdate()
+        )
+
+        delay(500.milliseconds)
+
+        awaitCameraUpdate(
+            controller = googleMap3D,
+            cameraUpdate = flyAroundOptions {
+                center = camera
+                durationInMillis = 3_500
+                rounds = 0.5
+            }.toCameraUpdate()
+        )
+    }
 
     companion object {
         const val PLANE_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb"

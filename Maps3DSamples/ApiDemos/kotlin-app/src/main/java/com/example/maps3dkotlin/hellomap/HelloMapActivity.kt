@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//   http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,10 @@ package com.example.maps3dkotlin.hellomap
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
-import androidx.core.view.WindowCompat
+import android.view.View
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
@@ -36,8 +39,20 @@ class HelloMapActivity : Activity(), OnMap3DViewReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_hello_map)
+
+        val rootView = findViewById<View>(R.id.map_container)
+        ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
+            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val navigationBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+
+            view.updatePadding(
+                top = view.paddingTop + statusBarInsets.top,
+                bottom = view.paddingBottom + navigationBarInsets.bottom
+            )
+
+            WindowInsetsCompat.CONSUMED
+        }
 
         map3DView = findViewById(R.id.map3dView)
         map3DView.onCreate(savedInstanceState)

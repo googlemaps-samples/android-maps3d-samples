@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//   http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import com.google.android.gms.maps3d.Map3DOptions
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.MarkerOptions
 import com.google.android.gms.maps3d.model.ModelOptions // Import ModelOptions
+import com.google.android.gms.maps3d.model.PolygonOptions
 import com.google.android.gms.maps3d.model.PolylineOptions
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
@@ -33,6 +34,7 @@ data class Scenario(
   val markers: List<MarkerOptions> = emptyList(),
   val models: List<ModelOptions> = emptyList(), // Add models property
   val polylines: List<PolylineOptions> = emptyList(),
+  val polygons: List<PolygonOptions> = emptyList(),
 ) {
   @Composable fun getTitle() = stringResource(titleId)
 
@@ -55,6 +57,10 @@ data class Scenario(
       viewModel.addPolyline(polyline)
     }
 
+    polygons.forEach { polygon ->
+      viewModel.addPolygon(polygon)
+    }
+
     Log.d("ScenarioReset", "Reset complete for scenario: $name")
   }
 }
@@ -67,6 +73,7 @@ fun createScenario(
   markers: String = "",
   models: String = "",
   polylines: String = "",
+  polygon: String? = null,
 ): Scenario {
   return Scenario(
     name = name,
@@ -76,6 +83,7 @@ fun createScenario(
     markers = markers.toMarkers(),
     models = models.toModels(),
     polylines = polylines.toPolylines(),
+    polygons = polygon?.toPolygons() ?: emptyList(),
   )
 }
 

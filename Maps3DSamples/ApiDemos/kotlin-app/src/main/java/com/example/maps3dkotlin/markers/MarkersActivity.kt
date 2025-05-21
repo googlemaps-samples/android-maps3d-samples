@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//   http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,7 +48,7 @@ class MarkersActivity : SampleBaseActivity() {
 
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
         super.onMap3DViewReady(googleMap3D)
-        googleMap3D.setMapMode(Map3DMode.HYBRID)
+        googleMap3D.setMapMode(Map3DMode.SATELLITE)
 
         // Marker 1: Absolute
         googleMap3D.addMarker(markerOptions {
@@ -80,10 +80,10 @@ class MarkersActivity : SampleBaseActivity() {
             isExtruded = true
             isDrawnWhenOccluded = true
 
-    // The marker should only be displayed if it does not overlap with other markers.
-    // If two markers of this type would overlap, the one with the higher draw order is
-    // shown. If they have the same draw order, the one with the lower vertical screen
-    // position is shown.
+            // The marker should only be displayed if it does not overlap with other markers.
+            // If two markers of this type would overlap, the one with the higher draw order is
+            // shown. If they have the same draw order, the one with the lower vertical screen
+            // position is shown.
             collisionBehavior = CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY
         })
 
@@ -120,4 +120,3 @@ class MarkersActivity : SampleBaseActivity() {
         })
     }
 }
-

@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//   http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,9 +14,7 @@
 
 package com.example.maps3dkotlin.cameracontrols
 
-import android.app.Activity
 import android.os.Bundle
-import android.util.Log
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.core.view.WindowCompat
@@ -44,17 +42,29 @@ import com.example.maps3dkotlin.common.copy
 import com.example.maps3dkotlin.common.toCompassDirection
 import com.example.maps3dkotlin.common.toValidCamera
 import com.example.maps3dkotlin.common.wrapIn
+import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.material.slider.Slider
 
-class CameraControlsActivity : Activity(), OnMap3DViewReadyCallback {
-    private lateinit var map3DView: Map3DView
-    private var googleMap3D: GoogleMap3D? = null
+class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
+    override val TAG = this::class.java.simpleName
+
     private lateinit var cameraStateText: TextView
     private lateinit var rollSlider: Slider
     private lateinit var rollSliderLabel: TextView
 
     private var restrictionCubeFaces: MutableList<Polygon> = mutableListOf()
+
+    override val initialCamera = camera {
+        center = latLngAltitude {
+            latitude = 40.7128
+            longitude = -74.0060
+            altitude = 150.0
+        }
+        heading = 252.7
+        tilt = 79.0
+        range = 1500.0
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,32 +149,6 @@ class CameraControlsActivity : Activity(), OnMap3DViewReadyCallback {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        map3DView.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        map3DView.onPause()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        map3DView.onDestroy()
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onLowMemory() {
-        super.onLowMemory()
-        map3DView.onLowMemory()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        map3DView.onSaveInstanceState(outState)
-    }
-
     private fun updateRollSliderLabel(value: Float) {
         rollSliderLabel.text = getString(R.string.camera_roll_label_dynamic, value)
     }
@@ -187,6 +171,7 @@ class CameraControlsActivity : Activity(), OnMap3DViewReadyCallback {
      * @param googleMap3D The [GoogleMap3D] object representing the 3D map.
      */
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
+        super.onMap3DViewReady(googleMap3D)
         this.googleMap3D = googleMap3D
 
         // Set the initial camera position
@@ -318,10 +303,5 @@ class CameraControlsActivity : Activity(), OnMap3DViewReadyCallback {
             rollSlider.value = resetValue
             updateRollSliderLabel(resetValue)
         }
-    }
-
-    override fun onError(error: Exception) {
-        Log.e("HelloMapActivity", "Error loading map", error)
-        super.onError(error)
     }
 }
