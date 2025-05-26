@@ -9,6 +9,9 @@ plugins {
 }
 
 android {
+    lint {
+        sarifOutput = file("$buildDir/reports/lint-results.sarif")
+    }
     namespace = "com.example.advancedmaps3dsamples"
     compileSdk = 35
 
