@@ -48,7 +48,7 @@ jobs:
           }' \
             Maps3DSamples/ApiDemos/common/build/reports/lint-results-debug.sarif \
             Maps3DSamples/ApiDemos/kotlin-app/build/reports/lint-results-debug.sarif \
-            advanced/app/build/reports/lint-results-debug.sarif \
+            Maps3DSamples/advanced/app/build/reports/lint-results-debug.sarif \
           > merged.sarif
 
       - name: Upload SARIF file
