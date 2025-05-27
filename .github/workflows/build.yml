@@ -52,4 +52,4 @@ jobs:
           distribution: 'adopt'
           java-version: '21'
       - name: Build advanced
-        run: cd advanced && ./gradlew buildDebugPreBundle
+        run: cd ../advanced && ./gradlew buildDebugPreBundle
