@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.advancedmaps3dsamples.scenarios.ScenariosActivity
+import com.example.advancedmaps3dsamples.trails.TrailsActivity
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -48,6 +49,7 @@ data class MapSample(@StringRes val label: Int, val clazz: Class<*>)
 private val samples =
     listOf(
         MapSample(R.string.map_sample_scenarios, ScenariosActivity::class.java),
+        MapSample(R.string.map_sample_osmp_trails, TrailsActivity::class.java),
     )
 
 @OptIn(ExperimentalMaterial3Api::class)
