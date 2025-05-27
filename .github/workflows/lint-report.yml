@@ -37,7 +37,7 @@ jobs:
         run: cd Maps3DSamples/ApiDemos && ./gradlew lint
 
       - name: Run Android Lint (advanced)
-        run: cd advanced && ./gradlew lint
+        run: cd ../advanced && ./gradlew lint
 
       - name: Merge SARIF files
         run: |
