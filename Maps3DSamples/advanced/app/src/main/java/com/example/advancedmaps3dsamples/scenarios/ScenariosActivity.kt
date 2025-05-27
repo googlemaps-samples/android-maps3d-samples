@@ -50,6 +50,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -89,9 +90,8 @@ class ScenariosActivity : ComponentActivity() {
       val viewState by viewModel.viewState.collectAsStateWithLifecycle()
       val currentCamera by viewModel.currentCamera.collectAsStateWithLifecycle(Camera.DEFAULT_CAMERA)
 
-      val roll by viewModel.roll
-        .map { it.toRoll().toFloat() }
-        .collectAsStateWithLifecycle(DEFAULT_ROLL.toFloat())
+      val mappedRoll = remember { viewModel.roll.map { it.toRoll().toFloat() } }
+      val roll by mappedRoll.collectAsStateWithLifecycle(DEFAULT_ROLL.toFloat())
 
       val cameraAttribute by viewModel.trackedAttribute.collectAsStateWithLifecycle()
 
