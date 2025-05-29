@@ -23,6 +23,8 @@ class AiNavigatorViewModel @Inject constructor(
 ) : Map3dViewModel(), ScenarioBaseViewModel {
     override val TAG = this::class.java.simpleName
     private var animationJob: Job? = null
+    private var currentAnimation: List<AnimationStep> = emptyList()
+    private var isAnimating = false
 
     private val _isRequestInflight = MutableStateFlow(false)
     val isRequestInflight: StateFlow<Boolean> = _isRequestInflight
@@ -37,9 +39,8 @@ class AiNavigatorViewModel @Inject constructor(
                 val animationString = navigatorService.getAnimationString(userInput)
                 Log.w(TAG, "Got animationString: $animationString")
 
-                val animation = animationString.toAnimation()
-
-                playAnimation(animation)
+                currentAnimation = animationString.toAnimation()
+                playAnimation()
             } catch (e: Exception) {
                 Log.e(TAG, "Error processing user request", e)
                 _userMessage.send("Error processing request: ${e.localizedMessage}")
@@ -49,16 +50,36 @@ class AiNavigatorViewModel @Inject constructor(
         }
     }
 
-    private fun playAnimation(animation: List<AnimationStep>) {
+    fun playAnimation() {
         animationJob?.cancel()
+        isAnimating = true
 
         animationJob = viewModelScope.launch {
-            animation.forEach { step -> step(this@AiNavigatorViewModel) }
+            for (step in currentAnimation) {
+                step(this@AiNavigatorViewModel)
+            }
+            isAnimating = false
+        }
+    }
+
+    fun stopAnimation() {
+        if (isAnimating && animationJob?.isActive == true) {
+            animationJob?.cancel()
+            isAnimating = false
+            // Call stopAnimations or similar function if needed when animation is stopped by user
+            // For example: stopAnimations()
+        }
+    }
+
+    fun restartAnimation() {
+        stopAnimation()
+        if (currentAnimation.isNotEmpty()) {
+            playAnimation()
         }
     }
 
     fun cancelRequest() {
-        animationJob?.cancel()
+        stopAnimation()
         _isRequestInflight.value = false
     }
 

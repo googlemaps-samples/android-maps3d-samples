@@ -43,6 +43,8 @@ class GameRepositoryException(message: String, cause: Throwable? = null) : Excep
 private fun String.sanitize(): String {
     return trim()
         .removeSurrounding("```json", "```").trim()
+        .removeSurrounding("```javascript", "```").trim()
+        .removeSurrounding("```python", "```").trim()
         .removeSurrounding("```", "```").trim()
         .removeSurrounding("`")
 }

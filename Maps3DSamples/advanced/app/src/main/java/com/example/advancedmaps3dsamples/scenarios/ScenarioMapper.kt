@@ -171,7 +171,7 @@ fun String.toAnimation(): List<AnimationStep> {
                     "flyaround" -> add(FlyAroundStep(value.toFlyAround()))
                     "message" -> {
                         Log.w(TAG, "Message: $value")
-                        add(MessageStep(value))
+                        add(MessageStep(value.trim('"')))
                     }
                     else -> Log.w(TAG, "Unsupported animation step type: $key")
                 }

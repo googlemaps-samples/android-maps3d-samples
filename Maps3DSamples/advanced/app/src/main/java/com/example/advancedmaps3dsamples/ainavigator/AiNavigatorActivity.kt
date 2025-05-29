@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,36 +18,48 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.NavigateBefore
+import androidx.compose.material.icons.automirrored.filled.NavigateNext
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults.iconButtonColors
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.advancedmaps3dsamples.ainavigator.data.examplePrompts
 import com.example.advancedmaps3dsamples.scenarios.ThreeDMap
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
 import com.google.android.gms.maps3d.Map3DOptions
 import com.google.android.gms.maps3d.model.Map3DMode
-import android.widget.Toast
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -95,75 +108,157 @@ class AiNavigatorActivity : ComponentActivity() {
         )
 
         setContent {
-            val context = LocalContext.current
             val scope = rememberCoroutineScope()
+
+            val snackbarHostState = remember { SnackbarHostState() }
 
             LaunchedEffect(viewModel.userMessage) {
                 scope.launch {
                     viewModel.userMessage.collect { message ->
-                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                        snackbarHostState.showSnackbar(message)
                     }
                 }
             }
 
             AdvancedMaps3DSamplesTheme {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    ThreeDMap(
-                        modifier = Modifier.weight(1f),
-                        options = options,
-                        onMap3dViewReady = { viewModel.setGoogleMap3D(it) },
-                        onReleaseMap = { viewModel.releaseGoogleMap3D() },
-                    )
-
+                Scaffold(
+                    snackbarHost = { SnackbarHost(snackbarHostState) }
+                ) { innerPadding ->
                     Column(
                         modifier = Modifier
-                            .padding(16.dp)
-                            .verticalScroll(rememberScrollState()),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .fillMaxSize()
+                            .padding(innerPadding)
                     ) {
-                        var userInput by rememberSaveable { mutableStateOf("") }
-                        val requestIsActive by viewModel.isRequestInflight.collectAsState()
+                        Box(modifier = Modifier.weight(1f)) {
+                            ThreeDMap(
+                                modifier = Modifier.fillMaxSize(),
+                                options = options,
+                                onMap3dViewReady = { viewModel.setGoogleMap3D(it) },
+                                onReleaseMap = { viewModel.releaseGoogleMap3D() },
+                            )
 
-                        OutlinedTextField(
-                            value = userInput,
-                            onValueChange = { userInput = it },
-                            label = { Text("Where would you like to go today?") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = false,
-                            maxLines = 3,
-                            trailingIcon = {
-                                IconButton(onClick = { userInput = "" }) {
-                                    Icon(Icons.Filled.Clear, contentDescription = "Clear")
+                            Row(
+                                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                IconButton(
+                                    onClick = { viewModel.playAnimation() },
+                                    colors = iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.PlayArrow,
+                                        contentDescription = "Play"
+                                    )
+                                }
+                                IconButton(
+                                    onClick = { viewModel.stopAnimation() },
+                                    colors = iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Stop,
+                                        contentDescription = "Stop"
+                                    )
+                                }
+                                IconButton(
+                                    onClick = { viewModel.restartAnimation() },
+                                    colors = iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Refresh,
+                                        contentDescription = "Restart"
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {  },
+                                    colors = iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Info,
+                                        contentDescription = "Describe View"
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = { viewModel.nextMapMode() },
+                                    colors = iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Public,
+                                        contentDescription = "Change Map Type"
+                                    )
                                 }
                             }
-                        )
+                        }
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                        Column(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .padding(bottom = 16.dp)
+                                .verticalScroll(rememberScrollState()),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            if (requestIsActive) {
-                                IconButton(
-                                    onClick = {
-                                         viewModel.cancelRequest()
-                                    },
-                                    modifier = Modifier
-                                        .padding(8.dp) // Add some padding around the spinner
-                                ) {
-                                    // Replace with your preferred spinner/loading indicator
-                                    Icon(Icons.Filled.Stop, contentDescription = "Cancel")
+                            var userInput by rememberSaveable { mutableStateOf("") }
+                            val requestIsActive by viewModel.isRequestInflight.collectAsState()
+
+                            // Always reserve space for the progress indicator, but only show it if the requestIsActive
+                            Box(modifier = Modifier.fillMaxWidth().padding(top = 0.dp, bottom = 4.dp)) {
+                                if (requestIsActive) {
+                                    LinearProgressIndicator(
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
                                 }
-                            } else {
+                            }
+
+                            OutlinedTextField(
+                                value = userInput,
+                                onValueChange = { userInput = it },
+                                label = { Text("Where would you like to go today?") },
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                singleLine = false,
+                                maxLines = 3,
+                                trailingIcon = {
+                                    if (requestIsActive) {
+                                        IconButton(onClick = { viewModel.cancelRequest() }) {
+                                            Icon(Icons.Filled.Stop, contentDescription = "Cancel")
+                                        }
+                                    } else {
+                                        IconButton(onClick = { userInput = "" }) {
+                                            Icon(Icons.Filled.Clear, contentDescription = "Clear")
+                                        }
+                                    }
+                                }
+                            )
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
                                 Button(
-                                    onClick = { userInput = examplePrompts.random() }
+                                    onClick = { userInput = examplePrompts.random() },
+                                    enabled = !requestIsActive
                                 ) {
                                     Text("I'm feeling lucky")
                                 }
 
                                 Spacer(modifier = Modifier.weight(1f))
-
                                 Button(
                                     onClick = { viewModel.processUserRequest(userInput) },
+                                    enabled = !requestIsActive
                                 ) {
                                     Text("Submit")
                                 }
