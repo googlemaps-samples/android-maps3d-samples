@@ -181,7 +181,11 @@ class AiNavigatorActivity : ComponentActivity() {
                                     )
                                 }
                                 IconButton(
-                                    onClick = {  },
+                                    onClick = {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar("\"What am I looking at?\" functionality coming soon!")
+                                        }
+                                    },
                                     colors = iconButtonColors(
                                         containerColor = MaterialTheme.colorScheme.primary,
                                         contentColor = MaterialTheme.colorScheme.onPrimary
@@ -191,18 +195,6 @@ class AiNavigatorActivity : ComponentActivity() {
                                         imageVector = Icons.Filled.Info,
                                         contentDescription = "Describe View"
                                     )
-                                }
-
-                                IconButton(
-                                    onClick = {
-                                        viewModel.generateNewPrompts()
-                                    },
-                                    colors = iconButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                ) {
-                                    Icon(imageVector = Icons.Filled.Shuffle, contentDescription = "New Prompts")
                                 }
 
                                 var mapModeButtonEnabled by remember { mutableStateOf(true) }
@@ -280,8 +272,28 @@ class AiNavigatorActivity : ComponentActivity() {
                                 }
 
                                 Spacer(modifier = Modifier.weight(1f))
+
+                                IconButton(
+                                    onClick = {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar("Generating new prompts...")
+                                        }
+                                        viewModel.generateNewPrompts()
+                                    },
+                                    colors = iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                ) {
+                                    Icon(imageVector = Icons.Filled.Shuffle, contentDescription = "New Prompts")
+                                }
+
+                                Spacer(modifier = Modifier.weight(1f))
+
                                 Button(
-                                    onClick = { viewModel.processUserRequest(userInput) },
+                                    onClick = {
+                                        viewModel.processUserRequest(userInput)
+                                    },
                                     enabled = !requestIsActive
                                 ) {
                                     Text("Submit")

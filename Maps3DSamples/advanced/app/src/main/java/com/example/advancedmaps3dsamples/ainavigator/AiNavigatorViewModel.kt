@@ -95,7 +95,10 @@ class AiNavigatorViewModel @Inject constructor(
             try {
                 val newPrompts = navigatorService.getNewPrompts()
                 Log.w(TAG, "Got new prompts: $newPrompts")
-                allPrompts.addAll(newPrompts)
+                if (newPrompts.isNotEmpty()) {
+                    allPrompts.clear()
+                    allPrompts.addAll(newPrompts)
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Error generating new prompts", e)
                 _userMessage.send("Error generating new prompts: ${e.localizedMessage}")
