@@ -160,7 +160,7 @@ fun String.toAnimation(): List<AnimationStep> {
     if (stepsString.isBlank()) {
         return emptyList()
     }
-    return buildList<AnimationStep> {
+    return buildList {
         stepsString.split(";").forEach { step ->
             val trimmedStep = step.trim()
             if (trimmedStep.contains('=')) {
@@ -169,6 +169,10 @@ fun String.toAnimation(): List<AnimationStep> {
                     "flyto" -> add(FlyToStep(value.toFlyTo()))
                     "delay" -> add(DelayStep(value.toDelay()))
                     "flyaround" -> add(FlyAroundStep(value.toFlyAround()))
+                    "message" -> {
+                        Log.w(TAG, "Message: $value")
+                        add(MessageStep(value))
+                    }
                     else -> Log.w(TAG, "Unsupported animation step type: $key")
                 }
             } else {

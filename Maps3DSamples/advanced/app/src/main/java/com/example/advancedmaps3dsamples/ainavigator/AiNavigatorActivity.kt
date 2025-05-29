@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,21 +26,28 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.advancedmaps3dsamples.ainavigator.data.examplePrompts
 import com.example.advancedmaps3dsamples.scenarios.ThreeDMap
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
 import com.google.android.gms.maps3d.Map3DOptions
 import com.google.android.gms.maps3d.model.Map3DMode
+import android.widget.Toast
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,6 +95,17 @@ class AiNavigatorActivity : ComponentActivity() {
         )
 
         setContent {
+            val context = LocalContext.current
+            val scope = rememberCoroutineScope()
+
+            LaunchedEffect(viewModel.userMessage) {
+                scope.launch {
+                    viewModel.userMessage.collect { message ->
+                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+
             AdvancedMaps3DSamplesTheme {
                 Column(modifier = Modifier.fillMaxSize()) {
                     ThreeDMap(
@@ -108,9 +127,10 @@ class AiNavigatorActivity : ComponentActivity() {
                         OutlinedTextField(
                             value = userInput,
                             onValueChange = { userInput = it },
-                            label = { Text("Where are you going?") },
+                            label = { Text("Where would you like to go today?") },
                             modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
+                            singleLine = false,
+                            maxLines = 3,
                             trailingIcon = {
                                 IconButton(onClick = { userInput = "" }) {
                                     Icon(Icons.Filled.Clear, contentDescription = "Clear")
@@ -134,6 +154,14 @@ class AiNavigatorActivity : ComponentActivity() {
                                     Icon(Icons.Filled.Stop, contentDescription = "Cancel")
                                 }
                             } else {
+                                Button(
+                                    onClick = { userInput = examplePrompts.random() }
+                                ) {
+                                    Text("I'm feeling lucky")
+                                }
+
+                                Spacer(modifier = Modifier.weight(1f))
+
                                 Button(
                                     onClick = { viewModel.processUserRequest(userInput) },
                                 ) {

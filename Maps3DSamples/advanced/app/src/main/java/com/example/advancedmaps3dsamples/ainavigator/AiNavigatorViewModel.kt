@@ -10,8 +10,11 @@ import com.example.advancedmaps3dsamples.scenarios.toAnimation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,6 +26,9 @@ class AiNavigatorViewModel @Inject constructor(
 
     private val _isRequestInflight = MutableStateFlow(false)
     val isRequestInflight: StateFlow<Boolean> = _isRequestInflight
+
+    private val _userMessage = Channel<String>()
+    val userMessage = _userMessage.receiveAsFlow()
 
     fun processUserRequest(userInput: String) {
         viewModelScope.launch {
@@ -36,6 +42,7 @@ class AiNavigatorViewModel @Inject constructor(
                 playAnimation(animation)
             } catch (e: Exception) {
                 Log.e(TAG, "Error processing user request", e)
+                _userMessage.send("Error processing request: ${e.localizedMessage}")
             } finally {
                 _isRequestInflight.value = false
             }
@@ -53,5 +60,9 @@ class AiNavigatorViewModel @Inject constructor(
     fun cancelRequest() {
         animationJob?.cancel()
         _isRequestInflight.value = false
+    }
+
+    override suspend fun showMessage(message: String) {
+        _userMessage.send(message)
     }
 }

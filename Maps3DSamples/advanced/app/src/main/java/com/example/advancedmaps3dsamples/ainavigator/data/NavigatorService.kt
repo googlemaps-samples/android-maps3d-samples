@@ -26,7 +26,7 @@ class NavigatorService @Inject constructor(
             // -----------------------------------------
             Log.d(TAG, "Firebase Vertex AI raw response: ${response.text}")
             // Clean potential markdown code blocks from riddle response as well
-            val cleanedText = response.text?.sanitize()?.removePrefix("animationString=")?.removeSurrounding("\"")
+            val cleanedText = response.text?.sanitize()?.removePrefix("animationString=")?.removeSurrounding("\"")?.replace("\\\"", "\"")
             Log.d(TAG, "Firebase Vertex AI cleaned response: $cleanedText")
             return cleanedText ?: ""  // TODO: default animation?  Do a barrel roll...?
         } catch (e: Exception) {

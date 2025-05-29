@@ -39,3 +39,9 @@ data class FlyAroundStep(val flyAroundOptions: FlyAroundOptions) : AnimationStep
     viewModel.awaitFlyAround(flyAroundOptions)
   }
 }
+
+data class MessageStep(val message: String) : AnimationStep {
+  override suspend operator fun invoke(viewModel: ScenarioBaseViewModel) {
+    viewModel.showMessage(message)
+  }
+}

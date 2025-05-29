@@ -72,6 +72,7 @@ private val NEUSCHWANSTEIN_CAMERA = camera {
 interface ScenarioBaseViewModel {
   suspend fun awaitFlyTo(flyToOptions: FlyToOptions)
   suspend fun awaitFlyAround(flyAroundOptions: FlyAroundOptions)
+  suspend fun showMessage(message: String)
 }
 
 @HiltViewModel
@@ -460,5 +461,9 @@ class ScenariosViewModel @Inject constructor() : Map3dViewModel(), ScenarioBaseV
 
   fun closeOverlay() {
     _viewState.value = viewState.value.copy(showFinished = false)
+  }
+
+  override suspend fun showMessage(message: String) {
+    Log.w(TAG, message)
   }
 }
