@@ -51,6 +51,12 @@
             android:name=".scenarios.ScenariosActivity"
             android:exported="true"
             />
+
+        <activity
+            android:name=".ainavigator.AiNavigatorActivity"
+            android:exported="true"
+            />
+
     </application>
 
 </manifest>

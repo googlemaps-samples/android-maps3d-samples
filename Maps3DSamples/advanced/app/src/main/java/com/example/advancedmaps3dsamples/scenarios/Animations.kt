@@ -19,23 +19,23 @@ import com.google.android.gms.maps3d.model.FlyToOptions
 import kotlinx.coroutines.delay
 
 sealed interface AnimationStep {
-  suspend operator fun invoke(viewModel: ScenariosViewModel)
+  suspend operator fun invoke(viewModel: ScenarioBaseViewModel)
 }
 
 data class DelayStep(val durationMillis: Long) : AnimationStep {
-  override suspend operator fun invoke(viewModel: ScenariosViewModel) {
+  override suspend operator fun invoke(viewModel: ScenarioBaseViewModel) {
     delay(durationMillis)
   }
 }
 
 data class FlyToStep(val flyToOptions: FlyToOptions) : AnimationStep {
-  override suspend operator fun invoke(viewModel: ScenariosViewModel) {
+  override suspend operator fun invoke(viewModel: ScenarioBaseViewModel) {
     viewModel.awaitFlyTo(flyToOptions)
   }
 }
 
 data class FlyAroundStep(val flyAroundOptions: FlyAroundOptions) : AnimationStep {
-  override suspend operator fun invoke(viewModel: ScenariosViewModel) {
+  override suspend operator fun invoke(viewModel: ScenarioBaseViewModel) {
     viewModel.awaitFlyAround(flyAroundOptions)
   }
 }

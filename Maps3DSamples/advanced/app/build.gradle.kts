@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.secrets.gradle.plugin)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -78,6 +79,10 @@ dependencies {
     implementation(libs.maps.utils.ktx)
 
     implementation(libs.androidx.material.icons.extended)
+
+    implementation(platform(libs.firebase.bom))
+//    implementation(libs.firebase.vertexai)
+    implementation(libs.firebase.ai)
 }
 
 secrets {

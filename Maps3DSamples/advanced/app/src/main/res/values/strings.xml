@@ -19,6 +19,7 @@
 
     <string name="map_sample_title" translatable="false">3D Map Samples</string>
     <string name="map_sample_scenarios" translatable="false">Scenarios (video visuals)</string>
+    <string name="map_sample_ai_navigator" translatable="false">AI Navigator</string>
 
     <!--
     Distance in feet, formatted to 0 decimal places.

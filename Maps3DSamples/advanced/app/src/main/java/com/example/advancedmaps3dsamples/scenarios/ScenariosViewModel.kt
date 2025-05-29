@@ -37,6 +37,8 @@ import com.example.advancedmaps3dsamples.utils.DEFAULT_ROLL
 import com.example.advancedmaps3dsamples.utils.toCameraString
 import com.example.advancedmaps3dsamples.R
 import com.example.advancedmaps3dsamples.utils.copy
+import com.google.android.gms.maps3d.model.FlyAroundOptions
+import com.google.android.gms.maps3d.model.FlyToOptions
 import com.google.android.gms.maps3d.model.flyAroundOptions
 
 enum class CameraAttribute(val labelId: Int) {
@@ -67,8 +69,13 @@ private val NEUSCHWANSTEIN_CAMERA = camera {
   roll = 0.0
 }
 
+interface ScenarioBaseViewModel {
+  suspend fun awaitFlyTo(flyToOptions: FlyToOptions)
+  suspend fun awaitFlyAround(flyAroundOptions: FlyAroundOptions)
+}
+
 @HiltViewModel
-class ScenariosViewModel @Inject constructor() : Map3dViewModel() {
+class ScenariosViewModel @Inject constructor() : Map3dViewModel(), ScenarioBaseViewModel {
   override val TAG = this::class.java.simpleName
   private val _viewState = MutableStateFlow(ScenarioViewState())
   val viewState = _viewState as StateFlow<ScenarioViewState>
