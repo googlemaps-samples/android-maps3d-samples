@@ -53,6 +53,20 @@ class NavigatorService @Inject constructor(
             throw GameRepositoryException("Unable to get prompts: ${e.message}", e)
         }
     }
+
+    suspend fun whatAmILookingAt(cameraParams: String): String {
+        Log.d(TAG, "Calling Firebase Vertex AI: Fetching whatAmILookingAt for cameraParams: $cameraParams")
+        try {
+            val response = model.generateContent(whatAmILookingAtPrompt.replace("<cameraParams>", cameraParams))
+            Log.d(TAG, "Firebase Vertex AI raw response: ${response.text}")
+            val cleanedText = response.text?.sanitize()
+            Log.d(TAG, "Firebase Vertex AI cleaned response: $cleanedText")
+            return cleanedText ?: ""
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting whatAmILookingAt from Firebase Vertex AI for $cameraParams", e)
+            throw GameRepositoryException("Unable to get whatAmILookingAt: ${e.message}", e)
+        }
+    }
 }
 
 // Define a custom exception class for clarity (Optional)

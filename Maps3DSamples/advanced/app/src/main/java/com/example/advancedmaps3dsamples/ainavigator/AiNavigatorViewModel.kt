@@ -8,6 +8,7 @@ import com.example.advancedmaps3dsamples.common.Map3dViewModel
 import com.example.advancedmaps3dsamples.scenarios.AnimationStep
 import com.example.advancedmaps3dsamples.scenarios.ScenarioBaseViewModel
 import com.example.advancedmaps3dsamples.scenarios.toAnimation
+import com.example.advancedmaps3dsamples.utils.toCameraString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -108,4 +109,24 @@ class AiNavigatorViewModel @Inject constructor(
     }
 
     fun getRandomPrompt(): String = allPrompts.random()
+
+    fun whatAmILookingAt() {
+        val cameraString = currentCamera.value.toCameraString()
+        Log.w(TAG, "What am I looking at? cameraString: $cameraString")
+
+        viewModelScope.launch {
+            _isRequestInflight.value = true
+            try {
+                val whatAmILookingAt = navigatorService.whatAmILookingAt(cameraString)
+                Log.w(TAG, "Got whatAmILookingAt: $whatAmILookingAt")
+                if (whatAmILookingAt.isNotEmpty()) {
+                    _userMessage.send(whatAmILookingAt)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error getting whatAmILookingAt", e)
+                _userMessage.send("Error getting whatAmILookingAt: ${e.localizedMessage}")
+            }
+            _isRequestInflight.value = false
+        }
+    }
 }

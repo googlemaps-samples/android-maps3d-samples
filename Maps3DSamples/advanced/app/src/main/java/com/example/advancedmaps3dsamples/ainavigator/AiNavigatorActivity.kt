@@ -38,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
@@ -118,7 +119,11 @@ class AiNavigatorActivity : ComponentActivity() {
             LaunchedEffect(viewModel.userMessage) {
                 scope.launch {
                     viewModel.userMessage.collect { message ->
-                        snackbarHostState.showSnackbar(message)
+                        if (message.length > 50) {
+                            snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Long)
+                        } else {
+                            snackbarHostState.showSnackbar(message)
+                        }
                     }
                 }
             }
@@ -182,9 +187,7 @@ class AiNavigatorActivity : ComponentActivity() {
                                 }
                                 IconButton(
                                     onClick = {
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar("\"What am I looking at?\" functionality coming soon!")
-                                        }
+                                        viewModel.whatAmILookingAt()
                                     },
                                     colors = iconButtonColors(
                                         containerColor = MaterialTheme.colorScheme.primary,
