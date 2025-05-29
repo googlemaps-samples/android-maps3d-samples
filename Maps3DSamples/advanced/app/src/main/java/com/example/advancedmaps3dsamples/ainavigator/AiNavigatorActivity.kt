@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -61,6 +62,8 @@ import com.google.android.gms.maps3d.Map3DOptions
 import com.google.android.gms.maps3d.model.Map3DMode
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 @AndroidEntryPoint
 @OptIn(ExperimentalMaterial3Api::class)
@@ -191,11 +194,32 @@ class AiNavigatorActivity : ComponentActivity() {
                                 }
 
                                 IconButton(
-                                    onClick = { viewModel.nextMapMode() },
+                                    onClick = {
+                                        viewModel.generateNewPrompts()
+                                    },
                                     colors = iconButtonColors(
                                         containerColor = MaterialTheme.colorScheme.primary,
                                         contentColor = MaterialTheme.colorScheme.onPrimary
                                     )
+                                ) {
+                                    Icon(imageVector = Icons.Filled.Shuffle, contentDescription = "New Prompts")
+                                }
+
+                                var mapModeButtonEnabled by remember { mutableStateOf(true) }
+                                IconButton(
+                                    onClick = {
+                                        viewModel.nextMapMode()
+                                        mapModeButtonEnabled = false
+                                        scope.launch {
+                                            delay(2.seconds)
+                                            mapModeButtonEnabled = true
+                                        }
+                                    },
+                                    colors = iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    ),
+                                    enabled = mapModeButtonEnabled
                                 ) {
                                     Icon(
                                         imageVector = Icons.Filled.Public,
@@ -249,7 +273,7 @@ class AiNavigatorActivity : ComponentActivity() {
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Button(
-                                    onClick = { userInput = examplePrompts.random() },
+                                    onClick = { userInput = viewModel.getRandomPrompt() },
                                     enabled = !requestIsActive
                                 ) {
                                     Text("I'm feeling lucky")

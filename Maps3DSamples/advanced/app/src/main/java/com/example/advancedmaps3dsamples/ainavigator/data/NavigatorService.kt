@@ -35,6 +35,24 @@ class NavigatorService @Inject constructor(
             throw GameRepositoryException("Unable to get animation: ${e.message}", e)
         }
     }
+
+    suspend fun getNewPrompts(): List<String> {
+        Log.d(TAG, "Calling Firebase Vertex AI: Fetching new prompts")
+        try {
+            // --- Use Firebase SDK's generateContent ---
+            val response = model.generateContent(promptGeneratorPrompt)
+            // -----------------------------------------
+            Log.d(TAG, "Firebase Vertex AI raw response: ${response.text}")
+            // Clean potential markdown code blocks from riddle response as well
+            val cleanedText = response.text?.sanitize()
+            Log.d(TAG, "Firebase Vertex AI cleaned response: $cleanedText")
+            return cleanedText?.split("\n") ?: emptyList()
+        } catch (e: Exception) {
+            // TODO: Handle specific Firebase/Vertex AI exceptions if needed
+            Log.e(TAG, "Error getting prompts from Firebase Vertex AI", e)
+            throw GameRepositoryException("Unable to get prompts: ${e.message}", e)
+        }
+    }
 }
 
 // Define a custom exception class for clarity (Optional)

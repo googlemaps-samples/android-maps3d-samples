@@ -3,6 +3,7 @@ package com.example.advancedmaps3dsamples.ainavigator
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.advancedmaps3dsamples.ainavigator.data.NavigatorService
+import com.example.advancedmaps3dsamples.ainavigator.data.examplePrompts
 import com.example.advancedmaps3dsamples.common.Map3dViewModel
 import com.example.advancedmaps3dsamples.scenarios.AnimationStep
 import com.example.advancedmaps3dsamples.scenarios.ScenarioBaseViewModel
@@ -10,7 +11,6 @@ import com.example.advancedmaps3dsamples.scenarios.toAnimation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.channels.Channel
@@ -31,6 +31,8 @@ class AiNavigatorViewModel @Inject constructor(
 
     private val _userMessage = Channel<String>()
     val userMessage = _userMessage.receiveAsFlow()
+
+    val allPrompts = examplePrompts.toMutableList()
 
     fun processUserRequest(userInput: String) {
         viewModelScope.launch {
@@ -86,4 +88,21 @@ class AiNavigatorViewModel @Inject constructor(
     override suspend fun showMessage(message: String) {
         _userMessage.send(message)
     }
+
+    fun generateNewPrompts() {
+        viewModelScope.launch {
+            _isRequestInflight.value = true
+            try {
+                val newPrompts = navigatorService.getNewPrompts()
+                Log.w(TAG, "Got new prompts: $newPrompts")
+                allPrompts.addAll(newPrompts)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error generating new prompts", e)
+                _userMessage.send("Error generating new prompts: ${e.localizedMessage}")
+            }
+            _isRequestInflight.value = false
+        }
+    }
+
+    fun getRandomPrompt(): String = allPrompts.random()
 }
