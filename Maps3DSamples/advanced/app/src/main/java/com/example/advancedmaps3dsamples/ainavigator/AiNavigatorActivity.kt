@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -165,7 +166,10 @@ class AiNavigatorActivity : ComponentActivity() {
 
                             WhiskeyCompass(
                                 heading = camera.heading?.toFloat() ?: 0f,
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .alpha(0.55f)
+                                    .safeDrawingPadding(), // Apply padding for system elements like cutouts
                                 stripHeight = 90.dp,
                                 pixelsPerDegree = 7f,
                                 degreeLabelInterval = 30 // Less frequent degree labels for clarity
