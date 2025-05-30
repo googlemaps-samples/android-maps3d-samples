@@ -39,6 +39,9 @@ import com.example.advancedmaps3dsamples.R
 import com.example.advancedmaps3dsamples.utils.copy
 import com.google.android.gms.maps3d.model.FlyAroundOptions
 import com.google.android.gms.maps3d.model.FlyToOptions
+import com.google.android.gms.maps3d.model.MarkerOptions
+import com.google.android.gms.maps3d.model.Polyline
+import com.google.android.gms.maps3d.model.PolylineOptions
 import com.google.android.gms.maps3d.model.flyAroundOptions
 
 enum class CameraAttribute(val labelId: Int) {
@@ -73,6 +76,8 @@ interface ScenarioBaseViewModel {
   suspend fun awaitFlyTo(flyToOptions: FlyToOptions)
   suspend fun awaitFlyAround(flyAroundOptions: FlyAroundOptions)
   suspend fun showMessage(message: String)
+  fun addMarker(options: MarkerOptions)
+  fun addPolyline(polylineOptions: PolylineOptions)
 }
 
 @HiltViewModel

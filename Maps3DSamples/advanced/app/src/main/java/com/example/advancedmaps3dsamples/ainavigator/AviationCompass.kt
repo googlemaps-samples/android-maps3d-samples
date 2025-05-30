@@ -225,7 +225,7 @@ fun WhiskeyCompass(
  * Converts a heading in degrees to its corresponding cardinal or intercardinal direction.
  * (This is not used by the compass itself anymore but kept for previews/external use)
  */
-private fun Float.toCardinalDirection(): String {
+fun Float.toCardinalDirection(): String {
     val normalizedHeading = (this % 360 + 360) % 360
     val directions = listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW", "N")
     return directions[((normalizedHeading + 22.5f) / 45f).toInt() % 8]

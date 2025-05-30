@@ -24,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LayersClear
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
@@ -236,6 +237,19 @@ class AiNavigatorActivity : ComponentActivity() {
                                     Icon(
                                         imageVector = Icons.Filled.Info,
                                         contentDescription = "Describe View"
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = { viewModel.clearMapObjects() },
+                                    colors = iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.LayersClear,
+                                        contentDescription = "Clear Map Objects"
                                     )
                                 }
 

@@ -47,6 +47,7 @@ import com.google.android.gms.maps3d.model.vector3D
 import com.google.maps.android.ktx.utils.toLatLngList
 import java.util.UUID
 import androidx.core.graphics.toColorInt
+import com.google.maps.android.PolyUtil
 
 private const val TAG = "ScenarioMapper"
 
@@ -155,6 +156,68 @@ fun String.toMap3DMode(): Int {
     }
 }
 
+fun Map<String, String>.toMarkerOptions(): MarkerOptions {
+    val labelText = getString("label", "").trim('"')
+    val altModeString = getString("altMode", "clampToGround") // Default altMode
+
+    return markerOptions {
+        position = this@toMarkerOptions.toLatLngAltitude() // Uses the existing LatLngAltitude parser
+        label = labelText
+        altitudeMode = parseAltitudeMode(altModeString) // Uses existing helper
+        isExtruded = true // Default
+        isDrawnWhenOccluded = true // Default
+        collisionBehavior = CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL // Default
+        zIndex = 1 // Default
+    }
+}
+
+fun Map<String, String>.toPolylineOptionsFromAi(): PolylineOptions {
+    val id = getString("id", "polyline_${UUID.randomUUID()}")
+    val encodedPointsStr = getString("encodedPoints", "").trim('"')
+    val colorStr = getString("color", "#0000FFFF").trim('"') // Default to blue
+    val width = getDouble("width", 5.0).toFloat()
+    val altModeString = getString("altMode", "clampToGround")
+
+    val decodedLatLngs: List<LatLng> =
+        if (encodedPointsStr.isNotBlank()) {
+            try {
+                PolyUtil.decode(encodedPointsStr)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to decode polyline string: '$encodedPointsStr'", e)
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+
+    val coordinates3D = decodedLatLngs.map {
+        latLngAltitude {
+            latitude = it.latitude
+            longitude = it.longitude
+            altitude = 0.0 // Altitude often ignored for clampToGround/Mesh, or could be part of a more complex encoding
+        }
+    }
+
+    val parsedColor = try {
+        colorStr.toColorInt()
+    } catch (e: IllegalArgumentException) {
+        Log.w(TAG, "Invalid color string '$colorStr' for polyline $id, defaulting to blue.")
+        Color.BLUE
+    }
+
+    return polylineOptions {
+        this.id = id
+        this.coordinates = coordinates3D
+        this.strokeColor = parsedColor
+        this.strokeWidth = width.toDouble() // PolylineOptions takes Double for strokeWidth
+        this.altitudeMode = parseAltitudeMode(altModeString)
+        this.zIndex = 5 // Default zIndex
+        // Add other properties like drawsOccludedSegments if needed
+        this.drawsOccludedSegments = true
+    }
+}
+
+
 fun String.toAnimation(): List<AnimationStep> {
     val stepsString = this.trim().trimEnd(';')
     if (stepsString.isBlank()) {
@@ -172,6 +235,14 @@ fun String.toAnimation(): List<AnimationStep> {
                     "message" -> {
                         Log.w(TAG, "Message: $value")
                         add(MessageStep(value.trim('"')))
+                    }
+                    "addmarker" -> { // Added new case
+                        val attributes = value.toAttributesMap()
+                        add(AddMarkerStep(attributes.toMarkerOptions()))
+                    }
+                    "addpolyline" -> { // Added new case
+                        val attributes = value.toAttributesMap()
+                        add(AddPolylineStep(attributes.toPolylineOptionsFromAi()))
                     }
                     else -> Log.w(TAG, "Unsupported animation step type: $key")
                 }

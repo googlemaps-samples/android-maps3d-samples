@@ -137,6 +137,18 @@ class AiNavigatorViewModel @Inject constructor(
             _isRequestInflight.value = false
         }
     }
+
+    fun clearMapObjects() {
+        viewModelScope.launch {
+            // Stop any ongoing animation that might be adding objects
+            stopAnimation()
+            // Call the clearObjects method from the parent Map3dViewModel
+            // This removes objects from the map and clears internal tracking lists.
+            super.clearObjects()
+            // Optionally, send a message to the user
+            _userMessage.send("Map objects cleared.")
+        }
+    }
 }
 
 suspend fun Bitmap.saveToDisk(context: Context): Uri {
