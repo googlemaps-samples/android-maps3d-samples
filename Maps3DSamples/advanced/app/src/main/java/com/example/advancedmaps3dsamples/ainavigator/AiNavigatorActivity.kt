@@ -10,7 +10,6 @@ import androidx.activity.viewModels
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,24 +20,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.East
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.North
-import androidx.compose.material.icons.filled.NorthEast
-import androidx.compose.material.icons.filled.NorthWest
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shuffle
-import androidx.compose.material.icons.filled.South
-import androidx.compose.material.icons.filled.SouthEast
-import androidx.compose.material.icons.filled.SouthWest
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.West
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,9 +41,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,13 +49,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -94,10 +80,7 @@ class AiNavigatorActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
         )
 
-        // Hide the system bars
         hideSystemUI()
-
-        // Prevent screen from dimming
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         val options = Map3DOptions(
@@ -119,18 +102,17 @@ class AiNavigatorActivity : ComponentActivity() {
         )
 
         setContent {
-            val scope = rememberCoroutineScope()
-            val coroutineScope = rememberCoroutineScope()
+            val scope = rememberCoroutineScope() // This scope can be used for actions tied to UI events
             val graphicsLayer = rememberGraphicsLayer()
-
             val snackbarHostState = remember { SnackbarHostState() }
-
             val camera by viewModel.currentCamera.collectAsStateWithLifecycle()
-
             val compassAlpha = remember { Animatable(0.55f) }
 
             LaunchedEffect(viewModel.userMessage) {
-                scope.launch {
+                // Use a new coroutine scope for collecting user messages
+                // to avoid being cancelled by other LaunchedEffects.
+                // This scope is tied to this LaunchedEffect instance.
+                launch {
                     viewModel.userMessage.collect { message ->
                         if (message.length > 50) {
                             snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Long)
@@ -141,21 +123,25 @@ class AiNavigatorActivity : ComponentActivity() {
                 }
             }
 
-            // Start a timer when the camera heading stops changing.
-            // After 2 seconds, fade the compass alpha.
-            // If the camera heading changes again, reset the timer and set the compass alpha back to 55%.
+            // This LaunchedEffect controls the compass alpha based on camera heading changes.
             LaunchedEffect(camera.heading) {
-                compassAlpha.snapTo(0.55f) // Reset alpha to 55% when heading changes
-                val job = scope.launch {
-                    delay(2.seconds) // Wait for 2 seconds
+                // When camera.heading changes, this LaunchedEffect is cancelled and restarted.
+                // Any coroutine launched within its scope (like the one below) is also cancelled.
+
+                // Reset alpha to initial state and stop any ongoing animation on compassAlpha.
+                compassAlpha.snapTo(0.55f)
+
+                // Launch a new coroutine within this LaunchedEffect's scope.
+                // This coroutine will handle the delay and subsequent fade-out animation.
+                // If camera.heading changes again before this completes, this coroutine will be cancelled.
+                launch {
+                    delay(2.seconds) // Wait for 2 seconds of stable heading
+                    // If this point is reached, it means camera.heading was stable for 2 seconds.
                     compassAlpha.animateTo(
                         targetValue = 0.3f,
                         animationSpec = tween(durationMillis = 500, easing = LinearEasing)
                     )
                 }
-                // Cancel the previous job if heading changes before 2 seconds
-                // This ensures the fade-out only happens if the heading is stable for 2 seconds
-                job.invokeOnCompletion { if (it is kotlinx.coroutines.CancellationException) scope.launch { compassAlpha.snapTo(0.55f) } }
             }
 
 
@@ -172,13 +158,10 @@ class AiNavigatorActivity : ComponentActivity() {
                             ThreeDMap(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .drawWithContent {  // This bit facilitates taking screenshots
-                                        // call record to capture the content in the graphics layer
+                                    .drawWithContent {
                                         graphicsLayer.record {
-                                            // draw the contents of the composable into the graphics layer
                                             this@drawWithContent.drawContent()
                                         }
-                                        // draw the graphics layer on the visible canvas
                                         drawLayer(graphicsLayer)
                                     },
                                 options = options,
@@ -191,10 +174,10 @@ class AiNavigatorActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .alpha(compassAlpha.value)
-                                    .safeDrawingPadding(), // Apply padding for system elements like cutouts
+                                    .safeDrawingPadding(),
                                 stripHeight = 90.dp,
                                 pixelsPerDegree = 7f,
-                                degreeLabelInterval = 30, // Less frequent degree labels for clarity
+                                degreeLabelInterval = 30,
                             )
 
                             Row(
@@ -239,7 +222,8 @@ class AiNavigatorActivity : ComponentActivity() {
                                 }
                                 IconButton(
                                     onClick = {
-                                        coroutineScope.launch {
+                                        // Use the general 'scope' for UI triggered actions
+                                        scope.launch {
                                             val bitmap = graphicsLayer.toImageBitmap()
                                             viewModel.whatAmILookingAt(bitmap)
                                         }
@@ -260,6 +244,7 @@ class AiNavigatorActivity : ComponentActivity() {
                                     onClick = {
                                         viewModel.nextMapMode()
                                         mapModeButtonEnabled = false
+                                        // Use the general 'scope' for UI triggered actions
                                         scope.launch {
                                             delay(2.seconds)
                                             mapModeButtonEnabled = true
@@ -287,9 +272,8 @@ class AiNavigatorActivity : ComponentActivity() {
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             var userInput by rememberSaveable { mutableStateOf("") }
-                            val requestIsActive by viewModel.isRequestInflight.collectAsState()
+                            val requestIsActive by viewModel.isRequestInflight.collectAsStateWithLifecycle() // Recommended
 
-                            // Always reserve space for the progress indicator, but only show it if the requestIsActive
                             Box(modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 0.dp, bottom = 4.dp)) {
@@ -374,44 +358,5 @@ class AiNavigatorActivity : ComponentActivity() {
             controller.hide(WindowInsetsCompat.Type.systemBars())
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
-    }
-}
-
-@Composable
-private fun Compass(
-    heading: Double,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier.background(MaterialTheme.colorScheme.primary, CircleShape),
-        horizontalAlignment = CenterHorizontally
-    ) {
-        val (icon, abbreviation) = heading.toCardinalDirection()
-
-        Icon(
-            imageVector = icon,
-            contentDescription = "Compass",
-            tint = MaterialTheme.colorScheme.onPrimary,
-            modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 0.dp)
-        )
-        Text(
-            text = abbreviation,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onPrimary,
-            modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
-        )
-    }
-}
-
-private fun Double.toCardinalDirection(): Pair<ImageVector, String> {
-    return when (this) {
-        in 337.5..360.0, in 0.0..22.5 -> Pair(Icons.Filled.North, "N")
-        in 22.5..67.5 -> Pair(Icons.Filled.NorthEast, "NE") // Placeholder, adjust as needed
-        in 67.5..112.5 -> Pair(Icons.Filled.East, "E")
-        in 112.5..157.5 -> Pair(Icons.Filled.SouthEast, "SE") // Placeholder
-        in 157.5..202.5 -> Pair(Icons.Filled.South, "S")
-        in 202.5..247.5 -> Pair(Icons.Filled.SouthWest, "SW") // Placeholder
-        in 247.5..292.5 -> Pair(Icons.Filled.West, "W")
-        else -> Pair(Icons.Filled.NorthWest, "NW") // Placeholder for 292.5..337.5
     }
 }
