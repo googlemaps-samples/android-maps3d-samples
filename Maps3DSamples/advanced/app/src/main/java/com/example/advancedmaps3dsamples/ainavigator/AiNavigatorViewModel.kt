@@ -79,8 +79,6 @@ class AiNavigatorViewModel @Inject constructor(
         if (isAnimating && animationJob?.isActive == true) {
             animationJob?.cancel()
             isAnimating = false
-            // Call stopAnimations or similar function if needed when animation is stopped by user
-            // For example: stopAnimations()
         }
     }
 

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
+import androidx.compose.foundation.background
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -16,15 +17,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.East
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.North
+import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material.icons.filled.NorthEast
+import androidx.compose.material.icons.filled.NorthWest
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.filled.South
+import androidx.compose.material.icons.filled.SouthEast
+import androidx.compose.material.icons.filled.SouthWest
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.West
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,6 +48,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,14 +58,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.advancedmaps3dsamples.scenarios.ThreeDMap
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
 import com.google.android.gms.maps3d.Map3DOptions
@@ -80,24 +95,15 @@ class AiNavigatorActivity : ComponentActivity() {
         // Prevent screen from dimming
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        val latitude = 40.02196731315463
-        val longitude = -105.25453645683653
-        val altitude = 1616.0
-
-        val heading = 0.0
-        val tilt = 0.0
-        val range = 10_000_000.0
-        val roll = 0.0
-
         val options = Map3DOptions(
             defaultUiDisabled = true,
-            centerLat = latitude,
-            centerLng = longitude,
-            centerAlt = altitude,
-            heading = heading,
-            tilt = tilt,
-            roll = roll,
-            range = range,
+            centerLat = 40.02196731315463,
+            centerLng = -105.25453645683653,
+            centerAlt = 1616.0,
+            heading = 0.0,
+            tilt = 0.0,
+            roll = 0.0,
+            range = 10_000_000.0,
             minHeading = 0.0,
             maxHeading = 360.0,
             minTilt = 0.0,
@@ -113,6 +119,8 @@ class AiNavigatorActivity : ComponentActivity() {
             val graphicsLayer = rememberGraphicsLayer()
 
             val snackbarHostState = remember { SnackbarHostState() }
+
+            val camera by viewModel.currentCamera.collectAsStateWithLifecycle()
 
             LaunchedEffect(viewModel.userMessage) {
                 scope.launch {
@@ -151,6 +159,13 @@ class AiNavigatorActivity : ComponentActivity() {
                                 options = options,
                                 onMap3dViewReady = { viewModel.setGoogleMap3D(it) },
                                 onReleaseMap = { viewModel.releaseGoogleMap3D() },
+                            )
+
+                            Compass(
+                                heading = camera.heading ?: 0.0,
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(16.dp)
                             )
 
                             Row(
@@ -246,7 +261,9 @@ class AiNavigatorActivity : ComponentActivity() {
                             val requestIsActive by viewModel.isRequestInflight.collectAsState()
 
                             // Always reserve space for the progress indicator, but only show it if the requestIsActive
-                            Box(modifier = Modifier.fillMaxWidth().padding(top = 0.dp, bottom = 4.dp)) {
+                            Box(modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 0.dp, bottom = 4.dp)) {
                                 if (requestIsActive) {
                                     LinearProgressIndicator(
                                         modifier = Modifier.fillMaxWidth(),
@@ -258,7 +275,9 @@ class AiNavigatorActivity : ComponentActivity() {
                                 value = userInput,
                                 onValueChange = { userInput = it },
                                 label = { Text("Where would you like to go today?") },
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp),
                                 singleLine = false,
                                 maxLines = 3,
                                 trailingIcon = {
@@ -326,5 +345,44 @@ class AiNavigatorActivity : ComponentActivity() {
             controller.hide(WindowInsetsCompat.Type.systemBars())
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
+    }
+}
+
+@Composable
+private fun Compass(
+    heading: Double,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.background(MaterialTheme.colorScheme.primary, CircleShape),
+        horizontalAlignment = CenterHorizontally
+    ) {
+        val (icon, abbreviation) = heading.toCardinalDirection()
+
+        Icon(
+            imageVector = icon,
+            contentDescription = "Compass",
+            tint = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 0.dp)
+        )
+        Text(
+            text = abbreviation,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+        )
+    }
+}
+
+private fun Double.toCardinalDirection(): Pair<ImageVector, String> {
+    return when (this) {
+        in 337.5..360.0, in 0.0..22.5 -> Pair(Icons.Filled.North, "N")
+        in 22.5..67.5 -> Pair(Icons.Filled.NorthEast, "NE") // Placeholder, adjust as needed
+        in 67.5..112.5 -> Pair(Icons.Filled.East, "E")
+        in 112.5..157.5 -> Pair(Icons.Filled.SouthEast, "SE") // Placeholder
+        in 157.5..202.5 -> Pair(Icons.Filled.South, "S")
+        in 202.5..247.5 -> Pair(Icons.Filled.SouthWest, "SW") // Placeholder
+        in 247.5..292.5 -> Pair(Icons.Filled.West, "W")
+        else -> Pair(Icons.Filled.NorthWest, "NW") // Placeholder for 292.5..337.5
     }
 }
