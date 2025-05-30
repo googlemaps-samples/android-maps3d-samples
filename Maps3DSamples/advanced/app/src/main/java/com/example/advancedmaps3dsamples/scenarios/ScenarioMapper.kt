@@ -52,23 +52,95 @@ import com.google.maps.android.PolyUtil
 private const val TAG = "ScenarioMapper"
 
 /**
- * Parses a comma-separated string of "key=value" pairs into a map. Example:
- * "lat=39.65,lng=-105.02,alt=550.2" -> {"lat": "39.65", "lng": "-105.02", "alt": "550.2"}
+ * Parses a comma-separated string of "key=value" pairs into a map.
+ * Handles quoted values that may contain commas or semicolons.
+ * Example: "id=foo,points="lat1,lng1;lat2,lng2",color=#FF0000"
  */
 fun String.toAttributesMap(): Map<String, String> {
-  // Trim whitespace around the string and commas/semicolons just in case
-  val trimmedString = this.trim().trimEnd(';').trimEnd(',')
-  if (trimmedString.isBlank()) {
-    return emptyMap()
-  }
-  return trimmedString
-    .split(",")
-    .map { it.trim() }
-    .filter { it.contains("=") }
-    .associate { part ->
-      val (key, value) = part.split("=", limit = 2)
-      key.trim() to value.trim()
+    val attributes = mutableMapOf<String, String>()
+    var index = 0
+    val length = this.length
+
+    while (index < length) {
+        // Skip leading delimiters (comma or semicolon) for subsequent pairs
+        // and any leading whitespace for the key.
+        while (index < length && (this[index] == ',' || this[index] == ';' || this[index].isWhitespace())) {
+            index++
+        }
+        if (index >= length) break
+
+        // Parse key
+        val keyStart = index
+        while (index < length && this[index] != '=') {
+            index++
+        }
+        if (index >= length || this[index] != '=') {
+            Log.w(TAG, "Malformed pair or end of string encountered parsing key at index $keyStart. Input: '$this'")
+            break // Malformed or end of string without a full pair
+        }
+        val key = this.substring(keyStart, index).trim()
+        index++ // Skip '='
+
+        if (index >= length) {
+            Log.w(TAG, "No value found for key '$key'. Input: '$this'")
+            if (key.isNotBlank()) attributes[key] = "" // Store empty value for key if key is valid
+            break
+        }
+
+        // Skip whitespace before value
+        while (index < length && this[index].isWhitespace()) {
+            index++
+        }
+        if (index >= length) {
+            Log.w(TAG, "No value found for key '$key' (after skipping whitespace). Input: '$this'")
+            if (key.isNotBlank()) attributes[key] = ""
+            break
+        }
+
+
+        // Parse value
+        val value: String
+        if (this[index] == '"') { // Quoted value
+            index++ // Skip opening quote
+            val valueStart = index
+            val sb = StringBuilder()
+            var escaped = false
+            var foundClosingQuote = false
+            while (index < length) {
+                val char = this[index]
+                if (escaped) {
+                    sb.append(char) // Append the escaped character as is
+                    escaped = false
+                } else if (char == '\\') {
+                    escaped = true // Next character is escaped
+                } else if (char == '"') {
+                    foundClosingQuote = true
+                    index++ // Consume the closing quote
+                    break   // End of quoted value
+                } else {
+                    sb.append(char)
+                }
+                index++
+            }
+            value = sb.toString() // Content within quotes, escaped characters processed
+            if (!foundClosingQuote) {
+                Log.w(TAG, "Unclosed quote for key '$key'. Value parsed so far: '$value'. Input: '$this'")
+            }
+        } else { // Unquoted value
+            val valueStart = index
+            while (index < length && this[index] != ',' && this[index] != ';') {
+                index++
+            }
+            value = this.substring(valueStart, index).trim()
+        }
+
+        if (key.isNotBlank()) {
+            attributes[key] = value
+        } else {
+            Log.w(TAG, "Parsed a blank key. Value was '$value'. Input: '$this'")
+        }
     }
+    return attributes
 }
 
 /** Helper to safely get a Double value from the attributes map. */
@@ -173,85 +245,185 @@ fun Map<String, String>.toMarkerOptions(): MarkerOptions {
 
 fun Map<String, String>.toPolylineOptionsFromAi(): PolylineOptions {
     val id = getString("id", "polyline_${UUID.randomUUID()}")
-    val encodedPointsStr = getString("encodedPoints", "").trim('"')
-    val colorStr = getString("color", "#0000FFFF").trim('"') // Default to blue
+    val pointsStr = getString("points", "").trim('"') // Get the "lat1,lng1;lat2,lng2;..." string
+    val colorStr = getString("color", "#000000FF").trim('"') // Default to opaque blue
     val width = getDouble("width", 5.0).toFloat()
     val altModeString = getString("altMode", "clampToGround")
 
-    val decodedLatLngs: List<LatLng> =
-        if (encodedPointsStr.isNotBlank()) {
-            try {
-                PolyUtil.decode(encodedPointsStr)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to decode polyline string: '$encodedPointsStr'", e)
-                emptyList()
+    val coordinates3D = mutableListOf<LatLngAltitude>()
+    if (pointsStr.isNotBlank()) {
+        val pointPairs = pointsStr.split(';')
+        for (pairStr in pointPairs) {
+            val latLngParts = pairStr.split(',')
+            if (latLngParts.size == 2) {
+                try {
+                    val lat = latLngParts[0].trim().toDouble()
+                    val lng = latLngParts[1].trim().toDouble()
+                    // For simplicity, assume altitude 0 for points from AI string.
+                    // `altMode` will determine how these are rendered.
+                    coordinates3D.add(latLngAltitude { latitude = lat; longitude = lng; altitude = 0.0 })
+                } catch (e: NumberFormatException) {
+                    Log.w(TAG, "Invalid lat/lng in polyline points string: '$pairStr' for polyline $id")
+                }
+            } else {
+                Log.w(TAG, "Invalid point pair format in polyline points string: '$pairStr' for polyline $id")
             }
-        } else {
-            emptyList()
         }
+    }
 
-    val coordinates3D = decodedLatLngs.map {
-        latLngAltitude {
-            latitude = it.latitude
-            longitude = it.longitude
-            altitude = 0.0 // Altitude often ignored for clampToGround/Mesh, or could be part of a more complex encoding
-        }
+    if (coordinates3D.size < 2) {
+        Log.w(TAG, "Polyline $id has fewer than 2 valid points. It might not render.")
     }
 
     val parsedColor = try {
         colorStr.toColorInt()
     } catch (e: IllegalArgumentException) {
         Log.w(TAG, "Invalid color string '$colorStr' for polyline $id, defaulting to blue.")
-        Color.BLUE
+        android.graphics.Color.BLUE
     }
 
     return polylineOptions {
         this.id = id
         this.coordinates = coordinates3D
         this.strokeColor = parsedColor
-        this.strokeWidth = width.toDouble() // PolylineOptions takes Double for strokeWidth
+        this.strokeWidth = width.toDouble()
         this.altitudeMode = parseAltitudeMode(altModeString)
-        this.zIndex = 5 // Default zIndex
-        // Add other properties like drawsOccludedSegments if needed
+        this.zIndex = 5
         this.drawsOccludedSegments = true
     }
 }
 
-
 fun String.toAnimation(): List<AnimationStep> {
-    val stepsString = this.trim().trimEnd(';')
-    if (stepsString.isBlank()) {
+    val animationString = this.trim()
+    if (animationString.isBlank()) {
         return emptyList()
     }
-    return buildList {
-        stepsString.split(";").forEach { step ->
-            val trimmedStep = step.trim()
-            if (trimmedStep.contains('=')) {
-                val (key, value) = trimmedStep.split("=", limit = 2)
-                when (key.trim().lowercase()) {
-                    "flyto" -> add(FlyToStep(value.toFlyTo()))
-                    "delay" -> add(DelayStep(value.toDelay()))
-                    "flyaround" -> add(FlyAroundStep(value.toFlyAround()))
-                    "message" -> {
-                        Log.w(TAG, "Message: $value")
-                        add(MessageStep(value.trim('"')))
-                    }
-                    "addmarker" -> { // Added new case
-                        val attributes = value.toAttributesMap()
-                        add(AddMarkerStep(attributes.toMarkerOptions()))
-                    }
-                    "addpolyline" -> { // Added new case
-                        val attributes = value.toAttributesMap()
-                        add(AddPolylineStep(attributes.toPolylineOptionsFromAi()))
-                    }
-                    else -> Log.w(TAG, "Unsupported animation step type: $key")
-                }
-            } else {
-                Log.w(TAG, "Ignoring invalid animation step format: $step")
+
+    val steps = mutableListOf<AnimationStep>()
+    var currentIndex = 0
+    val length = animationString.length
+
+    while (currentIndex < length) {
+        // Skip leading semicolons and whitespace
+        while (currentIndex < length && (animationString[currentIndex] == ';' || animationString[currentIndex].isWhitespace())) {
+            currentIndex++
+        }
+        if (currentIndex >= length) break
+
+        // Find the command key
+        val commandKeyStart = currentIndex
+        while (currentIndex < length && animationString[currentIndex] != '=') {
+            currentIndex++
+        }
+
+        if (currentIndex >= length || animationString[currentIndex] != '=') {
+            Log.w(TAG, "Malformed command (missing '=') starting at index $commandKeyStart in animation string: '$animationString'")
+            break // or continue to next potential command if desired
+        }
+        val commandKey = animationString.substring(commandKeyStart, currentIndex).trim().lowercase()
+        currentIndex++ // Skip '='
+
+        if (currentIndex >= length) {
+            Log.w(TAG, "No value found for command '$commandKey' at end of animation string: '$animationString'")
+            break
+        }
+
+        // Find the command value string (everything until the next unquoted semicolon or end of string)
+        val commandValueStart = currentIndex
+        val valueBuilder = StringBuilder()
+        var inQuotes = false
+        var foundEndOfValue = false
+
+        while (currentIndex < length) {
+            val char = animationString[currentIndex]
+            if (char == '"') {
+                inQuotes = !inQuotes
             }
+            if (!inQuotes && char == ';') {
+                foundEndOfValue = true
+                break // Found delimiter for the next command
+            }
+            valueBuilder.append(char)
+            currentIndex++
+        }
+
+        val commandValueString = valueBuilder.toString().trim()
+
+        if (commandKey.isBlank()) {
+            Log.w(TAG, "Parsed a blank command key. Value string was '$commandValueString'. Full string: '$animationString'")
+            if (foundEndOfValue) currentIndex++ // Move past the semicolon if we stopped because of it
+            continue
+        }
+
+        Log.d(TAG, "Parsing command: $commandKey with value: $commandValueString")
+
+        try {
+            when (commandKey) {
+                "flyto" -> steps.add(FlyToStep(commandValueString.toFlyTo()))
+                "delay" -> steps.add(DelayStep(commandValueString.toDelay()))
+                "flyaround" -> steps.add(FlyAroundStep(commandValueString.toFlyAround()))
+                "message" -> {
+                    // The value for message might be quoted itself. toAttributesMap is not ideal.
+                    // The prompt is message="<content>" -> commandValueString will be "\"<content>\""
+                    val messageContent = commandValueString.removeSurrounding("\"")
+                    steps.add(MessageStep(messageContent))
+                }
+                "addmarker" -> {
+                    val attributes = commandValueString.toAttributesMap()
+                    steps.add(AddMarkerStep(attributes.toMarkerOptions()))
+                }
+                "addpolyline" -> {
+                    val attributes = commandValueString.toAttributesMap()
+                    steps.add(AddPolylineStep(attributes.toPolylineOptionsFromAi()))
+                }
+                else -> Log.w(TAG, "Unsupported animation step type: $commandKey with value: $commandValueString")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing command '$commandKey' with value '$commandValueString'. Error: ${e.message}", e)
+        }
+
+        if (foundEndOfValue) {
+            // currentIndex is already at the semicolon, loop will skip it in the next iteration.
         }
     }
+    return steps
 }
+//
+//
+//fun String.toAnimation(): List<AnimationStep> {
+//    val stepsString = this.trim().trimEnd(';')
+//    if (stepsString.isBlank()) {
+//        return emptyList()
+//    }
+//    return buildList {
+//        stepsString.split(";").forEach { step ->
+//            val trimmedStep = step.trim()
+//            if (trimmedStep.contains('=')) {
+//                val (key, value) = trimmedStep.split("=", limit = 2)
+//                when (key.trim().lowercase()) {
+//                    "flyto" -> add(FlyToStep(value.toFlyTo()))
+//                    "delay" -> add(DelayStep(value.toDelay()))
+//                    "flyaround" -> add(FlyAroundStep(value.toFlyAround()))
+//                    "message" -> {
+//                        Log.w(TAG, "Message: $value")
+//                        add(MessageStep(value.trim('"')))
+//                    }
+//                    "addmarker" -> { // Added new case
+//                        val attributes = value.toAttributesMap()
+//                        add(AddMarkerStep(attributes.toMarkerOptions()))
+//                    }
+//                    "addpolyline" -> { // Added new case
+//                        val attributes = value.toAttributesMap()
+//                        add(AddPolylineStep(attributes.toPolylineOptionsFromAi()))
+//                    }
+//                    else -> Log.w(TAG, "Unsupported animation step type: $key")
+//                }
+//            } else {
+//                Log.w(TAG, "Ignoring invalid animation step format: $step")
+//            }
+//        }
+//    }
+//}
 
 fun String.toMaps3DOptions(): Map3DOptions {
     var camera: Camera? = null
@@ -570,20 +742,19 @@ fun String.toPolyline(idp: String? = null): List<PolylineOptions> {
 }
 
 // --- Helper Functions ---
-
 @AltitudeMode
-private fun parseAltitudeMode(altModeString: String): Int {
-    return when (altModeString.lowercase()) {
+internal fun parseAltitudeMode(altModeString: String?): Int { // Made internal
+    return when (altModeString?.trim()?.lowercase()) {
         "absolute" -> AltitudeMode.ABSOLUTE
+        "relativetoground" -> AltitudeMode.RELATIVE_TO_GROUND // common typo fix
         "relative_to_ground" -> AltitudeMode.RELATIVE_TO_GROUND
+        "relativetomesh" -> AltitudeMode.RELATIVE_TO_MESH // common typo fix
         "relative_to_mesh" -> AltitudeMode.RELATIVE_TO_MESH
+        "clamptoground" -> AltitudeMode.CLAMP_TO_GROUND // common typo fix
         "clamp_to_ground" -> AltitudeMode.CLAMP_TO_GROUND
         else -> {
-            if (altModeString.isNotEmpty()) {
-                Log.w(
-                    TAG,
-                    "Ignoring unrecognized altitude mode '$altModeString', defaulting to CLAMP_TO_GROUND",
-                )
+            if (!altModeString.isNullOrEmpty()) {
+                Log.w(TAG, "Ignoring unrecognized altitude mode '$altModeString', defaulting to CLAMP_TO_GROUND.")
             }
             AltitudeMode.CLAMP_TO_GROUND
         }
