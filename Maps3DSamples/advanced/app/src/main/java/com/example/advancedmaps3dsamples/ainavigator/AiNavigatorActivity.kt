@@ -18,18 +18,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.NavigateBefore
-import androidx.compose.material.icons.automirrored.filled.NavigateNext
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults.iconButtonColors
@@ -37,8 +33,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
@@ -51,23 +47,23 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.advancedmaps3dsamples.ainavigator.data.examplePrompts
 import com.example.advancedmaps3dsamples.scenarios.ThreeDMap
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
 import com.google.android.gms.maps3d.Map3DOptions
 import com.google.android.gms.maps3d.model.Map3DMode
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 @AndroidEntryPoint
-@OptIn(ExperimentalMaterial3Api::class)
 class AiNavigatorActivity : ComponentActivity() {
     private val viewModel by viewModels<AiNavigatorViewModel>()
 
@@ -113,6 +109,8 @@ class AiNavigatorActivity : ComponentActivity() {
 
         setContent {
             val scope = rememberCoroutineScope()
+            val coroutineScope = rememberCoroutineScope()
+            val graphicsLayer = rememberGraphicsLayer()
 
             val snackbarHostState = remember { SnackbarHostState() }
 
@@ -139,7 +137,17 @@ class AiNavigatorActivity : ComponentActivity() {
                     ) {
                         Box(modifier = Modifier.weight(1f)) {
                             ThreeDMap(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .drawWithContent {  // This bit facilitates taking screenshots
+                                        // call record to capture the content in the graphics layer
+                                        graphicsLayer.record {
+                                            // draw the contents of the composable into the graphics layer
+                                            this@drawWithContent.drawContent()
+                                        }
+                                        // draw the graphics layer on the visible canvas
+                                        drawLayer(graphicsLayer)
+                                    },
                                 options = options,
                                 onMap3dViewReady = { viewModel.setGoogleMap3D(it) },
                                 onReleaseMap = { viewModel.releaseGoogleMap3D() },
@@ -187,7 +195,10 @@ class AiNavigatorActivity : ComponentActivity() {
                                 }
                                 IconButton(
                                     onClick = {
-                                        viewModel.whatAmILookingAt()
+                                        coroutineScope.launch {
+                                            val bitmap = graphicsLayer.toImageBitmap()
+                                            viewModel.whatAmILookingAt(bitmap)
+                                        }
                                     },
                                     colors = iconButtonColors(
                                         containerColor = MaterialTheme.colorScheme.primary,
@@ -317,4 +328,3 @@ class AiNavigatorActivity : ComponentActivity() {
         }
     }
 }
-

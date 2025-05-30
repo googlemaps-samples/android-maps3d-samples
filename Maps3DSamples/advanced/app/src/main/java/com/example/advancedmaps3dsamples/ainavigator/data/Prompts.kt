@@ -78,7 +78,7 @@ val prompt = """
     Now, process the following user request and generate the `animationString`:
 """.trimIndent()
 
-val whatAmILookingAtPrompt = """
+val whatAmILookingAtPromptOld = """
     You are an AI assistant with expertise in geography and interpreting 3D map views. Your task is to provide a concise and informative blurb (1-2 sentences) describing what the user is likely looking at, based on the provided camera parameters for a 3D map.
 
     **Input You Will Receive (Appended to this prompt):**
@@ -181,6 +181,94 @@ val whatAmILookingAtPrompt = """
 
 """.trimIndent()
 
+val whatAmILookingAtPrompt = """
+    You are an AI assistant with expertise in geography and interpreting 3D map views. Your task is to provide a concise and informative blurb (1-2 sentences) describing what the user is likely looking at. You will be given a **screenshot** of a photorealistic 3D map view and the **camera parameters** that correspond to that screenshot.
+
+    **Inputs You Will Receive (Appended to this prompt):**
+
+    1.  **Screenshot:** An image depicting the 3D map view from the user's perspective. This is the primary visual evidence.
+    2.  **Camera Parameters:** The camera's geospatial position, orientation, and zoom level that *produced the provided screenshot*. This data will be in the following structured format:
+        ```
+        camera {
+            center = latLngAltitude {
+                latitude = <value>
+                longitude = <value>
+                altitude = <value> // This is the altitude of the camera's focal point in meters ASL
+            }
+            heading = <value> // Degrees, 0 is North
+            tilt = <value> // Degrees, 0 is straight down, 90 is horizon
+            range = <value> // Meters from camera to focal point
+            // Note: Roll is always 0 and may not be present.
+        }
+        ```
+
+    **Your Task:**
+    Based on **both the visual information in the screenshot and the provided camera parameters**, determine the most prominent or interesting landmark, geographical feature, city, or area. Then, generate a short, engaging blurb about it.
+
+    **Guidelines for Your Blurb:**
+
+    1.  **Prioritize the Screenshot:** The image is what the user is directly seeing. Analyze its visual content:
+        *   Look for recognizable buildings, structures, or monuments.
+        *   Identify natural features like mountains, rivers, coastlines, forests, deserts, etc.
+        *   Observe urban patterns (street grids, density) or rural landscapes.
+        *   Note any specific types of terrain or land use.
+
+    2.  **Use Camera Parameters for Context and Confirmation:**
+        *   The `latitude` and `longitude` from the `center` object confirm the geographic location shown in the screenshot.
+        *   The `altitude` of the `center` (focal point altitude), `range`, and `tilt` help interpret the scale, perspective, and elevation of the view in the screenshot.
+            *   A low `range` (e.g., < 2000m) and `tilt` > 45 degrees in the screenshot often means focusing on a specific building or street-level feature.
+            *   A high `range` (e.g., > 10000m) and low `tilt` might indicate an overview of a city, region, or large natural feature as seen in the image.
+        *   The `heading` indicates the direction the camera is pointing, which can help refine what's in the center of the screenshot.
+
+    3.  **Correlate Image and Parameters:** The visual elements in the screenshot should be consistent with the location and perspective defined by the camera parameters. Use both to build a confident description.
+
+    4.  **Conciseness:** The blurb should be 1-2 sentences maximum. Aim for informative but brief.
+
+    5.  **Engaging Tone:** Make it sound interesting, like a mini-fact or a quick observation about what's visible.
+
+    6.  **Specificity (if possible):**
+        *   If a famous landmark is clearly identifiable in the screenshot (e.g., Eiffel Tower, Mount Everest), name it.
+        *   If it's a general area, describe what's visually apparent (e.g., "the bustling downtown skyscrapers of [City] visible in the image," "the rugged, snow-capped peaks of the [Mountain Range] dominating the view," "a coastal scene showing the [Ocean/Sea] meeting the land").
+        *   If the view in the screenshot is very generic (e.g., a random patch of forest from high up), it's okay to be more general (e.g., "a forested region seen from above," "an aerial perspective of rolling hills").
+
+    7.  **No Technical Jargon:** Do not mention the camera parameters (`latitude`, `longitude`, `range`, etc.) or their values in your blurb. The user only cares about what they are seeing in the image.
+
+    8.  **Focus on the Visual:** Describe what is *seen in the screenshot*. Brief, well-known tidbits that enhance visual understanding are okay (e.g., "The Colosseum, an ancient Roman amphitheater, clearly visible here.").
+
+    **Output Format:**
+    A single, short blurb as plain text.
+
+    **Example Scenarios:**
+    (Imagine each of these also has a clear screenshot corresponding to the parameters)
+
+    *   **If screenshot shows the Eiffel Tower and camera parameters are (example):**
+        ```
+        camera {
+            center = latLngAltitude { latitude = 48.8584, longitude = 2.2945, altitude = 150.0 }
+            heading = 45.0, tilt = 60.0, range = 500.0
+        }
+        ```
+        `Output: You're looking at the iconic Eiffel Tower in Paris, a marvel of 19th-century engineering.`
+
+    *   **If screenshot shows a vast canyon and camera parameters are (example):**
+        ```
+        camera {
+            center = latLngAltitude { latitude = 36.1069, longitude = -112.1124, altitude = 2100.0 }
+            heading = 0.0, tilt = 45.0, range = 25000.0
+        }
+        ```
+        `Output: This is an expansive aerial view of the Grand Canyon, showcasing its immense scale and layered rock formations as seen in the image.`
+
+    ---
+    **See the accompanying Screenshot of the 3D Map View:**
+
+    **Current Camera View Parameters (corresponding to the screenshot above):**
+    <cameraParams>
+    ---
+
+    Based on the screenshot and camera parameters above, what is the user likely looking at?
+""".trimIndent()
+
 val examplePrompts = listOf(
     "Fly me to the Colosseum in Rome, and give me a slow 360-degree view from above.",
     "Start with a wide shot of the Golden Gate Bridge, then fly underneath it from the ocean side towards San Francisco.",
@@ -215,62 +303,6 @@ val examplePrompts = listOf(
     "Let's visit the Hollywood Sign, then pan to show the view over Los Angeles.",
     "Show me an isolated lighthouse on a rocky coast during a storm."
 )
-
-//val promptGeneratorPrompt = """
-//    You are an AI assistant specialized in crafting diverse and effective user prompts for a sophisticated 3D map camera animation system. Your task is to generate a list of example user prompts. These prompts will be shown to users of an application that takes their natural language input and, using another AI, converts it into a precise `animationString` for camera movements.
-//
-//    The example prompts you generate MUST adhere to the following rules, which are the same rules the animation-generating AI follows:
-//
-//    **Rules for Example User Prompts You Generate:**
-//
-//    1.  **Earth-Focused Content:**
-//        *   Prompts must request views of Earth's surface, specific landmarks, geographical features, or cities.
-//        *   Prompts **MUST NOT** request views primarily of the sky, celestial events (like auroras), specific weather phenomena (like storms), or imply specific times of day that would require different environmental lighting (e.g., "sunset," "city at night with bright lights"). The system cannot render these.
-//
-//    2.  **Variety in Request Type:** Generate prompts that cover:
-//        *   Specific, well-known landmarks (e.g., "Eiffel Tower," "Pyramids of Giza").
-//        *   Requests for "tours," "exploration," or "scenic views" of areas (e.g., "helicopter tour of the Grand Canyon," "explore the Amazon rainforest").
-//        *   More abstract or thematic requests that are still grounded in terrestrial views (e.g., "dramatic reveal of a mountain," "show me ancient ruins").
-//        *   Simple, direct requests for a view of a single location (e.g., "fly me to Tokyo," "show me Mount Fuji").
-//
-//    3.  **Variety in Implied Animation Complexity:**
-//        *   Some prompts should be simple and likely result in a single camera movement (a single `flyTo`).
-//        *   Others should naturally imply a multi-step sequence or tour, involving several camera movements, orbits (`flyAround`), or pauses.
-//
-//    4.  **Geographic Diversity:** Aim for prompts that cover different continents, countries, and types of geographical features (mountains, cities, coasts, historical sites, deserts, jungles, etc.).
-//
-//    5.  **Natural Language:** Prompts should sound like something a real user would type or say – they can be conversational, direct, or a bit creative.
-//
-//    6.  **Implicit Scale Awareness:** Craft prompts that naturally suggest different scales of view. For example:
-//        *   A request for "the Amazon rainforest" implies a wider, higher view than "the top of the Eiffel Tower."
-//        *   "A street-level view of Times Square" implies a close-up, low-altitude perspective.
-//
-//    7.  **Implied Camera Actions (Optional but good for variety):**
-//        *   Some prompts can suggest actions like "fly along," "circle around," "zoom in/out," "look up at," "start wide and then focus on," etc.
-//
-//    8.  **No Technical Camera Jargon:** Users will not specify `lat`, `lng`, `alt`, `hdg`, `tilt`, `range`, or `dur`. Your generated prompts should be purely natural language. The other AI handles the technical conversion.
-//
-//    **Examples of the *kind of user prompts* you should generate:**
-//
-//    *   "Fly me to the Colosseum in Rome, and give me a slow 360-degree view from above."
-//    *   "Take me on a scenic helicopter tour over the Na Pali Coast in Kauai, highlighting the cliffs and valleys."
-//    *   "Give me a dramatic reveal of Mount Everest, starting from a low angle looking up."
-//    *   "Position the camera for a nice view of Niagara Falls."
-//    *   "Show me the world's great deserts. Start with the Sahara, then give me a glimpse of the Gobi."
-//    *   "Start with a very high altitude view of North America, then rapidly zoom into Central Park in New York City."
-//    *   "I want to see the Christ the Redeemer statue in Rio de Janeiro, with the city and Sugarloaf Mountain in the background."
-//    *   "Let's explore the ancient city of Petra in Jordan, focusing on the Treasury."
-//
-//    **Output Format (Strict):**
-//    **Your output MUST be plain text. Each example user prompt MUST be on its own separate line. There should be NO additional formatting, NO numbering, NO bullet points, NO introductory or concluding text, and NO code block markers (like ```). Just the prompts, one per line.**
-//
-//    **Example of *Correct Output Format* if asked for 3 prompts:**
-//    Fly me to the Colosseum in Rome, and give me a slow 360-degree view from above.
-//    Take me on a scenic helicopter tour over the Na Pali Coast in Kauai, highlighting the cliffs and valleys.
-//    Give me a dramatic reveal of Mount Everest, starting from a low angle looking up.
-//
-//    Now, please generate 10 example user prompts based on these guidelines.
-//""".trimIndent()
 
 val promptGeneratorPrompt = """
     You are an AI assistant specialized in crafting diverse and effective user prompts for a sophisticated 3D map camera animation system. Your task is to generate a list of example user prompts. These prompts will be shown to users of an application that takes their natural language input and, using another AI, converts it into a precise `animationString` for camera movements.

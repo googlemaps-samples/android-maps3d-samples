@@ -1,6 +1,13 @@
 package com.example.advancedmaps3dsamples.ainavigator
 
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.media.MediaScannerConnection
+import android.net.Uri
+import android.os.Environment
 import android.util.Log
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.viewModelScope
 import com.example.advancedmaps3dsamples.ainavigator.data.NavigatorService
 import com.example.advancedmaps3dsamples.ainavigator.data.examplePrompts
@@ -16,7 +23,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.File
 import javax.inject.Inject
+import kotlin.coroutines.resume
 
 @HiltViewModel
 class AiNavigatorViewModel @Inject constructor(
@@ -110,14 +120,14 @@ class AiNavigatorViewModel @Inject constructor(
 
     fun getRandomPrompt(): String = allPrompts.random()
 
-    fun whatAmILookingAt() {
+    fun whatAmILookingAt(bitmap: ImageBitmap) {
         val cameraString = currentCamera.value.toCameraString()
         Log.w(TAG, "What am I looking at? cameraString: $cameraString")
 
         viewModelScope.launch {
             _isRequestInflight.value = true
             try {
-                val whatAmILookingAt = navigatorService.whatAmILookingAt(cameraString)
+                val whatAmILookingAt = navigatorService.whatAmILookingAt(cameraString, bitmap)
                 Log.w(TAG, "Got whatAmILookingAt: $whatAmILookingAt")
                 if (whatAmILookingAt.isNotEmpty()) {
                     _userMessage.send(whatAmILookingAt)
@@ -129,4 +139,47 @@ class AiNavigatorViewModel @Inject constructor(
             _isRequestInflight.value = false
         }
     }
+}
+
+suspend fun Bitmap.saveToDisk(context: Context): Uri {
+    val file = File(
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+        "screenshot-${System.currentTimeMillis()}.png"
+    )
+
+    file.writeBitmap(this, Bitmap.CompressFormat.PNG, 100)
+
+    return scanFilePath(context, file.path) ?: throw Exception("File could not be saved")
+}
+
+private fun File.writeBitmap(bitmap: Bitmap, format: Bitmap.CompressFormat, quality: Int) {
+    outputStream().use { out ->
+        bitmap.compress(format, quality, out)
+        out.flush()
+    }
+}
+
+private suspend fun scanFilePath(context: Context, filePath: String): Uri? {
+    return suspendCancellableCoroutine { continuation ->
+        MediaScannerConnection.scanFile(
+            context,
+            arrayOf(filePath),
+            arrayOf("image/png")
+        ) { _, scannedUri ->
+            if (scannedUri == null) {
+                continuation.cancel(Exception("File $filePath could not be scanned"))
+            } else {
+                continuation.resume(scannedUri)
+            }
+        }
+    }
+}
+
+private fun shareImage(uri: Uri, context: Context) {
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "image/jpeg"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, "Share Image"))
 }

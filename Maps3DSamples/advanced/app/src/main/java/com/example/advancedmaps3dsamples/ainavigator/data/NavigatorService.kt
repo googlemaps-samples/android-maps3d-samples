@@ -1,9 +1,12 @@
 package com.example.advancedmaps3dsamples.ainavigator.data
 
 import android.util.Log
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.content
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -57,7 +60,26 @@ class NavigatorService @Inject constructor(
     suspend fun whatAmILookingAt(cameraParams: String): String {
         Log.d(TAG, "Calling Firebase Vertex AI: Fetching whatAmILookingAt for cameraParams: $cameraParams")
         try {
-            val response = model.generateContent(whatAmILookingAtPrompt.replace("<cameraParams>", cameraParams))
+            val response = model.generateContent(whatAmILookingAtPromptOld.replace("<cameraParams>", cameraParams))
+            Log.d(TAG, "Firebase Vertex AI raw response: ${response.text}")
+            val cleanedText = response.text?.sanitize()
+            Log.d(TAG, "Firebase Vertex AI cleaned response: $cleanedText")
+            return cleanedText ?: ""
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting whatAmILookingAt from Firebase Vertex AI for $cameraParams", e)
+            throw GameRepositoryException("Unable to get whatAmILookingAt: ${e.message}", e)
+        }
+    }
+
+    suspend fun whatAmILookingAt(cameraParams: String, bitmap: ImageBitmap): String {
+        Log.d(TAG, "Calling Firebase Vertex AI: Fetching whatAmILookingAt for cameraParams: $cameraParams")
+        try {
+            val inputContent = content {
+                image(bitmap.asAndroidBitmap())
+                text(whatAmILookingAtPrompt.replace("<cameraParams>", cameraParams) + "")
+            }
+
+            val response = model.generateContent(inputContent)
             Log.d(TAG, "Firebase Vertex AI raw response: ${response.text}")
             val cleanedText = response.text?.sanitize()
             Log.d(TAG, "Firebase Vertex AI cleaned response: $cleanedText")

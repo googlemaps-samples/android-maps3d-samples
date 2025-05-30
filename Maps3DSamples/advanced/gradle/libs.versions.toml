@@ -45,7 +45,6 @@ maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version.re
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-vertexai = { module = "com.google.firebase:firebase-vertexai" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
