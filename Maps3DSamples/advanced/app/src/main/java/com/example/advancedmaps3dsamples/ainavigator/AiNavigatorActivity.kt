@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.North
-import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.NorthEast
 import androidx.compose.material.icons.filled.NorthWest
 import androidx.compose.material.icons.filled.Refresh
@@ -71,6 +70,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.advancedmaps3dsamples.scenarios.ThreeDMap
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
+import com.example.advancedmaps3dsamples.utils.toCameraString
 import com.google.android.gms.maps3d.Map3DOptions
 import com.google.android.gms.maps3d.model.Map3DMode
 import dagger.hilt.android.AndroidEntryPoint
@@ -161,11 +161,11 @@ class AiNavigatorActivity : ComponentActivity() {
                                 onReleaseMap = { viewModel.releaseGoogleMap3D() },
                             )
 
-                            Compass(
-                                heading = camera.heading ?: 0.0,
+                            WhiskeyCompass(
                                 modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(16.dp)
+                                    .align(Alignment.TopCenter)
+                                    .padding(top = 48.dp),
+                                heading = (camera.heading ?: 0.0).toFloat()
                             )
 
                             Row(
@@ -325,7 +325,7 @@ class AiNavigatorActivity : ComponentActivity() {
 
                                 Button(
                                     onClick = {
-                                        viewModel.processUserRequest(userInput)
+                                        viewModel.processUserRequest(userInput, camera.toCameraString())
                                     },
                                     enabled = !requestIsActive
                                 ) {

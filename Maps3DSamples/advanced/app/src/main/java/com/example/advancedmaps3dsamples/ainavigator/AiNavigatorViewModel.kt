@@ -45,11 +45,11 @@ class AiNavigatorViewModel @Inject constructor(
 
     val allPrompts = examplePrompts.toMutableList()
 
-    fun processUserRequest(userInput: String) {
+    fun processUserRequest(userInput: String, cameraString: String) {
         viewModelScope.launch {
             _isRequestInflight.value = true
             try {
-                val animationString = navigatorService.getAnimationString(userInput)
+                val animationString = navigatorService.getAnimationString(userInput, cameraString)
                 Log.w(TAG, "Got animationString: $animationString")
 
                 currentAnimation = animationString.toAnimation()

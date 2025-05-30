@@ -1,5 +1,6 @@
 package com.example.advancedmaps3dsamples.ainavigator.data
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -9,6 +10,7 @@ import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.content
 import javax.inject.Inject
 import javax.inject.Singleton
+import androidx.core.graphics.scale
 
 @Singleton
 class NavigatorService @Inject constructor(
@@ -20,12 +22,12 @@ class NavigatorService @Inject constructor(
             .generativeModel("gemini-2.5-flash-preview-05-20")
     }
 
-    suspend fun getAnimationString(userInput: String): String {
+    suspend fun getAnimationString(userInput: String, cameraString: String): String {
         Log.d(TAG, "Calling Firebase Vertex AI: Fetching animationString for user input: $userInput")
 
         try {
             // --- Use Firebase SDK's generateContent ---
-            val response = model.generateContent(prompt + userInput)
+            val response = model.generateContent(promptWithCamera + "\n" + userInput + "\n" + cameraString)
             // -----------------------------------------
             Log.d(TAG, "Firebase Vertex AI raw response: ${response.text}")
             // Clean potential markdown code blocks from riddle response as well
@@ -74,8 +76,22 @@ class NavigatorService @Inject constructor(
     suspend fun whatAmILookingAt(cameraParams: String, bitmap: ImageBitmap): String {
         Log.d(TAG, "Calling Firebase Vertex AI: Fetching whatAmILookingAt for cameraParams: $cameraParams")
         try {
+            // Convert the Jetpack Compose ImageBitmap to an Android Bitmap
+            val originalBitmap = bitmap.asAndroidBitmap()
+
+            // --- Start: Image Scaling Logic ---
+            // Calculate the new dimensions (50% of the original)
+            val newWidth = originalBitmap.width / 2
+            val newHeight = originalBitmap.height / 2
+
+            // Create a new bitmap scaled to the new dimensions.
+            // The 'true' flag enables filtering for better quality.
+            val scaledBitmap = originalBitmap.scale(newWidth, newHeight)
+            // --- End: Image Scaling Logic ---
+
             val inputContent = content {
-                image(bitmap.asAndroidBitmap())
+                // Use the newly created scaledBitmap in the request
+                image(scaledBitmap)
                 text(whatAmILookingAtPrompt.replace("<cameraParams>", cameraParams) + "")
             }
 
