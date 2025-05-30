@@ -1,6 +1,5 @@
 package com.example.advancedmaps3dsamples.ainavigator.data
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -56,20 +55,6 @@ class NavigatorService @Inject constructor(
             // TODO: Handle specific Firebase/Vertex AI exceptions if needed
             Log.e(TAG, "Error getting prompts from Firebase Vertex AI", e)
             throw GameRepositoryException("Unable to get prompts: ${e.message}", e)
-        }
-    }
-
-    suspend fun whatAmILookingAt(cameraParams: String): String {
-        Log.d(TAG, "Calling Firebase Vertex AI: Fetching whatAmILookingAt for cameraParams: $cameraParams")
-        try {
-            val response = model.generateContent(whatAmILookingAtPromptOld.replace("<cameraParams>", cameraParams))
-            Log.d(TAG, "Firebase Vertex AI raw response: ${response.text}")
-            val cleanedText = response.text?.sanitize()
-            Log.d(TAG, "Firebase Vertex AI cleaned response: $cleanedText")
-            return cleanedText ?: ""
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting whatAmILookingAt from Firebase Vertex AI for $cameraParams", e)
-            throw GameRepositoryException("Unable to get whatAmILookingAt: ${e.message}", e)
         }
     }
 

@@ -17,6 +17,7 @@ package com.example.advancedmaps3dsamples.scenarios
 import com.google.android.gms.maps3d.model.FlyAroundOptions
 import com.google.android.gms.maps3d.model.FlyToOptions
 import com.google.android.gms.maps3d.model.MarkerOptions
+import com.google.android.gms.maps3d.model.PolygonOptions
 import com.google.android.gms.maps3d.model.PolylineOptions
 import kotlinx.coroutines.delay
 
@@ -57,5 +58,11 @@ data class AddMarkerStep(val options: MarkerOptions) : AnimationStep {
 data class AddPolylineStep(val options: PolylineOptions) : AnimationStep {
   override suspend operator fun invoke(viewModel: ScenarioBaseViewModel) {
     viewModel.addPolyline(this.options)
+  }
+}
+
+data class AddPolygonStep(val options: PolygonOptions) : AnimationStep {
+  override suspend operator fun invoke(viewModel: ScenarioBaseViewModel) {
+    viewModel.addPolygon(this.options)
   }
 }

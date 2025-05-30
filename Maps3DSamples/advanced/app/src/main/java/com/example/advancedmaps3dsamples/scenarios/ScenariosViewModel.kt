@@ -40,6 +40,7 @@ import com.example.advancedmaps3dsamples.utils.copy
 import com.google.android.gms.maps3d.model.FlyAroundOptions
 import com.google.android.gms.maps3d.model.FlyToOptions
 import com.google.android.gms.maps3d.model.MarkerOptions
+import com.google.android.gms.maps3d.model.PolygonOptions
 import com.google.android.gms.maps3d.model.Polyline
 import com.google.android.gms.maps3d.model.PolylineOptions
 import com.google.android.gms.maps3d.model.flyAroundOptions
@@ -78,6 +79,7 @@ interface ScenarioBaseViewModel {
   suspend fun showMessage(message: String)
   fun addMarker(options: MarkerOptions)
   fun addPolyline(polylineOptions: PolylineOptions)
+  fun addPolygon(polygonOptions: PolygonOptions)
 }
 
 @HiltViewModel
