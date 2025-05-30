@@ -1,52 +1,63 @@
-package com.example.advancedmaps3dsamples.ainavigator
+package com.example.advancedmaps3dsamples.ainavigator // Keep your package structure
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Column // Keep for Preview if needed, not for main compass
+import androidx.compose.foundation.layout.Spacer // Keep for Preview
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.padding // Keep for Preview
+import androidx.compose.foundation.rememberScrollState // Keep for Preview
+import androidx.compose.foundation.verticalScroll // Keep for Preview
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.Text // Keep for Preview
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontFamily // Keep for Preview
+import androidx.compose.ui.text.font.FontWeight // Keep for Preview
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.sp // Keep for Preview
 import kotlin.math.roundToInt
 
 /**
  * A composable that displays a customizable aviation-style "whiskey" compass.
- *
- * This version allows detailed control over visual elements including text styles,
- * tick sizes, and stroke widths.
+ * This version renders a flat, scrollable strip with ticks, degree labels, and cardinal directions.
  *
  * @param heading The current heading in degrees (0-360).
  * @param modifier The modifier to be applied to the compass.
+ * @param stripHeight The total visual height of the compass strip.
  * @param backgroundColor The background color of the compass strip.
  * @param tickColor The color of the tick marks on the rotating dial.
- * @param labelColor The default color for the cardinal and numeric heading text,
- * used if the provided TextStyles don't specify a color.
  * @param lubberLineColor The color of the central indicator line.
  * @param pixelsPerDegree Controls the horizontal spacing between degree markers on the dial.
- * @param cardinalTextStyle TextStyle for the cardinal direction (e.g., "N", "NE").
- * @param numericTextStyle TextStyle for the numeric heading (e.g., "45").
+ *
+ * @param showDegreeLabels Whether to display numeric degree labels on the strip.
+ * @param degreeLabelInterval Interval for numeric degree labels (e.g., every 15 degrees).
+ * @param degreeLabelTextStyle TextStyle for the numeric degree labels on the strip.
+ * @param degreeLabelVerticalOffset Vertical offset of degree labels from the bottom of the ticks.
+ *
+ * @param showCardinalLabels Whether to display cardinal direction labels (N, NE, E, etc.) on the strip.
+ * @param cardinalLabelTextStyle TextStyle for the cardinal direction labels on the strip.
+ * @param cardinalLabelVerticalOffset Vertical offset of cardinal labels from the top of the ticks.
+ *
  * @param majorTickHeight Height of the major tick marks.
  * @param minorTickHeight Height of the minor tick marks.
- * @param tickAreaHeight The height of the central area where the lubber line and ticks are displayed.
  * @param majorTickStrokeWidth Stroke width for major ticks.
  * @param minorTickStrokeWidth Stroke width for minor ticks.
  * @param lubberLineStrokeWidth Stroke width for the lubber line.
@@ -55,60 +66,138 @@ import kotlin.math.roundToInt
 fun WhiskeyCompass(
     heading: Float,
     modifier: Modifier = Modifier,
-    backgroundColor: Color = MaterialTheme.colorScheme.primary,
-    tickColor: Color = MaterialTheme.colorScheme.onPrimary,
-    labelColor: Color = MaterialTheme.colorScheme.onPrimary,
+    stripHeight: Dp = 80.dp,
+    backgroundColor: Color = MaterialTheme.colorScheme.primaryContainer,
+    tickColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
     lubberLineColor: Color = Color.Red,
-    pixelsPerDegree: Float = 15f,
-    cardinalTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
-    numericTextStyle: TextStyle = MaterialTheme.typography.headlineSmall,
+    pixelsPerDegree: Float = 10f,
+
+    showDegreeLabels: Boolean = true,
+    degreeLabelInterval: Int = 15,
+    degreeLabelTextStyle: TextStyle = MaterialTheme.typography.labelSmall.copy(textAlign = TextAlign.Center),
+    degreeLabelVerticalOffset: Dp = 4.dp,
+
+    showCardinalLabels: Boolean = true,
+    cardinalLabelTextStyle: TextStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
+    cardinalLabelVerticalOffset: Dp = 4.dp,
+
     majorTickHeight: Dp = 25.dp,
     minorTickHeight: Dp = 15.dp,
-    tickAreaHeight: Dp = 40.dp, // Defines the central band for ticks and lubber line
     majorTickStrokeWidth: Dp = 2.dp,
     minorTickStrokeWidth: Dp = 1.dp,
-    lubberLineStrokeWidth: Dp = 3.dp
+    lubberLineStrokeWidth: Dp = 2.dp
 ) {
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+
+    // Memoize measured cardinal labels for performance
+    val measuredCardinalLabels = remember(cardinalLabelTextStyle, density) {
+        // Pass density to measure if text style uses Dp for size, though typically it's Sp.
+        // For safety or if a custom TextStyle using Dp might be passed.
+        with(density) {
+            mapOf(
+                0 to textMeasurer.measure("N", style = cardinalLabelTextStyle),
+                45 to textMeasurer.measure("NE", style = cardinalLabelTextStyle),
+                90 to textMeasurer.measure("E", style = cardinalLabelTextStyle),
+                135 to textMeasurer.measure("SE", style = cardinalLabelTextStyle),
+                180 to textMeasurer.measure("S", style = cardinalLabelTextStyle),
+                225 to textMeasurer.measure("SW", style = cardinalLabelTextStyle),
+                270 to textMeasurer.measure("W", style = cardinalLabelTextStyle),
+                315 to textMeasurer.measure("NW", style = cardinalLabelTextStyle)
+            )
+        }
+    }
+
 
     Box(
-        modifier = modifier.background(backgroundColor),
+        modifier = modifier
+            .height(stripHeight)
+            .background(backgroundColor),
         contentAlignment = Alignment.Center
     ) {
-        // The rotating compass card with only tick marks
-        Canvas(modifier = Modifier.fillMaxWidth()) {
-            val canvasWidth = size.width
-            val canvasCenterY = center.y // Center Y of the entire canvas
-            val xOffset = size.center.x - (heading * pixelsPerDegree)
+        // Canvas 1: Scrolling Compass Strip (ticks, degree labels, cardinal labels)
+        Canvas(modifier = Modifier.matchParentSize()) {
+            // Convert Dp to Px here, inside DrawScope where density is implicitly available
+            val majorTickHeightPx = majorTickHeight.toPx()
+            val minorTickHeightPx = minorTickHeight.toPx()
+            val majorTickStrokeWidthPx = majorTickStrokeWidth.toPx()
+            val minorTickStrokeWidthPx = minorTickStrokeWidth.toPx()
+            val degreeLabelVerticalOffsetPx = degreeLabelVerticalOffset.toPx()
+            val cardinalLabelVerticalOffsetPx = cardinalLabelVerticalOffset.toPx()
 
-            // Calculate Y positions for ticks to be somewhat centered if canvas is taller than tickAreaHeight
-            // Ticks will be drawn from the top edge of the tick drawing area.
-            val tickDrawingAreaStartY = canvasCenterY - (tickAreaHeight.toPx() / 2f)
+            val canvasWidth = size.width
+            val canvasCenterY = center.y // Vertical center of the strip
+
+            // xOffset determines how much the strip is shifted horizontally
+            val xOffset = center.x - (heading * pixelsPerDegree)
+
+            // The Y position where the center line of the ticks should be.
+            // Labels will be drawn above/below this.
+            val tickCenterY = canvasCenterY
 
             translate(left = xOffset) {
-                // Draw from -360 to 0, then 0 to 360, and 360 to 720 for robust wrapping.
+                // Loop through repetitions to ensure seamless wrapping
                 for (repetition in -1..1) {
-                    val repetitionOffset = repetition * 360 * pixelsPerDegree
-                    for (degree in 0 until 360) {
-                        val xPos = degree * pixelsPerDegree + repetitionOffset
+                    val repetitionBaseDegree = repetition * 360
+                    for (degreeInRepetition in 0 until 360) {
+                        val absoluteDegree = repetitionBaseDegree + degreeInRepetition
+                        val xPos = absoluteDegree * pixelsPerDegree
 
-                        // Only draw elements that might be visible
-                        if (xPos > -xOffset - (pixelsPerDegree * 10) && xPos < -xOffset + canvasWidth + (pixelsPerDegree * 10)) {
-                            // Major ticks every 10 degrees
-                            if (degree % 10 == 0) {
+                        // Optimization: Only draw if potentially visible
+                        val visibilityMargin = canvasWidth // Generous margin
+                        if (xPos < -xOffset + canvasWidth + visibilityMargin && xPos > -xOffset - visibilityMargin) {
+
+                            val isMajorTickEquivalent = degreeInRepetition % 10 == 0
+                            val isMinorTickEquivalent = degreeInRepetition % 5 == 0 && !isMajorTickEquivalent
+
+                            // Draw Major Ticks (every 10 degrees)
+                            if (isMajorTickEquivalent) {
+                                val tickTopY = tickCenterY - majorTickHeightPx / 2f
+                                val tickBottomY = tickCenterY + majorTickHeightPx / 2f
                                 drawLine(
                                     color = tickColor,
-                                    start = Offset(x = xPos, y = tickDrawingAreaStartY),
-                                    end = Offset(x = xPos, y = tickDrawingAreaStartY + majorTickHeight.toPx()),
-                                    strokeWidth = majorTickStrokeWidth.toPx()
+                                    start = Offset(x = xPos, y = tickTopY),
+                                    end = Offset(x = xPos, y = tickBottomY),
+                                    strokeWidth = majorTickStrokeWidthPx
+                                )
+
+                                // Draw Cardinal Labels above major ticks
+                                if (showCardinalLabels && measuredCardinalLabels.containsKey(degreeInRepetition)) {
+                                    val measuredText = measuredCardinalLabels.getValue(degreeInRepetition)
+                                    drawText(
+                                        textLayoutResult = measuredText,
+                                        topLeft = Offset(
+                                            x = xPos - measuredText.size.width / 2f,
+                                            y = tickTopY - measuredText.size.height - cardinalLabelVerticalOffsetPx
+                                        )
+                                    )
+                                }
+                            }
+                            // Draw Minor Ticks (every 5 degrees, not overlapping major)
+                            else if (isMinorTickEquivalent) {
+                                val tickTopY = tickCenterY - minorTickHeightPx / 2f
+                                val tickBottomY = tickCenterY + minorTickHeightPx / 2f
+                                drawLine(
+                                    color = tickColor,
+                                    start = Offset(x = xPos, y = tickTopY),
+                                    end = Offset(x = xPos, y = tickBottomY),
+                                    strokeWidth = minorTickStrokeWidthPx
                                 )
                             }
-                            // Minor ticks every 5 degrees
-                            else if (degree % 5 == 0) {
-                                drawLine(
-                                    color = tickColor,
-                                    start = Offset(x = xPos, y = tickDrawingAreaStartY),
-                                    end = Offset(x = xPos, y = tickDrawingAreaStartY + minorTickHeight.toPx()),
-                                    strokeWidth = minorTickStrokeWidth.toPx()
+
+                            // Draw Degree Labels below ticks at specified intervals
+                            if (showDegreeLabels && degreeInRepetition % degreeLabelInterval == 0) {
+                                val tickBottomY = tickCenterY + (if (isMajorTickEquivalent) majorTickHeightPx else if (isMinorTickEquivalent) minorTickHeightPx else 0f) / 2f
+                                val labelText = degreeInRepetition.toString()
+                                // It's good practice to use density for text measurement if TextStyle might involve Dp.
+                                // For standard Sp, it's usually handled, but explicit density in remember is safer.
+                                val measuredText = textMeasurer.measure(labelText, style = degreeLabelTextStyle)
+                                drawText(
+                                    textLayoutResult = measuredText,
+                                    topLeft = Offset(
+                                        x = xPos - measuredText.size.width / 2f,
+                                        y = tickBottomY + degreeLabelVerticalOffsetPx
+                                    )
                                 )
                             }
                         }
@@ -117,145 +206,110 @@ fun WhiskeyCompass(
             }
         }
 
-        // Static elements that do not move
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Cardinal direction text (e.g., NE)
-            Text(
-                text = heading.toCardinalDirection(),
-                style = cardinalTextStyle.copy(
-                    color = if (cardinalTextStyle.color == Color.Unspecified) labelColor else cardinalTextStyle.color
-                )
-            )
-
-            // The fixed central lubber line area
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(tickAreaHeight)
-            ) {
-                Canvas(modifier = Modifier.matchParentSize()) { // Use matchParentSize to fill the Box
-                    drawLine(
-                        color = lubberLineColor,
-                        start = Offset(x = center.x, y = 0f),
-                        end = Offset(x = center.x, y = size.height), // spans full height of this Box
-                        strokeWidth = lubberLineStrokeWidth.toPx()
-                    )
-                }
-            }
-
-            // Numeric heading text (e.g., 45)
-            Text(
-                text = heading.roundToInt().toString(),
-                style = numericTextStyle.copy(
-                    color = if (numericTextStyle.color == Color.Unspecified) labelColor else numericTextStyle.color
-                )
+        // Canvas 2: Fixed Lubber Line
+        Canvas(modifier = Modifier.matchParentSize()) {
+            // Draw the lubber line vertically centered, spanning a good portion of the strip height
+            val lubberLineVisualPadding = stripHeight.toPx() * 0.05f // Uses DrawScope.toPx() implicitly
+            val currentLubberLineStrokeWidthPx = lubberLineStrokeWidth.toPx() // Uses DrawScope.toPx() implicitly
+            drawLine(
+                color = lubberLineColor,
+                start = Offset(x = center.x, y = lubberLineVisualPadding),
+                end = Offset(x = center.x, y = size.height - lubberLineVisualPadding),
+                strokeWidth = currentLubberLineStrokeWidthPx
             )
         }
     }
 }
 
-
 /**
  * Converts a heading in degrees to its corresponding cardinal or intercardinal direction.
+ * (This is not used by the compass itself anymore but kept for previews/external use)
  */
 private fun Float.toCardinalDirection(): String {
-    // Ensure heading is within 0-360 range for calculations
     val normalizedHeading = (this % 360 + 360) % 360
     val directions = listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW", "N")
-    // Add 22.5 for correct centering of 45 degree segments, then divide by 45
     return directions[((normalizedHeading + 22.5f) / 45f).toInt() % 8]
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF222222)
 @Composable
-private fun FullyCustomizableWhiskeyCompassPreview() {
+private fun FlatWhiskeyCompassPreview() {
     val exampleHeadings = listOf(
-        0f, 45f, 168f, 225f, 358f
+        0f, 10f, 22.5f, 45f, 168f, 270f, 358f
     )
 
     Column(
         modifier = Modifier
+            .fillMaxWidth()
             .background(Color.DarkGray)
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Default Styling", color = Color.White, style = MaterialTheme.typography.titleMedium)
+        Text("Default Flat Compass Strip", color = Color.White, style = MaterialTheme.typography.titleMedium)
         WhiskeyCompass(
             heading = 45f,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp) // Give it some space
+            modifier = Modifier.fillMaxWidth(),
+            stripHeight = 100.dp,
+            pixelsPerDegree = 8f // Make it a bit denser for preview
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Custom Scaled & Styled", color = Color.White, style = MaterialTheme.typography.titleMedium)
+        Text("Customized Labels & Ticks", color = Color.White, style = MaterialTheme.typography.titleMedium)
         WhiskeyCompass(
             heading = 123f,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp), // Taller
-            backgroundColor = Color(0xFF303030),
-            tickColor = Color.Cyan,
-            labelColor = Color.Yellow,
-            lubberLineColor = Color.Magenta,
-            pixelsPerDegree = 20f, // More spread out
-            cardinalTextStyle = MaterialTheme.typography.headlineMedium.copy(
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold
-            ),
-            numericTextStyle = MaterialTheme.typography.displaySmall.copy(
-                fontFamily = FontFamily.Monospace,
-                letterSpacing = 2.sp
-            ),
-            majorTickHeight = 35.dp, // Taller ticks
-            minorTickHeight = 20.dp,
-            tickAreaHeight = 60.dp, // Larger central band
-            majorTickStrokeWidth = 3.dp,
-            minorTickStrokeWidth = 1.5.dp,
-            lubberLineStrokeWidth = 4.dp
+            modifier = Modifier.fillMaxWidth(),
+            stripHeight = 120.dp,
+            backgroundColor = Color(0xFF1A237E), // Dark Blue
+            tickColor = Color(0xFFB0BEC5), // Blue Grey
+            lubberLineColor = Color(0xFFFFD600), // Amber
+            pixelsPerDegree = 12f,
+            degreeLabelInterval = 10,
+            degreeLabelTextStyle = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF81D4FA)), // Light Blue
+            cardinalLabelTextStyle = MaterialTheme.typography.labelLarge.copy(color = Color.White, fontWeight = FontWeight.Bold),
+            majorTickHeight = 30.dp,
+            minorTickHeight = 18.dp,
+            degreeLabelVerticalOffset = 6.dp,
+            cardinalLabelVerticalOffset = 6.dp,
+            majorTickStrokeWidth = 2.5.dp
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Minimalist Small Version", color = Color.White, style = MaterialTheme.typography.titleMedium)
+        Text("No Cardinal Labels", color = Color.White, style = MaterialTheme.typography.titleMedium)
         WhiskeyCompass(
-            heading = 270f,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp), // Compact
-            pixelsPerDegree = 10f, // Denser
-            cardinalTextStyle = MaterialTheme.typography.labelSmall,
-            numericTextStyle = MaterialTheme.typography.titleSmall,
-            majorTickHeight = 15.dp,
-            minorTickHeight = 8.dp,
-            tickAreaHeight = 25.dp,
-            majorTickStrokeWidth = 1.5.dp,
-            minorTickStrokeWidth = 0.5.dp,
-            lubberLineStrokeWidth = 2.dp
+            heading = 210f,
+            modifier = Modifier.fillMaxWidth(),
+            stripHeight = 70.dp,
+            showCardinalLabels = false,
+            pixelsPerDegree = 6f
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("No Degree Labels", color = Color.White, style = MaterialTheme.typography.titleMedium)
+        WhiskeyCompass(
+            heading = 300f,
+            modifier = Modifier.fillMaxWidth(),
+            stripHeight = 70.dp,
+            showDegreeLabels = false,
+            pixelsPerDegree = 6f
         )
 
 
-        exampleHeadings.forEach { heading ->
-            Spacer(Modifier.height(8.dp))
+        exampleHeadings.forEach { currentHeading ->
+            Spacer(Modifier.height(12.dp))
             Text(
-                text = "Test Heading: ${heading.toInt()}° (${heading.toCardinalDirection()})",
+                text = "Test Heading: ${currentHeading.roundToInt()}°",
                 color = Color.LightGray,
                 fontFamily = FontFamily.Monospace,
                 fontSize = 12.sp
             )
             WhiskeyCompass(
-                heading = heading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp),
-                cardinalTextStyle = MaterialTheme.typography.bodySmall, // Smaller for these examples
-                numericTextStyle = MaterialTheme.typography.bodyLarge,
-                tickAreaHeight = 30.dp,
-                majorTickHeight = 20.dp,
-                minorTickHeight = 10.dp
+                heading = currentHeading,
+                modifier = Modifier.fillMaxWidth(),
+                stripHeight = 90.dp,
+                pixelsPerDegree = 7f,
+                degreeLabelInterval = 30 // Less frequent degree labels for clarity
             )
         }
     }

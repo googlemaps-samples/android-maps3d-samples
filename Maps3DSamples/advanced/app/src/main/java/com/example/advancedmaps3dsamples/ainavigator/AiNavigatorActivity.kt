@@ -165,20 +165,10 @@ class AiNavigatorActivity : ComponentActivity() {
 
                             WhiskeyCompass(
                                 heading = camera.heading?.toFloat() ?: 0f,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 36.dp) // Adjusted for status bar
-                                    .alpha(0.6f) // Make it somewhat transparent
-                                    .height(80.dp), // Compact
-                                pixelsPerDegree = 10f, // Denser
-                                cardinalTextStyle = MaterialTheme.typography.labelSmall,
-                                numericTextStyle = MaterialTheme.typography.titleSmall,
-                                majorTickHeight = 15.dp,
-                                minorTickHeight = 8.dp,
-                                tickAreaHeight = 25.dp,
-                                majorTickStrokeWidth = 1.5.dp,
-                                minorTickStrokeWidth = 0.5.dp,
-                                lubberLineStrokeWidth = 2.dp
+                                modifier = Modifier.fillMaxWidth(),
+                                stripHeight = 90.dp,
+                                pixelsPerDegree = 7f,
+                                degreeLabelInterval = 30 // Less frequent degree labels for clarity
                             )
 
                             Row(

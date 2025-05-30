@@ -70,9 +70,9 @@ val promptWithCamera = """
         *   For simple requests ("fly me to [location]"), ideally use a `flyTo` -> `message` -> `delay` (for tile loading & viewing) sequence.
         *   Only generate multi-step animations if a tour or multiple viewpoints are explicitly implied.
     *   **Tile Loading & Viewing Delay (Crucial):**
-        *   **After a `flyTo` command moves the camera to a *new, distinct, and geographically distant location*, and *after* any associated `message` for that location, insert a `delay=dur=4000` command.**
-        *   **Optionally, after this 4000ms tile loading delay, consider an *additional* short pacing `delay=dur=1000` or `delay=dur=2000`** for user absorption before the next major camera movement.
-        *   Do *not* add the 4000ms tile loading delay for minor adjustments at the *same general location* or if the animation starts from `currentCameraParams` and explores a *very nearby* feature without significant travel.
+        *   **After a `flyTo` command moves the camera to a *new, distinct, and geographically distant location*, and *after* any associated `message` for that location, insert a `delay=dur=5000` command.**
+        *   **Optionally, after this 5000ms tile loading delay, consider an *additional* short pacing `delay=dur=1000` or `delay=dur=2000`** for user absorption before the next major camera movement.
+        *   Do *not* add the 5000ms tile loading delay for minor adjustments at the *same general location* or if the animation starts from `currentCameraParams` and explores a *very nearby* feature without significant travel.
     *   **Messages:**
         *   Use the `message` command *after* a `flyTo` to a new location, or *before* a `flyAround`. Messages should be short and descriptive, appearing *before* subsequent delays at that location.
     *   Use realistic `dur` values for camera movements (e.g., 2000-10000ms).
@@ -85,16 +85,16 @@ val promptWithCamera = """
 
     User Request: "Show me the Eiffel Tower from above, then slowly zoom out."
     Expected Output (assuming `currentCameraParams` is not relevant or provided):
-    `animationString="flyTo=lat=48.8584,lng=2.2945,alt=200,hdg=0,tilt=20,range=600,dur=3000;message=\"Eiffel Tower\";delay=dur=4000;delay=dur=1000;flyTo=lat=48.8584,lng=2.2945,alt=200,hdg=0,tilt=30,range=2000,dur=4000"`
+    `animationString="flyTo=lat=48.8584,lng=2.2945,alt=200,hdg=0,tilt=20,range=600,dur=3000;message=\"Eiffel Tower\";delay=dur=5000;delay=dur=1000;flyTo=lat=48.8584,lng=2.2945,alt=200,hdg=0,tilt=30,range=2000,dur=5000"`
 
     User Request: "Fly me to the Grand Canyon."
     Expected Output (assuming `currentCameraParams` is not relevant or provided):
-    `animationString="flyTo=lat=36.1069,lng=-112.1124,alt=2100,hdg=0,tilt=45,range=25000,dur=6000;message=\"The Grand Canyon\";delay=dur=4000;delay=dur=1500"`
+    `animationString="flyTo=lat=36.1069,lng=-112.1124,alt=2100,hdg=0,tilt=45,range=25000,dur=6000;message=\"The Grand Canyon\";delay=dur=5000;delay=dur=1500"`
 
     User Request: "Show me some interesting spots near my current view."
     (Assuming `currentCameraParams="camera { center = latLngAltitude { latitude = 40.7128, longitude = -74.0060, altitude = 50.0 }, heading = 180.0, tilt = 45.0, range = 1000.0 }"` i.e., looking south in Lower Manhattan from 1km range)
     Expected Output (example, AI might choose different nearby spots):
-    `animationString="flyTo=lat=40.7061,lng=-74.0088,alt=30,hdg=0,tilt=60,range=500,dur=3000;message=\"Battery Park waterfront\";delay=dur=4000;delay=dur=1000;flyTo=lat=40.7100,lng=-74.0135,alt=150,hdg=270,tilt=50,range=800,dur=3000;message=\"One World Trade Center from nearby\";delay=dur=4000;delay=dur=1000"`
+    `animationString="flyTo=lat=40.7061,lng=-74.0088,alt=30,hdg=0,tilt=60,range=500,dur=3000;message=\"Battery Park waterfront\";delay=dur=5000;delay=dur=1000;flyTo=lat=40.7100,lng=-74.0135,alt=150,hdg=270,tilt=50,range=800,dur=3000;message=\"One World Trade Center from nearby\";delay=dur=4000;delay=dur=1000"`
 
     Now, process the following user request and generate the `animationString`:
 """.trimIndent()
@@ -142,9 +142,9 @@ val prompt = """
         *   For simple requests ("fly me to [location]"), ideally use a `flyTo` -> `message` -> `delay` (for tile loading & viewing) sequence.
         *   Only generate multi-step animations if a tour or multiple viewpoints are explicitly implied.
     *   **Tile Loading & Viewing Delay (Crucial):**
-        *   **After a `flyTo` command moves the camera to a *new, distinct, and geographically distant location*, and *after* any associated `message` for that location, insert a `delay=dur=4000` command.**
-        *   **Optionally, after this 4000ms tile loading delay, consider an *additional* short pacing `delay=dur=1000` or `delay=dur=2000`** for user absorption before the next major camera movement.
-        *   Do *not* add the 4000ms tile loading delay for minor adjustments at the *same general location*.
+        *   **After a `flyTo` command moves the camera to a *new, distinct, and geographically distant location*, and *after* any associated `message` for that location, insert a `delay=dur=5000` command.**
+        *   **Optionally, after this 5000ms tile loading delay, consider an *additional* short pacing `delay=dur=1000` or `delay=dur=2000`** for user absorption before the next major camera movement.
+        *   Do *not* add the 5000ms tile loading delay for minor adjustments at the *same general location*.
     *   **Messages:**
         *   Use the `message` command *after* a `flyTo` to a new location, or *before* a `flyAround`. Messages should be short and descriptive, appearing *before* subsequent delays at that location.
     *   Use realistic `dur` values for camera movements (e.g., 2000-10000ms).
@@ -157,23 +157,23 @@ val prompt = """
 
     User Request: "Show me the Eiffel Tower from above, then slowly zoom out."
     Expected Output:
-    `animationString="flyTo=lat=48.8584,lng=2.2945,alt=200,hdg=0,tilt=20,range=600,dur=3000;message=\"Eiffel Tower\";delay=dur=4000;delay=dur=1000;flyTo=lat=48.8584,lng=2.2945,alt=200,hdg=0,tilt=30,range=2000,dur=4000"`
+    `animationString="flyTo=lat=48.8584,lng=2.2945,alt=200,hdg=0,tilt=20,range=600,dur=3000;message=\"Eiffel Tower\";delay=dur=5000;delay=dur=1000;flyTo=lat=48.8584,lng=2.2945,alt=200,hdg=0,tilt=30,range=2000,dur=5000"`
 
     User Request: "Fly me to the Grand Canyon."
     Expected Output:
-    `animationString="flyTo=lat=36.1069,lng=-112.1124,alt=2100,hdg=0,tilt=45,range=25000,dur=6000;message=\"The Grand Canyon\";delay=dur=4000;delay=dur=1500"`
+    `animationString="flyTo=lat=36.1069,lng=-112.1124,alt=2100,hdg=0,tilt=45,range=25000,dur=6000;message=\"The Grand Canyon\";delay=dur=5000;delay=dur=1500"`
 
     User Request: "Give me a quick fly-around of Mount Fuji, Japan, then take me to Tokyo Tower."
     Expected Output:
-    `animationString="flyTo=lat=35.3606,lng=138.7274,alt=3000,hdg=0,tilt=45,range=5000,dur=5000;message=\"Mount Fuji\";delay=dur=4000;delay=dur=1000;flyAround=lat=35.3606,lng=138.7274,alt=3000,hdg=0,tilt=45,range=5000,dur=10000,count=1;delay=dur=1000;flyTo=lat=35.6586,lng=139.7454,alt=250,hdg=0,tilt=60,range=1000,dur=7000;message=\"Tokyo Tower\";delay=dur=4000;delay=dur=1500"`
+    `animationString="flyTo=lat=35.3606,lng=138.7274,alt=3000,hdg=0,tilt=45,range=5000,dur=5000;message=\"Mount Fuji\";delay=dur=5000;delay=dur=1000;flyAround=lat=35.3606,lng=138.7274,alt=3000,hdg=0,tilt=45,range=5000,dur=10000,count=1;delay=dur=1000;flyTo=lat=35.6586,lng=139.7454,alt=250,hdg=0,tilt=60,range=1000,dur=7000;message=\"Tokyo Tower\";delay=dur=5000;delay=dur=1500"`
 
     User Request: "I want a helicopter tour of the Grand Canyon, starting near the South Rim visitor center, flying towards Mather Point, then doing a slow circle around Yavapai Point."
     Expected Output:
-    `animationString="flyTo=lat=36.0592,lng=-112.1096,alt=2150,hdg=45,tilt=60,range=1500,dur=6000;message=\"Grand Canyon South Rim\";delay=dur=4000;delay=dur=1000;flyTo=lat=36.0620,lng=-112.1068,alt=2180,hdg=70,tilt=55,range=1200,dur=5000;message=\"Approaching Mather Point\";delay=dur=2000;flyTo=lat=36.0658,lng=-112.1156,alt=2150,hdg=0,tilt=65,range=1000,dur=2000;message=\"Yavapai Point\";delay=dur=1000;flyAround=lat=36.0658,lng=-112.1156,alt=2150,hdg=0,tilt=65,range=1000,dur=15000,count=1.2;delay=dur=1000;flyTo=lat=36.0658,lng=-112.1156,alt=2200,hdg=270,tilt=40,range=5000,dur=4000"`
+    `animationString="flyTo=lat=36.0592,lng=-112.1096,alt=2150,hdg=45,tilt=60,range=1500,dur=6000;message=\"Grand Canyon South Rim\";delay=dur=5000;delay=dur=1000;flyTo=lat=36.0620,lng=-112.1068,alt=2180,hdg=70,tilt=55,range=1200,dur=5000;message=\"Approaching Mather Point\";delay=dur=2000;flyTo=lat=36.0658,lng=-112.1156,alt=2150,hdg=0,tilt=65,range=1000,dur=2000;message=\"Yavapai Point\";delay=dur=1000;flyAround=lat=36.0658,lng=-112.1156,alt=2150,hdg=0,tilt=65,range=1000,dur=15000,count=1.2;delay=dur=1000;flyTo=lat=36.0658,lng=-112.1156,alt=2200,hdg=270,tilt=40,range=5000,dur=5000"`
 
     User Request: "Show me New York City from high above."
     Expected Output:
-    `animationString="flyTo=lat=40.7128,lng=-74.0060,alt=800,hdg=0,tilt=30,range=40000,dur=5000;message=\"New York City Overview\";delay=dur=4000;delay=dur=1500"`
+    `animationString="flyTo=lat=40.7128,lng=-74.0060,alt=800,hdg=0,tilt=30,range=50000,dur=5000;message=\"New York City Overview\";delay=dur=5000;delay=dur=1500"`
 
     Now, process the following user request and generate the `animationString`:
 """.trimIndent()
