@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -59,6 +60,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
@@ -162,10 +164,21 @@ class AiNavigatorActivity : ComponentActivity() {
                             )
 
                             WhiskeyCompass(
+                                heading = camera.heading?.toFloat() ?: 0f,
                                 modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .padding(top = 48.dp),
-                                heading = (camera.heading ?: 0.0).toFloat()
+                                    .fillMaxWidth()
+                                    .padding(top = 36.dp) // Adjusted for status bar
+                                    .alpha(0.6f) // Make it somewhat transparent
+                                    .height(80.dp), // Compact
+                                pixelsPerDegree = 10f, // Denser
+                                cardinalTextStyle = MaterialTheme.typography.labelSmall,
+                                numericTextStyle = MaterialTheme.typography.titleSmall,
+                                majorTickHeight = 15.dp,
+                                minorTickHeight = 8.dp,
+                                tickAreaHeight = 25.dp,
+                                majorTickStrokeWidth = 1.5.dp,
+                                minorTickStrokeWidth = 0.5.dp,
+                                lubberLineStrokeWidth = 2.dp
                             )
 
                             Row(
