@@ -4,10 +4,13 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
-import androidx.compose.foundation.background
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,9 +18,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -25,11 +27,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.East
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.North
 import androidx.compose.material.icons.filled.NorthEast
 import androidx.compose.material.icons.filled.NorthWest
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.South
@@ -125,6 +127,8 @@ class AiNavigatorActivity : ComponentActivity() {
 
             val camera by viewModel.currentCamera.collectAsStateWithLifecycle()
 
+            val compassAlpha = remember { Animatable(0.55f) }
+
             LaunchedEffect(viewModel.userMessage) {
                 scope.launch {
                     viewModel.userMessage.collect { message ->
@@ -136,6 +140,24 @@ class AiNavigatorActivity : ComponentActivity() {
                     }
                 }
             }
+
+            // Start a timer when the camera heading stops changing.
+            // After 2 seconds, fade the compass alpha.
+            // If the camera heading changes again, reset the timer and set the compass alpha back to 55%.
+            LaunchedEffect(camera.heading) {
+                compassAlpha.snapTo(0.55f) // Reset alpha to 55% when heading changes
+                val job = scope.launch {
+                    delay(2.seconds) // Wait for 2 seconds
+                    compassAlpha.animateTo(
+                        targetValue = 0.3f,
+                        animationSpec = tween(durationMillis = 500, easing = LinearEasing)
+                    )
+                }
+                // Cancel the previous job if heading changes before 2 seconds
+                // This ensures the fade-out only happens if the heading is stable for 2 seconds
+                job.invokeOnCompletion { if (it is kotlinx.coroutines.CancellationException) scope.launch { compassAlpha.snapTo(0.55f) } }
+            }
+
 
             AdvancedMaps3DSamplesTheme {
                 Scaffold(
@@ -168,11 +190,11 @@ class AiNavigatorActivity : ComponentActivity() {
                                 heading = camera.heading?.toFloat() ?: 0f,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .alpha(0.55f)
+                                    .alpha(compassAlpha.value)
                                     .safeDrawingPadding(), // Apply padding for system elements like cutouts
                                 stripHeight = 90.dp,
                                 pixelsPerDegree = 7f,
-                                degreeLabelInterval = 30 // Less frequent degree labels for clarity
+                                degreeLabelInterval = 30, // Less frequent degree labels for clarity
                             )
 
                             Row(
