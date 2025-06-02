@@ -126,12 +126,21 @@ val hawaiiRoute = """
     21.26286, -157.80343
     21.26289, -157.80359
     21.26401, -157.80579
-""".trimIndent().split("\n")
-    .map {
+""".trimIndent().coordinatesToEncodedPolyline()
+
+val bostonPolyline = """
+    42.35628586524052, -71.06225781918089
+    42.35583081188131, -71.06130009037366
+    42.355455527402505, -71.06161679863297
+    42.355449621886734, -71.06161403790463
+""".trimIndent().coordinatesToEncodedPolyline()
+
+private fun String.coordinatesToEncodedPolyline(): String {
+    return this.split("\n").map {
         val (lat, lng) = it.split(",").map(String::toDouble)
         LatLng(lat, lng)
-    }
-    .latLngListEncode()
+    }.latLngListEncode()
+}
 
 // Encoded polyline
 // qj`aCj}nb]BDlAuAp@gAlEwIpAaDp@gBlAw@p@YtBq@vB}@v@U~Ao@dAk@dF_ErAcAbAm@~EmDxAqAhAyAx@wAdAiCdCqH~CuIt@mCrAiDnEwMfNea@TkAFu@BgA@_BpF{B|LqFrH_EpDmBxAu@bG{ChHwCpG}CrCuB~P}RhAmAnCeCbAcANIlTcJ~@YNMj@W|B{Bn@s@rAwBj@{Kt@_RH_F@qHM{AyA_Hi@wN?aBB_BFe@PiDLoD@cJQoE?g@Ju@DSRi@Zc@v@s@l@w@jAgCz@mAz@aAl@}@fAr@H?NI`@]LIb@OhAKx@ClCY|@KNCb@[d@E`@@XLFFJRl@~BhCfKjAtE@d@E^_FvL
@@ -370,6 +379,23 @@ val scenarios =
                         "flyTo=lat=39.7498,lng=-104.9535,alt=2000,hdg=200,tilt=60,range=1500,dur=2500;" +
                         "delay=dur=1000",
             polygon = denverPolygon,
-        )
+        ),
+        createScenario(
+            name = "boston-lost-man",
+            titleId = R.string.scenarios_lost_in_boston,
+            initialState = "mode=satellite;camera=lat=42.35628586524052,lng=-71.06225781918089,alt=10,tilt=10,hdg=121,range=1000",
+            animationString = "delay=dur=5000;" +
+                "flyTo=lat=42.35628586524052,lng=-71.06225781918089,alt=15,tilt=67,hdg=121,range=135,dur=2000;"+
+                "flyTo=lat=42.355819,lng=-71.061274,alt=10,tilt=45,hdg=121,range=119,dur=2000;"+
+                "flyTo=lat=42.355858,lng=-71.061279,alt=10,tilt=0,hdg=211,range=64,dur=2000;"+
+                "flyTo=lat=42.355455,lng=-71.061608,alt=12,tilt=35,hdg=211,range=56,dur=2000;"+
+                "delay=dur=2000;" +
+                "flyTo=lat=42.355475,lng=-71.062052,alt=53.5,tilt=5,hdg=216,range=524,dur=2000;"+
+                "",
+            polylines = bostonPolyline,
+            markers =
+                "lat=42.35628586524052,lng=-71.06225781918089,alt=10,altMode=clamp_to_ground;" +
+                "lat=42.355449621886734,lng=-71.06161403790463,alt=10,altMode=clamp_to_ground;"
+        ),
 
     ).associateBy { it.name }
