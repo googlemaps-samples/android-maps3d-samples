@@ -29,7 +29,7 @@ approach to building UIs with 3D maps.
 
 ## View-based Kotlin Samples
 
-[Maps3DSamples/ApiDemos]This repo contains the following samples:
+**[Maps3DSamples/ApiDemos]([Maps3DSamples/ApiDemos])**: This repo contains the following samples:
 
 **[Maps3DSamples/ApiDemos/kotlin-app](Maps3DSamples/ApiDemos/kotlin-app)**: Demonstrates various features of the **Maps3D SDK for Android**
 using Kotlin and Android Views. This module includes examples for:
