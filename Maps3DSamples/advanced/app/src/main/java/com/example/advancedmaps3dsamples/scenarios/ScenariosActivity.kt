@@ -16,11 +16,16 @@ package com.example.advancedmaps3dsamples.scenarios
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +37,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -46,21 +52,30 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.advancedmaps3dsamples.R
+import com.example.advancedmaps3dsamples.ainavigator.WhiskeyCompass
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
 import com.example.advancedmaps3dsamples.utils.DEFAULT_ROLL
 import com.example.advancedmaps3dsamples.utils.toHeading
@@ -69,7 +84,10 @@ import com.example.advancedmaps3dsamples.utils.toRoll
 import com.example.advancedmaps3dsamples.utils.toTilt
 import com.google.android.gms.maps3d.model.Camera
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 @AndroidEntryPoint
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,7 +103,14 @@ class ScenariosActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    enableEdgeToEdge()
+    enableEdgeToEdge(
+      statusBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
+      navigationBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+    )
+
+    hideSystemUI()
+    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
     setContent {
       val viewState by viewModel.viewState.collectAsStateWithLifecycle()
       val currentCamera by viewModel.currentCamera.collectAsStateWithLifecycle(Camera.DEFAULT_CAMERA)
@@ -95,21 +120,47 @@ class ScenariosActivity : ComponentActivity() {
 
       val cameraAttribute by viewModel.trackedAttribute.collectAsStateWithLifecycle()
 
+      val camera by viewModel.currentCamera.collectAsStateWithLifecycle()
+      val compassAlpha = remember { Animatable(0.55f) }
+
+      // This LaunchedEffect controls the compass alpha based on camera heading changes.
+      LaunchedEffect(camera.heading) {
+        // When camera.heading changes, this LaunchedEffect is cancelled and restarted.
+        // Any coroutine launched within its scope (like the one below) is also cancelled.
+
+        // Reset alpha to initial state and stop any ongoing animation on compassAlpha.
+        compassAlpha.snapTo(0.55f)
+
+        // Launch a new coroutine within this LaunchedEffect's scope.
+        // This coroutine will handle the delay and subsequent fade-out animation.
+        // If camera.heading changes again before this completes, this coroutine will be cancelled.
+        launch {
+          delay(2.seconds) // Wait for 2 seconds of stable heading
+          // If this point is reached, it means camera.heading was stable for 2 seconds.
+          compassAlpha.animateTo(
+            targetValue = 0.3f,
+            animationSpec = tween(durationMillis = 500, easing = LinearEasing)
+          )
+        }
+      }
+
       AdvancedMaps3DSamplesTheme(
         dynamicColor = false
       ) {
         Scaffold(
           modifier = Modifier.fillMaxSize(),
           topBar = {
-            CenterAlignedTopAppBar(
-              colors = topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-              ),
-              title = {
-                Text(stringResource(viewState.scenario?.titleId ?: R.string.scenarios_none))
-              }
-            )
+            if (viewState.scenario == null) {
+              CenterAlignedTopAppBar(
+                colors = topAppBarColors(
+                  containerColor = MaterialTheme.colorScheme.primaryContainer,
+                  titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
+                title = {
+                  Text(stringResource(viewState.scenario?.titleId ?: R.string.scenarios_none))
+                }
+              )
+            }
           }
         ) { innerPadding ->
           val modifier = Modifier.padding(innerPadding)
@@ -134,6 +185,17 @@ class ScenariosActivity : ComponentActivity() {
                   scenario = scenario,
                   onMap3dViewReady = { viewModel.setGoogleMap3D(it) },
                   onReleaseMap = { viewModel.releaseGoogleMap3D() },
+                )
+
+                WhiskeyCompass(
+                  heading = camera.heading?.toFloat() ?: 0f,
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .alpha(compassAlpha.value)
+                    .safeDrawingPadding(),
+                  stripHeight = 90.dp,
+                  pixelsPerDegree = 7f,
+                  degreeLabelInterval = 30,
                 )
               }
 
@@ -163,6 +225,14 @@ class ScenariosActivity : ComponentActivity() {
           viewModel.setScenario(null)
         }
       }
+    }
+  }
+
+  private fun hideSystemUI() {
+    WindowCompat.setDecorFitsSystemWindows(window, false)
+    WindowInsetsControllerCompat(window, window.decorView).let { controller ->
+      controller.hide(WindowInsetsCompat.Type.systemBars())
+      controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     }
   }
 }
@@ -256,7 +326,10 @@ fun FinishedOverlay(
   ) {
     // Close Button at the top end corner
     OverlayButton(
-      modifier = modifier.align(Alignment.TopEnd).offset(x = (-16).dp, y = 16.dp).size(size),
+      modifier = modifier
+        .align(Alignment.TopEnd)
+        .offset(x = (-16).dp, y = 16.dp)
+        .size(size),
       onExitClick = onCloseClick,
       imageVector = Icons.Default.Close,
       contentDescription = stringResource(R.string.close)
