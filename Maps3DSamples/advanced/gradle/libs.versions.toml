@@ -1,5 +1,5 @@
 [versions]
-agp = "8.10.0"
+agp = "8.10.1"
 kotlin = "2.1.10"
 kotlinxDatetime = "0.3.2"
 coreKtx = "1.16.0"
@@ -8,7 +8,7 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.9.0"
 activityCompose = "1.10.1"
-composeBom = "2025.05.00"
+composeBom = "2025.05.01"
 
 hilt = "2.55"
 ksp = "2.1.10-1.0.30"
@@ -16,9 +16,11 @@ playServicesMaps3d = "0.0.1"
 secretsGradlePlugin = "2.0.1"
 truth = "1.4.4"
 mapsUtilsKtx = "5.2.0"
+firebaseBom = "33.14.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+firebase-ai = { module = "com.google.firebase:firebase-ai" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -41,6 +43,8 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 play-services-maps3d = { module = "com.google.android.gms:play-services-maps3d", version.ref = "playServicesMaps3d" }
 maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version.ref = "mapsUtilsKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

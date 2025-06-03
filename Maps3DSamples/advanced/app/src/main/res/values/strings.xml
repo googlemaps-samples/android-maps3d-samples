@@ -19,6 +19,7 @@
 
     <string name="map_sample_title" translatable="false">3D Map Samples</string>
     <string name="map_sample_scenarios" translatable="false">Scenarios (video visuals)</string>
+    <string name="map_sample_ai_navigator" translatable="false">AI Navigator</string>
 
     <!--
     Distance in feet, formatted to 0 decimal places.
@@ -58,6 +59,7 @@
     <string name="scenarios_polyline" translatable="false">Polyline in Chicago</string>
     <string name="scenarios_polyline_honolulu" translatable="false">Polyline in Honolulu</string>
     <string name="scenarios_polygon" translatable="false">Polygon in Denver</string>
+    <string name="scenarios_lost_in_boston" translatable="false">Lost in Boston</string>
 
     <string name="heading_label" translatable="false">Heading: %1$.0f</string>
     <string name="tilt_label" translatable="false">Tilt: %1$.0f</string>

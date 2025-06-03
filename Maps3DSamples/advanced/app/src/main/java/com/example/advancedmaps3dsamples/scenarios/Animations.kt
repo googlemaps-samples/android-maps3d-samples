@@ -16,26 +16,53 @@ package com.example.advancedmaps3dsamples.scenarios
 
 import com.google.android.gms.maps3d.model.FlyAroundOptions
 import com.google.android.gms.maps3d.model.FlyToOptions
+import com.google.android.gms.maps3d.model.MarkerOptions
+import com.google.android.gms.maps3d.model.PolygonOptions
+import com.google.android.gms.maps3d.model.PolylineOptions
 import kotlinx.coroutines.delay
 
 sealed interface AnimationStep {
-  suspend operator fun invoke(viewModel: ScenariosViewModel)
+  suspend operator fun invoke(viewModel: ScenarioBaseViewModel)
 }
 
 data class DelayStep(val durationMillis: Long) : AnimationStep {
-  override suspend operator fun invoke(viewModel: ScenariosViewModel) {
+  override suspend operator fun invoke(viewModel: ScenarioBaseViewModel) {
     delay(durationMillis)
   }
 }
 
 data class FlyToStep(val flyToOptions: FlyToOptions) : AnimationStep {
-  override suspend operator fun invoke(viewModel: ScenariosViewModel) {
+  override suspend operator fun invoke(viewModel: ScenarioBaseViewModel) {
     viewModel.awaitFlyTo(flyToOptions)
   }
 }
 
 data class FlyAroundStep(val flyAroundOptions: FlyAroundOptions) : AnimationStep {
-  override suspend operator fun invoke(viewModel: ScenariosViewModel) {
+  override suspend operator fun invoke(viewModel: ScenarioBaseViewModel) {
     viewModel.awaitFlyAround(flyAroundOptions)
+  }
+}
+
+data class MessageStep(val message: String) : AnimationStep {
+  override suspend operator fun invoke(viewModel: ScenarioBaseViewModel) {
+    viewModel.showMessage(message)
+  }
+}
+
+data class AddMarkerStep(val options: MarkerOptions) : AnimationStep {
+  override suspend operator fun invoke(viewModel: ScenarioBaseViewModel) {
+    viewModel.addMarker(this.options)
+  }
+}
+
+data class AddPolylineStep(val options: PolylineOptions) : AnimationStep {
+  override suspend operator fun invoke(viewModel: ScenarioBaseViewModel) {
+    viewModel.addPolyline(this.options)
+  }
+}
+
+data class AddPolygonStep(val options: PolygonOptions) : AnimationStep {
+  override suspend operator fun invoke(viewModel: ScenarioBaseViewModel) {
+    viewModel.addPolygon(this.options)
   }
 }
