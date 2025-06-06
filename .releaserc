@@ -1,5 +1,5 @@
 branches:
-  - build/upload_apks_to_github
+  - main1
 plugins:
   - "@semantic-release/commit-analyzer"
   - "@semantic-release/release-notes-generator"
