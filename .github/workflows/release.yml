@@ -44,7 +44,7 @@ jobs:
           echo "Generating advanced APK"
           cd $GITHUB_WORKSPACE/Maps3DSamples/advanced
           ./gradlew assemble
-          cp ./app/build/outputs/apk/debug/kotlin-debug.apk $GITHUB_WORKSPACE/advanced-kotlin-debug.apk
+          cp ./app/build/outputs/apk/debug/app-debug.apk $GITHUB_WORKSPACE/advanced-kotlin-debug.apk
 
       - uses: actions/setup-node@v2
         with:
