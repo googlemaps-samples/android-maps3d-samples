@@ -32,12 +32,19 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Build APKs
+      - name: Build ApiDemos APK
         run: |
           echo "Generating ApiDemos APK"
           cd $GITHUB_WORKSPACE/Maps3DSamples/ApiDemos
           ./gradlew assemble
           cp ./kotlin-app/build/outputs/apk/debug/kotlin-app-debug.apk $GITHUB_WORKSPACE/ApiDemos-kotlin-debug.apk
+
+      - name: Build advanced APK
+        run: |
+          echo "Generating advanced APK"
+          cd $GITHUB_WORKSPACE/Maps3DSamples/advanced
+          ./gradlew assemble
+          cp ./app/build/outputs/apk/debug/kotlin-debug.apk $GITHUB_WORKSPACE/advanced-kotlin-debug.apk
 
       - uses: actions/setup-node@v2
         with:
