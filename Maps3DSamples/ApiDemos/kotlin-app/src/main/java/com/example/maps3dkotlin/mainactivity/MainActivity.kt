@@ -141,11 +141,6 @@ fun SampleMenuList(
 
             item {
                 // TODO
-                Text("Need a hole demo", fontStyle = FontStyle.Italic)
-            }
-
-            item {
-                // TODO
                 Text("Flows demos (probably in a different) module?", fontStyle = FontStyle.Italic)
             }
 
