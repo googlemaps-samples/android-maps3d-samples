@@ -16,9 +16,9 @@ package com.example.maps3dkotlin.models
 
 import android.os.Bundle
 import com.example.maps3dcommon.R
-import com.example.maps3dkotlin.common.awaitCameraUpdate
-import com.example.maps3dkotlin.common.toCameraUpdate
-import com.example.maps3dkotlin.common.toValidCamera
+import com.example.maps3d.common.awaitCameraUpdate
+import com.example.maps3d.common.toCameraUpdate
+import com.example.maps3d.common.toValidCamera
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode

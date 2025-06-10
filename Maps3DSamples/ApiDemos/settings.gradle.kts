@@ -24,4 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Maps 3D Samples"
 include(":kotlin-app")
+include(":java-app")
 include(":common")
