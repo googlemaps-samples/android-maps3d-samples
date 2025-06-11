@@ -86,9 +86,7 @@ fun Map<String, String>.getInt(key: String, default: Int = 0): Int {
 }
 
 /** Helper to safely get a String value from the attributes map. */
-fun Map<String, String>.getString(key: String, default: String = ""): String {
-    return this[key] ?: default
-}
+fun Map<String, String>.getString(key: String, default: String = ""): String = this[key] ?: default
 
 // --- Object Converters ---
 
@@ -242,9 +240,13 @@ fun String.toMarkers(): List<MarkerOptions> {
     }
     return markersString.split(";").mapNotNull { markerStr ->
         val attributes = markerStr.toAttributesMap()
+        val markerId = attributes["id"]
         // Basic validation: requires lat, lng
         if (attributes.containsKey("lat") && attributes.containsKey("lng")) {
             markerOptions {
+                if (markerId != null) {
+                    id = markerId
+                }
                 collisionBehavior = CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL
                 position = attributes.toLatLngAltitude()
                 isExtruded = true
