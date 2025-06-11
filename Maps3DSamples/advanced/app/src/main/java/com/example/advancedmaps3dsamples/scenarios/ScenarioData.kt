@@ -300,10 +300,10 @@ val scenarios =
                         "flyTo=lat=52.522255,lng=13.405010,alt=84.0,hdg=312.8,tilt=66,range=1621,dur=2000;" +
                         "delay=dur=3000",
             markers =
-                "lat=52.519605780912585,lng=13.406867190588198,alt=150,label= ,altMode=absolute;" +
-                        "lat=52.519882191069016,lng=13.407410777254293,alt=50,label= ,altMode=relative_to_ground;" +
-                        "lat=52.52027645136134,lng=13.408271658592406,alt=5,label= ,altMode=clamp_to_ground;" +
-                        "lat=52.520835071144226,lng=13.409426847943774,alt=10,label= ,altMode=relative_to_mesh;"
+                "id=absolute,lat=52.519605780912585,lng=13.406867190588198,alt=150,label= ,altMode=absolute;" +
+                        "id=relative_to_ground,lat=52.519882191069016,lng=13.407410777254293,alt=50,label= ,altMode=relative_to_ground;" +
+                        "id=clamp_to_ground,lat=52.52027645136134,lng=13.408271658592406,alt=5,label= ,altMode=clamp_to_ground;" +
+                        "id=relative_to_mesh,lat=52.520835071144226,lng=13.409426847943774,alt=10,label= ,altMode=relative_to_mesh;"
         ),
         createScenario(
             name = "model",

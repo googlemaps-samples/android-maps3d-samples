@@ -52,6 +52,7 @@ class MarkersActivity : SampleBaseActivity() {
 
         // Marker 1: Absolute
         googleMap3D.addMarker(markerOptions {
+            id = "marker_one"
             position = latLngAltitude {
                 latitude = 52.519605780912585
                 longitude = 13.406867190588198
@@ -70,6 +71,7 @@ class MarkersActivity : SampleBaseActivity() {
 
         // Marker 2: Relative to Ground
         googleMap3D.addMarker(markerOptions {
+            id = "relative_to_ground"
             position = latLngAltitude {
                 latitude = 52.519882191069016
                 longitude = 13.407410777254293
@@ -89,6 +91,7 @@ class MarkersActivity : SampleBaseActivity() {
 
         // Marker 3: Clamped to Ground
         googleMap3D.addMarker(markerOptions {
+            id = "clamped_to_ground"
             position = latLngAltitude {
                 latitude = 52.52027645136134
                 longitude = 13.408271658592406
@@ -107,6 +110,7 @@ class MarkersActivity : SampleBaseActivity() {
 
         // Marker 4: Relative to Mesh
         googleMap3D.addMarker(markerOptions {
+            // With no id, one will be provided automatically
             position = latLngAltitude {
                 latitude = 52.520835071144226
                 longitude = 13.409426847943774
