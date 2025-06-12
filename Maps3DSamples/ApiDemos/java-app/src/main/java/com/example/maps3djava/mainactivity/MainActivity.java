@@ -32,6 +32,7 @@ import com.example.maps3djava.markers.MarkersActivity;
 import com.example.maps3djava.models.ModelsActivity;
 import com.example.maps3djava.polygons.PolygonsActivity;
 import com.example.maps3djava.polylines.PolylinesActivity;
+import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -42,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
         put(R.string.feature_title_overview_hello_3d_map, HelloMapActivity.class);
         put(R.string.feature_title_camera_controls, CameraControlsActivity.class);
         put(R.string.feature_title_markers, MarkersActivity.class);
-        put(R.string.feature_title_3d_models, ModelsActivity.class);
         put(R.string.feature_title_polygons, PolygonsActivity.class);
         put(R.string.feature_title_polylines, PolylinesActivity.class);
         put(R.string.feature_title_3d_models, ModelsActivity.class);
@@ -57,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new SampleListAdapter(sampleActivities, this::onSampleClicked));
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+
+        MaterialToolbar toolbar = findViewById(com.example.maps3djava.R.id.topAppBar);
+        setSupportActionBar(toolbar);
     }
 
     private void onSampleClicked(Class<?> activityClass, @StringRes int titleResId) {
