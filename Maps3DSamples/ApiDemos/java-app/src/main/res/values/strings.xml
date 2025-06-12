@@ -14,7 +14,7 @@
  limitations under the License.
 -->
 <resources>
-    <string name="app_name">Maps 3D Samples</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="app_name">Java Maps3D Samples</string>
+    <string name="title_activity_main">Java Maps3D Samples</string>
 
 </resources>
