@@ -16,6 +16,7 @@ package com.example.advancedmaps3dsamples.scenarios
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.example.advancedmaps3dsamples.common.ThreeDMap
 import com.google.android.gms.maps3d.GoogleMap3D
 
 @Composable
