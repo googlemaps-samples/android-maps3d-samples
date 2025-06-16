@@ -30,6 +30,8 @@ import java.util.List;
 
 import static com.example.maps3djava.polylines.SanitasLoopData.sanitasLoop;
 
+import androidx.annotation.NonNull;
+
 /**
  * Activity that demonstrates the use of polylines on a 3D map.
  * <p>
@@ -109,7 +111,7 @@ public class PolylinesActivity extends SampleBaseActivity implements OnMap3DView
      * @param googleMap3D The GoogleMap3D object that is ready.
      */
     @Override
-    public void onMap3DViewReady(GoogleMap3D googleMap3D) {
+    public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
         super.onMap3DViewReady(googleMap3D);
         googleMap3D.setMapMode(Map3DMode.HYBRID);
         googleMap3D.addPolyline(trailBackgroundPolylineOptions);

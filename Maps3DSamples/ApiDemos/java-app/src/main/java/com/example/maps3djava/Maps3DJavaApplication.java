@@ -59,36 +59,26 @@ public class Maps3DJavaApplication extends Application {
      */
     private void checkApiKey() {
         try {
-            // Get the application's info, including its meta-data.
             ApplicationInfo appInfo =
                     getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
-            // Ensure the meta-data bundle is not null.
             Bundle bundle = Objects.requireNonNull(appInfo.metaData);
 
-            // Retrieve the API key string from the bundle. The key name is crucial.
             String apiKey =
                     bundle.getString("com.google.android.geo.maps3d.API_KEY"); // Key name is important!
 
-            // Check if the API key is null, blank, or still the default placeholder value.
             if (apiKey == null || apiKey.isBlank() || apiKey.equals("DEFAULT_API_KEY")) {
-                // Display a Toast message to the user indicating the API key issue.
                 Toast.makeText(
                         this,
                         "API Key was not set in secrets.properties",
                         Toast.LENGTH_LONG
                 ).show();
-                // Throw a RuntimeException to halt the application if the API key is misconfigured.
                 throw new RuntimeException("API Key was not set in secrets.properties");
             }
         } catch (PackageManager.NameNotFoundException e) {
-            // Log an error if the package name is not found (should not happen in a running app).
             Log.e(TAG, "Package name not found.", e);
-            // Re-throw as a RuntimeException as this is a critical application setup issue.
             throw new RuntimeException("Error getting package info.", e);
         } catch (NullPointerException e) {
-            // Log an error if meta-data is completely missing from the application info.
             Log.e(TAG, "Error accessing meta-data.", e); // Handle the case where meta-data is completely missing.
-            // Re-throw as a RuntimeException.
             throw new RuntimeException("Error accessing meta-data in manifest", e);
         }
     }

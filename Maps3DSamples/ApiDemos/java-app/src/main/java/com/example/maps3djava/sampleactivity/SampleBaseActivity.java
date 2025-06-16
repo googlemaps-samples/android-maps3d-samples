@@ -17,7 +17,6 @@ package com.example.maps3djava.sampleactivity;
 
 import static com.example.maps3d.common.UtilitiesKt.toCameraString;
 import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
-import static com.google.android.gms.maps3d.model.Camera.DEFAULT_CAMERA;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -70,8 +69,6 @@ public abstract class SampleBaseActivity extends Activity implements OnMap3DView
 
     public abstract Camera getInitialCamera();
     public abstract String getTAG();
-
-    private Camera currentCameraValue = DEFAULT_CAMERA; // Initialize with default
 
     private OnCameraChangedListener cameraChangedListener;
 
@@ -174,17 +171,9 @@ public abstract class SampleBaseActivity extends Activity implements OnMap3DView
 
         // Initialize and set the camera changed listener
         cameraChangedListener = cameraPosition -> {
-            // Update the private current camera state
-            currentCameraValue = cameraPosition;
-            // Log.d(getTAG(), "Camera updated: " + CameraExtKt.toCameraString(cameraPosition)); // Optional: for debugging
         };
         googleMap3D.setCameraChangedListener(cameraChangedListener);
 
-        // Also update the current camera value with the initial state when map is ready
-        Camera initialCamera = googleMap3D.getCamera();
-        if (initialCamera != null) {
-            currentCameraValue = initialCamera;
-        }
     }
 
     @CallSuper
@@ -215,13 +204,5 @@ public abstract class SampleBaseActivity extends Activity implements OnMap3DView
 
     protected void snapshot(Camera camera) {
         Log.d(getTAG(), toCameraString(camera));
-    }
-
-    public Camera getCurrentCameraValue() {
-        return currentCameraValue;
-    }
-
-    public void setCurrentCameraValue(Camera currentCameraValue) {
-        this.currentCameraValue = currentCameraValue;
     }
 }

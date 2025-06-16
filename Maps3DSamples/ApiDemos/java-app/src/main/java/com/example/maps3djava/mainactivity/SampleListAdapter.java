@@ -46,7 +46,7 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
         this.listener = listener;
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView title;
 
         ViewHolder(View view) {

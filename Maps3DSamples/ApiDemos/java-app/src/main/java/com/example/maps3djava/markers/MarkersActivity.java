@@ -62,7 +62,7 @@ public class MarkersActivity extends SampleBaseActivity {
         googleMap3D.setMapMode(Map3DMode.SATELLITE);
 
         // Marker 1: Absolute
-        MarkerOptions marker1Options = new MarkerOptions(); // Create the object
+        MarkerOptions marker1Options = new MarkerOptions();
         marker1Options.setPosition(new LatLngAltitude(
                 52.519605780912585,
                 13.406867190588198,
@@ -90,7 +90,7 @@ public class MarkersActivity extends SampleBaseActivity {
         googleMap3D.addMarker(marker2Options);
 
         // Marker 3: Clamped to Ground
-        MarkerOptions marker3Options = new MarkerOptions(); // Declare and instantiate
+        MarkerOptions marker3Options = new MarkerOptions();
         marker3Options.setPosition(new LatLngAltitude(
                 52.52027645136134,
                 13.408271658592406,

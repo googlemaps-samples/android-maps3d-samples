@@ -18,22 +18,22 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 
 import com.example.maps3dcommon.R;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
-
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyAroundOptions;
+import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.Map3DMode;
 import com.google.android.gms.maps3d.model.ModelOptions;
 import com.google.android.gms.maps3d.model.Orientation;
 import com.google.android.gms.maps3d.model.Vector3D;
-import com.google.android.gms.maps3d.OnCameraAnimationEndListener;
 
 import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
 
@@ -42,6 +42,15 @@ import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
  * Demonstrates the use of 3D models in a 3D map environment.
  */
 public class ModelsActivity extends SampleBaseActivity {
+
+    public static final String PLANE_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb";
+    public static final double PLANE_SCALE = 0.05;
+
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private Runnable currentAnimationStep;
+    private boolean isAnimationRunning = false;
+    private Button recenterButton;
+    private Button stopButton;
 
     @Override
     public final String getTAG() {
@@ -63,53 +72,31 @@ public class ModelsActivity extends SampleBaseActivity {
         ));
     }
 
-
-    private Runnable currentAnimationStepRunnable;
-    private final Handler mainHandler = new Handler(Looper.getMainLooper());
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         recenterButton = findViewById(R.id.reset_view_button);
+        stopButton = findViewById(R.id.stop_button);
+
         recenterButton.setOnClickListener(view -> {
-            GoogleMap3D controller = googleMap3D;
-            if (controller == null) {
+            if (googleMap3D == null) {
                 return;
             }
+            // 1. Stop any and all current animation activity.
+            stopAnimation();
 
-            // --- STOP Current Animation Sequence ---
-            // Remove any pending tasks from the handler and clear the runnable.
-            if (currentAnimationStepRunnable != null) {
-                mainHandler.removeCallbacks(currentAnimationStepRunnable);
-                currentAnimationStepRunnable = null;
-            }
-            // Also, explicitly clear any ongoing listener if an animation was active.
-            controller.setCameraAnimationEndListener(null);
-            // --- END STOP ---
+            // 2. Set the camera to its initial state.
+            googleMap3D.setCamera(getInitialCamera());
 
-
-            controller.setCameraAnimationEndListener(() -> {
-                controller.setCameraAnimationEndListener(null);
-                runAnimationSequence(controller);
-            });
-            controller.setCamera(getInitialCamera());
+            // 3. Start the animation sequence fresh.
+            runAnimationSequence(googleMap3D);
         });
+
+        stopButton.setOnClickListener(view -> stopAnimation());
+
         recenterButton.setVisibility(View.VISIBLE);
-
-
-        findViewById(R.id.stop_button).setOnClickListener(view -> {
-            if (currentAnimationStepRunnable != null) {
-                mainHandler.removeCallbacks(currentAnimationStepRunnable);
-                currentAnimationStepRunnable = null;
-            }
-
-            if (googleMap3D != null) {
-                googleMap3D.setCameraAnimationEndListener(null);
-            }
-
-        });
-        findViewById(R.id.stop_button).setVisibility(View.VISIBLE);
+        stopButton.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -128,7 +115,7 @@ public class ModelsActivity extends SampleBaseActivity {
         ));
         modelOptions.setAltitudeMode(AltitudeMode.ABSOLUTE);
 
-        Orientation orientation = new Orientation(41.5, 90.0, 0.0);
+        Orientation orientation = new Orientation(41.5, -90.0, 0.0);
         modelOptions.setOrientation(orientation);
 
         modelOptions.setUrl(PLANE_URL);
@@ -138,70 +125,68 @@ public class ModelsActivity extends SampleBaseActivity {
 
         googleMap3D.addModel(modelOptions);
 
-        // Start the animation sequence after the map is ready.
-        // No initial camera animation needed here, as runAnimationSequence will handle delays.
         runAnimationSequence(googleMap3D);
+    }
+
+    /**
+     * Stops any scheduled or in-progress camera animation.
+     */
+    private void stopAnimation() {
+        if (googleMap3D == null) {
+            return;
+        }
+        // Remove any pending runnables from the handler
+        if (currentAnimationStep != null) {
+            mainHandler.removeCallbacks(currentAnimationStep);
+            currentAnimationStep = null;
+        }
+        // Remove any active animation listeners and stop camera movement
+        googleMap3D.setCameraAnimationEndListener(null);
+        googleMap3D.stopCameraAnimation(); // Halts any in-progress camera movement
+        isAnimationRunning = false;
     }
 
     /**
      * Runs a sequence of camera animations using nested callbacks and delays.
      */
     private void runAnimationSequence(GoogleMap3D googleMap3D) {
-        // --- Step 1: Initial Delay ---
-        currentAnimationStepRunnable = () -> {
-            Camera cameraAnimation1 = new Camera(
-                    new LatLngAltitude(
-                            47.133971,
-                            11.333161,
-                            2200.0
-                    ),
-                    221.4, // heading
-                    75.0,  // tilt
-                    0.0,   // zoom
-                    700.0  // range
-            );
+        if (isAnimationRunning) {
+            return;
+        }
+        isAnimationRunning = true;
 
-           // --- Step 2: First Animation ---
-            // Set the listener for when this FIRST animation finishes.
-            googleMap3D.setCameraAnimationEndListener(new OnCameraAnimationEndListener() {
-                @Override
-                public void onCameraAnimationEnd() {
-                    // This callback executes when the first animation is complete.
-                    // IMPORTANT: Clear the listener immediately to avoid it being called multiple times.
-                    googleMap3D.setCameraAnimationEndListener(null);
+        Camera cameraTarget = new Camera(
+                new LatLngAltitude(47.133971, 11.333161, 2200.0),
+                221.4,
+                75.0,
+                0.0,
+                700.0
+        );
 
-                    // --- Step 3: Delay between animations ---
-                    currentAnimationStepRunnable = () -> {
-                        FlyAroundOptions flyAroundOptions = new FlyAroundOptions(cameraAnimation1, 3_500, 0.5);
+        // --- STEP 1: Fly to the location ---
+        currentAnimationStep = () -> {
+            FlyToOptions flyTo = new FlyToOptions(cameraTarget, 3_500);
 
-                        // --- Step 4: Second Animation ---
-                        // Set the listener for when this SECOND animation finishes.
-                        googleMap3D.setCameraAnimationEndListener(new OnCameraAnimationEndListener() {
-                            @Override
-                            public void onCameraAnimationEnd() {
-                                // This callback executes when the second animation is complete.
-                                // IMPORTANT: Clear the listener.
-                                googleMap3D.setCameraAnimationEndListener(null);
-                                // The entire animation sequence is now finished.
-                                currentAnimationStepRunnable = null; // Mark sequence as done.
-                            }
-                        });
-                        // Trigger the second animation.
-                        googleMap3D.setCamera(cameraAnimation1);
-                    };
-                    // Schedule the second animation to start after its 500ms delay.
-                    mainHandler.postDelayed(currentAnimationStepRunnable, 500L);
-                }
+            googleMap3D.setCameraAnimationEndListener(() -> {
+                // --- STEP 2: Fly around the location (after a short pause) ---
+                currentAnimationStep = () -> {
+                    FlyAroundOptions flyAround = new FlyAroundOptions(cameraTarget, 3_500, 0.5);
+
+                    googleMap3D.setCameraAnimationEndListener(() -> {
+                        // --- SEQUENCE END ---
+                        googleMap3D.setCameraAnimationEndListener(null);
+                        currentAnimationStep = null;
+                        isAnimationRunning = false;
+                    });
+
+                    googleMap3D.flyCameraAround(flyAround);
+                };
+                mainHandler.postDelayed(currentAnimationStep, 500);
             });
-            // Trigger the first animation.
-            googleMap3D.setCamera(cameraAnimation1);
+
+            googleMap3D.flyCameraTo(flyTo);
         };
-        // Schedule the start of the first animation step after its initial 1500ms delay.
-        mainHandler.postDelayed(currentAnimationStepRunnable, 1500L);
+
+        mainHandler.postDelayed(currentAnimationStep, 1500);
     }
-
-
-
-    public static final String PLANE_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb";
-    public static final double PLANE_SCALE = 0.05;
 }

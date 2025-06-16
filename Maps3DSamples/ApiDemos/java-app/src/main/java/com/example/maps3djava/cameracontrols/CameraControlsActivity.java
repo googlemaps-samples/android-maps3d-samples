@@ -54,7 +54,7 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
     private Slider rollSlider;
     private TextView rollSliderLabel;
 
-    private List<Polygon> restrictionCubeFaces = new ArrayList<>();
+    private final List<Polygon> restrictionCubeFaces = new ArrayList<>();
 
     @Override
     public final Camera getInitialCamera() {
@@ -123,12 +123,9 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
                 DataModel.nycPolygonOptions.forEach(polygonOptions -> {
                     if (googleMap3D != null) {
                         Polygon polygon = googleMap3D.addPolygon(polygonOptions);
-                        if (polygon != null) {
-                            restrictionCubeFaces.add(polygon);
-                        }
+                        restrictionCubeFaces.add(polygon);
                     }
                 });
-
             } else {
                 button.setText(getText(R.string.camera_show_restriction));
                 for (Polygon polygon : restrictionCubeFaces) {
@@ -191,20 +188,17 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
         super.onMap3DViewReady(googleMap3D);
         this.googleMap3D = googleMap3D;
 
-        // Set the initial camera position
         if (googleMap3D.getCamera() != null) {
             updateCameraPosition(googleMap3D.getCamera());
         }
 
-        // Track camera position changes
         googleMap3D.setCameraChangedListener(this::updateCameraPosition);
 
         googleMap3D.setOnMapSteadyListener(isSteady -> {
             if (isSteady) {
                 googleMap3D.setOnMapSteadyListener(null);
-                // Using Handler for delay, similar to coroutine delay
                 new Handler(Looper.getMainLooper()).postDelayed(this::flyToEmpireStateBuilding,
-                        TimeUnit.SECONDS.toMillis(2)); // 2000.milliseconds
+                        TimeUnit.SECONDS.toMillis(2));
             }
         });
     }
@@ -296,7 +290,7 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
 
         // Longitude
         cameraStateStringBuilder.append(getString(R.string.cam_lng_label, camera.getCenter().getLongitude()));
-        cameraStateStringBuilder.append(",\n"); // Newline after longitude (as per previous example)
+        cameraStateStringBuilder.append(",\n");
 
         // Altitude
         cameraStateStringBuilder.append(getString( R.string.cam_alt_label, camera.getCenter().getAltitude()));
@@ -304,7 +298,7 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
 
         // Heading
         cameraStateStringBuilder.append(getString(R.string.cam_hdg_label, heading));
-        String compassString = toCompassDirection(heading); // Assuming this utility exists
+        String compassString = toCompassDirection(heading);
         cameraStateStringBuilder.append(nbsp).append("(").append(compassString).append(")");
         cameraStateStringBuilder.append(", ");
 

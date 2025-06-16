@@ -71,12 +71,7 @@ public final class DataModel {
      * This face is defined by four LatLngAltitude points that form a rectangle.
      * All points share the same minimum altitude.
      */
-    private static final List<LatLngAltitude> baseFace = Collections.unmodifiableList(Arrays.asList(
-            new LatLngAltitude(NYC_SOUTH_WEST_LAT, NYC_SOUTH_WEST_LNG, MIN_ALTITUDE_NYC_METERS),
-            new LatLngAltitude(NYC_SOUTH_WEST_LAT, NYC_NORTH_EAST_LNG, MIN_ALTITUDE_NYC_METERS),
-            new LatLngAltitude(NYC_NORTH_EAST_LAT, NYC_NORTH_EAST_LNG, MIN_ALTITUDE_NYC_METERS),
-            new LatLngAltitude(NYC_NORTH_EAST_LAT, NYC_SOUTH_WEST_LNG, MIN_ALTITUDE_NYC_METERS)
-    ));
+    private static final List<LatLngAltitude> baseFace = List.of(new LatLngAltitude(NYC_SOUTH_WEST_LAT, NYC_SOUTH_WEST_LNG, MIN_ALTITUDE_NYC_METERS), new LatLngAltitude(NYC_SOUTH_WEST_LAT, NYC_NORTH_EAST_LNG, MIN_ALTITUDE_NYC_METERS), new LatLngAltitude(NYC_NORTH_EAST_LAT, NYC_NORTH_EAST_LNG, MIN_ALTITUDE_NYC_METERS), new LatLngAltitude(NYC_NORTH_EAST_LAT, NYC_SOUTH_WEST_LNG, MIN_ALTITUDE_NYC_METERS));
 
     private static final List<List<LatLngAltitude>> extrudedNyc = extrudePolygon(baseFace, MAX_ALTITUDE_NYC_METERS);
 
@@ -117,7 +112,6 @@ public final class DataModel {
             List<LatLngAltitude> basePoints,
             double extrusionHeight
     ) {
-        // Validate input
         if (basePoints.size() < 3) {
             System.out.println("Error: Base polygon must have at least 3 points.");
             return Collections.emptyList();
@@ -127,8 +121,6 @@ public final class DataModel {
             return Collections.emptyList();
         }
 
-        // Assuming all base points share this altitude
-        // In a more robust system, you might validate this assumption.
         double baseAltitude = basePoints.get(0).getAltitude();
 
         // 1. Create points for the top face
