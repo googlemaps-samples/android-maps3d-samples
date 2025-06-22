@@ -23,9 +23,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import com.example.maps3dcommon.R
-import com.example.maps3dkotlin.common.DEFAULT_CAMERA
-import com.example.maps3dkotlin.common.toCameraString
-import com.example.maps3dkotlin.common.toValidCamera
+import com.example.maps3d.common.DEFAULT_CAMERA
+import com.example.maps3d.common.toCameraString
+import com.example.maps3d.common.toValidCamera
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnCameraChangedListener

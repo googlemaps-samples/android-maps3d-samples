@@ -14,8 +14,8 @@
  limitations under the License.
 -->
 <resources>
-    <string name="app_name">Maps 3D Samples</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="app_name">Kotlin Maps3D Samples</string>
+    <string name="title_activity_main">Kotlin Maps3D Samples</string>
 
     <!--
     Distance in feet, formatted to 0 decimal places.

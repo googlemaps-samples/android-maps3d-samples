@@ -38,10 +38,10 @@ import com.example.maps3dkotlin.cameracontrols.DataModel.nycCameraRestriction
 import com.example.maps3dkotlin.cameracontrols.DataModel.nycPolygonOptions
 import com.example.maps3dkotlin.cameracontrols.DataModel.EMPIRE_STATE_BUILDING_LATITUDE
 import com.example.maps3dkotlin.cameracontrols.DataModel.EMPIRE_STATE_BUILDING_LONGITUDE
-import com.example.maps3dkotlin.common.copy
-import com.example.maps3dkotlin.common.toCompassDirection
-import com.example.maps3dkotlin.common.toValidCamera
-import com.example.maps3dkotlin.common.wrapIn
+import com.example.maps3d.common.copy
+import com.example.maps3d.common.toCompassDirection
+import com.example.maps3d.common.toValidCamera
+import com.example.maps3d.common.wrapIn
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.material.slider.Slider

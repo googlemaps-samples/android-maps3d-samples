@@ -16,9 +16,9 @@ package com.example.maps3dkotlin.polygons
 
 import android.graphics.Color
 import com.example.maps3dkotlin.cameracontrols.extrudePolygon
-import com.example.maps3dkotlin.common.miles
-import com.example.maps3dkotlin.common.toMeters
-import com.example.maps3dkotlin.common.toValidCamera
+import com.example.maps3d.common.miles
+import com.example.maps3d.common.toMeters
+import com.example.maps3d.common.toValidCamera
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
