@@ -123,7 +123,7 @@ public class PolygonsActivity extends SampleBaseActivity {
     private final List<PolygonOptions> extrudedMuseum = extrudePolygon(
             museumBaseFace, 50.0).stream().map(outline -> {
         PolygonOptions options = new PolygonOptions();
-        options.setOuterCoordinates(outline);
+        options.setPath(outline);
         options.setFillColor(faceFillColor);
         options.setStrokeColor(faceStrokeColor);
         options.setStrokeWidth(faceStrokeWidth);
@@ -179,8 +179,8 @@ public class PolygonsActivity extends SampleBaseActivity {
 
     static {
         zooPolygonOptions = new PolygonOptions();
-        zooPolygonOptions.setOuterCoordinates(PolygonsActivity.zooOutline);
-        zooPolygonOptions.setInnerCoordinates(Collections.singletonList(PolygonsActivity.zooHole));
+        zooPolygonOptions.setPath(PolygonsActivity.zooOutline);
+        zooPolygonOptions.setInnerPaths(Collections.singletonList(PolygonsActivity.zooHole));
         zooPolygonOptions.setFillColor(Color.argb(70, 255, 255, 0));
         zooPolygonOptions.setStrokeColor(Color.GREEN);
         zooPolygonOptions.setStrokeWidth(3.0);

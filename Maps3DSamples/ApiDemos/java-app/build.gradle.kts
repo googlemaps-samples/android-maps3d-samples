@@ -26,7 +26,7 @@ android {
         sarifOutput = file("$buildDir/reports/lint-results.sarif")
     }
     namespace = "com.example.maps3djava"
-    compileSdk = 36
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "com.example.maps3djava"

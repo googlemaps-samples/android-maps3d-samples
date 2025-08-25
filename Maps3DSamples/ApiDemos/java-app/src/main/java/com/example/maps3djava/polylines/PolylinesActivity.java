@@ -88,7 +88,7 @@ public class PolylinesActivity extends SampleBaseActivity implements OnMap3DView
 
     public PolylinesActivity() {
         trailForegroundPolylineOptions = new PolylineOptions();
-        trailForegroundPolylineOptions.setCoordinates(trailLocations);
+        trailForegroundPolylineOptions.setPath(trailLocations);
         trailForegroundPolylineOptions.setStrokeColor(Color.RED);
         trailForegroundPolylineOptions.setStrokeWidth(7.0);
         trailForegroundPolylineOptions.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
@@ -96,7 +96,7 @@ public class PolylinesActivity extends SampleBaseActivity implements OnMap3DView
         trailForegroundPolylineOptions.setDrawsOccludedSegments(true);
 
         trailBackgroundPolylineOptions = new PolylineOptions();
-        trailBackgroundPolylineOptions.setCoordinates(trailLocations);
+        trailBackgroundPolylineOptions.setPath(trailLocations);
         trailBackgroundPolylineOptions.setStrokeColor(trailBackground);
         trailBackgroundPolylineOptions.setStrokeWidth(13.0);
         trailBackgroundPolylineOptions.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);

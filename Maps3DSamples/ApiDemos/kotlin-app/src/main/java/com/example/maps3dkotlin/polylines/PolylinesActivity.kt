@@ -51,7 +51,7 @@ class PolylinesActivity : SampleBaseActivity() {
     }
 
     private val trailForegroundPolylineOptions = polylineOptions {
-        coordinates = trailLocations
+        path = trailLocations
         strokeColor = Color.RED
         strokeWidth = 7.0
         altitudeMode = AltitudeMode.CLAMP_TO_GROUND
@@ -62,7 +62,7 @@ class PolylinesActivity : SampleBaseActivity() {
     private val trailBackground = Color.argb(128, 0, 0, 0)
 
     private val trailBackgroundPolylineOptions = polylineOptions {
-        coordinates = trailLocations
+        path = trailLocations
         strokeColor = trailBackground
         strokeWidth = 13.0
         altitudeMode = AltitudeMode.CLAMP_TO_GROUND

@@ -98,7 +98,7 @@ object DataModel {
 
     val nycPolygonOptions = extrudedNyc.map { facePoints ->
         polygonOptions {
-            outerCoordinates = facePoints
+            path = facePoints
             fillColor = faceFillColor
             strokeColor = faceStrokeColor
             strokeWidth = faceStrokeWidth

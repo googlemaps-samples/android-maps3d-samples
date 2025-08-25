@@ -29,12 +29,13 @@ android {
         sarifOutput = file("$buildDir/reports/lint-results.sarif")
     }
     namespace = "com.example.advancedmaps3dsamples"
-    compileSdk = 35
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "com.example.advancedmaps3dsamples"
-        minSdk = 26
-        targetSdk = 35
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
+
         versionCode = 1
         versionName = "1.1.0"
 
@@ -86,7 +87,10 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.android)
 
-    implementation(libs.play.services.maps3d)
+    api(libs.play.services.base)
+    api("com.google.android.gms:play-services-maps3d:0.0.3")
+    // implementation(libs.play.services.maps3d)
+    api(files("libs/play-services-maps3d-0.0.3.aar"))
 
     testImplementation(libs.google.truth)
 

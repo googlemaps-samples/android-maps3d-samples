@@ -49,7 +49,7 @@ class PolygonsActivity : SampleBaseActivity() {
 
     private val extrudedMuseum = extrudePolygon(museumBaseFace, 50.0).map { outline ->
         polygonOptions {
-            outerCoordinates = outline
+            path = outline
             fillColor = faceFillColor
             strokeColor = faceStrokeColor
             strokeWidth = faceStrokeWidth
@@ -152,8 +152,8 @@ class PolygonsActivity : SampleBaseActivity() {
             }
 
         val zooPolygonOptions = polygonOptions {
-            outerCoordinates = zooOutline
-            innerCoordinates = listOf(zooHole)
+            path = zooOutline
+            innerPaths = listOf(zooHole)
             fillColor = Color.argb(70, 255, 255, 0)
             strokeColor = Color.GREEN
             strokeWidth = 3.0

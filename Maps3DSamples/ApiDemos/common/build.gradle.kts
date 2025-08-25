@@ -1,3 +1,5 @@
+import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.include
+
 /*
  * Copyright 2025 Google LLC
  *
@@ -25,7 +27,7 @@ android {
         sarifOutput = file("$buildDir/reports/lint-results.sarif")
     }
     namespace = "com.example.maps3dcommon"
-    compileSdk = 36
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
@@ -67,6 +69,6 @@ dependencies {
 
     implementation(libs.androidx.material3)
 
-    // Leave this to make the dependency easier to see
-    api("com.google.android.gms:play-services-maps3d:0.0.2")
+    api(libs.play.services.base)
+    api("com.google.android.gms:play-services-maps3d:0.0.3")
 }
