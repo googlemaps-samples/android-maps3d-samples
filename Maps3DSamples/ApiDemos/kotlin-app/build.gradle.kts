@@ -26,12 +26,12 @@ android {
         sarifOutput = file("$buildDir/reports/lint-results.sarif")
     }
     namespace = "com.example.maps3dkotlin"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.maps3dkotlin"
-        minSdk = 26
-        targetSdk = 35
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.1.0"
 
@@ -80,8 +80,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    implementation(libs.play.services.maps3d)
 
     implementation(project(":common"))
 }

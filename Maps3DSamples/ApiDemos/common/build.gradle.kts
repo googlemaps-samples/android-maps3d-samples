@@ -25,10 +25,10 @@ android {
         sarifOutput = file("$buildDir/reports/lint-results.sarif")
     }
     namespace = "com.example.maps3dcommon"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
-        minSdk = 26
+        minSdk = libs.versions.minSdk.get().toInt()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -67,5 +67,8 @@ dependencies {
 
     implementation(libs.androidx.material3)
 
-    implementation("com.google.android.gms:play-services-maps3d:0.0.1")
+    api("com.google.android.gms:play-services-maps3d:0.0.2")
+
+//    api(files("libs/play-services-maps3d-local.apk"))
+//    api(file("app-release-unsigned.apk"))
 }
