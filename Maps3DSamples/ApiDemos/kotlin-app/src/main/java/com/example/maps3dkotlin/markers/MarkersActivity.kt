@@ -14,6 +14,8 @@
 
 package com.example.maps3dkotlin.markers
 
+import android.util.Log
+import android.widget.Toast
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.camera
@@ -21,7 +23,14 @@ import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.CollisionBehavior
 import com.google.android.gms.maps3d.model.Map3DMode
+import com.google.android.gms.maps3d.model.Marker
+import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.markerOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Demonstrates the use of different altitude modes for markers in a 3D map.
@@ -50,77 +59,101 @@ class MarkersActivity : SampleBaseActivity() {
         super.onMap3DViewReady(googleMap3D)
         googleMap3D.setMapMode(Map3DMode.SATELLITE)
 
-        // Marker 1: Absolute
-        googleMap3D.addMarker(markerOptions {
-            id = "marker_one"
-            position = latLngAltitude {
-                latitude = 52.519605780912585
-                longitude = 13.406867190588198
-                altitude = 150.0
+        CoroutineScope(Dispatchers.Main).launch {
+            // Marker 1: Absolute
+            googleMap3D.addMarker(markerOptions {
+                id = "marker_one"
+                position = latLngAltitude {
+                    latitude = 52.519605780912585
+                    longitude = 13.406867190588198
+                    altitude = 150.0
+                }
+                label = "Absolute (150m)"
+                altitudeMode = AltitudeMode.ABSOLUTE
+                isExtruded = true
+                isDrawnWhenOccluded = true
+
+                //  The marker should always be displayed regardless of collision. Markers with
+                //  OPTIONAL_AND_HIDES_LOWER_PRIORITY collision behavior or the default map labels that
+                //  overlap with this marker will be hidden.
+                collisionBehavior = CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL
+            })?.let { marker ->
+                markerClicked(marker)
             }
-            label = "Absolute (150m)"
-            altitudeMode = AltitudeMode.ABSOLUTE
-            isExtruded = true
-            isDrawnWhenOccluded = true
 
-            //  The marker should always be displayed regardless of collision. Markers with
-            //  OPTIONAL_AND_HIDES_LOWER_PRIORITY collision behavior or the default map labels that
-            //  overlap with this marker will be hidden.
-            collisionBehavior = CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL
-        })
+            // Marker 2: Relative to Ground
+            googleMap3D.addMarker(markerOptions {
+                id = "relative_to_ground"
+                position = latLngAltitude {
+                    latitude = 52.519882191069016
+                    longitude = 13.407410777254293
+                    altitude = 50.0
+                }
+                label = "Relative to Ground (50m)"
+                altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+                isExtruded = true
+                isDrawnWhenOccluded = true
 
-        // Marker 2: Relative to Ground
-        googleMap3D.addMarker(markerOptions {
-            id = "relative_to_ground"
-            position = latLngAltitude {
-                latitude = 52.519882191069016
-                longitude = 13.407410777254293
-                altitude = 50.0
+                // The marker should only be displayed if it does not overlap with other markers.
+                // If two markers of this type would overlap, the one with the higher draw order is
+                // shown. If they have the same draw order, the one with the lower vertical screen
+                // position is shown.
+                collisionBehavior = CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY
+            })?.let { marker ->
+                markerClicked(marker)
             }
-            label = "Relative to Ground (50m)"
-            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-            isExtruded = true
-            isDrawnWhenOccluded = true
 
-            // The marker should only be displayed if it does not overlap with other markers.
-            // If two markers of this type would overlap, the one with the higher draw order is
-            // shown. If they have the same draw order, the one with the lower vertical screen
-            // position is shown.
-            collisionBehavior = CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY
-        })
+            // Marker 3: Clamped to Ground
+            googleMap3D.addMarker(markerOptions {
+                id = "clamped_to_ground"
+                position = latLngAltitude {
+                    latitude = 52.52027645136134
+                    longitude = 13.408271658592406
+                    altitude =
+                        0.0  // altitude is effectively ignored by CLAMP_TO_GROUND for rendering,
+                    // but might be relevant if you read the marker's position later.
+                    // For CLAMP_TO_GROUND, it's often set to 0.0.
+                }
+                label = "Clamped to Ground"
+                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                isExtruded = true
+                isDrawnWhenOccluded = true
 
-        // Marker 3: Clamped to Ground
-        googleMap3D.addMarker(markerOptions {
-            id = "clamped_to_ground"
-            position = latLngAltitude {
-                latitude = 52.52027645136134
-                longitude = 13.408271658592406
-                altitude = 0.0  // altitude is effectively ignored by CLAMP_TO_GROUND for rendering,
-                // but might be relevant if you read the marker's position later.
-                // For CLAMP_TO_GROUND, it's often set to 0.0.
+                // The marker should always be displayed regardless of collision
+                collisionBehavior = CollisionBehavior.REQUIRED
+            })?.let { marker ->
+                markerClicked(marker)
             }
-            label = "Clamped to Ground"
-            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-            isExtruded = true
-            isDrawnWhenOccluded = true
 
-            // The marker should always be displayed regardless of collision
-            collisionBehavior = CollisionBehavior.REQUIRED
-        })
-
-        // Marker 4: Relative to Mesh
-        googleMap3D.addMarker(markerOptions {
-            // With no id, one will be provided automatically
-            position = latLngAltitude {
-                latitude = 52.520835071144226
-                longitude = 13.409426847943774
-                altitude = 10.0 // Altitude relative to 3D mesh (buildings, terrain features)
+            // Marker 4: Relative to Mesh
+            googleMap3D.addMarker(markerOptions {
+                // With no id, one will be provided automatically
+                position = latLngAltitude {
+                    latitude = 52.520835071144226
+                    longitude = 13.409426847943774
+                    altitude = 10.0 // Altitude relative to 3D mesh (buildings, terrain features)
+                }
+                label = "Relative to Mesh (10m)"
+                altitudeMode = AltitudeMode.RELATIVE_TO_MESH
+                isExtruded = true
+                isDrawnWhenOccluded = true
+                // collisionBehavior defaults to CollisionBehavior.REQUIRED
+            })?.let { marker ->
+                markerClicked(marker)
             }
-            label = "Relative to Mesh (10m)"
-            altitudeMode = AltitudeMode.RELATIVE_TO_MESH
-            isExtruded = true
-            isDrawnWhenOccluded = true
-            // collisionBehavior defaults to CollisionBehavior.REQUIRED
-        })
+        }
+    }
+
+    private fun markerClicked(marker: Marker) {
+        Log.w("MarkersActivity", "Marker added: ${marker.id}")
+        marker.setClickListener {
+            CoroutineScope(Dispatchers.Main).launch {
+                Toast.makeText(
+                    /* context = */ this@MarkersActivity,
+                    /* text = */ "Clicked on marker: ${marker.label}",
+                    /* duration = */ Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 }

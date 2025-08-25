@@ -15,10 +15,12 @@
 package com.example.maps3dkotlin.polygons
 
 import android.graphics.Color
-import com.example.maps3dkotlin.cameracontrols.extrudePolygon
+import android.util.Log
+import android.widget.Toast
 import com.example.maps3d.common.miles
 import com.example.maps3d.common.toMeters
 import com.example.maps3d.common.toValidCamera
+import com.example.maps3dkotlin.cameracontrols.extrudePolygon
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
@@ -26,8 +28,14 @@ import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Hole
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.polygonOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 class PolygonsActivity : SampleBaseActivity() {
     override val TAG = this::class.java.simpleName
@@ -63,13 +71,46 @@ class PolygonsActivity : SampleBaseActivity() {
         super.onMap3DViewReady(googleMap3D)
         googleMap3D.setMapMode(Map3DMode.HYBRID)
 
-        // Add extruded polygons to the map.  The returned list of polygons can be used to remove them at a later time.
-        val museumPolygons = extrudedMuseum.map { face ->
-            googleMap3D.addPolygon(face)
-        }
+        CoroutineScope(Dispatchers.Main).launch {
+            delay(3.seconds)
 
-        // Add a zoo polygon to the map.
-        val zooPolygon = googleMap3D.addPolygon(zooPolygonOptions)
+            googleMap3D.flyCameraTo(
+                flyToOptions {
+                    endCamera = initialCamera
+                    durationInMillis = 1_000
+                }
+            )
+
+            // Add extruded polygons to the map.  The returned list of polygons can be used to remove them at a later time.
+            val museumPolygons = extrudedMuseum.map { face ->
+                googleMap3D.addPolygon(face).also { polygon ->
+                    polygon.setClickListener {
+                        Log.w(TAG, "Clicked on museum polygon")
+                        CoroutineScope(Dispatchers.Main).launch {
+                            Toast.makeText(
+                                this@PolygonsActivity,
+                                "Check out the Museum!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            }
+
+            // Add a zoo polygon to the map.
+            val zooPolygon = googleMap3D.addPolygon(zooPolygonOptions).also { polygon ->
+                polygon.setClickListener {
+                    Log.w(TAG, "Clicked on zoo polygon")
+                    CoroutineScope(Dispatchers.Main).launch {
+                        Toast.makeText(
+                            this@PolygonsActivity,
+                            "Zoo time",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
     }
 
     companion object {

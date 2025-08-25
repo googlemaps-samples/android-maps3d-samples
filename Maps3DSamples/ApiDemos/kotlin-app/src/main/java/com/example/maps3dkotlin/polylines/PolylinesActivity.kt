@@ -15,6 +15,8 @@
 package com.example.maps3dkotlin.polylines
 
 import android.graphics.Color
+import android.util.Log
+import android.widget.Toast
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DView
@@ -24,6 +26,9 @@ import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.polylineOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Activity that demonstrates the use of polylines on a 3D map.
@@ -74,8 +79,19 @@ class PolylinesActivity : SampleBaseActivity() {
         super.onMap3DViewReady(googleMap3D)
         googleMap3D.setMapMode(Map3DMode.HYBRID)
 
-        googleMap3D.addPolyline(trailBackgroundPolylineOptions)
-        googleMap3D.addPolyline(trailForegroundPolylineOptions)
+        CoroutineScope(Dispatchers.Main).launch {
+            googleMap3D.addPolyline(trailBackgroundPolylineOptions)
+            googleMap3D.addPolyline(trailForegroundPolylineOptions).setClickListener {
+                Log.w(TAG, "Clicked on trail polyline")
+                CoroutineScope(Dispatchers.Main).launch {
+                    Toast.makeText(
+                        /* context = */ this@PolylinesActivity,
+                        /* text = */ "Hiking time!",
+                        /* duration = */ Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
     }
 
     companion object {

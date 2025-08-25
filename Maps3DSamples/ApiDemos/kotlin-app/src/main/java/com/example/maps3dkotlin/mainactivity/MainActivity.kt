@@ -44,11 +44,12 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maps3dcommon.R
-import com.example.maps3dkotlin.polygons.PolygonsActivity
 import com.example.maps3dkotlin.cameracontrols.CameraControlsActivity
 import com.example.maps3dkotlin.hellomap.HelloMapActivity
+import com.example.maps3dkotlin.mapinteractions.MapInteractionsActivity
 import com.example.maps3dkotlin.markers.MarkersActivity
 import com.example.maps3dkotlin.models.ModelsActivity
+import com.example.maps3dkotlin.polygons.PolygonsActivity
 import com.example.maps3dkotlin.polylines.PolylinesActivity
 import com.example.maps3dkotlin.theme.Maps3DSamplesTheme
 import kotlinx.coroutines.CoroutineScope
@@ -65,6 +66,7 @@ class MainActivity : ComponentActivity() {
         R.string.feature_title_polygons to PolygonsActivity::class.java,
         R.string.feature_title_polylines to PolylinesActivity::class.java,
         R.string.feature_title_3d_models to ModelsActivity::class.java,
+        R.string.feature_title_map_interactions to MapInteractionsActivity::class.java,
     )
 
     @OptIn(ExperimentalMaterial3Api::class)

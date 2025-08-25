@@ -34,10 +34,15 @@ import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Base activity for sample map activities.
@@ -207,7 +212,10 @@ abstract class SampleBaseActivity : Activity(), OnMap3DViewReadyCallback {
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
         this.googleMap3D = googleMap3D
 
-        googleMap3D.setCamera(initialCamera)
+        CoroutineScope(Dispatchers.Main).launch {
+            delay(100.milliseconds)
+            googleMap3D.setCamera(initialCamera)
+        }
     }
 
     @CallSuper
