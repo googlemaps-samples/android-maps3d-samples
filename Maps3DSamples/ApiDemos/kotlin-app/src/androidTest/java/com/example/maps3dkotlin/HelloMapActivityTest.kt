@@ -8,6 +8,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.maps3dcommon.R
 import com.example.maps3dkotlin.hellomap.HelloMapActivity
+import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -15,7 +16,10 @@ import org.junit.runner.RunWith
 class HelloMapActivityTest {
     @Test
     fun testMapIsDisplayed() {
-        ActivityScenario.launch(HelloMapActivity::class.java)
+        val scenario = ActivityScenario.launch(HelloMapActivity::class.java)
         onView(withId(R.id.map3dView)).check(matches(isDisplayed()))
+        scenario.onActivity { activity ->
+            assertThat(activity.isFinishing).isFalse()
+        }
     }
 }

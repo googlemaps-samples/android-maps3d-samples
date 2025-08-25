@@ -17,8 +17,7 @@ import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertNotNull
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -114,10 +113,10 @@ class CameraControlsActivityTest : OnMap3DViewReadyCallback {
         steadyLatch.await(5, TimeUnit.SECONDS)
 
         val cameraPosition = googleMap?.getCamera()
-        assertNotNull(cameraPosition)
+        assertThat(cameraPosition).isNotNull()
         cameraPosition?.let {
-            assertEquals(DataModel.EMPIRE_STATE_BUILDING_LATITUDE, it.center.latitude, 0.01)
-            assertEquals(DataModel.EMPIRE_STATE_BUILDING_LONGITUDE, it.center.longitude, 0.01)
+            assertThat(it.center.latitude).isWithin(0.01).of(DataModel.EMPIRE_STATE_BUILDING_LATITUDE)
+            assertThat(it.center.longitude).isWithin(0.01).of(DataModel.EMPIRE_STATE_BUILDING_LONGITUDE)
         }
     }
 
@@ -135,10 +134,10 @@ class CameraControlsActivityTest : OnMap3DViewReadyCallback {
         }
 
         val cameraPosition = googleMap?.getCamera()
-        assertNotNull(cameraPosition)
+        assertThat(cameraPosition).isNotNull()
         cameraPosition?.let {
-            assertEquals(40.7, it.center.latitude, 0.1)
-            assertEquals(-74.0, it.center.longitude, 0.1)
+            assertThat(it.center.latitude).isWithin(0.1).of(40.7)
+            assertThat(it.center.longitude).isWithin(0.1).of(-74.0)
         }
     }
 }
