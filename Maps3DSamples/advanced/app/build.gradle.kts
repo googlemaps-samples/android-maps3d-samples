@@ -89,8 +89,6 @@ dependencies {
 
     api(libs.play.services.base)
     api("com.google.android.gms:play-services-maps3d:0.0.3")
-    // implementation(libs.play.services.maps3d)
-    api(files("libs/play-services-maps3d-0.0.3.aar"))
 
     testImplementation(libs.google.truth)
 
