@@ -67,8 +67,6 @@ dependencies {
 
     implementation(libs.androidx.material3)
 
+    // Leave this to make the dependency easier to see
     api("com.google.android.gms:play-services-maps3d:0.0.2")
-
-//    api(files("libs/play-services-maps3d-local.apk"))
-//    api(file("app-release-unsigned.apk"))
 }
