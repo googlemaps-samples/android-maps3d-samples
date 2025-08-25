@@ -1,5 +1,6 @@
 package com.example.maps3dkotlin.cameracontrols
 
+import android.util.Log
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -17,13 +18,19 @@ import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(AndroidJUnit4::class)
 class CameraControlsActivityTest : OnMap3DViewReadyCallback {
@@ -52,6 +59,11 @@ class CameraControlsActivityTest : OnMap3DViewReadyCallback {
             mapFragment.getMap3DViewAsync(this)
         }
         mapReadyLatch.await(5, TimeUnit.SECONDS)
+
+        // Let the initial animation finish
+        CoroutineScope(Dispatchers.Main).launch {
+            delay(2.seconds)
+        }
     }
 
     @After
@@ -108,5 +120,40 @@ class CameraControlsActivityTest : OnMap3DViewReadyCallback {
             assertEquals(DataModel.EMPIRE_STATE_BUILDING_LATITUDE, it.center.latitude, 0.01)
             assertEquals(DataModel.EMPIRE_STATE_BUILDING_LONGITUDE, it.center.longitude, 0.01)
         }
+    }
+
+    @Test
+    fun testFlyAround() {
+        // Wait for the initial animation to complete.
+        var steadyLatch = CountDownLatch(1)
+        scenario.onActivity {
+            googleMap?.setOnMapSteadyListener { isSteady ->
+                Log.w("CameraControlsActivityTest", "Map steady callback called 1")
+                if (isSteady) {
+                    Log.w("CameraControlsActivityTest", "Map is steady on load")
+                    steadyLatch.countDown()
+                }
+            }
+        }
+        steadyLatch.await(30, TimeUnit.SECONDS)
+
+        // Click the "Fly Around" button.
+        onView(withId(R.id.fly_around)).perform(click())
+
+        var steady = false
+        // Wait for the fly around animation to complete.
+        steadyLatch = CountDownLatch(1)
+        scenario.onActivity {
+            googleMap?.setOnMapSteadyListener { isSteady ->
+                Log.w("CameraControlsActivityTest", "Map steady callback called 2")
+                if (isSteady) {
+                    Log.w("CameraControlsActivityTest", "Map is steady after fly around")
+                    steadyLatch.countDown()
+                    steady = true
+                }
+            }
+        }
+        steadyLatch.await(30, TimeUnit.SECONDS)
+        assertEquals(true, steady)
     }
 }
