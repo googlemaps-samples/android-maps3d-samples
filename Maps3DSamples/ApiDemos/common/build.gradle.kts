@@ -70,5 +70,5 @@ dependencies {
     implementation(libs.androidx.material3)
 
     api(libs.play.services.base)
-    api("com.google.android.gms:play-services-maps3d:0.0.3")
+    compileOnly(files("libs/play-services-maps3d-0.0.3.aar"))
 }

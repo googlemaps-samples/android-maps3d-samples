@@ -14,11 +14,13 @@
 
 package com.example.maps3dkotlin.mainactivity
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,7 +42,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maps3dcommon.R
@@ -52,21 +53,37 @@ import com.example.maps3dkotlin.models.ModelsActivity
 import com.example.maps3dkotlin.polygons.PolygonsActivity
 import com.example.maps3dkotlin.polylines.PolylinesActivity
 import com.example.maps3dkotlin.theme.Maps3DSamplesTheme
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
+ * A data class to represent a single sample in the list.
+ * Using a data class provides type safety and makes the code more readable
+ * compared to using a Map or a Pair.
+ *
+ * @param titleResId The string resource ID for the sample's title.
+ * @param activityClass The activity to launch for this sample. Null if not implemented.
+ */
+data class Sample(
+    @StringRes val titleResId: Int,
+    val activityClass: Class<out Activity>?
+)
+
+/**
  * The main activity of the 3D Maps SDK Samples application.
+ * This activity displays a list of available samples that users can select from.
  */
 class MainActivity : ComponentActivity() {
-    private val sampleActivities = mapOf(
-        R.string.feature_title_overview_hello_3d_map to HelloMapActivity::class.java,
-        R.string.feature_title_camera_controls to CameraControlsActivity::class.java,
-        R.string.feature_title_markers to MarkersActivity::class.java,
-        R.string.feature_title_polygons to PolygonsActivity::class.java,
-        R.string.feature_title_polylines to PolylinesActivity::class.java,
-        R.string.feature_title_3d_models to ModelsActivity::class.java,
-        R.string.feature_title_map_interactions to MapInteractionsActivity::class.java,
+
+    // A list of all the samples to be displayed in the app.
+    // This approach is more idiomatic and type-safe than using a map.
+    private val samples = listOf(
+        Sample(R.string.feature_title_overview_hello_3d_map, HelloMapActivity::class.java),
+        Sample(R.string.feature_title_camera_controls, CameraControlsActivity::class.java),
+        Sample(R.string.feature_title_markers, MarkersActivity::class.java),
+        Sample(R.string.feature_title_polygons, PolygonsActivity::class.java),
+        Sample(R.string.feature_title_polylines, PolylinesActivity::class.java),
+        Sample(R.string.feature_title_3d_models, ModelsActivity::class.java),
+        Sample(R.string.feature_title_map_interactions, MapInteractionsActivity::class.java),
     )
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -76,8 +93,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Maps3DSamplesTheme {
-                val coroutineScope = rememberCoroutineScope()
                 val snackbarHostState = remember { SnackbarHostState() }
+                val coroutineScope = rememberCoroutineScope()
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -87,51 +104,40 @@ class MainActivity : ComponentActivity() {
                     snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
                 ) { innerPadding ->
                     SampleMenuList(
-                        sampleActivities = sampleActivities,
-                        modifier = Modifier.padding(innerPadding) // Pass padding to content
-                    ) { activity ->
-                        if (activity != null) {
-                            launchSampleActivity(activity)
+                        samples = samples,
+                        modifier = Modifier.padding(innerPadding)
+                    ) { sample ->
+                        val activityClass = sample.activityClass
+                        if (activityClass != null) {
+                            startActivity(Intent(this, activityClass))
                         } else {
-                            showSnackbar(
-                                message = getString(R.string.feature_not_implemented),
-                                coroutineScope = coroutineScope,
-                                snackbarHostState = snackbarHostState
-                            )
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = getString(R.string.feature_not_implemented)
+                                )
+                            }
                         }
                     }
                 }
             }
         }
     }
-
-    private fun showSnackbar(
-        message: String,
-        coroutineScope: CoroutineScope,
-        snackbarHostState: SnackbarHostState
-    ) {
-        coroutineScope.launch {
-            snackbarHostState.showSnackbar(message = message)
-        }
-    }
-
-    private fun launchSampleActivity(activity: Class<*>) {
-        val intent = Intent(this, activity)
-        startActivity(intent)
-    }
 }
 
 /**
- * Composable function to display the list of samples.
- * @param sampleActivities List of sample names.
- * @param modifier Modifier to be applied to the Column.
- * @param onItemClick Lambda to be invoked when an item is clicked.
+ * A Composable function that displays the list of samples.
+ * This function is responsible for rendering the list of available map samples.
+ * It uses a `LazyColumn` for efficient rendering of the list.
+ *
+ * @param samples The list of samples to display.
+ * @param modifier A `Modifier` to be applied to the layout.
+ * @param onItemClick A callback that is invoked when a sample is clicked.
  */
 @Composable
 fun SampleMenuList(
-    sampleActivities: Map<Int, Class<*>?>,
+    samples: List<Sample>,
     modifier: Modifier = Modifier,
-    onItemClick: (Class<*>?) -> Unit
+    onItemClick: (Sample) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -140,15 +146,9 @@ fun SampleMenuList(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
-
-            item {
-                // TODO
-                Text("Flows demos (probably in a different) module?", fontStyle = FontStyle.Italic)
-            }
-
-            items(sampleActivities.entries.toList()) { (sampleLabelId, activity) ->
-                SampleListItem(sampleLabelId = sampleLabelId, enabled = activity != null) {
-                    onItemClick(activity)
+            items(samples) { sample ->
+                SampleListItem(sample = sample) {
+                    onItemClick(sample)
                 }
                 HorizontalDivider()
             }
@@ -157,20 +157,30 @@ fun SampleMenuList(
 }
 
 /**
- * Composable function for a single item in the sample list.
- * @param sampleLabelId The name of the sample.
- * @param onClick Lambda to be invoked when the item is clicked.
+ * A Composable function for a single item in the sample list.
+ * This function displays the title of the sample and handles click events.
+ * The item's appearance changes based on whether the feature is enabled.
+ *
+ * @param sample The sample to display.
+ * @param onClick A callback that is invoked when the item is clicked.
  */
 @Composable
-fun SampleListItem(sampleLabelId: Int, enabled: Boolean, onClick: () -> Unit) {
+fun SampleListItem(sample: Sample, onClick: () -> Unit) {
+    val isEnabled = sample.activityClass != null
+    val color = if (isEnabled) {
+        MaterialTheme.colorScheme.onBackground
+    } else {
+        MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+    }
+
     Text(
-        text = stringResource(sampleLabelId),
+        text = stringResource(sample.titleResId),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(enabled = isEnabled, onClick = onClick)
             .padding(vertical = 16.dp, horizontal = 8.dp),
         fontSize = 18.sp,
         style = MaterialTheme.typography.bodyMedium,
-        color = if (enabled) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+        color = color,
     )
 }

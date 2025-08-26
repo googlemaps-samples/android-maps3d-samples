@@ -84,6 +84,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(project(":common"))
+    implementation(files("../common/libs/play-services-maps3d-0.0.3.aar"))
 }
 
 secrets {

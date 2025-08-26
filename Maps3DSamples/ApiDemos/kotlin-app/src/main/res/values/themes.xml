@@ -15,8 +15,9 @@
 -->
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Maps3DSamples" parent="Theme.Material3.DayNight.NoActionBar"> // Or another M3 theme
-        <item name="colorPrimary">@color/purple_500</item> <item name="colorOnPrimary">@color/white</item>
+    <style name="Theme.Maps3DSamples" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/teal_200</item>
         <item name="colorOnSecondary">@color/black</item>
     </style>
