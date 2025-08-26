@@ -16,6 +16,7 @@ package com.example.maps3dkotlin.models
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.example.maps3d.common.awaitCameraUpdate
 import com.example.maps3d.common.toCameraUpdate
@@ -33,6 +34,7 @@ import com.google.android.gms.maps3d.model.modelOptions
 import com.google.android.gms.maps3d.model.orientation
 import com.google.android.gms.maps3d.model.vector3D
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.sample
@@ -147,7 +149,17 @@ class ModelsActivity : SampleBaseActivity() {
                     z = PLANE_SCALE
                 }
             }
-        )
+        ).also { model ->
+            model.setClickListener {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@ModelsActivity,
+                        "Model clicked",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
     }
 
     /**
