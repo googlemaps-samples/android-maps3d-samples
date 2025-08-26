@@ -19,6 +19,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.annotation.CallSuper
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -67,7 +68,7 @@ import kotlin.time.Duration.Companion.milliseconds
  *
  * The activity layout includes a [Map3DView], a snapshot button, and a recenter button.
  */
-abstract class SampleBaseActivity : Activity(), OnMap3DViewReadyCallback {
+abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     protected lateinit var map3DView: Map3DView
     protected var googleMap3D: GoogleMap3D? = null
 
