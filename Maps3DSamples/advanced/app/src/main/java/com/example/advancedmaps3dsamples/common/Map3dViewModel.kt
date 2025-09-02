@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
 
@@ -73,8 +74,12 @@ abstract class Map3dViewModel : ViewModel() {
 
   // --- Camera Position from Map & Pending Requests ---
   // This is guaranteed to always be a valid camera
-  private val _currentCamera = MutableStateFlow(DEFAULT_CAMERA)
-  val currentCamera = _currentCamera.asStateFlow()
+  private val _currentCamera = MutableSharedFlow<Camera>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+  val currentCamera = _currentCamera.stateIn(
+    scope = viewModelScope,
+    started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+    initialValue = DEFAULT_CAMERA
+  )
 
   private val mapObjects = mutableMapOf<String, MapObject>()
 
@@ -96,7 +101,7 @@ abstract class Map3dViewModel : ViewModel() {
     onBufferOverflow = BufferOverflow.DROP_OLDEST
   )
 
-  private val activeMapObjects = mutableMapOf<String, ActiveMapObject>()
+  internal val activeMapObjects = mutableMapOf<String, ActiveMapObject>()
 
   val mapReady = _googleMap3D.map { it != null }
 
@@ -108,7 +113,7 @@ abstract class Map3dViewModel : ViewModel() {
         if (controller != null) {
           launch {
             getCameraFlow(controller).collect { camera ->
-              _currentCamera.value = camera
+              _currentCamera.tryEmit(camera)
             }
           }
           addMapObjects(mapObjects, controller)
@@ -163,7 +168,7 @@ abstract class Map3dViewModel : ViewModel() {
         // Send the new camera position to the flow's channel
         trySend(newPosition)
         // Also update the private state
-        _currentCamera.value = newPosition
+        _currentCamera.tryEmit(newPosition)
       }
 
       // Get the current map instance (ensure it's not null before setting listener)
@@ -175,7 +180,8 @@ abstract class Map3dViewModel : ViewModel() {
       controller.getCamera()?.let { initial ->
         val newPosition = initial.toValidCamera()
         trySend(newPosition)
-        _currentCamera.value = newPosition // Also update private state on collection
+        // Also update the private state
+        _currentCamera.tryEmit(newPosition)
       }
 
       // The awaitClose block runs when the collector is cancelled
