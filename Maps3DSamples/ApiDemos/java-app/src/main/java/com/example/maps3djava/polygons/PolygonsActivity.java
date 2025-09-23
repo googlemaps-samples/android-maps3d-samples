@@ -21,7 +21,7 @@ import static com.example.maps3djava.cameracontrols.DataModel.extrudePolygon;
 import android.graphics.Color;
 
 import com.example.maps3d.common.UnitsKt;
-import com.example.maps3djava.R;
+import com.example.maps3dcommon.R;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;

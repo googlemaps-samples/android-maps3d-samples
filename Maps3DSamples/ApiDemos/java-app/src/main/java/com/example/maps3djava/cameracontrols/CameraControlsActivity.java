@@ -14,16 +14,22 @@
 
 package com.example.maps3djava.cameracontrols;
 
+import static com.example.maps3d.common.UtilitiesKt.toCompassDirection;
+import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
+import static com.example.maps3d.common.UtilitiesKt.wrapIn;
+
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.core.view.WindowCompat;
 
+import com.example.maps3dcommon.R;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback;
-import com.example.maps3dcommon.R;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyAroundOptions;
 import com.google.android.gms.maps3d.model.FlyToOptions;
@@ -32,15 +38,10 @@ import com.google.android.gms.maps3d.model.Map3DMode;
 import com.google.android.gms.maps3d.model.Polygon;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.slider.Slider;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import android.os.Handler;
-import android.os.Looper;
-
-import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
-import static com.example.maps3d.common.UtilitiesKt.toCompassDirection;
-import static com.example.maps3d.common.UtilitiesKt.wrapIn;
 
 
 
@@ -197,8 +198,8 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
         googleMap3D.setOnMapSteadyListener(isSteady -> {
             if (isSteady) {
                 googleMap3D.setOnMapSteadyListener(null);
-                new Handler(Looper.getMainLooper()).postDelayed(this::flyToEmpireStateBuilding,
-                        TimeUnit.SECONDS.toMillis(2));
+                // Use postDelayed on a view for a simpler way to delay UI-related tasks.
+                map3DView.postDelayed(this::flyToEmpireStateBuilding, TimeUnit.SECONDS.toMillis(2));
             }
         });
     }
@@ -269,51 +270,29 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
      * string that is displayed in the `cameraStateText` TextView.
      * <p>
      * It also appends the compass direction based on the camera's heading.
-     * <p>
-     * The update to the TextView is performed on the main thread using a coroutine.
      *
      * @param camera The [Camera] object representing the current camera position.
      */
     private void updateCameraPosition(@NonNull Camera camera) {
-        String nbsp = "\u00A0";
-
         double heading = camera.getHeading() != null ? camera.getHeading() : 0.0;
         double tilt = camera.getTilt() != null ? camera.getTilt() : 0.0;
         double range = camera.getRange() != null ? camera.getRange() : 0.0;
         double roll = camera.getRoll() != null ? camera.getRoll() : 0.0;
 
-
-        StringBuilder cameraStateStringBuilder = new StringBuilder();
-        // Latitude
-        cameraStateStringBuilder.append(getString(R.string.cam_lat_label, camera.getCenter().getLatitude()));
-        cameraStateStringBuilder.append(", ");
-
-        // Longitude
-        cameraStateStringBuilder.append(getString(R.string.cam_lng_label, camera.getCenter().getLongitude()));
-        cameraStateStringBuilder.append(",\n");
-
-        // Altitude
-        cameraStateStringBuilder.append(getString( R.string.cam_alt_label, camera.getCenter().getAltitude()));
-        cameraStateStringBuilder.append(", ");
-
-        // Heading
-        cameraStateStringBuilder.append(getString(R.string.cam_hdg_label, heading));
-        String compassString = toCompassDirection(heading);
-        cameraStateStringBuilder.append(nbsp).append("(").append(compassString).append(")");
-        cameraStateStringBuilder.append(", ");
-
-        // Tilt
-        cameraStateStringBuilder.append(getString(R.string.cam_tlt_label, tilt));
-        cameraStateStringBuilder.append(", ");
-
-        // Range
-        cameraStateStringBuilder.append(getString(R.string.cam_rng_label, range));
-
-        String cameraStateString = cameraStateStringBuilder.toString();
+        String cameraStateString = getString(R.string.camera_state_format,
+            camera.getCenter().getLatitude(),
+            camera.getCenter().getLongitude(),
+            camera.getCenter().getAltitude(),
+            heading,
+            toCompassDirection(heading),
+            tilt,
+            range
+        );
 
         float resetValue = (float) wrapIn(roll, -180f, 180f);
 
-        new Handler(Looper.getMainLooper()).post(() -> {
+        // Post the UI updates to the main thread.
+        runOnUiThread(() -> {
             cameraStateText.setText(cameraStateString);
             rollSlider.setValue(resetValue);
             updateRollSliderLabel(resetValue);

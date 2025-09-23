@@ -17,6 +17,9 @@
     <string name="app_name">Maps 3D Samples</string>
     <string name="title_activity_main">MainActivity</string>
 
+    <string name="java_app_name">Java Maps3D Samples</string>
+    <string name="java_title_activity_main">Java Maps3D Samples</string>
+
     <string name="samples_menu_title">3D Maps SDK Samples</string>
 
     <string name="feature_title_overview_hello_3d_map">Hello 3D Maps</string>
@@ -81,5 +84,9 @@
     -->
     <string name="in_kilometers" translatable="false">%1$,.1f km</string>
 
-
+    <string name="camera_state_format">Lat: %.4f, Lng: %.4f, Alt: %.2fm\nHdg: %.2f° (%s), Tlt: %.2f°, Rng: %.2fm</string>
+    <string name="polygon_museum_clicked">Check out the Museum!</string>
+    <string name="polygon_zoo_clicked">Zoo time</string>
+    <string name="polyline_trail_clicked">Hiking time!</string>
+    <string name="model_plane_clicked">Model clicked</string>
 </resources>

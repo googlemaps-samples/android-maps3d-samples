@@ -20,7 +20,8 @@ import android.graphics.Color;
 
 import androidx.annotation.NonNull;
 
-import com.example.maps3djava.R;
+import com.example.maps3dcommon.R;
+
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback;
