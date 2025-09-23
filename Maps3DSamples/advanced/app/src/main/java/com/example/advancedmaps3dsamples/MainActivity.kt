@@ -43,7 +43,7 @@ import com.example.advancedmaps3dsamples.scenarios.ScenariosActivity
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
 import dagger.hilt.android.AndroidEntryPoint
 
-data class MapSample(@StringRes val label: Int, val clazz: Class<*>)
+data class MapSample(@param:StringRes val label: Int, val clazz: Class<*>)
 
 private val samples =
     listOf(

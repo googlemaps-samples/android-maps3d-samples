@@ -26,7 +26,7 @@ plugins {
 
 android {
     lint {
-        sarifOutput = file("$buildDir/reports/lint-results.sarif")
+        sarifOutput = layout.buildDirectory.file("reports/lint-results.sarif").get().asFile
     }
     namespace = "com.example.advancedmaps3dsamples"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -88,7 +88,9 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.android)
 
-    implementation(libs.play.services.maps3d)
+    //  implementation(libs.play.services.maps3d)
+    implementation(libs.play.services.base)
+    implementation(files("../app/libs/play-services-maps3d-0.0.3.aar"))
 
     testImplementation(libs.google.truth)
 

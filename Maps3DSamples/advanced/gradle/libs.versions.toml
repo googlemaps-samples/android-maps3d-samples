@@ -17,6 +17,7 @@ composeBom = "2025.09.00"
 hilt = "2.57.1"
 ksp = "2.2.20-2.0.2"
 playServicesMaps3d = "0.0.2"
+playServicesBase = "18.8.0"
 secretsGradlePlugin = "2.0.1"
 truth = "1.4.5"
 mapsUtilsKtx = "5.2.0"
@@ -45,6 +46,7 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 play-services-maps3d = { module = "com.google.android.gms:play-services-maps3d", version.ref = "playServicesMaps3d" }
 maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version.ref = "mapsUtilsKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "playServicesBase" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
