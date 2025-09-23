@@ -35,7 +35,6 @@ android {
         applicationId = "com.example.advancedmaps3dsamples"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-
         versionCode = 1
         versionName = "1.1.0"
 
@@ -55,8 +54,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
     }
     buildFeatures {
         compose = true
@@ -87,9 +88,7 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.android)
 
-    api(libs.play.services.base)
-    // api("com.google.android.gms:play-services-maps3d:0.0.3")
-    api(files("libs/play-services-maps3d-0.0.3.aar"))
+    implementation(libs.play.services.maps3d)
 
     testImplementation(libs.google.truth)
 

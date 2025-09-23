@@ -1,5 +1,3 @@
-import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.include
-
 /*
  * Copyright 2025 Google LLC
  *
@@ -50,8 +48,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
     }
 }
 
@@ -69,8 +69,5 @@ dependencies {
 
     implementation(libs.androidx.material3)
 
-    api(libs.play.services.base)
-    api("com.google.android.gms:play-services-maps3d:0.0.3")
-    // compileOnly(files("libs/play-services-maps3d-0.0.3.aar"))
-//    api(files("libs/play-services-maps3d-0.0.3.aar"))
+    implementation(libs.play.services.maps3d)
 }
