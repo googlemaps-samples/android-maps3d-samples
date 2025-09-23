@@ -19,11 +19,13 @@ import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
 import static com.example.maps3djava.cameracontrols.DataModel.extrudePolygon;
 
 import android.graphics.Color;
+import android.widget.Toast;
 
 
 import com.example.maps3d.common.UnitsKt;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
+import com.google.android.gms.maps3d.OnPolygonClickListener;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.Hole;
@@ -144,8 +146,17 @@ public class PolygonsActivity extends SampleBaseActivity {
                 .map(googleMap3D::addPolygon)
                 .collect(Collectors.toList());
 
+        for (com.google.android.gms.maps3d.model.Polygon polygon : museumPolygons) {
+            polygon.setClickListener(() -> PolygonsActivity.this.runOnUiThread(() -> {
+                Toast.makeText(PolygonsActivity.this, "Check out the Museum!", Toast.LENGTH_SHORT).show();
+            }));
+        }
+
         // Add a zoo polygon to the map.
         com.google.android.gms.maps3d.model.Polygon zooPolygon = googleMap3D.addPolygon(zooPolygonOptions);
+        zooPolygon.setClickListener(() -> PolygonsActivity.this.runOnUiThread(() -> {
+            Toast.makeText(PolygonsActivity.this, "Zoo time", Toast.LENGTH_SHORT).show();
+        }));
     }
 
     public static class Companion {

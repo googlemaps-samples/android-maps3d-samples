@@ -15,10 +15,12 @@
 package com.example.maps3djava.polylines;
 
 import android.graphics.Color;
+import android.widget.Toast;
 
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback;
+import com.google.android.gms.maps3d.OnPolylineClickListener;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
@@ -115,7 +117,8 @@ public class PolylinesActivity extends SampleBaseActivity implements OnMap3DView
         super.onMap3DViewReady(googleMap3D);
         googleMap3D.setMapMode(Map3DMode.HYBRID);
         googleMap3D.addPolyline(trailBackgroundPolylineOptions);
-        googleMap3D.addPolyline(trailForegroundPolylineOptions);
+        com.google.android.gms.maps3d.model.Polyline foregroundPolyline = googleMap3D.addPolyline(trailForegroundPolylineOptions);
+        foregroundPolyline.setClickListener(() -> PolylinesActivity.this.runOnUiThread(() -> Toast.makeText(PolylinesActivity.this, "Hiking time!", Toast.LENGTH_SHORT).show()));
     }
 
 

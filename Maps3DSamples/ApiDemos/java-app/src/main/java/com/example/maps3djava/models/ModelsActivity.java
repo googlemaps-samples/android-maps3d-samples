@@ -19,12 +19,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import com.example.maps3dcommon.R;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
+import com.google.android.gms.maps3d.OnModelClickListener;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyAroundOptions;
@@ -123,7 +125,7 @@ public class ModelsActivity extends SampleBaseActivity {
         Vector3D scale = new Vector3D(PLANE_SCALE, PLANE_SCALE, PLANE_SCALE);
         modelOptions.setScale(scale);
 
-        googleMap3D.addModel(modelOptions);
+        googleMap3D.addModel(modelOptions).setClickListener(() -> ModelsActivity.this.runOnUiThread(() -> Toast.makeText(ModelsActivity.this, "Model clicked", Toast.LENGTH_SHORT).show()));
 
         runAnimationSequence(googleMap3D);
     }
