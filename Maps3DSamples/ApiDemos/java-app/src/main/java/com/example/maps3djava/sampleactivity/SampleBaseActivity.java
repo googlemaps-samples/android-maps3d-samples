@@ -22,12 +22,15 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
+
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+
 import com.example.maps3dcommon.R;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.Map3DView;
@@ -211,5 +214,9 @@ public abstract class SampleBaseActivity extends Activity implements OnMap3DView
 
     protected void snapshot(Camera camera) {
         Log.d(getTAG(), toCameraString(camera));
+    }
+
+    protected void showToast(String message) {
+        runOnUiThread(() -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show());
     }
 }

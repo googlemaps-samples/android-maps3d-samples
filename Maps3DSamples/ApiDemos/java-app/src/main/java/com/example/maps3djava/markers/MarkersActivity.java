@@ -16,13 +16,8 @@ package com.example.maps3djava.markers;
 
 import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
 
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
-import com.google.android.gms.maps3d.OnMarkerClickListener;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.CollisionBehavior;
@@ -111,10 +106,6 @@ public class MarkersActivity extends SampleBaseActivity {
         options.setDrawnWhenOccluded(true);
 
         com.google.android.gms.maps3d.model.Marker marker = map.addMarker(options);
-        marker.setClickListener(() ->
-                MarkersActivity.this.runOnUiThread(() ->
-                        Toast.makeText(MarkersActivity.this,
-                                "Clicked on marker: " + label, Toast.LENGTH_SHORT).show())
-        );
+        marker.setClickListener(() -> MarkersActivity.this.showToast("Clicked on marker: " + label));
     }
 }

@@ -17,4 +17,8 @@
     <string name="app_name">Java Maps3D Samples</string>
     <string name="title_activity_main">Java Maps3D Samples</string>
 
+    <string name="polygon_museum_clicked">Check out the Museum!</string>
+    <string name="polygon_zoo_clicked">Zoo time</string>
+    <string name="polyline_trail_clicked">Hiking time!</string>
+    <string name="model_plane_clicked">Model clicked</string>
 </resources>
