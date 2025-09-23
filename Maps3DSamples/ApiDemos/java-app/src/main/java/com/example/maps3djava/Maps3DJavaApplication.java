@@ -25,11 +25,11 @@ import java.util.Objects;
 
 /**
  * `Maps3DKotlinApplication` is a custom Application class for the API demo.
- *
+ * <p>
  * This class is responsible for application-wide initialization and setup,
  * such as checking for the presence and validity of the API key during the
  * application's startup.
- *
+ * <p>
  * It extends the [Application] class and overrides the [.onCreate]
  * method to perform these initialization tasks.
  */
@@ -49,11 +49,11 @@ public class Maps3DJavaApplication extends Application {
 
     /**
      * Checks if the API key for Google Maps is properly configured in the application's metadata.
-     *
+     * <p>
      * This method retrieves the API key from the application's metadata, specifically looking for
      * a string value associated with the key "com.google.android.geo.maps3d.API_KEY".
      * The key must be present, not blank, and not set to the placeholder value "DEFAULT_API_KEY".
-     *
+     * <p>
      * If any of these checks fail, a Toast message is displayed indicating that the API key is missing or
      * incorrectly configured, and a RuntimeException is thrown.
      */

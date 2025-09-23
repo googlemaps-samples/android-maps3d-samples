@@ -22,7 +22,7 @@ plugins {
 
 android {
     lint {
-        sarifOutput = file("$buildDir/reports/lint-results.sarif")
+        sarifOutput = layout.buildDirectory.file("reports/lint-results.sarif").get().asFile
     }
     namespace = "com.example.maps3dcommon"
     compileSdk = libs.versions.compileSdk.get().toInt()
