@@ -18,10 +18,16 @@ package com.example.maps3djava.mainactivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+
 import com.example.maps3dcommon.R;
 
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -51,7 +57,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // This tells the system that the app will handle drawing behind the system bars.
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+
         setContentView(com.example.maps3djava.R.layout.main_activity);
+
+        View contentContainer = findViewById(com.example.maps3djava.R.id.root_layout);
+        ViewCompat.setOnApplyWindowInsetsListener(contentContainer, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            // Apply the insets as padding to the view.
+            // This will push the content down from behind the status bar and up from
+            // behind the navigation bar.
+            v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+            // Return CONSUMED to signal that we've handled the insets.
+            return WindowInsetsCompat.CONSUMED;
+        });
 
         RecyclerView recyclerView = findViewById(com.example.maps3djava.R.id.sample_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

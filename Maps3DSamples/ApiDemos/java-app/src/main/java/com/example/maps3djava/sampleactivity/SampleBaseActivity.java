@@ -26,6 +26,7 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.example.maps3dcommon.R;
 import com.google.android.gms.maps3d.GoogleMap3D;
@@ -77,19 +78,25 @@ public abstract class SampleBaseActivity extends Activity implements OnMap3DView
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // This tells the system that the app will handle drawing behind the system bars.
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+
         setContentView(R.layout.activity_common_map);
         View rootView = findViewById(R.id.map_container);
-        ViewCompat.setOnApplyWindowInsetsListener(rootView, (view, insets) -> {
-            Insets statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars());
-            Insets navigationBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+        ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
 
-            view.setPadding(
-                    view.getPaddingLeft(),
-                    view.getPaddingTop() + statusBarInsets.top,
-                    view.getPaddingRight(),
-                    view.getPaddingBottom() + navigationBarInsets.bottom
+            // Apply the insets as padding to the view.
+            // This will push the content down from behind the status bar and up from
+            // behind the navigation bar.
+            v.setPadding(
+                insets.left,
+                insets.top,
+                insets.right,
+                insets.bottom
             );
 
+            // Return CONSUMED to signal that we've handled the insets.
             return WindowInsetsCompat.CONSUMED;
         });
 
