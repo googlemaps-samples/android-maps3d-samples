@@ -74,12 +74,12 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    androidTestImplementation(libs.truth)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    implementation(libs.play.services.base)
+    implementation(files("../common/libs/play-services-maps3d-0.0.3.aar"))
     implementation(project(":common"))
-//    implementation(files("../common/libs/play-services-maps3d-0.0.3.aar"))
 }
 
 secrets {
