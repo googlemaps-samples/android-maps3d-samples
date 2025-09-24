@@ -167,10 +167,17 @@ fun String.toAnimation(): List<AnimationStep> {
                     "flyto" -> add(FlyToStep(value.toFlyTo()))
                     "delay" -> add(DelayStep(value.toDelay()))
                     "flyaround" -> add(FlyAroundStep(value.toFlyAround()))
+
                     else -> Log.w(TAG, "Unsupported animation step type: $key")
                 }
             } else {
-                Log.w(TAG, "Ignoring invalid animation step format: $step")
+                when (trimmedStep.lowercase()) {
+                    "waituntilthemapissteady" -> {
+                        Log.d("ScenarioMapper", "add(WaitUntilTheMapIsSteadyStep)")
+                        add(WaitUntilTheMapIsSteadyStep)
+                    }
+                    else -> Log.w(TAG, "Ignoring invalid animation step format: $step")
+                }
             }
         }
     }

@@ -189,6 +189,8 @@ val scenarios =
             initialState =
                 "mode=satellite;camera=lat=51.5057832,lng=-0.0751902,alt=5.6035,hdg=-16.36154,tilt=0,range=20000",
             animationString =
+                // Wait for the map to be fully loaded and idle before starting the animation.
+                "waitUntilTheMapIsSteady;" +
                 "delay=dur=2000;" +
                         "flyTo=lat=51.5057832,lng=-0.0751902,alt=5.6035,hdg=-16.36154,tilt=65,range=564,dur=3500;" +
                         "delay=dur=1500;" +
@@ -203,6 +205,7 @@ val scenarios =
                 "mode=hybrid;camera=lat=51.4045642,lng=-94.023074,alt=100,hdg=0.0,tilt=0.0,range=15000000",
             // Animation: Initial delay, fly to ESB, pause, zoom in, pause, pan right, pause, pan left & tilt up, pause, zoom out slightly, final pause.
             animationString =
+                "waitUntilTheMapIsSteady;" +
                 "delay=dur=2000;" + // Initial 1s delay
                         // Fly to a viewpoint near the Empire State Building
                         "flyTo=lat=40.748392,lng=-73.986060,alt=174.1,hdg=26.3,tilt=67,range=3977,dur=4500;" +
@@ -236,6 +239,7 @@ val scenarios =
                 "mode=satellite;camera=lat=51.4045642,lng=-94.023074,alt=100,hdg=0.0,tilt=0.0,range=15000000",
             // Animation: Initial delay, fly to ESB, pause, zoom in, pause, pan right, pause, pan left & tilt up, pause, zoom out slightly, final pause.
             animationString =
+                "waitUntilTheMapIsSteady;" +
                 "delay=dur=2000;" + // Initial 1s delay
                         // Fly to a viewpoint near the Empire State Building
                         "flyTo=lat=40.748392,lng=-73.986060,alt=174.1,hdg=26.3,tilt=67,range=3977,dur=4500;" +
@@ -266,6 +270,7 @@ val scenarios =
             initialState =
                 "mode=satellite;camera=lat=47.557714,lng=10.749557,alt=988.6,hdg=0,tilt=55,range=723",
             animationString =
+                "waitUntilTheMapIsSteady;" +
                 "delay=dur=2000", // This scenario runs custom code, not parsed animation string
         ),
         createScenario(
@@ -274,6 +279,7 @@ val scenarios =
             initialState =
                 "mode=satellite;camera=lat=-33.891984,lng=151.273785,alt=13.3,hdg=274.5,tilt=71,range=3508",
             animationString =
+                "waitUntilTheMapIsSteady;" +
                 "delay=dur=2000;" +
                         "flyTo=lat=-33.868670,lng=151.204183,alt=39.6,hdg=293.8,tilt=69,range=1512,dur=2500;" +
                         "delay=dur=2000",
@@ -284,9 +290,11 @@ val scenarios =
             initialState =
                 "mode=satellite;camera=lat=36.10145879,lng=-112.10555998,alt=774.39,hdg=33.198,tilt=74.036,range=9180.62",
             animationString =
+                "waitUntilTheMapIsSteady;" +
                 "delay=dur=3000;" +
                         "flyTo=lat=38.743502,lng=-109.499374,alt=1467,hdg=-10.4,tilt=58.1,range=138.2,dur=3500;" +
                         "delay=dur=2000;" +
+                        "waitUntilTheMapIsSteady;" +
                         "flyAround=lat=38.743502,lng=-109.499374,alt=1467,hdg=-10.4,tilt=58.1,range=138.2,dur=6000,count=2;" +
                         "delay=dur=2000",
         ),
@@ -296,6 +304,7 @@ val scenarios =
             initialState =
                 "mode=satellite;camera=lat=52.51974795,lng=13.40715553,alt=150,hdg=252.7,tilt=79,range=1500",
             animationString =
+                "waitUntilTheMapIsSteady;" +
                 "delay=dur=2000;" +
                         "flyTo=lat=52.522255,lng=13.405010,alt=84.0,hdg=312.8,tilt=66,range=1621,dur=2000;" +
                         "delay=dur=3000",
@@ -312,6 +321,7 @@ val scenarios =
                 "mode=satellite;camera=lat=47.133971,lng=11.333161,alt=2200,hdg=221.4,tilt=25,range=30000",
             animationString =
                 // Initial delay
+                "waitUntilTheMapIsSteady;" +
                 "delay=dur=1000;" +
                         "flyTo=lat=47.133971,lng=11.333161,alt=2200,hdg=221.4,tilt=65,range=1200,dur=3500;" +
                         "flyAround=lat=47.133971,lng=11.333161,alt=2200,hdg=221.4,tilt=65,range=1200,dur=3500,count=0.5;" +
@@ -326,6 +336,7 @@ val scenarios =
             initialState =
                 "mode=satellite;camera=lat=41.886251,lng=-87.628896,alt=367.3,hdg=190.5,tilt=71,range=19962",
             animationString =
+                "waitUntilTheMapIsSteady;" +
                 "delay=dur=1000;" +
                         "flyTo=lat=41.901229,lng=-87.621649,alt=179.6,hdg=169.0,tilt=71,range=4145,dur=2500;" +
                         "delay=dur=1000",
@@ -338,16 +349,20 @@ val scenarios =
             initialState =
                 "mode=satellite;camera=$hawaiiCenter",
             animationString =
-                "delay=dur=1000;" +
+                "waitUntilTheMapIsSteady;" +
                         "flyAround=$hawaiiCenter,dur=3000,count=0.5;" +
                         "flyTo=lat=21.304491,lng=-157.856769,alt=10.4,hdg=117,tilt=58,range=5410,dur=2000;" +
                         "delay=dur=500;" +
+                        "waitUntilTheMapIsSteady;" +
                         "flyTo=lat=21.306388,lng=-157.859271,alt=6.0,hdg=63,tilt=58,range=689,dur=2500;" +
                         "delay=dur=750;" +
+                        "waitUntilTheMapIsSteady;" +
                         "flyTo=lat=21.276715,lng=-157.827153,alt=63.3,hdg=16,tilt=65,range=2121,dur=3500;" +
                         "delay=dur=1000;" +
+                        "waitUntilTheMapIsSteady;" +
                         "flyTo=lat=21.262728,lng=-157.808147,alt=89.1,hdg=273,tilt=58,range=5400,dur=3500;" +
                         "delay=dur=500;" +
+                        "waitUntilTheMapIsSteady;" +
                         "flyAround=lat=21.262728,lng=-157.808147,alt=89.1,hdg=273,tilt=58,range=5400,dur=5000,count=1.0;" +
                         "delay=dur=5000",
             polylines = hawaiiRoute,
@@ -364,6 +379,7 @@ val scenarios =
             initialState =
                 "mode=satellite;camera=lat=39.7498,lng=-104.9535,alt=2000,tilt=60,hdg=200,range=3000",
             animationString =
+                "waitUntilTheMapIsSteady;" +
                 "delay=dur=1000;" +
                         "flyAround=lat=39.7498,lng=-104.9535,alt=2000,hdg=200,tilt=60,range=3000,dur=3000,count=1.0;" +
                         "delay=dur=1000;" +

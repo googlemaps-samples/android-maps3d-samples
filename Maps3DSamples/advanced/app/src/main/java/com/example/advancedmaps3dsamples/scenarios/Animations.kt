@@ -28,6 +28,16 @@ data class DelayStep(val durationMillis: Long) : AnimationStep {
   }
 }
 
+/**
+ * An [AnimationStep] that waits until the map is fully loaded and idle before proceeding
+ * to the next step in the animation sequence.
+ */
+data object WaitUntilTheMapIsSteadyStep : AnimationStep {
+  override suspend fun invoke(viewModel: ScenariosViewModel) {
+    viewModel.awaitMapSteady()
+  }
+}
+
 data class FlyToStep(val flyToOptions: FlyToOptions) : AnimationStep {
   override suspend operator fun invoke(viewModel: ScenariosViewModel) {
     viewModel.awaitFlyTo(flyToOptions)

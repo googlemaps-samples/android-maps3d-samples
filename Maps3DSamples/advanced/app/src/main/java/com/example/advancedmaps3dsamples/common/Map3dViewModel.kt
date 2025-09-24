@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
@@ -67,6 +68,9 @@ abstract class Map3dViewModel : ViewModel() {
 
   private val _cameraRestriction = MutableStateFlow<CameraRestriction?>(null)
   val cameraRestriction = _cameraRestriction.asStateFlow()
+
+  private val _isMapSteady = MutableStateFlow(false)
+  val isMapSteady = _isMapSteady.asStateFlow()
 
   private val _mapMode = MutableStateFlow(Map3DMode.SATELLITE)
   val mapMode = _mapMode.asStateFlow()
@@ -290,6 +294,21 @@ abstract class Map3dViewModel : ViewModel() {
 
   fun setMapMode(@Map3DMode mode: Int) {
     _mapMode.value = mode
+  }
+
+  fun onMapSteadyChange(isSteady: Boolean) {
+    _isMapSteady.value = isSteady
+  }
+
+  /**
+   * Suspends until the map has entered a steady state, meaning it is not moving and has
+   * finished loading. This is useful to ensure that camera animations start from a stable
+   * and predictable state.
+   */
+  suspend fun awaitMapSteady() {
+    Log.d("Map3dViewModel", "awaitMapSteady: start")
+    isMapSteady.first { it }
+    Log.d("Map3dViewModel", "awaitMapSteady: done")
   }
 
   override fun onCleared() {
