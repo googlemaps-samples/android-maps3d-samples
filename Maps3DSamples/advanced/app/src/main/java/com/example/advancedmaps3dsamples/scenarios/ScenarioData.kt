@@ -290,11 +290,10 @@ val scenarios =
             initialState =
                 "mode=satellite;camera=lat=36.10145879,lng=-112.10555998,alt=774.39,hdg=33.198,tilt=74.036,range=9180.62",
             animationString =
-                "waitUntilTheMapIsSteady;" +
+                "waitUntilTheMapIsSteady=3000;" +
                 "delay=dur=3000;" +
                         "flyTo=lat=38.743502,lng=-109.499374,alt=1467,hdg=-10.4,tilt=58.1,range=138.2,dur=3500;" +
-                        "delay=dur=2000;" +
-                        "waitUntilTheMapIsSteady;" +
+                        "waitUntilTheMapIsSteady=timeout=3000;" +
                         "flyAround=lat=38.743502,lng=-109.499374,alt=1467,hdg=-10.4,tilt=58.1,range=138.2,dur=6000,count=2;" +
                         "delay=dur=2000",
         ),
@@ -356,7 +355,7 @@ val scenarios =
                         "waitUntilTheMapIsSteady;" +
                         "flyTo=lat=21.306388,lng=-157.859271,alt=6.0,hdg=63,tilt=58,range=689,dur=2500;" +
                         "delay=dur=750;" +
-                        "waitUntilTheMapIsSteady;" +
+                        "waitUntilTheMapIsSteady=timeout=1000;" +
                         "flyTo=lat=21.276715,lng=-157.827153,alt=63.3,hdg=16,tilt=65,range=2121,dur=3500;" +
                         "delay=dur=1000;" +
                         "waitUntilTheMapIsSteady;" +

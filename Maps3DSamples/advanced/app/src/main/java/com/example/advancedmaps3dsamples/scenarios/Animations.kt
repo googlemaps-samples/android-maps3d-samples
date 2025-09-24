@@ -31,10 +31,12 @@ data class DelayStep(val durationMillis: Long) : AnimationStep {
 /**
  * An [AnimationStep] that waits until the map is fully loaded and idle before proceeding
  * to the next step in the animation sequence.
+ *
+ * @param timeoutMillis The maximum time to wait in milliseconds. A value of 0 means no timeout.
  */
-data object WaitUntilTheMapIsSteadyStep : AnimationStep {
+data class WaitUntilTheMapIsSteadyStep(val timeoutMillis: Long = 0) : AnimationStep {
   override suspend fun invoke(viewModel: ScenariosViewModel) {
-    viewModel.awaitMapSteady()
+    viewModel.awaitMapSteady(timeoutMillis)
   }
 }
 

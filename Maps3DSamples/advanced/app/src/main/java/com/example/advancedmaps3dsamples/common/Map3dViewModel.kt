@@ -44,12 +44,14 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration
 
 abstract class Map3dViewModel : ViewModel() {
@@ -304,10 +306,22 @@ abstract class Map3dViewModel : ViewModel() {
    * Suspends until the map has entered a steady state, meaning it is not moving and has
    * finished loading. This is useful to ensure that camera animations start from a stable
    * and predictable state.
+   *
+   * @param timeoutMillis The maximum time to wait in milliseconds. A value of 0 means no timeout.
    */
-  suspend fun awaitMapSteady() {
-    Log.d("Map3dViewModel", "awaitMapSteady: start")
-    isMapSteady.first { it }
+  suspend fun awaitMapSteady(timeoutMillis: Long) {
+    Log.d("Map3dViewModel", "awaitMapSteady: start with timeout $timeoutMillis")
+    if (timeoutMillis > 0) {
+      try {
+        withTimeout(timeoutMillis) {
+          isMapSteady.first { it }
+        }
+      } catch (e: TimeoutCancellationException) {
+        Log.w("Map3dViewModel", "awaitMapSteady timed out after $timeoutMillis ms")
+      }
+    } else {
+      isMapSteady.first { it }
+    }
     Log.d("Map3dViewModel", "awaitMapSteady: done")
   }
 
