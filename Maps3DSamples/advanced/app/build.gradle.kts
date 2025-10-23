@@ -88,9 +88,8 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.android)
 
-    //  implementation(libs.play.services.maps3d)
     implementation(libs.play.services.base)
-    implementation(files("../app/libs/play-services-maps3d-0.0.3.aar"))
+    implementation(libs.play.services.maps3d)
 
     testImplementation(libs.google.truth)
 

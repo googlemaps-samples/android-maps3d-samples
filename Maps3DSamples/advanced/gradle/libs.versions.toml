@@ -16,7 +16,7 @@ composeBom = "2025.09.01"
 
 hilt = "2.57.2"
 ksp = "2.2.20-2.0.2"
-playServicesMaps3d = "0.0.2"
+playServicesMaps3d = "0.1.0"
 playServicesBase = "18.9.0"
 secretsGradlePlugin = "2.0.1"
 truth = "1.4.5"
