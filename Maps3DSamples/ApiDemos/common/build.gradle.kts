@@ -69,10 +69,6 @@ dependencies {
 
     implementation(libs.androidx.material3)
 
-//    api(libs.play.services.basement)
-    implementation(libs.play.services.base)
-    implementation(files("../common/libs/play-services-maps3d-0.0.3.aar"))
-
-    // TODO: use the version catalog when the library is released
-    //    implementation(libs.play.services.maps3d)
+    api(libs.play.services.base)
+    api(libs.play.services.maps3d)
 }

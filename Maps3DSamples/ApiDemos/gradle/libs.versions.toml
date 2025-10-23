@@ -17,7 +17,7 @@ lifecycleRuntimeKtx = "2.9.4"
 material = "1.13.0"
 
 playServicesBase = "18.8.0"
-playServicesMaps3d = "0.0.3"
+playServicesMaps3d = "0.1.0"
 secretsGradlePlugin = "2.0.1"
 truth = "1.4.5"
 uiautomator = "2.3.0"
