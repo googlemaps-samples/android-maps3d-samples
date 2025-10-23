@@ -84,7 +84,7 @@
     -->
     <string name="in_kilometers" translatable="false">%1$,.1f km</string>
 
-    <string name="camera_state_format">Lat: %.4f, Lng: %.4f, Alt: %.2fm\nHdg: %.2f° (%s), Tlt: %.2f°, Rng: %.2fm</string>
+    <string name="camera_state_format" formatted="false">Lat: %.4f, Lng: %.4f, Alt: %.2fm\nHdg: %.2f° (%s), Tlt: %.2f°, Rng: %.2fm</string>
     <string name="polygon_museum_clicked">Check out the Museum!</string>
     <string name="polygon_zoo_clicked">Zoo time</string>
     <string name="polyline_trail_clicked">Hiking time!</string>
