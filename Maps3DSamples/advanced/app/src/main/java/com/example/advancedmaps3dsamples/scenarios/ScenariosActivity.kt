@@ -120,8 +120,7 @@ class ScenariosActivity : ComponentActivity() {
                 CameraControlDemoScreen(
                   modifier = Modifier.fillMaxSize(),
                   scenario = scenario,
-                  onMap3dViewReady = { viewModel.setGoogleMap3D(it) },
-                  onReleaseMap = { viewModel.releaseGoogleMap3D() },
+                  viewModel = viewModel,
                   attribute = cameraAttribute,
                   heading = currentCamera.heading.toHeading().toFloat(),
                   tilt = currentCamera.tilt.toTilt().toFloat(),
@@ -132,8 +131,7 @@ class ScenariosActivity : ComponentActivity() {
                 ScenarioScreen(
                   modifier = Modifier.fillMaxSize(),
                   scenario = scenario,
-                  onMap3dViewReady = { viewModel.setGoogleMap3D(it) },
-                  onReleaseMap = { viewModel.releaseGoogleMap3D() },
+                  viewModel = viewModel,
                 )
               }
 

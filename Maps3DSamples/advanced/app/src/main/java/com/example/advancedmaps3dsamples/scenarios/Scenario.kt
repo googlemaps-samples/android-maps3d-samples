@@ -14,7 +14,6 @@
 
 package com.example.advancedmaps3dsamples.scenarios
 
-import android.util.Log // Import Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.google.android.gms.maps3d.Map3DOptions
@@ -39,7 +38,6 @@ data class Scenario(
   @Composable fun getTitle() = stringResource(titleId)
 
   fun reset(viewModel: ScenariosViewModel) {
-    Log.d("ScenarioReset", "Resetting scenario: $name")
     viewModel.setCamera(mapsOptions.toCamera()) // Set initial camera
     viewModel.setMapMode(mapsOptions.mapMode)
 
@@ -60,8 +58,6 @@ data class Scenario(
     polygons.forEach { polygon ->
       viewModel.addPolygon(polygon)
     }
-
-    Log.d("ScenarioReset", "Reset complete for scenario: $name")
   }
 }
 
