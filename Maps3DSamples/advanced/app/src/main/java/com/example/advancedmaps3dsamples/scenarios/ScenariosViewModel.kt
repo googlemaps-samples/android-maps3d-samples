@@ -244,6 +244,8 @@ class ScenariosViewModel @Inject constructor() : Map3dViewModel() {
 
         setCamera(NEUSCHWANSTEIN_CAMERA)
 
+          awaitMapSteady(10000)
+
         cameraHeadingSweep(NEUSCHWANSTEIN_CAMERA)
         cameraTiltSweep(NEUSCHWANSTEIN_CAMERA)
         cameraRangeSweep(NEUSCHWANSTEIN_CAMERA)

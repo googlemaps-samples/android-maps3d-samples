@@ -25,8 +25,7 @@ import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 @Composable
 internal fun ThreeDMap(
   options: Map3DOptions,
-  onMap3dViewReady: (GoogleMap3D) -> Unit,
-  onReleaseMap: () -> Unit,
+  viewModel: ScenariosViewModel,
   modifier: Modifier = Modifier,
 ) {
   AndroidView(
@@ -40,7 +39,10 @@ internal fun ThreeDMap(
       map3dView.getMap3DViewAsync(
         object : OnMap3DViewReadyCallback {
           override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-            onMap3dViewReady(googleMap3D)
+            viewModel.setGoogleMap3D(googleMap3D)
+            googleMap3D.setOnMapSteadyListener { isSceneSteady ->
+                viewModel.onMapSteadyChange(isSceneSteady)
+            }
           }
 
           override fun onError(error: Exception) {
@@ -49,10 +51,10 @@ internal fun ThreeDMap(
         }
       )
     },
-    onRelease = { view ->
+    onRelease = { _ ->
       // Clean up resources if needed
-      onReleaseMap()
+      viewModel.releaseGoogleMap3D()
     },
-    onReset = { view -> },
+    onReset = { _ -> },
   )
 }
