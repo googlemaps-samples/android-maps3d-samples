@@ -1,4 +1,4 @@
-## Migration Guide: Updating to the Latest Maps3D SDK
+## Migration Guide: Updating to v0.1.0 of Maps3D SDK
 
 Welcome to the latest version of the Maps3D SDK! This release focuses on improving API clarity and introducing powerful new ways to make your maps interactive. This guide will walk you through the necessary changes to update your application in both Kotlin and Java.
 
