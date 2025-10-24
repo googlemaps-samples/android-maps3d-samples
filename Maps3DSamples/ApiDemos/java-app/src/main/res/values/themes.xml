@@ -15,10 +15,26 @@
 -->
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Maps3DSamples" parent="Theme.Material3.DayNight.NoActionBar"> // Or another M3 theme
-        <item name="colorPrimary">@color/purple_500</item> <item name="colorOnPrimary">@color/white</item>
+    <style name="Theme.Maps3DSamples" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/teal_200</item>
         <item name="colorOnSecondary">@color/black</item>
+
+        <!-- Make status and navigation bars transparent -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+
+        <!--
+          Required for edge-to-edge display. This allows the app to draw behind
+          the system bars.
+        -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+
+        <!--
+          On API 27+, this allows the app to render in the display cutout area.
+          'shortEdges' is a good default. This is now defined in values-v27/themes.xml
+        -->
     </style>
 
 <!--    <style name="Theme.Maps3DSamples" parent="Theme.MaterialComponents.DayNight.DarkActionBar">-->

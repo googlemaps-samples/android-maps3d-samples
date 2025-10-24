@@ -15,10 +15,13 @@
 package com.example.maps3dkotlin.models
 
 import android.os.Bundle
-import com.example.maps3dcommon.R
+import android.view.View
+import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.example.maps3d.common.awaitCameraUpdate
 import com.example.maps3d.common.toCameraUpdate
 import com.example.maps3d.common.toValidCamera
+import com.example.maps3dcommon.R
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
@@ -31,28 +34,27 @@ import com.google.android.gms.maps3d.model.modelOptions
 import com.google.android.gms.maps3d.model.orientation
 import com.google.android.gms.maps3d.model.vector3D
 import com.google.android.material.button.MaterialButton
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /**
- * Demonstrates the use of 3D models in a 3D map environment.
+ * This activity provides a demonstration of how to incorporate 3D models into a map environment.
+ * It loads a 3D airplane model and displays it on a satellite map, complemented by a sequence
+ * of camera animations that showcase the model from various perspectives.
  *
- * This activity loads and displays a 3D plane model on a satellite map. It also
- * features camera animations to showcase the model from different angles.
- *
- * The activity extends [SampleBaseActivity] and overrides its properties to define
- * the initial camera position.
- *
- * The user can reset the view to the initial camera position using a button.
+ * The user can interact with the scene by resetting the camera to its initial position, which
+ * also restarts the animation sequence, or by stopping the animation altogether.
  */
 class ModelsActivity : SampleBaseActivity() {
     override val TAG = this::class.java.simpleName
+
+    // The initial camera position is defined declaratively, providing a clear and concise
+    // starting point for the map's view.
     override val initialCamera =
         camera {
             center = latLngAltitude {
@@ -65,54 +67,67 @@ class ModelsActivity : SampleBaseActivity() {
             range = 30_000.0
         }
 
-    private var animationSequenceJob : Job? = null
+    // A Job to keep track of the animation sequence coroutine. This allows us to cancel
+    // the animation if the user interacts with the UI.
+    private var animationSequenceJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setupUI()
+    }
 
-        // Use the reset view button to reset the camera to the initial position and restart the
-        // animation sequence
-        recenterButton = findViewById<MaterialButton>(R.id.reset_view_button).apply {
+    /**
+     * Sets up the user interface elements and their click listeners.
+     */
+    private fun setupUI() {
+        // The reset button allows the user to return to the initial camera position and
+        // restart the animation sequence.
+        findViewById<MaterialButton>(R.id.reset_view_button).apply {
             setOnClickListener {
-                val controller = googleMap3D ?: return@setOnClickListener
-
-                animationSequenceJob?.cancel()
-
-                animationSequenceJob = CoroutineScope(Dispatchers.Main).launch {
-                    awaitCameraUpdate(
-                        controller = controller,
-                        cameraUpdate = flyToOptions {
-                            endCamera = initialCamera
-                            durationInMillis = 2_000
-                        }.toCameraUpdate()
-                    )
-                    runAnimationSequence(controller)
-                    animationSequenceJob = null
-                }
+                googleMap3D?.let { restartAnimation(it) }
             }
-            visibility = android.view.View.VISIBLE
+            visibility = View.VISIBLE
         }
 
+        // The stop button allows the user to cancel the animation sequence.
         findViewById<MaterialButton>(R.id.stop_button).apply {
             setOnClickListener {
                 animationSequenceJob?.cancel()
                 animationSequenceJob = null
             }
-            visibility = android.view.View.VISIBLE
+            visibility = View.VISIBLE
         }
     }
 
-    @OptIn(FlowPreview::class)
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
         super.onMap3DViewReady(googleMap3D)
         googleMap3D.setMapMode(Map3DMode.SATELLITE)
 
-        CoroutineScope(Dispatchers.Main).launch {
-            cameraUpdates.sample(1_000.milliseconds).collect { camera ->
+        // A coroutine is launched to collect camera updates and generate snapshots.
+        // This is done in a lifecycle-aware manner to prevent memory leaks.
+        lifecycleScope.launch {
+            cameraUpdates.sample(1.seconds).collect { camera ->
                 snapshot(camera.toValidCamera())
             }
         }
 
+        lifecycleScope.launch {
+            delay(10.milliseconds)
+
+            // The 3D model is added to the map.
+            addPlaneModel(googleMap3D)
+
+            // The animation sequence is started.
+            startAnimationSequence(googleMap3D)
+        }
+    }
+
+    /**
+     * Adds the 3D airplane model to the map.
+     *
+     * @param googleMap3D The map object to which the model will be added.
+     */
+    private fun addPlaneModel(googleMap3D: GoogleMap3D) {
         googleMap3D.addModel(
             modelOptions {
                 id = "plane_model"
@@ -134,16 +149,59 @@ class ModelsActivity : SampleBaseActivity() {
                     z = PLANE_SCALE
                 }
             }
-        )
+        ).also { model ->
+            model.setClickListener {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@ModelsActivity,
+                        "Model clicked",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
 
-        animationSequenceJob = CoroutineScope(Dispatchers.Main).launch {
+    /**
+     * Starts the camera animation sequence.
+     *
+     * @param googleMap3D The map object on which the animation will be run.
+     */
+    private fun startAnimationSequence(googleMap3D: GoogleMap3D) {
+        animationSequenceJob = lifecycleScope.launch {
             runAnimationSequence(googleMap3D)
             animationSequenceJob = null
         }
     }
 
+    /**
+     * Restarts the camera animation sequence.
+     *
+     * @param googleMap3D The map object on which the animation will be run.
+     */
+    private fun restartAnimation(googleMap3D: GoogleMap3D) {
+        animationSequenceJob?.cancel()
+        animationSequenceJob = lifecycleScope.launch {
+            awaitCameraUpdate(
+                controller = googleMap3D,
+                cameraUpdate = flyToOptions {
+                    endCamera = initialCamera
+                    durationInMillis = 2.seconds.inWholeMilliseconds
+                }.toCameraUpdate()
+            )
+            runAnimationSequence(googleMap3D)
+            animationSequenceJob = null
+        }
+    }
+
+    /**
+     * Runs the camera animation sequence, which consists of flying to the model and then
+     * flying around it.
+     *
+     * @param googleMap3D The map object on which the animation will be run.
+     */
     private suspend fun runAnimationSequence(googleMap3D: GoogleMap3D) {
-        delay(1_500.milliseconds)
+        delay(1500.milliseconds)
 
         val camera = camera {
             center = latLngAltitude {
@@ -156,29 +214,30 @@ class ModelsActivity : SampleBaseActivity() {
             range = 700.0
         }
 
-        // Fly to the plane model and wait until the animation is finished
+        // Fly to the plane model.
         awaitCameraUpdate(
             controller = googleMap3D,
             cameraUpdate = flyToOptions {
                 endCamera = camera
-                durationInMillis = 3_500
+                durationInMillis = 3500.milliseconds.inWholeMilliseconds
             }.toCameraUpdate()
         )
 
         delay(500.milliseconds)
 
+        // Fly around the plane model.
         awaitCameraUpdate(
             controller = googleMap3D,
             cameraUpdate = flyAroundOptions {
                 center = camera
-                durationInMillis = 3_500
+                durationInMillis = 3500.milliseconds.inWholeMilliseconds
                 rounds = 0.5
             }.toCameraUpdate()
         )
     }
 
     companion object {
-        const val PLANE_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb"
-        const val PLANE_SCALE = 0.05
+        private const val PLANE_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb"
+        private const val PLANE_SCALE = 0.05
     }
 }

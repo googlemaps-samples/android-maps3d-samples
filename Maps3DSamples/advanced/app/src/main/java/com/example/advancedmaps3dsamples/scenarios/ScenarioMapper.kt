@@ -360,8 +360,8 @@ fun String.toPolygons(): List<PolygonOptions> {
 
     return listOf(
         polygonOptions {
-            this.outerCoordinates = outerCoordinates
-            this.innerCoordinates = innerCoordinates
+            this.path = outerCoordinates
+            this.innerPaths = innerCoordinates
             this.fillColor = fillColor
             this.strokeColor = strokeColor
             this.strokeWidth = strokeWidth
@@ -471,7 +471,7 @@ fun String.toPolyline(idp: String? = null): List<PolylineOptions> {
     // 4. Create PolylineOptions
     val polylineOptions = polylineOptions {
         this.id = id
-        this.coordinates = points3d
+        this.path = points3d
         strokeColor = color
         strokeWidth = 7.0
         altitudeMode = AltitudeMode.CLAMP_TO_GROUND
@@ -482,7 +482,7 @@ fun String.toPolyline(idp: String? = null): List<PolylineOptions> {
 
     val polylineOptionsBackground = polylineOptions {
         this.id = id + "_background"
-        this.coordinates = points3d
+        this.path = points3d
         strokeColor = Color.argb(128, 0, 0, 0)
         strokeWidth = 13.0
         altitudeMode = AltitudeMode.CLAMP_TO_GROUND

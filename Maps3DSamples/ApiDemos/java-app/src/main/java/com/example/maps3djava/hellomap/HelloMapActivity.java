@@ -86,41 +86,31 @@ public class HelloMapActivity extends Activity implements OnMap3DViewReadyCallba
     @Override
     protected void onResume() {
         super.onResume();
-        if (map3DView != null) {
-            map3DView.onResume();
-        }
+        map3DView.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (map3DView != null) {
-            map3DView.onPause();
-        }
+        map3DView.onPause();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (map3DView != null) {
-            map3DView.onDestroy();
-        }
+        map3DView.onDestroy();
     }
 
     @Deprecated
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        if (map3DView != null) {
-            map3DView.onLowMemory();
-        }
+        map3DView.onLowMemory();
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (map3DView != null) {
-            map3DView.onSaveInstanceState(outState);
-        }
+        map3DView.onSaveInstanceState(outState);
     }
 }

@@ -32,9 +32,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url=uri("/Users/dkhawk/Downloads/not_releasable.m2repo")
-        }
     }
 }
 

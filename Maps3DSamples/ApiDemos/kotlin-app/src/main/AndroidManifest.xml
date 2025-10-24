@@ -88,6 +88,13 @@
             android:exported="true"
             />
 
+        <activity
+            android:name=".mapinteractions.MapInteractionsActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_map_interactions"
+            android:exported="true"
+            />
+
     </application>
 
 </manifest>

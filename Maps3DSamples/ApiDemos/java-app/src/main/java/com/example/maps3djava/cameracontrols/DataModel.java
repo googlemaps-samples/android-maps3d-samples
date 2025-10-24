@@ -85,7 +85,7 @@ public final class DataModel {
             extrudedNyc.stream()
                     .map(facePoints -> {
                         PolygonOptions options = new PolygonOptions();
-                        options.setOuterCoordinates(facePoints);
+                        options.setPath(facePoints);
                         options.setFillColor(faceFillColor);
                         options.setStrokeColor(faceStrokeColor);
                         options.setStrokeWidth(faceStrokeWidth);

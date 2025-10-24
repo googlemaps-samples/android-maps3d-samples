@@ -14,7 +14,13 @@
 
 package com.example.maps3djava.polylines;
 
+import static com.example.maps3djava.polylines.SanitasLoopData.sanitasLoop;
+
 import android.graphics.Color;
+
+import androidx.annotation.NonNull;
+
+import com.example.maps3dcommon.R;
 
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
@@ -27,10 +33,6 @@ import com.google.android.gms.maps3d.model.PolylineOptions;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.example.maps3djava.polylines.SanitasLoopData.sanitasLoop;
-
-import androidx.annotation.NonNull;
 
 /**
  * Activity that demonstrates the use of polylines on a 3D map.
@@ -45,8 +47,12 @@ import androidx.annotation.NonNull;
  * [Map3DView] to ensure proper resource management.
  */
 public class PolylinesActivity extends SampleBaseActivity implements OnMap3DViewReadyCallback {
-
+    private final PolylineOptions trailForegroundPolylineOptions;
+    private final int trailBackground = Color.argb(128, 0, 0, 0);
+    private final PolylineOptions trailBackgroundPolylineOptions;
     private static final List<LatLngAltitude> trailLocations = new ArrayList<>();
+    private static final double BOULDER_LATITUDE = 40.029349;
+    private static final double BOULDER_LONGITUDE = -105.300354;
 
     static {
         String[] lines = sanitasLoop.split("\n");
@@ -79,16 +85,9 @@ public class PolylinesActivity extends SampleBaseActivity implements OnMap3DView
         return this.getClass().getSimpleName();
     }
 
-    private final PolylineOptions trailForegroundPolylineOptions;
-
-    private final int trailBackground = Color.argb(128, 0, 0, 0);
-
-    private final PolylineOptions trailBackgroundPolylineOptions;
-
-
     public PolylinesActivity() {
         trailForegroundPolylineOptions = new PolylineOptions();
-        trailForegroundPolylineOptions.setCoordinates(trailLocations);
+        trailForegroundPolylineOptions.setPath(trailLocations);
         trailForegroundPolylineOptions.setStrokeColor(Color.RED);
         trailForegroundPolylineOptions.setStrokeWidth(7.0);
         trailForegroundPolylineOptions.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
@@ -96,7 +95,7 @@ public class PolylinesActivity extends SampleBaseActivity implements OnMap3DView
         trailForegroundPolylineOptions.setDrawsOccludedSegments(true);
 
         trailBackgroundPolylineOptions = new PolylineOptions();
-        trailBackgroundPolylineOptions.setCoordinates(trailLocations);
+        trailBackgroundPolylineOptions.setPath(trailLocations);
         trailBackgroundPolylineOptions.setStrokeColor(trailBackground);
         trailBackgroundPolylineOptions.setStrokeWidth(13.0);
         trailBackgroundPolylineOptions.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
@@ -115,12 +114,7 @@ public class PolylinesActivity extends SampleBaseActivity implements OnMap3DView
         super.onMap3DViewReady(googleMap3D);
         googleMap3D.setMapMode(Map3DMode.HYBRID);
         googleMap3D.addPolyline(trailBackgroundPolylineOptions);
-        googleMap3D.addPolyline(trailForegroundPolylineOptions);
+        com.google.android.gms.maps3d.model.Polyline foregroundPolyline = googleMap3D.addPolyline(trailForegroundPolylineOptions);
+        foregroundPolyline.setClickListener(() -> showToast(getString(R.string.polyline_trail_clicked)));
     }
-
-
-    private static final double BOULDER_LATITUDE = 40.029349;
-    private static final double BOULDER_LONGITUDE = -105.300354;
-
-
 }

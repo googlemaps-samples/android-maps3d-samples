@@ -61,61 +61,51 @@ public class MarkersActivity extends SampleBaseActivity {
         super.onMap3DViewReady(googleMap3D);
         googleMap3D.setMapMode(Map3DMode.SATELLITE);
 
-        // Marker 1: Absolute
-        MarkerOptions marker1Options = new MarkerOptions();
-        marker1Options.setPosition(new LatLngAltitude(
-                52.519605780912585,
-                13.406867190588198,
-                150.0
-        ));
-        marker1Options.setLabel("Absolute (150m)");
-        marker1Options.setAltitudeMode(AltitudeMode.ABSOLUTE);
-        marker1Options.setExtruded(true);
-        marker1Options.setDrawnWhenOccluded(true);
-        marker1Options.setCollisionBehavior(CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL);
-        googleMap3D.addMarker(marker1Options);
+        addMarkerWithToastListener(googleMap3D,
+            new LatLngAltitude(52.519605780912585, 13.406867190588198, 150.0),
+            "Absolute (150m)",
+            AltitudeMode.ABSOLUTE,
+            CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL
+        );
 
-        // Marker 2: Relative to Ground
-        MarkerOptions marker2Options = new MarkerOptions();
-        marker2Options.setPosition(new LatLngAltitude(
-                52.519882191069016,
-                13.407410777254293,
-                50.0
-        ));
-        marker2Options.setLabel("Relative to Ground (50m)");
-        marker2Options.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
-        marker2Options.setExtruded(true);
-        marker2Options.setDrawnWhenOccluded(true);
-        marker2Options.setCollisionBehavior(CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY);
-        googleMap3D.addMarker(marker2Options);
+        addMarkerWithToastListener(googleMap3D,
+            new LatLngAltitude(52.519882191069016, 13.407410777254293, 50.0),
+            "Relative to Ground (50m)",
+            AltitudeMode.RELATIVE_TO_GROUND,
+            CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY
+        );
 
-        // Marker 3: Clamped to Ground
-        MarkerOptions marker3Options = new MarkerOptions();
-        marker3Options.setPosition(new LatLngAltitude(
-                52.52027645136134,
-                13.408271658592406,
-                0.0
-        ));
-        marker3Options.setLabel("Clamped to Ground");
-        marker3Options.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
-        marker3Options.setExtruded(true);
-        marker3Options.setDrawnWhenOccluded(true);
-        marker3Options.setCollisionBehavior(CollisionBehavior.REQUIRED);
-        googleMap3D.addMarker(marker3Options);
+        addMarkerWithToastListener(googleMap3D,
+            new LatLngAltitude(52.52027645136134, 13.408271658592406, 0.0),
+            "Clamped to Ground",
+            AltitudeMode.CLAMP_TO_GROUND,
+            CollisionBehavior.REQUIRED
+        );
 
-        MarkerOptions marker4Options = new MarkerOptions();
+        addMarkerWithToastListener(googleMap3D,
+            new LatLngAltitude(52.520835071144226, 13.409426847943774, 10.0),
+            "Relative to Mesh (10m)",
+            AltitudeMode.RELATIVE_TO_MESH,
+            CollisionBehavior.REQUIRED
+        );
+    }
 
-        // Marker 4: Relative to Mesh
-        marker4Options.setPosition(new LatLngAltitude(
-                52.520835071144226,
-                13.409426847943774,
-                10.0
-        ));
-        marker4Options.setLabel("Relative to Mesh (10m)");
-        marker4Options.setAltitudeMode(AltitudeMode.RELATIVE_TO_MESH);
-        marker4Options.setExtruded(true);
-        marker4Options.setDrawnWhenOccluded(true);
-        marker4Options.setCollisionBehavior(CollisionBehavior.REQUIRED);
-        googleMap3D.addMarker(marker4Options);
+    private void addMarkerWithToastListener(
+        GoogleMap3D map,
+        LatLngAltitude position,
+        String label,
+        int altitudeMode,
+        int collisionBehavior
+    ) {
+        MarkerOptions options = new MarkerOptions();
+        options.setPosition(position);
+        options.setLabel(label);
+        options.setAltitudeMode(altitudeMode);
+        options.setCollisionBehavior(collisionBehavior);
+        options.setExtruded(true);
+        options.setDrawnWhenOccluded(true);
+
+        com.google.android.gms.maps3d.model.Marker marker = map.addMarker(options);
+        marker.setClickListener(() -> MarkersActivity.this.showToast("Clicked on marker: " + label));
     }
 }

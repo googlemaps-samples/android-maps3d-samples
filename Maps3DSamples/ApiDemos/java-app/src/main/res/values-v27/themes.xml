@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
  Copyright 2025 Google LLC
 
@@ -9,12 +10,17 @@
 
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
+
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<resources>
-    <string name="app_name">Java Maps3D Samples</string>
-    <string name="title_activity_main">Java Maps3D Samples</string>
-
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.Maps3DSamples" parent="Theme.Material3.DayNight.NoActionBar">
+        <!--
+          On API 27+, this allows the app to render in the display cutout area.
+          'shortEdges' is a good default.
+        -->
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
 </resources>

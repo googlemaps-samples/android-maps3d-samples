@@ -14,6 +14,8 @@
 
 package com.example.maps3djava.models;
 
+import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -23,6 +25,7 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 
 import com.example.maps3dcommon.R;
+
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
@@ -34,9 +37,6 @@ import com.google.android.gms.maps3d.model.Map3DMode;
 import com.google.android.gms.maps3d.model.ModelOptions;
 import com.google.android.gms.maps3d.model.Orientation;
 import com.google.android.gms.maps3d.model.Vector3D;
-
-import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
-
 
 /**
  * Demonstrates the use of 3D models in a 3D map environment.
@@ -76,8 +76,8 @@ public class ModelsActivity extends SampleBaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        recenterButton = findViewById(R.id.reset_view_button);
-        stopButton = findViewById(R.id.stop_button);
+        recenterButton = findViewById(com.example.maps3dcommon.R.id.reset_view_button);
+        stopButton = findViewById(com.example.maps3dcommon.R.id.stop_button);
 
         recenterButton.setOnClickListener(view -> {
             if (googleMap3D == null) {
@@ -123,7 +123,7 @@ public class ModelsActivity extends SampleBaseActivity {
         Vector3D scale = new Vector3D(PLANE_SCALE, PLANE_SCALE, PLANE_SCALE);
         modelOptions.setScale(scale);
 
-        googleMap3D.addModel(modelOptions);
+        googleMap3D.addModel(modelOptions).setClickListener(() -> showToast(getString(R.string.model_plane_clicked)));
 
         runAnimationSequence(googleMap3D);
     }

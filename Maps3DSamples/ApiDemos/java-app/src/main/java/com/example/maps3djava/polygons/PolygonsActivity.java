@@ -20,8 +20,8 @@ import static com.example.maps3djava.cameracontrols.DataModel.extrudePolygon;
 
 import android.graphics.Color;
 
-
 import com.example.maps3d.common.UnitsKt;
+import com.example.maps3dcommon.R;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
@@ -37,6 +37,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class PolygonsActivity extends SampleBaseActivity {
+    private final int faceFillColor = Color.argb(70, 255, 0, 255);
+    private final int faceStrokeColor = Color.MAGENTA;
+    private final double faceStrokeWidth = 3.0;
 
     private static final Hole zooHole = new Hole(Arrays.stream(
                     ("39.7498, -104.9535\n" +
@@ -98,8 +101,6 @@ public class PolygonsActivity extends SampleBaseActivity {
         return this.getClass().getSimpleName();
     }
 
-    private final String TAG = getTAG();
-
     @Override
     public final Camera getInitialCamera() {
         return toValidCamera(new Camera(
@@ -116,14 +117,10 @@ public class PolygonsActivity extends SampleBaseActivity {
         ));
     }
 
-    private final int faceFillColor = Color.argb(70, 255, 0, 255);
-    private final int faceStrokeColor = Color.MAGENTA;
-    private final double faceStrokeWidth = 3.0;
-
     private final List<PolygonOptions> extrudedMuseum = extrudePolygon(
             museumBaseFace, 50.0).stream().map(outline -> {
         PolygonOptions options = new PolygonOptions();
-        options.setOuterCoordinates(outline);
+        options.setPath(outline);
         options.setFillColor(faceFillColor);
         options.setStrokeColor(faceStrokeColor);
         options.setStrokeWidth(faceStrokeWidth);
@@ -144,8 +141,13 @@ public class PolygonsActivity extends SampleBaseActivity {
                 .map(googleMap3D::addPolygon)
                 .collect(Collectors.toList());
 
+        for (com.google.android.gms.maps3d.model.Polygon polygon : museumPolygons) {
+            polygon.setClickListener(() -> showToast(getString(R.string.polygon_museum_clicked)));
+        }
+
         // Add a zoo polygon to the map.
         com.google.android.gms.maps3d.model.Polygon zooPolygon = googleMap3D.addPolygon(zooPolygonOptions);
+        zooPolygon.setClickListener(() -> showToast(getString(R.string.polygon_zoo_clicked)));
     }
 
     public static class Companion {
@@ -179,8 +181,8 @@ public class PolygonsActivity extends SampleBaseActivity {
 
     static {
         zooPolygonOptions = new PolygonOptions();
-        zooPolygonOptions.setOuterCoordinates(PolygonsActivity.zooOutline);
-        zooPolygonOptions.setInnerCoordinates(Collections.singletonList(PolygonsActivity.zooHole));
+        zooPolygonOptions.setPath(PolygonsActivity.zooOutline);
+        zooPolygonOptions.setInnerPaths(Collections.singletonList(PolygonsActivity.zooHole));
         zooPolygonOptions.setFillColor(Color.argb(70, 255, 255, 0));
         zooPolygonOptions.setStrokeColor(Color.GREEN);
         zooPolygonOptions.setStrokeWidth(3.0);
