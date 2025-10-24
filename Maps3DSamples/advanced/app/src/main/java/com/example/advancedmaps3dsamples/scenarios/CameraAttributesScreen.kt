@@ -48,8 +48,7 @@ private val rollSliderRange = -360f..360f
  * which changes based on the currently selected [attribute].
  *
  * @param scenario The scenario providing options for the map.
- * @param onMap3dViewReady A callback function invoked when the [GoogleMap3D] view is ready.
- * @param onReleaseMap A callback function invoked when the map should be released.
+ * @param viewModel The view model that manages the map's state.
  * @param modifier The modifier to be applied to the composable.
  * @param heading The current heading value of the camera.
  * @param tilt The current tilt value of the camera.
@@ -60,8 +59,7 @@ private val rollSliderRange = -360f..360f
 @Composable
 fun CameraControlDemoScreen(
   scenario: Scenario,
-  onMap3dViewReady: (GoogleMap3D) -> Unit,
-  onReleaseMap: () -> Unit,
+  viewModel: ScenariosViewModel,
   modifier: Modifier = Modifier,
   heading: Float,
   tilt: Float,
@@ -74,8 +72,7 @@ fun CameraControlDemoScreen(
       ThreeDMap(
         modifier = Modifier.fillMaxWidth().weight(1f),
         options = scenario.mapsOptions,
-        onMap3dViewReady = onMap3dViewReady,
-        onReleaseMap = onReleaseMap,
+        viewModel = viewModel,
       )
       Spacer(modifier = Modifier.height(16.dp))
       Crossfade(

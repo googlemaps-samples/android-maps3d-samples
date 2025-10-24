@@ -21,14 +21,12 @@ import com.google.android.gms.maps3d.GoogleMap3D
 @Composable
 fun ScenarioScreen(
   scenario: Scenario,
-  onMap3dViewReady: (GoogleMap3D) -> Unit,
-  onReleaseMap: () -> Unit,
+  viewModel: ScenariosViewModel,
   modifier: Modifier = Modifier,
 ) {
     ThreeDMap(
       modifier = modifier,
       options = scenario.mapsOptions,
-      onMap3dViewReady = onMap3dViewReady,
-      onReleaseMap = onReleaseMap,
+      viewModel = viewModel,
     )
 }
