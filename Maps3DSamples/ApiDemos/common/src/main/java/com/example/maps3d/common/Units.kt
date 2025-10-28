@@ -93,7 +93,7 @@ fun Meters.plus(other: Meters) = Meters(value = this.value + other.value)
  * @property value: The numerical value.
  * @property unitsTemplate: The string resource ID for the units.
  */
-data class ValueWithUnitsTemplate(val value: Double, @param:StringRes val unitsTemplate: Int)
+data class ValueWithUnitsTemplate(val value: Double, @StringRes val unitsTemplate: Int)
 
 /** Abstract base class for all units converters. */
 abstract class UnitsConverter {

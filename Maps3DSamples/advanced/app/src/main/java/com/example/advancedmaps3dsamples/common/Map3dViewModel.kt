@@ -44,12 +44,16 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
 
 abstract class Map3dViewModel : ViewModel() {
   abstract val TAG: String
@@ -67,6 +71,9 @@ abstract class Map3dViewModel : ViewModel() {
 
   private val _cameraRestriction = MutableStateFlow<CameraRestriction?>(null)
   val cameraRestriction = _cameraRestriction.asStateFlow()
+
+  private val _isMapSteady = MutableStateFlow(false)
+  val isMapSteady = _isMapSteady.asStateFlow()
 
   private val _mapMode = MutableStateFlow(Map3DMode.SATELLITE)
   val mapMode = _mapMode.asStateFlow()
@@ -290,6 +297,32 @@ abstract class Map3dViewModel : ViewModel() {
 
   fun setMapMode(@Map3DMode mode: Int) {
     _mapMode.value = mode
+  }
+
+  fun onMapSteadyChange(isSteady: Boolean) {
+    _isMapSteady.value = isSteady
+  }
+
+  /**
+   * Suspends until the map has entered a steady state, meaning it is not moving and has
+   * finished loading. This is useful to ensure that camera animations start from a stable
+   * and predictable state.
+   *
+   * @param timeoutMillis The maximum time to wait in milliseconds. A value of 0 means no timeout.
+   */
+  @OptIn(ExperimentalTime::class)
+  suspend fun awaitMapSteady(timeoutMillis: Long) {
+    if (timeoutMillis > 0) {
+      try {
+        withTimeout(timeoutMillis) {
+          isMapSteady.first { it }
+        }
+      } catch (_: TimeoutCancellationException) {
+        Log.w("Map3dViewModel", "awaitMapSteady timed out after $timeoutMillis ms")
+      }
+    } else {
+      isMapSteady.first { it }
+    }
   }
 
   override fun onCleared() {
