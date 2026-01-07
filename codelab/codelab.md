@@ -42,18 +42,36 @@ Now that we’re in Hawaii, let's head to the historic **Iolani Palace**. In thi
 
 ### Objective
 
-* **The Snap:** Use `CameraUpdate` to move the camera instantly to the Palace.
-* **The Smooth Glide:** Implement `animateCamera` to transition from the ocean to the Palace with a dramatic tilt.
-* **The Orbit:** Script a 360-degree rotation around the building to show off its 3D depth.
-* **The Steady Listener:** Use `fun setOnMapSteadyListener(mapSteadyListener: OnMapSteadyListener?)` to ensure the "orbit" only starts once the "glide" has finished. This prevents your animations from fighting each other.
+*   **The Snap:** Use `CameraUpdate` to move the camera instantly to the Palace.
+*   **The Smooth Glide:** Implement `animateCamera` to transition from the ocean to the Palace with a dramatic tilt.
+*   **The Orbit:** Script a 360-degree rotation around the building to show off its 3D depth.
+*   **Timing the Scene:** Use `delay()` to sequence these animations. It's simple, but is it robust?
 
 ### Conclusion
 
-You’ve mastered the 3D camera. By waiting for the map to be "steady," you’ve created a professional, polished user experience that feels like a drone flight rather than a digital jump.
+You’ve mastered the 3D camera. You can now direct a scene like a movie, moving from shot to shot with cinematic grace.
 
 ---
 
-## 3. Sticking the Landing (Markers & Clamping)
+## 3. The Professional Touch (Wait for It...)
+
+Using specific time delays (e.g., `delay(5000)`) is easy, but it's risky. What if the user has a slow connection and the map isn't loaded yet? What if the device is slow and the animation takes longer than expected?
+
+In this section, we replace "guessing" with "listening."
+
+### Objective
+
+*   **The Steady Listener:** Use `setOnMapSteadyListener` to detect when the 3D map has fully streamed in the surrounding tiles.
+*   **The Animation Listener:** Use `setCameraAnimationEndListener` to trigger the "Orbit" only after the "Glide" has truly finished.
+*   **The "Suspending" Wrapper:** Write your own suspending functions, `awaitMapSteady()` and `awaitCameraAnimation()`, to wrap these callbacks. This allows you to keep your clean, readable coroutine code while getting the robustness of event-driven programming.
+
+### Conclusion
+
+Your app is now "network resilient." It doesn't just run on a timer; it reacts to the state of the world. This is the difference between a prototype and a production-ready app.
+
+---
+
+## 4. Sticking the Landing (Markers & Clamping)
 
 Objects in a 3D world need to know where they sit on the "Z-axis." If you place a marker on a mountain, does it float in the air or sink into the rocks?
 
@@ -71,7 +89,9 @@ You now understand **Clamping**. This is the secret to making sure your UI eleme
 
 ---
 
-## 4. Highlighting History (2D to 3D Polygons)
+---
+
+## 5. Highlighting History (2D to 3D Polygons)
 
 Sometimes a single marker isn't enough. We want to highlight the entire Palace grounds to show its significance.
 
@@ -86,7 +106,9 @@ You’ve moved beyond points and lines. You can now define 3D volumes in space, 
 
 ---
 
-## 5. Tapping the Turf (Interaction)
+---
+
+## 6. Tapping the Turf (Interaction)
 
 A great app is interactive. We want users to be able to "touch" the 3D world.
 
@@ -100,7 +122,9 @@ Your map is now alive. You’ve bridged the gap between the 3D map renderer and 
 
 ---
 
-## 6. Beach Bound & "Jumping the Shark"
+---
+
+## 7. Beach Bound & "Jumping the Shark"
 
 It’s time for some fun. We’re moving from the Palace to the beach, and we’re bringing some animation with us.
 
@@ -117,7 +141,9 @@ You’ve pushed the SDK to its limits! You can now animate complex 3D assets thr
 
 ---
 
-## 7. The "Cool Kids" Corner (Jetpack Compose)
+---
+
+## 8. The "Cool Kids" Corner (Jetpack Compose)
 
 Modern Android development is all about **Jetpack Compose**. While the 3D SDK is View-based, it plays perfectly with Compose.
 
