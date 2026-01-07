@@ -37,16 +37,22 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val HONOLULU = latLngAltitude {
             latitude = 21.3069
             longitude = -157.8583
-            altitude = 1000.0
+            altitude = 0.0
         }
 
         // Step 2: Iolani Palace
-        val IOLANI_PALACE_LAT = 21.306740
-        val IOLANI_PALACE_LNG = -157.858803
+        val IOLANI_PALACE = latLngAltitude {
+            latitude = 21.306740
+            longitude = -157.858803
+            altitude = 0.0
+        }
 
         // Step 6: Waikiki Beach
-        val WAIKIKI_LAT = 21.2766
-        val WAIKIKI_LNG = -157.8286
+        val WAIKIKI = latLngAltitude {
+            latitude = 21.2766
+            longitude = -157.8286
+            altitude = 0.0
+        }
         
         // Placeholder URL for the shark (using a known working generic model if shark is unavailable)
         const val SHARK_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb"
@@ -68,32 +74,59 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         map3DView.getMap3DViewAsync(this)
     }
 
-    override fun onMap3DViewReady(map: GoogleMap3D) {
-        googleMap3D = map
+    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
+        this@MainActivity.googleMap3D = googleMap3D
 
-        // Step 1: Initial Position
-        // Using setCamera for instant move
-        map.setCamera(
-            camera {
-                center = HONOLULU
-                tilt = 45.0
-                range = 2000.0
-            }
-        )
+        lifecycleScope.launch {
+            // Step 0: Start from Global View
+            startFromGlobalView(googleMap3D)
+            
+            // Allow map to load a bit
+            delay(1000)
 
-        // Step 2: Royal Flyover
-        setupFlyover(map)
-
-        // Step 3: Markers & Clamping
-        addMarkers(map)
-
-        // Step 4: Highlighting History (Polygons)
-        addPolygon(map)
-
-        // Step 6: Beach Bound (Shark)
-        setupShark(map)
+            // Step 1: Fly to Honolulu
+            flyToHonolulu(googleMap3D)
+            
+            // Stop here for now as requested
+        }
     }
 
+    private fun startFromGlobalView(map: GoogleMap3D) {
+        // Initial Position: Global View
+        map.setCamera(
+            camera {
+                center = latLngAltitude {
+                    latitude = 21.3069
+                    longitude = -157.8583
+                    altitude = 0.0
+                }
+                tilt = 0.0
+                range = 5000000.0 // 5000 km up
+            }
+        )
+    }
+
+    private suspend fun flyToHonolulu(map: GoogleMap3D) {
+        // Duration for the animation
+        val duration = 5.seconds
+        
+        println("Flying to Honolulu...")
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = HONOLULU
+                    tilt = 45.0
+                    range = 20000.0 // Zoomed out a bit from the city
+                    heading = 0.0
+                }
+                durationInMillis = duration.inWholeMilliseconds
+            }
+        )
+        // Delay for the duration of the animation
+        delay(duration)
+    }
+
+    /*
     private fun setupFlyover(map: GoogleMap3D) {
         // We wait for the map to be steady (loaded) before starting the cinematic animation
         map.setOnMapSteadyListener { isSteady ->
@@ -107,8 +140,8 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                         flyToOptions {
                             endCamera = camera {
                                 center = latLngAltitude {
-                                    latitude = IOLANI_PALACE_LAT
-                                    longitude = IOLANI_PALACE_LNG
+                                    latitude = IOLANI_PALACE.latitude
+                                    longitude = IOLANI_PALACE.longitude
                                     altitude = 50.0
                                 }
                                 tilt = 60.0
@@ -138,8 +171,8 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         map.addMarker(
             markerOptions {
                 position = latLngAltitude {
-                    latitude = IOLANI_PALACE_LAT
-                    longitude = IOLANI_PALACE_LNG
+                    latitude = IOLANI_PALACE.latitude
+                    longitude = IOLANI_PALACE.longitude
                     altitude = 100.0
                 }
                 altitudeMode = AltitudeMode.ABSOLUTE
@@ -151,8 +184,8 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         map.addMarker(
             markerOptions {
                 position = latLngAltitude {
-                    latitude = IOLANI_PALACE_LAT + 0.001
-                    longitude = IOLANI_PALACE_LNG
+                    latitude = IOLANI_PALACE.latitude + 0.001
+                    longitude = IOLANI_PALACE.longitude
                     altitude = 50.0
                 }
                 altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
@@ -164,8 +197,8 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         map.addMarker(
             markerOptions {
                 position = latLngAltitude {
-                    latitude = IOLANI_PALACE_LAT - 0.001
-                    longitude = IOLANI_PALACE_LNG
+                    latitude = IOLANI_PALACE.latitude - 0.001
+                    longitude = IOLANI_PALACE.longitude
                     altitude = 0.0
                 }
                 altitudeMode = AltitudeMode.CLAMP_TO_GROUND
@@ -214,10 +247,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         // Draw path to Waikiki
         map.addPolyline(
             polylineOptions {
-                path = listOf(
-                    latLngAltitude { latitude = IOLANI_PALACE_LAT; longitude = IOLANI_PALACE_LNG; altitude = 0.0 },
-                    latLngAltitude { latitude = WAIKIKI_LAT; longitude = WAIKIKI_LNG; altitude = 0.0 }
-                )
+                path = listOf(IOLANI_PALACE, WAIKIKI)
                 strokeWidth = 10.0
                 strokeColor = Color.BLUE
             }
@@ -226,11 +256,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         // Add "Shark" (Airplane placeholder)
         val shark = map.addModel(
             modelOptions {
-                position = latLngAltitude {
-                    latitude = WAIKIKI_LAT
-                    longitude = WAIKIKI_LNG
-                    altitude = 0.0
-                }
+                position = WAIKIKI
                 altitudeMode = AltitudeMode.CLAMP_TO_GROUND
                 orientation = orientation {
                     heading = 0.0
@@ -248,18 +274,15 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             
             // Simple animation
             shark.setPosition(latLngAltitude {
-                latitude = WAIKIKI_LAT
-                longitude = WAIKIKI_LNG
+                latitude = WAIKIKI.latitude
+                longitude = WAIKIKI.longitude
                 altitude = 50.0
             })
             delay(1000)
-            shark.setPosition(latLngAltitude {
-                latitude = WAIKIKI_LAT
-                longitude = WAIKIKI_LNG
-                altitude = 0.0
-            })
+            shark.setPosition(WAIKIKI)
         }
     }
+    */
 
     /**
      * Extrudes a flat polygon (defined by basePoints, all at the same altitude)

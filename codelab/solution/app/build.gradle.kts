@@ -48,3 +48,21 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+
+secrets {
+    // Optionally specify a different file name containing your secrets.
+    // The plugin defaults to "local.properties"
+    propertiesFileName = "secrets.properties"
+
+    // A properties file containing default secret values. This file can be
+    // checked in version control.
+    defaultPropertiesFileName = "local.defaults.properties"
+}
+
+tasks.register<Exec>("launchDebug") {
+    dependsOn("installDebug")
+    commandLine("adb", "shell", "am", "start", "-n", "com.example.alohaexplorer/.MainActivity")
+    doLast {
+        println("Launched com.example.alohaexplorer/.MainActivity")
+    }
+}
