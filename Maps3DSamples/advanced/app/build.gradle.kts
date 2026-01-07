@@ -1,3 +1,43 @@
+import org.gradle.api.GradleException
+import java.io.File
+
+// Check for secrets.properties file before proceeding with build tasks.
+val secretsFile = rootProject.file("secrets.properties")
+if (!secretsFile.exists()) {
+    val requestedTasks = gradle.startParameter.taskNames
+    if (requestedTasks.isEmpty()) {
+        // It's likely an IDE sync if no tasks are specified, so just issue a warning.
+        println("Warning: secrets.properties not found. Gradle sync may succeed, but building/running the app will fail.")
+    } else {
+        val buildTaskKeywords = listOf("build", "install", "assemble")
+        val isBuildTask = requestedTasks.any { task ->
+            buildTaskKeywords.any { keyword ->
+                task.contains(keyword, ignoreCase = true)
+            }
+        }
+
+        val testTaskKeywords = listOf("test", "report", "lint")
+        val isTestTask = requestedTasks.any { task ->
+            testTaskKeywords.any { keyword ->
+                task.contains(keyword, ignoreCase = true)
+            }
+        }
+
+        if (isBuildTask && !isTestTask) {
+            val defaultsFile = rootProject.file("local.defaults.properties")
+            val requiredKeysMessage = if (defaultsFile.exists()) {
+                defaultsFile.readText()
+            } else {
+                "MAPS_API_KEY=<YOUR_API_KEY>"
+            }
+
+            throw GradleException("secrets.properties file not found. Please create a 'secrets.properties' file in the root project directory with the following content:\n" +
+                    "\n" +
+                    requiredKeysMessage)
+        }
+    }
+}
+
 /*
  * Copyright 2025 Google LLC
  *
