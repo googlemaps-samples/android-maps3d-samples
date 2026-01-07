@@ -25,6 +25,8 @@ import com.google.android.gms.maps3d.model.polylineOptions
 import com.google.android.gms.maps3d.model.vector3D
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.seconds
 
 class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
@@ -81,13 +83,43 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             // Step 0: Start from Global View
             startFromGlobalView(googleMap3D)
             
-            // Allow map to load a bit
-            delay(1000)
+            // Wait for the map to settle
+            awaitMapSteady(googleMap3D)
 
             // Step 1: Fly to Honolulu
             flyToHonolulu(googleMap3D)
             
             // Stop here for now as requested
+        }
+    }
+
+    private suspend fun awaitMapSteady(map: GoogleMap3D) = suspendCancellableCoroutine { continuation ->
+        map.setOnMapSteadyListener { isSteady ->
+            if (isSteady) {
+                map.setOnMapSteadyListener(null) // Cleanup
+                if (continuation.isActive) {
+                    continuation.resume(Unit)
+                }
+            }
+        }
+        
+        // Remove listener if coroutine is cancelled
+        continuation.invokeOnCancellation {
+            map.setOnMapSteadyListener(null)
+        }
+    }
+
+    private suspend fun awaitCameraAnimation(map: GoogleMap3D) = suspendCancellableCoroutine { continuation ->
+        map.setCameraAnimationEndListener {
+            map.setCameraAnimationEndListener(null) // Cleanup
+            if (continuation.isActive) {
+                continuation.resume(Unit)
+            }
+        }
+
+        // Remove listener if coroutine is cancelled
+        continuation.invokeOnCancellation {
+            map.setCameraAnimationEndListener(null)
         }
     }
 
@@ -108,7 +140,8 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
     private suspend fun flyToHonolulu(map: GoogleMap3D) {
         // Duration for the animation
-        val duration = 5.seconds
+        val flyDuration = 5.seconds
+        val orbitDuration = 10.seconds
         
         println("Flying to Honolulu...")
         map.flyCameraTo(
@@ -119,11 +152,28 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                     range = 20000.0 // Zoomed out a bit from the city
                     heading = 0.0
                 }
-                durationInMillis = duration.inWholeMilliseconds
+                durationInMillis = flyDuration.inWholeMilliseconds
             }
         )
-        // Delay for the duration of the animation
-        delay(duration)
+        // Wait for the animation to finish
+        awaitCameraAnimation(map)
+        
+        println("Orbiting Honolulu...")
+        map.flyCameraAround(
+            flyAroundOptions {
+                // Determine the center of the orbit (the camera we just flew to)
+                // We reuse the target parameters to be precise, or could read map.camera
+                center = camera {
+                    center = HONOLULU
+                    tilt = 45.0
+                    range = 20000.0
+                    heading = 0.0
+                }
+                rounds = 1.0
+                durationInMillis = orbitDuration.inWholeMilliseconds
+            }
+        )
+        awaitCameraAnimation(map)
     }
 
     /*
