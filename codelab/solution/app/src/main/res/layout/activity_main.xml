@@ -30,4 +30,51 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <HorizontalScrollView
+        android:id="@+id/controls_scroll_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
+
+            <Button
+                android:id="@+id/btn_fly_honolulu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Camera"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_show_markers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Markers"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_show_polygons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Polygons"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_show_shark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Models" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

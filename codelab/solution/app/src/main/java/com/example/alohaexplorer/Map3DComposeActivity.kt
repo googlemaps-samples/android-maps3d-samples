@@ -58,7 +58,7 @@ val map3DOptions = Map3DOptions(
 )
 
 /**
- * A simple activity to demonstrate how to integrate [Map3DView] with Jetpack Compose.
+ * A minimalist activity to demonstrate how to integrate [Map3DView] with Jetpack Compose.
  */
 class Map3DComposeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
