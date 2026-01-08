@@ -14,6 +14,10 @@ import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.LatLngAltitude
+import com.google.android.gms.maps3d.model.Marker
+import com.google.android.gms.maps3d.model.Model
+import com.google.android.gms.maps3d.model.Polygon
+import com.google.android.gms.maps3d.model.Polyline
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyAroundOptions
 import com.google.android.gms.maps3d.model.flyToOptions
@@ -24,7 +28,7 @@ import com.google.android.gms.maps3d.model.orientation
 import com.google.android.gms.maps3d.model.polygonOptions
 import com.google.android.gms.maps3d.model.polylineOptions
 import com.google.android.gms.maps3d.model.vector3D
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
@@ -34,6 +38,13 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
     private lateinit var map3DView: Map3DView
     private var googleMap3D: GoogleMap3D? = null
+
+    // Track active objects to prevent duplicates
+    private val activeMarkers = mutableListOf<Marker>()
+    private val activePolygons = mutableListOf<Polygon>()
+    private val activePolylines = mutableListOf<Polyline>()
+
+    private val activeModels = mutableListOf<Model>()
 
     companion object {
         // Step 1: Honolulu
@@ -56,13 +67,9 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             longitude = -157.8286
             altitude = 0.0
         }
-        
-        // Placeholder URL for the shark (using a known working generic model if shark is unavailable)
-//        const val SHARK_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Shark.glb"
-//        const val SHARK_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Shark%20fin.glb"
-//        const val SHARK_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/UFO.glb"
-        const val SHARK_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb"
-        const val SHARK_SCALE = 0.05
+
+        const val BALLOON_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/balloon-pin-BlXF32yD.glb"
+        const val BALLOON_SCALE = 5.0
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,9 +95,6 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             // Step 0: Start from Global View
             startFromGlobalView(googleMap3D)
             
-            // Wait for the map to settle
-            awaitMapSteady(googleMap3D)
-
             // Setup UI Buttons
             setupButtons(googleMap3D)
         }
@@ -111,9 +115,9 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             lifecycleScope.launch { flyToMarkers(map) } // Re-use marker view for polygons as it's the same place
         }
 
-        findViewById<Button>(R.id.btn_show_shark).setOnClickListener {
-            setupShark(map)
-            lifecycleScope.launch { flyToShark(map) }
+        findViewById<Button>(R.id.btn_show_balloon).setOnClickListener {
+            setupBalloon(map)
+            lifecycleScope.launch { flyToBalloon(map) }
         }
     }
 
@@ -132,7 +136,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         awaitCameraAnimation(map)
     }
 
-    private suspend fun flyToShark(map: GoogleMap3D) {
+    private suspend fun flyToBalloon(map: GoogleMap3D) {
         map.flyCameraTo(
             flyToOptions {
                 endCamera = camera {
@@ -231,7 +235,22 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         awaitCameraAnimation(map)
     }
 
+    private fun resetMap() {
+        activeMarkers.forEach { it.remove() }
+        activeMarkers.clear()
+
+        activePolygons.forEach { it.remove() }
+        activePolygons.clear()
+
+        activePolylines.forEach { it.remove() }
+        activePolylines.clear()
+
+        activeModels.forEach { it.remove() }
+        activeModels.clear()
+    }
+
     private fun addPolygon(map: GoogleMap3D) {
+        resetMap()
         // Step 4: Extruded Polygon around Iolani Palace
         val palaceBaseFace = listOf(
             latLngAltitude { latitude = 21.3073; longitude = -157.8593; altitude = 0.0 },
@@ -256,29 +275,39 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 }
             )
         }
+        activePolygons.addAll(palacePolygons)
 
-        // Step 5: Tapping the Turf
+        // Step 6: Tapping the Turf
         // Add click listener to each face
         palacePolygons.forEach { polygon ->
             polygon.setClickListener {
-                Toast.makeText(this, "The Royal Palace: A symbol of Hawaiian sovereignty.", Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "The Royal Palace: A symbol of Hawaiian sovereignty.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
 
-    private fun setupShark(map: GoogleMap3D) {
+    private fun setupBalloon(map: GoogleMap3D) {
+        resetMap()
+
         // Step 6: Beach Bound
         // Draw path to Waikiki
-        map.addPolyline(
+
+        activePolylines.add(map.addPolyline(
             polylineOptions {
                 path = listOf(IOLANI_PALACE, WAIKIKI)
                 strokeWidth = 10.0
                 strokeColor = Color.BLUE
             }
-        )
+        ))
         
-        // Add "Shark" (Airplane placeholder)
-        val shark = map.addModel(
+        // Add "Balloon"
+        val balloon = map.addModel(
             modelOptions {
                 position = latLngAltitude {
                     latitude = WAIKIKI.latitude
@@ -288,69 +317,67 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 altitudeMode = AltitudeMode.ABSOLUTE
                 orientation = orientation {
                     heading = 0.0
-                    tilt = -90.0
+                    tilt = 0.0
                     roll = 0.0
                 }
-                url = SHARK_MODEL_URL
-                scale = vector3D { x = SHARK_SCALE; y = SHARK_SCALE; z = SHARK_SCALE } // Big shark
+                url = BALLOON_MODEL_URL
+                scale = vector3D { x = BALLOON_SCALE; y = BALLOON_SCALE; z = BALLOON_SCALE } // Big balloon
             }
         )
 
-        // Animate Shark
-        lifecycleScope.launch {
-            // Simple animation loop provided in codelab
-            shark.position = latLngAltitude {
-                latitude = WAIKIKI.latitude
-                longitude = WAIKIKI.longitude
-                altitude = 50.0
-            }
-            delay(1000)
-            shark.position = WAIKIKI
-        }
+        // Add to list if not null
+        balloon.let { activeModels.add(it) }
     }
 
     private fun addMarkers(map: GoogleMap3D) {
-        // Absolute
-        map.addMarker(
-            markerOptions {
-                position = latLngAltitude {
-                    latitude = IOLANI_PALACE.latitude
-                    longitude = IOLANI_PALACE.longitude
-                    altitude = 100.0
-                }
-                altitudeMode = AltitudeMode.ABSOLUTE
-                label = "Absolute (100m)"
-                isDrawnWhenOccluded = true
-            }
-        )
+        resetMap()
 
-        // Relative
-        map.addMarker(
-            markerOptions {
-                position = latLngAltitude {
-                    latitude = IOLANI_PALACE.latitude + 0.001
-                    longitude = IOLANI_PALACE.longitude
-                    altitude = 50.0
+        buildList {
+            // Absolute
+            add(map.addMarker(
+                markerOptions {
+                    position = latLngAltitude {
+                        latitude = IOLANI_PALACE.latitude
+                        longitude = IOLANI_PALACE.longitude
+                        altitude = 100.0
+                    }
+                    altitudeMode = AltitudeMode.ABSOLUTE
+                    label = "Absolute (100m)"
+                    isDrawnWhenOccluded = true
+                    isExtruded = true
                 }
-                altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-                label = "Relative (50m)"
-                isDrawnWhenOccluded = true
-            }
-        )
+            ))
 
-        // Clamped
-        map.addMarker(
-            markerOptions {
-                position = latLngAltitude {
-                    latitude = IOLANI_PALACE.latitude - 0.001
-                    longitude = IOLANI_PALACE.longitude
-                    altitude = 0.0
+            // Relative
+            add(map.addMarker(
+                markerOptions {
+                    position = latLngAltitude {
+                        latitude = IOLANI_PALACE.latitude + 0.001
+                        longitude = IOLANI_PALACE.longitude
+                        altitude = 50.0
+                    }
+                    altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+                    label = "Relative (50m)"
+                    isDrawnWhenOccluded = true
+                    isExtruded = true
                 }
-                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                label = "Clamped"
-                isDrawnWhenOccluded = true
-            }
-        )
+            ))
+
+            // Clamped
+            add(map.addMarker(
+                markerOptions {
+                    position = latLngAltitude {
+                        latitude = IOLANI_PALACE.latitude - 0.001
+                        longitude = IOLANI_PALACE.longitude
+                        altitude = 0.0
+                    }
+                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                    label = "Clamped"
+                    isDrawnWhenOccluded = true
+                    isExtruded = true
+                }
+            ))
+        }.filterNotNull().forEach { activeMarkers.add(it) }
     }
 
     /**
