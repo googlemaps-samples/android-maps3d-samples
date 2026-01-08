@@ -2,6 +2,7 @@ package com.example.alohaexplorer
 
 import android.graphics.Color
 import android.os.Bundle
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -57,7 +58,11 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         }
         
         // Placeholder URL for the shark (using a known working generic model if shark is unavailable)
+//        const val SHARK_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Shark.glb"
+//        const val SHARK_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Shark%20fin.glb"
+//        const val SHARK_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/UFO.glb"
         const val SHARK_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb"
+        const val SHARK_SCALE = 0.05
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,11 +91,60 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             // Wait for the map to settle
             awaitMapSteady(googleMap3D)
 
-            // Step 1: Fly to Honolulu
-            flyToHonolulu(googleMap3D)
-            
-            // Stop here for now as requested
+            // Setup UI Buttons
+            setupButtons(googleMap3D)
         }
+    }
+
+    private fun setupButtons(map: GoogleMap3D) {
+        findViewById<Button>(R.id.btn_fly_honolulu).setOnClickListener {
+            lifecycleScope.launch { flyToHonolulu(map) }
+        }
+
+        findViewById<Button>(R.id.btn_show_markers).setOnClickListener {
+            addMarkers(map)
+            lifecycleScope.launch { flyToMarkers(map) }
+        }
+
+        findViewById<Button>(R.id.btn_show_polygons).setOnClickListener {
+            addPolygon(map)
+            lifecycleScope.launch { flyToMarkers(map) } // Re-use marker view for polygons as it's the same place
+        }
+
+        findViewById<Button>(R.id.btn_show_shark).setOnClickListener {
+            setupShark(map)
+            lifecycleScope.launch { flyToShark(map) }
+        }
+    }
+
+    private suspend fun flyToMarkers(map: GoogleMap3D) {
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = IOLANI_PALACE
+                    tilt = 60.0
+                    range = 500.0
+                    heading = 0.0
+                }
+                durationInMillis = 2000L
+            }
+        )
+        awaitCameraAnimation(map)
+    }
+
+    private suspend fun flyToShark(map: GoogleMap3D) {
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = WAIKIKI
+                    tilt = 60.0
+                    range = 1000.0
+                    heading = 0.0
+                }
+                durationInMillis = 2000L
+            }
+        )
+        awaitCameraAnimation(map)
     }
 
     private suspend fun awaitMapSteady(map: GoogleMap3D) = suspendCancellableCoroutine { continuation ->
@@ -177,87 +231,6 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         awaitCameraAnimation(map)
     }
 
-    /*
-    private fun setupFlyover(map: GoogleMap3D) {
-        // We wait for the map to be steady (loaded) before starting the cinematic animation
-        map.setOnMapSteadyListener { isSteady ->
-            if (isSteady) {
-                map.setOnMapSteadyListener(null) // Only run once
-                lifecycleScope.launch {
-                    delay(2000) // Brief pause
-
-                    // The Smooth Glide
-                    map.flyCameraTo(
-                        flyToOptions {
-                            endCamera = camera {
-                                center = latLngAltitude {
-                                    latitude = IOLANI_PALACE.latitude
-                                    longitude = IOLANI_PALACE.longitude
-                                    altitude = 50.0
-                                }
-                                tilt = 60.0
-                                range = 300.0
-                                heading = 0.0
-                            }
-                            durationInMillis = 5.seconds.inWholeMilliseconds
-                        }
-                    )
-                    
-                    delay(5500) // Wait for flyTo + pause
-
-                    // The Orbit
-                    map.flyCameraAround(
-                        flyAroundOptions {
-                            rounds = 1.0
-                            durationInMillis = 10.seconds.inWholeMilliseconds
-                        }
-                    )
-                }
-            }
-        }
-    }
-
-    private fun addMarkers(map: GoogleMap3D) {
-        // Absolute
-        map.addMarker(
-            markerOptions {
-                position = latLngAltitude {
-                    latitude = IOLANI_PALACE.latitude
-                    longitude = IOLANI_PALACE.longitude
-                    altitude = 100.0
-                }
-                altitudeMode = AltitudeMode.ABSOLUTE
-                label = "Absolute (100m)"
-            }
-        )
-
-        // Relative
-        map.addMarker(
-            markerOptions {
-                position = latLngAltitude {
-                    latitude = IOLANI_PALACE.latitude + 0.001
-                    longitude = IOLANI_PALACE.longitude
-                    altitude = 50.0
-                }
-                altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-                label = "Relative (50m)"
-            }
-        )
-
-        // Clamped
-        map.addMarker(
-            markerOptions {
-                position = latLngAltitude {
-                    latitude = IOLANI_PALACE.latitude - 0.001
-                    longitude = IOLANI_PALACE.longitude
-                    altitude = 0.0
-                }
-                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                label = "Clamped"
-            }
-        )
-    }
-
     private fun addPolygon(map: GoogleMap3D) {
         // Step 4: Extruded Polygon around Iolani Palace
         val palaceBaseFace = listOf(
@@ -307,33 +280,78 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         // Add "Shark" (Airplane placeholder)
         val shark = map.addModel(
             modelOptions {
-                position = WAIKIKI
-                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                position = latLngAltitude {
+                    latitude = WAIKIKI.latitude
+                    longitude = WAIKIKI.longitude
+                    altitude = 20.0
+                }
+                altitudeMode = AltitudeMode.ABSOLUTE
                 orientation = orientation {
                     heading = 0.0
                     tilt = -90.0
                     roll = 0.0
                 }
                 url = SHARK_MODEL_URL
-                scale = vector3D { x = 10.0; y = 10.0; z = 10.0 } // Big shark
+                scale = vector3D { x = SHARK_SCALE; y = SHARK_SCALE; z = SHARK_SCALE } // Big shark
             }
         )
 
         // Animate Shark
         lifecycleScope.launch {
-            delay(15000) // Wait for other animations
-            
-            // Simple animation
-            shark.setPosition(latLngAltitude {
+            // Simple animation loop provided in codelab
+            shark.position = latLngAltitude {
                 latitude = WAIKIKI.latitude
                 longitude = WAIKIKI.longitude
                 altitude = 50.0
-            })
+            }
             delay(1000)
-            shark.setPosition(WAIKIKI)
+            shark.position = WAIKIKI
         }
     }
-    */
+
+    private fun addMarkers(map: GoogleMap3D) {
+        // Absolute
+        map.addMarker(
+            markerOptions {
+                position = latLngAltitude {
+                    latitude = IOLANI_PALACE.latitude
+                    longitude = IOLANI_PALACE.longitude
+                    altitude = 100.0
+                }
+                altitudeMode = AltitudeMode.ABSOLUTE
+                label = "Absolute (100m)"
+                isDrawnWhenOccluded = true
+            }
+        )
+
+        // Relative
+        map.addMarker(
+            markerOptions {
+                position = latLngAltitude {
+                    latitude = IOLANI_PALACE.latitude + 0.001
+                    longitude = IOLANI_PALACE.longitude
+                    altitude = 50.0
+                }
+                altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+                label = "Relative (50m)"
+                isDrawnWhenOccluded = true
+            }
+        )
+
+        // Clamped
+        map.addMarker(
+            markerOptions {
+                position = latLngAltitude {
+                    latitude = IOLANI_PALACE.latitude - 0.001
+                    longitude = IOLANI_PALACE.longitude
+                    altitude = 0.0
+                }
+                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                label = "Clamped"
+                isDrawnWhenOccluded = true
+            }
+        )
+    }
 
     /**
      * Extrudes a flat polygon (defined by basePoints, all at the same altitude)
