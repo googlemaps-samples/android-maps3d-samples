@@ -157,6 +157,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         )
         // Wait for the animation to finish
         awaitCameraAnimation(map)
+        awaitMapSteady(map)
         
         println("Orbiting Honolulu...")
         map.flyCameraAround(

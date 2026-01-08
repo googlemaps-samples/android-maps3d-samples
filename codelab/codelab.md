@@ -89,8 +89,6 @@ You now understand **Clamping**. This is the secret to making sure your UI eleme
 
 ---
 
----
-
 ## 5. Highlighting History (2D to 3D Polygons)
 
 Sometimes a single marker isn't enough. We want to highlight the entire Palace grounds to show its significance.
@@ -103,8 +101,6 @@ Sometimes a single marker isn't enough. We want to highlight the entire Palace g
 ### Conclusion
 
 You’ve moved beyond points and lines. You can now define 3D volumes in space, a powerful tool for highlighting districts or historic sites.
-
----
 
 ---
 
@@ -122,8 +118,6 @@ Your map is now alive. You’ve bridged the gap between the 3D map renderer and 
 
 ---
 
----
-
 ## 7. Beach Bound & "Jumping the Shark"
 
 It’s time for some fun. We’re moving from the Palace to the beach, and we’re bringing some animation with us.
@@ -138,8 +132,6 @@ It’s time for some fun. We’re moving from the Palace to the beach, and we’
 ### Conclusion
 
 You’ve pushed the SDK to its limits! You can now animate complex 3D assets through space and time, opening the door for games or real-time transit tracking.
-
----
 
 ---
 
