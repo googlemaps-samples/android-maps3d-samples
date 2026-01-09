@@ -76,9 +76,17 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+        // Apply insets (Top for Map, Bottom for Controls)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.map3dView)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            insets
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.controls_scroll_view)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val basePadding = (16 * resources.displayMetrics.density).toInt() // 16dp
+            v.setPadding(systemBars.left, basePadding, systemBars.right, systemBars.bottom + basePadding)
             insets
         }
 
@@ -325,8 +333,15 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             }
         )
 
+        // Add click listener
+        balloon?.setClickListener {
+            lifecycleScope.launch(Dispatchers.Main) {
+                Toast.makeText(this@MainActivity, "Clicked the Balloon!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         // Add to list if not null
-        balloon.let { activeModels.add(it) }
+        balloon?.let { activeModels.add(it) }
     }
 
     private fun addMarkers(map: GoogleMap3D) {
@@ -346,7 +361,13 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                     isDrawnWhenOccluded = true
                     isExtruded = true
                 }
-            ))
+            )?.apply {
+                setClickListener {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "Clicked Absolute Marker", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            })
 
             // Relative
             add(map.addMarker(
@@ -361,7 +382,13 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                     isDrawnWhenOccluded = true
                     isExtruded = true
                 }
-            ))
+            )?.apply {
+                setClickListener {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "Clicked Relative Marker", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            })
 
             // Clamped
             add(map.addMarker(
@@ -376,7 +403,13 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                     isDrawnWhenOccluded = true
                     isExtruded = true
                 }
-            ))
+            )?.apply {
+                setClickListener {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "Clicked Clamped Marker", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            })
         }.filterNotNull().forEach { activeMarkers.add(it) }
     }
 
