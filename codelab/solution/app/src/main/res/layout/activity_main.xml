@@ -10,7 +10,7 @@
     <com.google.android.gms.maps3d.Map3DView
         android:id="@+id/map3dView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         app:mode="hybrid"
         app:centerLat="21.3069"
         app:centerLng="-157.8583"
@@ -25,18 +25,19 @@
         app:maxHeading="360"
         app:minTilt="0"
         app:maxTilt="90"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/controls_scroll_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <HorizontalScrollView
         android:id="@+id/controls_scroll_view"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:paddingVertical="16dp"
         android:fillViewport="true"
         android:scrollbars="none"
+        android:background="#FFFFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
