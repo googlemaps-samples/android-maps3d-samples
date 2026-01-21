@@ -219,7 +219,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 }
             }
         }
-        
+
         // Safety: If the coroutine is cancelled (e.g., user exits app), remove the listener.
         continuation.invokeOnCancellation {
             map.setOnMapSteadyListener(null)
@@ -320,19 +320,28 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
     private fun addPolygon(map: GoogleMap3D) {
         resetMap()
-        
+
         // Define the base (ground) shape of Iolani Palace.
+        // Note: Points are defined clockwise: North -> East -> South -> West
         val palaceBaseFace = listOf(
-            latLngAltitude { latitude = 21.3073; longitude = -157.8593; altitude = 0.0 },
-            latLngAltitude { latitude = 21.3073; longitude = -157.8584; altitude = 0.0 },
-            latLngAltitude { latitude = 21.3063; longitude = -157.8584; altitude = 0.0 },
-            latLngAltitude { latitude = 21.3063; longitude = -157.8593; altitude = 0.0 },
-            latLngAltitude { latitude = 21.3073; longitude = -157.8593; altitude = 0.0 }
-        )
+            21.307180365, -157.858769898,
+            21.306765552, -157.858390366,
+            21.306476932, -157.858755146,
+            21.306892995, -157.859134679,
+        ).windowed(2, 2).map {
+            latLngAltitude {
+                latitude = it[0]
+                longitude = it[1]
+                altitude = 0.0
+            }
+        }.let { points ->
+            // Close the loop by appending the first point to the end
+            points + points.first()
+        }
 
         // **Extrusion**: Turn a 2D shape into a 3D building by duplicating the path upwards
         // and connecting the edges.
-        val extrudedPalace = extrudePolygon(palaceBaseFace, 50.0) // 50 meters tall
+        val extrudedPalace = extrudePolygon(palaceBaseFace, 35.0) // 35 meters tall
 
         // Add all faces (top, bottom, sides) to the map
         val palacePolygons = extrudedPalace.map { facePoints ->
