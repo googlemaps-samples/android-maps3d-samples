@@ -87,6 +87,14 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         // Models must be loaded from the internet.  Here we use Cloud Storage.
         const val BALLOON_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/balloon-pin-BlXF32yD.glb"
         const val BALLOON_SCALE = 5.0
+
+        // Step 5: Iolani Palace Geometry (Lat, Lng pairs)
+        val IOLANI_PALACE_GEO = listOf(
+            21.307180365, -157.858769898,
+            21.306765552, -157.858390366,
+            21.306476932, -157.858755146,
+            21.306892995, -157.859134679,
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -322,22 +330,10 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         resetMap()
 
         // Define the base (ground) shape of Iolani Palace.
-        // Note: Points are defined clockwise: North -> East -> South -> West
-        val palaceBaseFace = listOf(
-            21.307180365, -157.858769898,
-            21.306765552, -157.858390366,
-            21.306476932, -157.858755146,
-            21.306892995, -157.859134679,
-        ).windowed(2, 2).map {
-            latLngAltitude {
-                latitude = it[0]
-                longitude = it[1]
-                altitude = 0.0
-            }
-        }.let { points ->
-            // Close the loop by appending the first point to the end
-            points + points.first()
-        }
+        // uses the constant defined in companion object
+        val palaceBaseFace = IOLANI_PALACE_GEO.windowed(2, 2).map { 
+             latLngAltitude { latitude = it[0]; longitude = it[1]; altitude = 0.0 }
+        }.let { points -> points + points.first() }
 
         // **Extrusion**: Turn a 2D shape into a 3D building by duplicating the path upwards
         // and connecting the edges.

@@ -1,18 +1,41 @@
 # Codelab: Aloha Explorer — Building with the 3D Maps SDK for Android
 
-Welcome to the future of mobile mapping! In this codelab, we are going to build **Aloha Explorer**, a travel app designed to showcase the beauty and history of Honolulu using the **Google Maps 3D SDK for Android**.
+Welcome to the future of mobile mapping! In this codelab, we are going to build **Aloha Explorer**, a 3D interactive tour of historic Iolani Palace in Honolulu.
 
-Unlike standard 2D or "2.5D" maps, the 3D SDK allows you to treat the world as a true 3D environment. You will learn how to fly cameras through mountain passes, animate models in the air, and highlight historic landmarks with 3D volumes.
+Using the **Google Maps 3D SDK for Android**, you will transform a standard flat map into an immersive 3D experience. We will start with a basic "Hello World" app and add:
+
+*   **Cinematic Camera**: A smooth flight from space down to Honolulu.
+*   **3D Markers**: Floating markers pinned to specific altitudes.
+*   **3D Volumes**: An extruded polygon visualizing the palace grounds.
+*   **3D Models**: A high-fidelity glTF model (a Balloon) floating above the scene.
 
 ### What you’ll learn
 
 *   **Initialization**: How to set up the `Map3DView` and handle its lifecycle.
-*   **Camera Control**: How to orchestrate cinematic camera movements.
-*   **Altitude Modes**: How to use `ABSOLUTE`, `RELATIVE_TO_GROUND`, and `CLAMP_TO_GROUND`.
-*   **Extrusion**: How to turn 2D polygons into 3D volumes.
-*   **3D Models**: How to load and place glTF models (a Balloon!).
-*   **Interaction**: How to handle click events on 3D objects.
-*   **Coroutines**: How to use Kotlin Coroutines for smooth, asynchronous animation sequencing.
+*   **Camera Control**: How to orchestrate smooth animations using Coroutines.
+*   **Altitude Modes**: Understanding `ABSOLUTE`, `RELATIVE_TO_GROUND`, `CLAMP_TO_GROUND`, and `RELATIVE_TO_MESH`.
+*   **Extrusion**: Turning 2D footprints into 3D volumes.
+*   **3D Models**: Loading and placing glTF assets.
+*   **Interaction**: Handling click events on 3D objects.
+
+---
+
+## Prerequisites
+
+Before we start coding, ensure your environment is ready.
+
+1.  **Dependencies**: Open `app/build.gradle.kts` and ensure you have the Maps 3D SDK dependency:
+    ```kotlin
+    implementation(libs.play.services.maps3d)
+    implementation(libs.androidx.lifecycle.runtime.ktx) // For lifecycleScope
+    ```
+
+2.  **API Key**: Add your API key to `local.properties` (secure) or directly in `AndroidManifest.xml` (for quick testing).
+    ```xml
+    <meta-data
+        android:name="com.google.android.geo.maps3d.API_KEY"
+        android:value="${MAPS3D_API_KEY}" />
+    ```
 
 ---
 
@@ -35,10 +58,24 @@ Open `app/src/main/res/layout/activity_main.xml`. We want a full-screen 3D map w
         android:id="@+id/map3dView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:mode="hybrid"
+        app:centerLat="21.3069"
+        app:centerLng="-157.8583"
+        app:centerAlt="0"
+        app:heading="0"
+        app:tilt="0"
+        app:range="5000000"
+        app:roll="0"
+        app:minAltitude="0"
+        app:maxAltitude="10000000"
+        app:minHeading="0"
+        app:maxHeading="360"
+        app:minTilt="0"
+        app:maxTilt="90"
         app:layout_constraintBottom_toTopOf="@id/controls_scroll_view"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <HorizontalScrollView
         android:id="@+id/controls_scroll_view"
@@ -53,8 +90,36 @@ Open `app/src/main/res/layout/activity_main.xml`. We want a full-screen 3D map w
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <!-- Buttons go here -->
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
+
+            <Button
+                android:id="@+id/btn_fly_honolulu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Camera"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_show_markers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Markers"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_show_polygons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Polygons"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btn_show_balloon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Models" />
+
         </LinearLayout>
     </HorizontalScrollView>
 
@@ -63,37 +128,110 @@ Open `app/src/main/res/layout/activity_main.xml`. We want a full-screen 3D map w
 
 ### Step 1.2: Initialization & Lifecycle
 
-Open `MainActivity.kt`. The `Map3DView` is powerful, but it needs a little help to know when to start and stop rendering.
+Open `MainActivity.kt`. We need to setup our class structure, define constants, and manage the map's lifecycle.
 
-**Task**:
-1.  Enable **Edge-to-Edge** display for maximum immersion.
-2.  Handle **WindowInsets** so our controls don't get hidden behind the navigation bar.
-3.  Forward **Lifecycle** events (`onResume`, `onPause`, `onDestroy`) to the map.
+**Tasks**:
+1.  Define **Constants** for our locations and assets.
+2.  Setup **State Management** lists to track objects we add to the map.
+3.  Initialize the **Map3DView** and handle **Edge-to-Edge** insets.
+4.  Wire up our **Buttons**.
 
 ```kotlin
-override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    enableEdgeToEdge() // 1. Full screen!
-    setContentView(R.layout.activity_main)
+// Add these imports if not present
+import kotlin.time.Duration.Companion.seconds
+// ... other imports will be auto-added by Android Studio
 
-    // 2. Handle Insets
-    // Map needs padding at Top (Status Bar)
-    ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.map3dView)) { v, insets ->
-        val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-        v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
-        insets
-    }
-    // Controls need padding at Bottom (Nav Bar)
-    ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.controls_scroll_view)) { v, insets ->
-        val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-        v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom)
-        insets
+class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
+
+    private lateinit var map3DView: Map3DView
+    private var googleMap3D: GoogleMap3D? = null
+
+    // State Management: Track objects to remove them later
+    private val activeMarkers = mutableListOf<Marker>()
+    private val activePolygons = mutableListOf<Polygon>()
+    private val activePolylines = mutableListOf<Polyline>()
+    private val activeModels = mutableListOf<Model>()
+
+    companion object {
+        // Locations
+        val HONOLULU = latLngAltitude { latitude = 21.3069; longitude = -157.8583; altitude = 0.0 }
+        val IOLANI_PALACE = latLngAltitude { latitude = 21.306740; longitude = -157.858803; altitude = 0.0 }
+        val WAIKIKI = latLngAltitude { latitude = 21.2766; longitude = -157.8286; altitude = 0.0 }
+        
+        // Assets
+        const val BALLOON_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/balloon-pin-BlXF32yD.glb"
+        const val BALLOON_SCALE = 5.0
+        
+        // Geometry
+        val IOLANI_PALACE_GEO = listOf(
+            21.307180365, -157.858769898,
+            21.306765552, -157.858390366,
+            21.306476932, -157.858755146,
+            21.306892995, -157.859134679,
+        )
     }
 
-    // 3. Initialize Map
-    map3DView = findViewById(R.id.map3dView)
-    map3DView.onCreate(savedInstanceState)
-    map3DView.getMap3DViewAsync(this)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+
+        // Handle Insets (Status Bar & Nav Bar)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.map3dView)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            insets
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.controls_scroll_view)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val basePadding = (16 * resources.displayMetrics.density).toInt() // 16dp
+            v.setPadding(systemBars.left, basePadding, systemBars.right, systemBars.bottom + basePadding)
+            insets
+        }
+
+        map3DView = findViewById(R.id.map3dView)
+        map3DView.onCreate(savedInstanceState)
+        map3DView.getMap3DViewAsync(this)
+    }
+
+    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
+        this@MainActivity.googleMap3D = googleMap3D
+
+        lifecycleScope.launch {
+            // Start from space!
+            startFromGlobalView(googleMap3D)
+            
+            // Wire up buttons
+            setupButtons(googleMap3D)
+        }
+    }
+    
+    // Wire up UI buttons to functions
+    private fun setupButtons(map: GoogleMap3D) {
+        findViewById<Button>(R.id.btn_fly_honolulu).setOnClickListener {
+            lifecycleScope.launch { flyToHonolulu(map) }
+        }
+        findViewById<Button>(R.id.btn_show_markers).setOnClickListener {
+            addMarkers(map)
+            lifecycleScope.launch { flyToMarkers(map) }
+        }
+        findViewById<Button>(R.id.btn_show_polygons).setOnClickListener {
+            addPolygon(map)
+            lifecycleScope.launch { flyToMarkers(map) } // Re-use marker view for polygons
+        }
+        findViewById<Button>(R.id.btn_show_balloon).setOnClickListener {
+            setupBalloon(map)
+            lifecycleScope.launch { flyToBalloon(map) }
+        }
+    }
+    
+    // Helper to clear the map before adding new content
+    private fun resetMap() {
+        activeMarkers.forEach { it.remove() }; activeMarkers.clear()
+        activePolygons.forEach { it.remove() }; activePolygons.clear()
+        activePolylines.forEach { it.remove() }; activePolylines.clear()
+        activeModels.forEach { it.remove() }; activeModels.clear()
+    }
 }
 ```
 
@@ -191,6 +329,10 @@ Objects in a 3D world need to know where they sit on the vertical "Z-axis".
 1.  **ABSOLUTE**: Relative to sea level (WGS84). Good for airplanes.
 2.  **RELATIVE_TO_GROUND**: Relative to the terrain height. Good for things floating *above* the ground.
 3.  **CLAMP_TO_GROUND**: Snaps to the terrain. Good for POIs.
+4.  **RELATIVE_TO_MESH**: Relative to the actual 3D objects (buildings/trees). Good for placing things on rooftops.
+
+### Helper: `resetMap()`
+You noticed we call `resetMap()` at the start. This prevents "ghost objects"—markers from previous clicks staying on the map. We iterate through our tracking lists (`activeMarkers`, etc.), call `.remove()` on each object to clear it from the 3D engine, and then clear the list.
 
 ```kotlin
 private fun addMarkers(map: GoogleMap3D) {
@@ -277,22 +419,10 @@ We can "extrude" a flat shape by:
 
 ```kotlin
 // Define the base (ground) shape of Iolani Palace.
-// Note: Points are defined clockwise: North -> East -> South -> West
-val palaceBaseFace = listOf(
-    21.307180365, -157.858769898,
-    21.306765552, -157.858390366,
-    21.306476932, -157.858755146,
-    21.306892995, -157.859134679,
-).windowed(2, 2).map {
-    latLngAltitude {
-        latitude = it[0]
-        longitude = it[1]
-        altitude = 0.0
-    }
-}.let { points ->
-    // Close the loop by appending the first point to the end
-    points + points.first()
-}
+// Uses the constant defined in companion object
+val palaceBaseFace = IOLANI_PALACE_GEO.windowed(2, 2).map { 
+     latLngAltitude { latitude = it[0]; longitude = it[1]; altitude = 0.0 }
+}.let { points -> points + points.first() }
 
 // Extrude!
 val extrudedPalace = extrudePolygon(palaceBaseFace, 35.0) // 35 meters tall
@@ -356,6 +486,176 @@ balloon.setClickListener {
     }
 }
 ```
+
+---
+
+---
+
+## 8. Bonus: Jetpack Compose
+
+Prefer **Jetpack Compose** over XML? The Maps 3D SDK is View-based, but it integrates seamlessly using `AndroidView`.
+
+We have included a full reference implementation in `Map3DComposeActivity.kt` (in the solution code). Here is a complete guide to recreating it.
+
+### 1. Configure Options
+First, define how the map should initialize.
+
+```kotlin
+val map3DOptions = Map3DOptions(
+    centerLat = HONOLULU.latitude,
+    centerLng = HONOLULU.longitude,
+    centerAlt = 1000.0,
+    heading = 0.0,
+    range = 10_000_000.0, // Start from space
+    mapMode = Map3DMode.HYBRID
+)
+```
+
+### 2. The Composable Wrapper
+
+We'll build the `Map3DContainer` step-by-step.
+
+#### 2.1 State & AndroidView Skeleton
+
+First, we need to bridge the gap between Compose and the View system using `AndroidView`. We also need to hold the `GoogleMap3D` object in our Compose state.
+
+```kotlin
+@Composable
+fun Map3DContainer(
+    modifier: Modifier = Modifier,
+    options: Map3DOptions
+) {
+    // State to hold the map controller
+    var googleMap by remember { mutableStateOf<GoogleMap3D?>(null) }
+    
+    Box(modifier = modifier.fillMaxSize()) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = { context ->
+                // TODO: Initialize View
+                Map3DView(context, options) 
+            }
+        )
+    }
+}
+```
+
+#### 2.2 Initializing the View (`factory`)
+
+The `factory` lambda is called *once* to create the View. We must manually initialize the `Map3DView`'s lifecycle here.
+
+```kotlin
+factory = { context ->
+    Map3DView(context, options).apply {
+        // Manually call onCreate. In a real app, wire this to LifecycleOwner.
+        onCreate(null)
+    }
+},
+```
+
+#### 2.3 Capturing the Map (`update`)
+
+The `update` lambda runs when the Composable recomposes. We use `getMap3DViewAsync` to extract the `GoogleMap3D` controller and save it to our state.
+
+```kotlin
+update = { view ->
+    view.getMap3DViewAsync(
+        object : OnMap3DViewReadyCallback {
+            override fun onMap3DViewReady(map3D: GoogleMap3D) {
+                googleMap = map3D
+            }
+            override fun onError(e: Exception) {
+                googleMap = null
+                throw e
+            }
+        }
+    )
+},
+```
+
+#### 2.4 Cleanup (`onRelease`)
+
+To prevent memory leaks, we must destroy the view when the Composable is removed from the screen.
+
+```kotlin
+onRelease = { view -> 
+    googleMap = null
+    view.onDestroy() 
+}
+```
+
+#### 2.5 Adding Interaction
+
+Finally, let's overlay a Button to trigger our cinematic flight. We use a `Job` to manage the animation cancellation.
+
+```kotlin
+// Add this state to track animations
+var animationJob by remember { mutableStateOf<Job?>(null) }
+val coroutineScope = rememberCoroutineScope()
+
+// ... inside Box, after AndroidView ...
+
+Button(
+    // Enable only if map is ready and not currently animating
+    enabled = googleMap != null && animationJob == null,
+    onClick = {
+        animationJob?.cancel()
+        animationJob = coroutineScope.launch {
+            // 1. Fly to Honolulu
+            googleMap?.flyCameraTo(flyToOptions {
+                endCamera = camera {
+                    center = HONOLULU
+                    tilt = 45.0
+                    range = 20000.0
+                }
+                durationInMillis = 2000L
+            })
+            googleMap?.let { awaitCameraAnimation(it) }
+
+            // 2. Orbit
+            googleMap?.flyCameraAround(flyAroundOptions {
+                center = camera {
+                    center = HONOLULU
+                    tilt = 45.0
+                    range = 20000.0
+                }
+                rounds = 1.0
+                durationInMillis = 5000L
+            })
+            googleMap?.let { awaitCameraAnimation(it) }
+            
+            animationJob = null
+        }
+    },
+    modifier = Modifier
+        .align(Alignment.BottomCenter)
+        .padding(bottom = 32.dp)
+) {
+    Text("Fly to Honolulu")
+}
+```
+
+### 3. The Activity Setup
+Finally, use `setContent` to display your Composable.
+
+```kotlin
+class Map3DComposeActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Map3DContainer(
+                    modifier = Modifier.padding(innerPadding),
+                    options = map3DOptions
+                )
+            }
+        }
+    }
+}
+```
+
+This pattern gives you the best of both worlds: the power of the 3D Maps SDK and the modern UI of Jetpack Compose. Check out `Map3DComposeActivity.kt` for the complete code!
 
 ---
 
