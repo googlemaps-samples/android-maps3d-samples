@@ -19,7 +19,7 @@ import java.io.File
 
 // Check for secrets.properties file before proceeding with build tasks.
 val secretsFile = rootProject.file("secrets.properties")
-if (!secretsFile.exists()) {
+if (!secretsFile.exists() && System.getenv("CI") != "true") {
     val requestedTasks = gradle.startParameter.taskNames
     if (requestedTasks.isEmpty()) {
         // It's likely an IDE sync if no tasks are specified, so just issue a warning.
