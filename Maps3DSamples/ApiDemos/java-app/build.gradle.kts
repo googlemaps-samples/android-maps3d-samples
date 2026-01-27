@@ -19,7 +19,9 @@ import java.io.File
 
 // Check for secrets.properties file before proceeding with build tasks.
 val secretsFile = rootProject.file("secrets.properties")
-if (!secretsFile.exists()) {
+val isCI = System.getenv("CI")?.toBoolean() ?: false
+
+if (!secretsFile.exists() && !isCI) {
     val requestedTasks = gradle.startParameter.taskNames
     if (requestedTasks.isEmpty()) {
         // It's likely an IDE sync if no tasks are specified, so just issue a warning.
@@ -39,7 +41,11 @@ if (!secretsFile.exists()) {
             }
         }
 
-        if (isBuildTask && !isTestTask) {
+        val isDebugTask = requestedTasks.any { task ->
+            task.contains("Debug", ignoreCase = true)
+        }
+
+        if (isBuildTask && !isTestTask && isDebugTask) {
             val defaultsFile = rootProject.file("local.defaults.properties")
             val requiredKeysMessage = if (defaultsFile.exists()) {
                 defaultsFile.readText()
@@ -108,17 +114,19 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.play.services.base)
+    implementation(project(":common"))
+
     testImplementation(libs.junit)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(project(":common"))
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.truth)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    implementation(libs.play.services.base)
-    implementation(project(":common"))
 }
 
 secrets {
