@@ -19,7 +19,9 @@ import java.io.File
 
 // Check for secrets.properties file before proceeding with build tasks.
 val secretsFile = rootProject.file("secrets.properties")
-if (!secretsFile.exists() && System.getenv("CI") != "true") {
+val isCI = System.getenv("CI")?.toBoolean() ?: false
+
+if (!secretsFile.exists() && !isCI) {
     val requestedTasks = gradle.startParameter.taskNames
     if (requestedTasks.isEmpty()) {
         // It's likely an IDE sync if no tasks are specified, so just issue a warning.
@@ -39,7 +41,11 @@ if (!secretsFile.exists() && System.getenv("CI") != "true") {
             }
         }
 
-        if (isBuildTask && !isTestTask) {
+        val isDebugTask = requestedTasks.any { task ->
+            task.contains("Debug", ignoreCase = true)
+        }
+
+        if (isBuildTask && !isTestTask && isDebugTask) {
             val defaultsFile = rootProject.file("local.defaults.properties")
             val requiredKeysMessage = if (defaultsFile.exists()) {
                 defaultsFile.readText()
@@ -140,11 +146,9 @@ secrets {
     defaultPropertiesFileName = "local.defaults.properties"
 }
 
-tasks.register<Exec>("launchDebug") {
+tasks.register<Exec>("installAndLaunch") {
+    description = "Installs and launches the demo app."
+    group = "install"
     dependsOn("installDebug")
-    commandLine("adb", "shell", "am", "start", "-n", "com.example.maps3dkotlin/.MainActivity")
-    doLast {
-        println("Launched com.example.maps3dkotlin/.MainActivity")
-    }
+    commandLine("adb", "shell", "am", "start", "-n", "com.example.maps3dkotlin/.mainactivity.MainActivity")
 }
-
