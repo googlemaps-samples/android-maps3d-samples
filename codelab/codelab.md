@@ -24,18 +24,61 @@ Using the **Google Maps 3D SDK for Android**, you will transform a standard flat
 
 Before we start coding, ensure your environment is ready.
 
-1.  **Dependencies**: Open `app/build.gradle.kts` and ensure you have the Maps 3D SDK dependency:
-    ```kotlin
-    implementation(libs.play.services.maps3d)
-    implementation(libs.androidx.lifecycle.runtime.ktx) // For lifecycleScope
-    ```
+1.  **Enable the SDK**:
+    *   Go to the [Google Cloud Console](https://console.cloud.google.com/marketplace/product/google/mapsandroid.googleapis.com).
+    *   Select your project and click **Enable** to turn on the "Maps 3D SDK for Android".
+    *   Make sure you have an API Key created in the "Credentials" section.
 
-2.  **API Key**: Add your API key to `local.properties` (secure) or directly in `AndroidManifest.xml` (for quick testing).
-    ```xml
-    <meta-data
-        android:name="com.google.android.geo.maps3d.API_KEY"
-        android:value="${MAPS3D_API_KEY}" />
-    ```
+2.  **Dependencies**:
+    *   Open `gradle/libs.versions.toml` and add the secrets plugin to the `[versions]` and `[plugins]` sections:
+        ```toml
+        [versions]
+        # ... existing versions ...
+        secretsGradlePlugin = "2.0.1"
+
+        [plugins]
+        # ... existing plugins ...
+        secrets-gradle-plugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
+        ```
+    *   Open `app/build.gradle.kts` and apply the plugin:
+        ```kotlin
+        plugins {
+            // ... other plugins
+            alias(libs.plugins.secrets.gradle.plugin)
+        }
+
+        // Add this block to configure the plugin
+        secrets {
+            propertiesFileName = "secrets.properties"
+            defaultPropertiesFileName = "local.defaults.properties"
+        }
+        ```
+    *   Ensure the Maps 3D SDK dependency is also present in `dependencies { ... }`:
+        ```kotlin
+        implementation(libs.play.services.maps3d)
+        implementation(libs.androidx.lifecycle.runtime.ktx)
+        ```
+
+3.  **API Key**:
+    *   Create a file named `secrets.properties` in your project's root directory.
+    *   Add your API key to this file:
+        ```properties
+        MAPS3D_API_KEY=YOUR_ACTUAL_API_KEY
+        ```
+    *   **Note**: `secrets.properties` should NOT be committed to version control.
+    *   Create another file named `local.defaults.properties` in the root directory.
+    *   Add a fallback value:
+        ```properties
+        MAPS3D_API_KEY=DEFAULT_API_KEY
+        ```
+    *   This file *should* be committed to version control to verify which keys are required.
+    *   Open `app/src/main/AndroidManifest.xml` and add the following metadata tag inside the `<application>` element:
+        ```xml
+        <meta-data
+            android:name="com.google.android.geo.maps3d.API_KEY"
+            android:value="${MAPS3D_API_KEY}" />
+        ```
+        The secrets plugin will inject the key from `secrets.properties` into this placeholder.
 
 ---
 
@@ -115,6 +158,13 @@ Open `app/src/main/res/layout/activity_main.xml`. We want a full-screen 3D map w
                 android:layout_marginEnd="8dp"/>
 
             <Button
+                android:id="@+id/btn_show_popovers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Info"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
                 android:id="@+id/btn_show_balloon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -126,20 +176,52 @@ Open `app/src/main/res/layout/activity_main.xml`. We want a full-screen 3D map w
 </androidx.constraintlayout.widget.ConstraintLayout>
 ```
 
-### Step 1.2: Initialization & Lifecycle
+### Step 1.2: Project Skeleton
 
-Open `MainActivity.kt`. We need to setup our class structure, define constants, and manage the map's lifecycle.
+Open `MainActivity.kt`. First, we'll set up the class structure, binding constants, and helper variables. We also handle the "Edge-to-Edge" UI logic here.
 
 **Tasks**:
 1.  Define **Constants** for our locations and assets.
-2.  Setup **State Management** lists to track objects we add to the map.
-3.  Initialize the **Map3DView** and handle **Edge-to-Edge** insets.
-4.  Wire up our **Buttons**.
+2.  Setup **State Management** lists to track objects.
+3.  Handle **Window Insets** in `onCreate`.
 
 ```kotlin
-// Add these imports if not present
+// Maps 3D SDK
+import com.google.android.gms.maps3d.GoogleMap3D
+import com.google.android.gms.maps3d.Map3DView
+import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
+import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.LatLngAltitude
+import com.google.android.gms.maps3d.model.Marker
+import com.google.android.gms.maps3d.model.Model
+import com.google.android.gms.maps3d.model.Polygon
+import com.google.android.gms.maps3d.model.Polyline
+import com.google.android.gms.maps3d.model.Popover
+import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyAroundOptions
+import com.google.android.gms.maps3d.model.flyToOptions
+import com.google.android.gms.maps3d.model.latLngAltitude
+import com.google.android.gms.maps3d.model.markerOptions
+import com.google.android.gms.maps3d.model.modelOptions
+import com.google.android.gms.maps3d.model.orientation
+import com.google.android.gms.maps3d.model.polygonOptions
+import com.google.android.gms.maps3d.model.polylineOptions
+import com.google.android.gms.maps3d.model.popoverOptions
+import com.google.android.gms.maps3d.model.popoverShadow
+import com.google.android.gms.maps3d.model.popoverStyle
+import com.google.android.gms.maps3d.model.vector3D
+
+// Android UI
+import android.graphics.Color
+import android.widget.TextView
+
+// Coroutines & Lifecycle
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.seconds
-// ... other imports will be auto-added by Android Studio
 
 class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
@@ -151,6 +233,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private val activePolygons = mutableListOf<Polygon>()
     private val activePolylines = mutableListOf<Polyline>()
     private val activeModels = mutableListOf<Model>()
+    private val activePopovers = mutableListOf<Popover>()
 
     companion object {
         // Locations
@@ -159,6 +242,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val WAIKIKI = latLngAltitude { latitude = 21.2766; longitude = -157.8286; altitude = 0.0 }
         
         // Assets
+        // 3D models must be hosted online and reachable via a URL (e.g. Cloud Storage).
         const val BALLOON_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/balloon-pin-BlXF32yD.glb"
         const val BALLOON_SCALE = 5.0
         
@@ -188,7 +272,39 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             v.setPadding(systemBars.left, basePadding, systemBars.right, systemBars.bottom + basePadding)
             insets
         }
+    }
 
+    // Helper to clear the map before adding new content
+    private fun resetMap() {
+        activeMarkers.forEach { it.remove() }; activeMarkers.clear()
+        activePolygons.forEach { it.remove() }; activePolygons.clear()
+        activePolylines.forEach { it.remove() }; activePolylines.clear()
+        activeModels.forEach { it.remove() }; activeModels.clear()
+        activePopovers.forEach { it.remove() }; activePopovers.clear()
+    }
+
+    // We'll implement onMap3DViewReady in the next step!
+    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
+        // TODO: Initialize map
+    }
+}
+```
+
+### Step 1.3: Initialize the Map
+
+Now separate the boilerplate from the logic. We will initialize the `Map3DView` and set up our callback.
+
+1.  **Initialize View**: Add the `map3DView` setup code to the end of `onCreate`.
+2.  **Handle Callback**: Implement `onMap3DViewReady` to receive the `GoogleMap3D` controller.
+3.  **Setup Controls**: Configure the bottom sheet buttons.
+
+Add this logic to `MainActivity.kt`:
+
+```kotlin
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // ... previous code ...
+        
+        // Initialize the Map3DView
         map3DView = findViewById(R.id.map3dView)
         map3DView.onCreate(savedInstanceState)
         map3DView.getMap3DViewAsync(this)
@@ -205,7 +321,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             setupButtons(googleMap3D)
         }
     }
-    
+
     // Wire up UI buttons to functions
     private fun setupButtons(map: GoogleMap3D) {
         findViewById<Button>(R.id.btn_fly_honolulu).setOnClickListener {
@@ -223,16 +339,15 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             setupBalloon(map)
             lifecycleScope.launch { flyToBalloon(map) }
         }
+        findViewById<Button>(R.id.btn_show_popovers).setOnClickListener {
+            setupPopover(map)
+            // No flight needed, we reuse the camera if we are already there, or we could fly to it.
+            // Let's fly to the same spot as markers for now.
+             lifecycleScope.launch { flyToMarkers(map) }
+        }
     }
-    
-    // Helper to clear the map before adding new content
-    private fun resetMap() {
-        activeMarkers.forEach { it.remove() }; activeMarkers.clear()
-        activePolygons.forEach { it.remove() }; activePolygons.clear()
-        activePolylines.forEach { it.remove() }; activePolylines.clear()
-        activeModels.forEach { it.remove() }; activeModels.clear()
-    }
-}
+```
+> **Note**: You will see red errors for `startFromGlobalView`, `flyToHonolulu`, and other helper functions. Don't worry! We will implement these in the next sections.
 ```
 
 ---
@@ -403,6 +518,15 @@ private fun addMarkers(map: GoogleMap3D) {
         })
     }.filterNotNull().forEach { activeMarkers.add(it) }
 }
+
+<!-- TODO: Add screenshot here.
+     Subject: "Three Markers"
+     Description: Show the three markers side-by-side.
+     - "Absolute" marker should be floating high up.
+     - "Relative" marker should be floating slightly above ground.
+     - "Clamped" marker should be on the ground.
+     Highlight the visual vertical line (extrusion) connecting the floating markers to the ground. 
+-->
 ```
 
 ---
@@ -429,6 +553,12 @@ val extrudedPalace = extrudePolygon(palaceBaseFace, 35.0) // 35 meters tall
 ```
 
 When we add these faces to the map, we use `AltitudeMode.ABSOLUTE` to ensure the building keeps its shape perfectly.
+
+<!-- TODO: Add screenshot here.
+     Subject: "Extruded Palace"
+     Description: Show the Iolani Palace with the semi-transparent gold polygon extruded upwards. 
+     Camera should be tilted to show the 3D volume, not just the top-down view.
+-->
 
 ---
 
@@ -485,15 +615,101 @@ balloon.setClickListener {
         Toast.makeText(this@MainActivity, "Clicked the Balloon!", Toast.LENGTH_SHORT).show()
     }
 }
+
+<!-- TODO: Add screenshot here.
+     Subject: "The Balloon"
+     Description: Show the 3D Balloon model floating over Waikiki.
+     Include the blue polyline path visible in the background if possible.
+-->
 ```
 
 ---
 
+## 8. Popovers (Info Windows)
+
+Markers are great, but sometimes you need to show more information. **Popovers** are 2D views that "stick" to a 3D location. Unlike Markers, they always face the camera and can contain any Android View (button, text, image, etc.).
+
+### Creating a Popover
+
+In this example, we will attach a "Hello World" message to the Iolani Palace marker.
+
+1.  **Create the View**: First, we create a standard Android `TextView` programmatically.
+2.  **Configure the Popover**: We use `popoverOptions` to define its anchor point and style.
+
+```kotlin
+    private fun setupPopover(map: GoogleMap3D) {
+        resetMap()
+
+        // 1. Add a marker to serve as a visual anchor reference
+        val marker = map.addMarker(markerOptions {
+            position = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude
+                longitude = IOLANI_PALACE.longitude
+                altitude = 50.0 // Floating, matching our "Relative" example
+            }
+            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+            label = "Click me!"
+        })
+        marker?.let { activeMarkers.add(it) }
+
+        // 2. Create a simple text view for the popover content
+        // In a real app, you could inflate this from XML using layoutInflater
+        val textView = TextView(this).apply {
+            text = "Welcome to Iolani Palace!\nA symbol of Hawaiian sovereignty."
+            setPadding(32, 16, 32, 16)
+            setTextColor(Color.BLACK)
+            setBackgroundColor(Color.WHITE)
+        }
+
+        // 3. Add a Popover attached to the same location
+        val popover = map.addPopover(popoverOptions {
+            positionAnchor = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude
+                longitude = IOLANI_PALACE.longitude
+                altitude = 50.0
+            }
+            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+            content = textView
+            isAutoCloseEnabled = true // Close when user clicks elsewhere
+            isAutoPanEnabled = true   // Move camera to ensure popover is visible
+            popoverStyle = popoverStyle {
+                backgroundColor = Color.WHITE
+                borderRadius = 16f
+                shadow = popoverShadow {
+                    color = Color.DKGRAY
+                    radius = 8f
+                    offsetX = 4f
+                    offsetY = 4f
+                }
+            }
+        })
+        
+        // Track it
+        popover?.let { activePopovers.add(it) }
+        
+        // 4. Show popover on marker click
+        marker?.setClickListener {
+            popover?.show()
+        }
+        
+        // Show immediately for demo purposes
+        popover?.show()
+    }
+```
+
+Popovers bridge the gap between the 3D world and 2D information. They are perfect for labels, detailed info windows, or even interactive menus.
+
+<!-- TODO: Add screenshot here.
+     Subject: "Popover Example"
+     Description: Show the "Welcome to Iolani Palace!" popover visible above the Iolani Palace marker.
+     Highlight the popover's clean white background and shadow.
+-->
+
 ---
 
-## 8. Bonus: Jetpack Compose
+## 9. Bonus: Jetpack Compose
 
-Prefer **Jetpack Compose** over XML? The Maps 3D SDK is View-based, but it integrates seamlessly using `AndroidView`.
+Prefer **Jetpack Compose** over XML? The Maps 3D SDK is View-based, but is a perfect candidate for `AndroidView`.
 
 We have included a full reference implementation in `Map3DComposeActivity.kt` (in the solution code). Here is a complete guide to recreating it.
 
@@ -656,6 +872,12 @@ class Map3DComposeActivity : ComponentActivity() {
 ```
 
 This pattern gives you the best of both worlds: the power of the 3D Maps SDK and the modern UI of Jetpack Compose. Check out `Map3DComposeActivity.kt` for the complete code!
+
+<!-- TODO: Add screenshot here.
+     Subject: "Compose Integration"
+     Description: Show the "Fly to Honolulu" Compose button overlaid on the 3D Map.
+     The visual style of the button should clearly look like a native Compose Material3 component.
+-->
 
 ---
 
