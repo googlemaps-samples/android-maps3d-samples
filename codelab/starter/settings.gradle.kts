@@ -14,6 +14,9 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        if (System.getenv("USE_MAVEN_LOCAL") == "true") {
+            mavenLocal()
+        }
         google()
         mavenCentral()
     }

@@ -34,7 +34,12 @@ Before we start coding, ensure your environment is ready.
         ```toml
         [versions]
         # ... existing versions ...
+        playServicesMaps3d = "0.2.0"
         secretsGradlePlugin = "2.0.1"
+
+        [libraries]
+        # ... existing libraries ...
+        play-services-maps3d = { group = "com.google.android.gms", name = "play-services-maps3d", version.ref = "playServicesMaps3d" }
 
         [plugins]
         # ... existing plugins ...
@@ -56,7 +61,6 @@ Before we start coding, ensure your environment is ready.
     *   Ensure the Maps 3D SDK dependency is also present in `dependencies { ... }`:
         ```kotlin
         implementation(libs.play.services.maps3d)
-        implementation(libs.androidx.lifecycle.runtime.ktx)
         ```
 
 3.  **API Key**:
@@ -95,7 +99,13 @@ Open `app/src/main/res/layout/activity_main.xml`. We want a full-screen 3D map w
 2.  **HorizontalScrollView**: This holds our buttons. We verify it's pinned to the *bottom* of the screen.
 
 ```xml
-<androidx.constraintlayout.widget.ConstraintLayout ...>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
 
     <com.google.android.gms.maps3d.Map3DView
         android:id="@+id/map3dView"
@@ -124,13 +134,16 @@ Open `app/src/main/res/layout/activity_main.xml`. We want a full-screen 3D map w
         android:id="@+id/controls_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
         android:paddingVertical="16dp"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:background="#FFFFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
+            style="?android:attr/buttonBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -138,34 +151,31 @@ Open `app/src/main/res/layout/activity_main.xml`. We want a full-screen 3D map w
 
             <Button
                 android:id="@+id/btn_fly_honolulu"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Camera"
-                android:layout_marginEnd="8dp"/>
+                android:layout_marginEnd="8dp" />
 
             <Button
                 android:id="@+id/btn_show_markers"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Markers"
-                android:layout_marginEnd="8dp"/>
+                android:layout_marginEnd="8dp" />
 
             <Button
                 android:id="@+id/btn_show_polygons"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Polygons"
-                android:layout_marginEnd="8dp"/>
-
-            <Button
-                android:id="@+id/btn_show_popovers"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Info"
-                android:layout_marginEnd="8dp"/>
+                android:layout_marginEnd="8dp" />
 
             <Button
                 android:id="@+id/btn_show_balloon"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Models" />
@@ -322,6 +332,18 @@ Add this logic to `MainActivity.kt`:
         }
     }
 
+    // Helper: Start the camera from a global view
+    private fun startFromGlobalView(map: GoogleMap3D) {
+        map.setCamera(
+            camera {
+                center = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
+                range = 25_000_000.0 // 25,000 km
+                tilt = 0.0
+                heading = 0.0
+            }
+        )
+    }
+
     // Wire up UI buttons to functions
     private fun setupButtons(map: GoogleMap3D) {
         findViewById<Button>(R.id.btn_fly_honolulu).setOnClickListener {
@@ -465,7 +487,6 @@ private fun addMarkers(map: GoogleMap3D) {
                 altitudeMode = AltitudeMode.ABSOLUTE
                 label = "Absolute (100m)"
                 isDrawnWhenOccluded = true
-                isExtruded = true
             }
         )?.apply {
             setClickListener {
@@ -486,7 +507,6 @@ private fun addMarkers(map: GoogleMap3D) {
                 altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
                 label = "Relative (50m)"
                 isDrawnWhenOccluded = true
-                isExtruded = true
             }
         )?.apply {
             setClickListener {
@@ -507,7 +527,6 @@ private fun addMarkers(map: GoogleMap3D) {
                 altitudeMode = AltitudeMode.CLAMP_TO_GROUND
                 label = "Clamped"
                 isDrawnWhenOccluded = true
-                isExtruded = true
             }
         )?.apply {
             setClickListener {
@@ -550,6 +569,43 @@ val palaceBaseFace = IOLANI_PALACE_GEO.windowed(2, 2).map {
 
 // Extrude!
 val extrudedPalace = extrudePolygon(palaceBaseFace, 35.0) // 35 meters tall
+```
+
+```kotlin
+// Helper function to create the 3D extrusion geometry
+private fun extrudePolygon(
+    basePoints: List<LatLngAltitude>,
+    extrusionHeight: Double
+): List<List<LatLngAltitude>> {
+    if (basePoints.size < 3) return emptyList()
+    if (extrusionHeight <= 0) return emptyList()
+
+    val baseAltitude = basePoints.first().altitude
+    
+    // 1. Create top points
+    val topPoints = basePoints.map { basePoint ->
+        latLngAltitude {
+            latitude = basePoint.latitude
+            longitude = basePoint.longitude
+            altitude = baseAltitude + extrusionHeight
+        }
+    }
+
+    val faces = mutableListOf<List<LatLngAltitude>>()
+    faces.add(basePoints.toList()) // Bottom
+    faces.add(topPoints.toList().reversed()) // Top
+
+    // 2. Create side walls
+    for (i in basePoints.indices) {
+        val p1Base = basePoints[i]
+        val p2Base = basePoints[(i + 1) % basePoints.size]
+        val p1Top = topPoints[i]
+        val p2Top = topPoints[(i + 1) % basePoints.size]
+        
+        faces.add(listOf(p1Base, p2Base, p2Top, p1Top))
+    }
+    return faces
+}
 ```
 
 When we add these faces to the map, we use `AltitudeMode.ABSOLUTE` to ensure the building keeps its shape perfectly.
@@ -670,8 +726,8 @@ In this example, we will attach a "Hello World" message to the Iolani Palace mar
             }
             altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
             content = textView
-            isAutoCloseEnabled = true // Close when user clicks elsewhere
-            isAutoPanEnabled = true   // Move camera to ensure popover is visible
+            autoCloseEnabled = true // Close when user clicks elsewhere
+            autoPanEnabled = true   // Move camera to ensure popover is visible
             popoverStyle = popoverStyle {
                 backgroundColor = Color.WHITE
                 borderRadius = 16f
