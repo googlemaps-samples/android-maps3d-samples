@@ -60,7 +60,9 @@ Before we start coding, ensure your environment is ready.
         ```
     *   Ensure the Maps 3D SDK dependency is also present in `dependencies { ... }`:
         ```kotlin
-        implementation(libs.play.services.maps3d)
+        dependencies {
+            implementation(libs.play.services.maps3d)
+        }
         ```
 
 3.  **API Key**:
@@ -83,6 +85,8 @@ Before we start coding, ensure your environment is ready.
             android:value="${MAPS3D_API_KEY}" />
         ```
         The secrets plugin will inject the key from `secrets.properties` into this placeholder.
+
+    *  **Be sure to sync the project if you haven't already!**
 
 ---
 
@@ -196,43 +200,6 @@ Open `MainActivity.kt`. First, we'll set up the class structure, binding constan
 3.  Handle **Window Insets** in `onCreate`.
 
 ```kotlin
-// Maps 3D SDK
-import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.Map3DView
-import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
-import com.google.android.gms.maps3d.model.AltitudeMode
-import com.google.android.gms.maps3d.model.LatLngAltitude
-import com.google.android.gms.maps3d.model.Marker
-import com.google.android.gms.maps3d.model.Model
-import com.google.android.gms.maps3d.model.Polygon
-import com.google.android.gms.maps3d.model.Polyline
-import com.google.android.gms.maps3d.model.Popover
-import com.google.android.gms.maps3d.model.camera
-import com.google.android.gms.maps3d.model.flyAroundOptions
-import com.google.android.gms.maps3d.model.flyToOptions
-import com.google.android.gms.maps3d.model.latLngAltitude
-import com.google.android.gms.maps3d.model.markerOptions
-import com.google.android.gms.maps3d.model.modelOptions
-import com.google.android.gms.maps3d.model.orientation
-import com.google.android.gms.maps3d.model.polygonOptions
-import com.google.android.gms.maps3d.model.polylineOptions
-import com.google.android.gms.maps3d.model.popoverOptions
-import com.google.android.gms.maps3d.model.popoverShadow
-import com.google.android.gms.maps3d.model.popoverStyle
-import com.google.android.gms.maps3d.model.vector3D
-
-// Android UI
-import android.graphics.Color
-import android.widget.TextView
-
-// Coroutines & Lifecycle
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
-import kotlin.time.Duration.Companion.seconds
-
 class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
     private lateinit var map3DView: Map3DView
