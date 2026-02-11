@@ -26,6 +26,10 @@ import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.markerOptions
+import com.google.android.gms.maps3d.model.pinConfiguration
+import com.google.android.gms.maps3d.model.PinConfiguration
+import com.google.android.gms.maps3d.model.Glyph
+import com.google.android.gms.maps3d.model.ImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -65,14 +69,12 @@ class MarkersActivity : SampleBaseActivity() {
         range = 1500.0
     }
 
-    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-        super.onMap3DViewReady(googleMap3D)
+    override fun onMapReady(googleMap3D: GoogleMap3D) {
+        super.onMapReady(googleMap3D)
         googleMap3D.setMapMode(Map3DMode.SATELLITE)
-
-        // Using lifecycleScope ensures that the coroutine is automatically cancelled when the
-        // activity is destroyed, preventing potential memory leaks.
-        lifecycleScope.launch {
-            delay(1.milliseconds)
+        // Adding markers can be a heavy operation, so we do it on a background thread
+        // to avoid prolonged blocking of the main thread.
+        lifecycleScope.launch(Dispatchers.Default) {
             addMarkers(googleMap3D)
         }
     }
@@ -85,6 +87,8 @@ class MarkersActivity : SampleBaseActivity() {
      * @param googleMap3D The map object to which the markers will be added.
      */
     private fun addMarkers(googleMap3D: GoogleMap3D) {
+        Log.d(TAG, "addMarkers: start")
+
         // Marker 1: Absolute Altitude
         // This marker is placed at a fixed altitude of 150 meters above sea level.
         googleMap3D.addMarker(markerOptions {
@@ -150,6 +154,70 @@ class MarkersActivity : SampleBaseActivity() {
             isDrawnWhenOccluded = true
             collisionBehavior = CollisionBehavior.REQUIRED
         })?.let(::setupMarkerClickListener)
+
+        // Marker 5: Styled Pin
+        // This marker demonstrates custom styling using PinConfiguration.
+        googleMap3D.addMarker(markerOptions {
+            position = latLngAltitude {
+                latitude = 52.5213
+                longitude = 13.4105
+                altitude = 0.0
+            }
+            label = "Styled Pin"
+            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+            setStyle(com.google.android.gms.maps3d.model.pinConfiguration {
+                backgroundColor = android.graphics.Color.BLUE
+                borderColor = android.graphics.Color.WHITE
+                scale = 1.5f
+            })
+        })?.let(::setupMarkerClickListener)
+
+        // New Styled Markers based on User Request
+        val glyphImage = Glyph.fromColor(android.graphics.Color.YELLOW)
+        glyphImage.setImage(ImageView(com.example.maps3dcommon.R.drawable.ook))
+        
+        val glyphText = Glyph.fromColor(android.graphics.Color.YELLOW)
+        glyphText.setText("ABCDEFGHIJKLMNOPQ")
+
+        // Marker 6: Image Glyph
+        googleMap3D.addMarker(markerOptions {
+            position = latLngAltitude {
+                latitude = 52.5220
+                longitude = 13.4110
+                altitude = 0.0
+            }
+            label = "Image Glyph"
+            isExtruded = true
+            isDrawnWhenOccluded = true
+            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+            setStyle(pinConfiguration {
+                setGlyph(glyphImage)
+                setScale(1.5f)
+                setBackgroundColor(android.graphics.Color.BLUE)
+                setBorderColor(android.graphics.Color.GREEN)
+            })
+        })?.let(::setupMarkerClickListener)
+
+        // Marker 7: Text Glyph
+        googleMap3D.addMarker(markerOptions {
+            position = latLngAltitude {
+                latitude = 52.5225
+                longitude = 13.4115
+                altitude = 0.0
+            }
+            label = "Text Glyph"
+            isExtruded = true
+            isDrawnWhenOccluded = true
+            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+            setStyle(pinConfiguration {
+                setGlyph(glyphText)
+                setScale(1.2f)
+                setBackgroundColor(android.graphics.Color.BLUE)
+                setBorderColor(android.graphics.Color.GREEN)
+            })
+        })?.let(::setupMarkerClickListener)
+
+        Log.d(TAG, "addMarkers: finished")
     }
 
     /**
@@ -168,4 +236,14 @@ class MarkersActivity : SampleBaseActivity() {
             }
         }
     }
+}
+
+/**
+ * Builds a [PinConfiguration] using a DSL-style builder.
+ *
+ * @param action The action to configure the [PinConfiguration.Builder].
+ * @return The built [PinConfiguration].
+ */
+inline fun pinConfiguration(action: com.google.android.gms.maps3d.model.PinConfiguration.Builder.() -> Unit): com.google.android.gms.maps3d.model.PinConfiguration {
+    return com.google.android.gms.maps3d.model.PinConfiguration.builder().apply(action).build()
 }

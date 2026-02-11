@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 pluginManagement {
     repositories {
         google {
@@ -27,11 +28,24 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        val useLocalMaven = providers.gradleProperty("use_local_maven")
+            .getOrElse("false")
+            .toBoolean()
+
+        if (useLocalMaven) {
+            mavenLocal()
+        }
         google()
         mavenCentral()
+        maven {
+            url = uri("/Users/dkhawk/AndroidStudioProjects/github-maps-code/android-maps3d-samples/feat-update-library-version/local-maven-repo")
+        }
     }
 }
 

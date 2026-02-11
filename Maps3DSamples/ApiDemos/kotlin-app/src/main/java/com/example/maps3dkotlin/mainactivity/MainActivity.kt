@@ -83,6 +83,7 @@ class MainActivity : ComponentActivity() {
         Sample(R.string.feature_title_polygons, PolygonsActivity::class.java),
         Sample(R.string.feature_title_polylines, PolylinesActivity::class.java),
         Sample(R.string.feature_title_3d_models, ModelsActivity::class.java),
+        Sample(R.string.feature_title_popovers, com.example.maps3dkotlin.popovers.PopoversActivity::class.java),
         Sample(R.string.feature_title_map_interactions, MapInteractionsActivity::class.java),
     )
 

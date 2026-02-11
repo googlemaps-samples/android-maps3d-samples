@@ -33,12 +33,12 @@
         app:layout_constraintTop_toTopOf="parent"
         app:title="@string/feature_title_overview_hello_3d_map"
         app:titleTextColor="?attr/colorOnPrimary"
-        android:fitsSystemWindows="true"
+
         />
 
     <com.google.android.gms.maps3d.Map3DView
         android:id="@+id/map3dView"
-        map3d:mode="hybrid"
+        map3d:mode="satellite"
         map3d:centerLat="40.748392"
         map3d:centerLng="-73.986060"
         map3d:centerAlt="175"

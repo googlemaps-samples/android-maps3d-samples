@@ -14,19 +14,19 @@
 
 package com.example.maps3dkotlin.sampleactivity
 
-import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import com.example.maps3dcommon.R
 import com.example.maps3d.common.DEFAULT_CAMERA
 import com.example.maps3d.common.toCameraString
 import com.example.maps3d.common.toValidCamera
+import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnCameraChangedListener
@@ -35,15 +35,10 @@ import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Base activity for sample map activities.
@@ -127,6 +122,7 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         setContentView(R.layout.activity_common_map)
         val rootView = findViewById<View>(R.id.map_container)
@@ -201,21 +197,34 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
     }
 
     /**
-     * Called when the [Map3DView] is ready to be used.
+     * Called when the [Map3DView] is initialized and the map scene is ready.
      *
-     * This method is called after the [Map3DView] has been initialized and is ready to receive
-     * commands. It sets the internal [googleMap3D] reference and sets the initial camera
-     * position and orientation.
+     * This method is called from within [GoogleMap3D.setOnMapReadyListener] to ensure that
+     * the map scene is fully loaded and ready for 3D content additions (markers, models, etc.).
+     *
+     * Subclasses should override this method to add their content.
      *
      * @param googleMap3D The [GoogleMap3D] instance that is ready to be used.
      */
+    private var isMapInitialized = false
+
+    @CallSuper
+    protected open fun onMapReady(googleMap3D: GoogleMap3D) {
+        // Guarded by caller in onMap3DViewReady
+        Log.d(TAG, "onMapReady called (guaranteed once)")
+        googleMap3D.setCamera(initialCamera)
+    }
+
     @CallSuper
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
         this.googleMap3D = googleMap3D
-
-        CoroutineScope(Dispatchers.Main).launch {
-            delay(100.milliseconds)
-            googleMap3D.setCamera(initialCamera)
+        Log.d(TAG, "onMap3DViewReady called")
+        Log.d(TAG, "Setting initial camera: " + initialCamera.toCameraString())
+        // Wire up the standardized listener
+        googleMap3D.setOnMapReadyListener {
+            Log.w(TAG, "on map ready listener")
+            googleMap3D.setOnMapReadyListener(null)
+            onMapReady(googleMap3D)
         }
     }
 
