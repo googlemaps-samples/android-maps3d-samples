@@ -152,9 +152,9 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     updateCameraButton = findViewById<Button>(R.id.updateCameraButton)
     toggleRestrictionButton = findViewById<ToggleButton>(R.id.toggleCameraRestrictionButton)
 
-    var glyphImage = Glyph.fromColor(Color.YELLOW)
+    val glyphImage = Glyph.fromColor(Color.YELLOW)
     glyphImage.setImage(ImageView(R.drawable.ook))
-    var glyphText = Glyph.fromColor(Color.YELLOW)
+    val glyphText = Glyph.fromColor(Color.YELLOW)
     glyphText.setText("ABCDEFGHIJKLMNOPQ")
     markerOptionsInAvdaDeBrasil.setStyle(
       PinConfiguration.builder().setScale(8f).setGlyph(glyphImage).build()
@@ -253,81 +253,69 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
       )
     }
 
-    googleMap3D.setCameraAnimationEndListener(
-      object : OnCameraAnimationEndListener {
-        override fun onCameraAnimationEnd() {
-          Logger.getLogger("MainActivity").fine("onCameraAnimationEnd ")
-        }
-      }
-    )
+    googleMap3D.setCameraAnimationEndListener {
+      Logger.getLogger("MainActivity").fine("onCameraAnimationEnd ")
+    }
 
-    googleMap3D.setCameraChangedListener(
-      object : OnCameraChangedListener {
-        override fun onCameraChanged(camera: Camera) {
-          this@MainActivity.currentCamera = camera
-          Logger.getLogger("MainActivity")
-            .fine("onCameraChanged: ${camera.center.latitude}, ${camera.center.longitude}")
-        }
-      }
-    )
+    googleMap3D.setCameraChangedListener { camera ->
+      this@MainActivity.currentCamera = camera
+      Logger.getLogger("MainActivity")
+        .fine("onCameraChanged: ${camera.center.latitude}, ${camera.center.longitude}")
+    }
 
-    googleMap3D.setOnMapReadyListener(
-      object : OnMapReadyListener {
-        override fun onMapReady(sceneReadiness: Double) {
-          Logger.getLogger("MainActivity").fine("onMapReady sceneReadiness: ${sceneReadiness}")
-          // Use lifecycleScope to run heavy 3D object creation on a background thread.
-          lifecycleScope.launch(Dispatchers.Default) {
-              if (!::balloonModel.isInitialized) {
-                balloonModel = googleMap3D.addModel(modelOptions)
-                balloonModel.setClickListener { Log.d("MainActivity", "Map3DModel onModelClick") }
-              }
-              if (!::markerInAvdaDeBrasil.isInitialized) {
-                googleMap3D.addMarker(markerOptionsInAvdaDeBrasil)?.let {
-                  markerInAvdaDeBrasil = it
-                  it.setClickListener {
-                    Log.d("MainActivity", "Map3DMarker onMarkerClick markerInAvdaDeBrasil")
-                  }
-                }
-              }
-              if (!::markerInElViso.isInitialized) {
-                googleMap3D.addMarker(markerOptionsInElViso)?.let {
-                  markerInElViso = it
-                  it.setClickListener {
-                    Log.d("MainActivity", "Map3DMarker onMarkerClick markerInElViso")
-                  }
-                }
-              }
-              if (!::markerInIrishRover.isInitialized) {
-                googleMap3D.addMarker(markerOptionsInIrishRover)?.let {
-                  markerInIrishRover = it
-                  it.setClickListener {
-                    Log.d("MainActivity", "Map3DMarker onMarkerClick markerInIrishRover")
-                  }
-                }
-              }
-              if (!::markerInMadrid.isInitialized) {
-                googleMap3D.addMarker(markerOptionsInMadrid)?.let {
-                  markerInMadrid = it
-                  it.setClickListener {
-                    Log.d("MainActivity", "Map3DMarker onMarkerClick markerInMadrid")
-                  }
-                }
-              }
-              if (!::markerInSanRafael.isInitialized) {
-                googleMap3D.addMarker(markerOptionsInSanRafael)?.let {
-                  markerInSanRafael = it
-                  it.setClickListener {
-                    Log.d("MainActivity", "Map3DMarker onMarkerClick markerInSanRafael")
-                  }
-                }
-              }
-              if (!::popover.isInitialized) {
-                setupPopover(googleMap3D)
-              }
+    googleMap3D.setOnMapReadyListener { sceneReadiness ->
+      Logger.getLogger("MainActivity").fine("onMapReady sceneReadiness: ${sceneReadiness}")
+      // Use lifecycleScope to run heavy 3D object creation on a background thread.
+      lifecycleScope.launch(Dispatchers.Default) {
+        if (!::balloonModel.isInitialized) {
+          balloonModel = googleMap3D.addModel(modelOptions)
+          balloonModel.setClickListener { Log.d("MainActivity", "Map3DModel onModelClick") }
+        }
+        if (!::markerInAvdaDeBrasil.isInitialized) {
+          googleMap3D.addMarker(markerOptionsInAvdaDeBrasil)?.let {
+            markerInAvdaDeBrasil = it
+            it.setClickListener {
+              Log.d("MainActivity", "Map3DMarker onMarkerClick markerInAvdaDeBrasil")
+            }
           }
         }
+        if (!::markerInElViso.isInitialized) {
+          googleMap3D.addMarker(markerOptionsInElViso)?.let {
+            markerInElViso = it
+            it.setClickListener {
+              Log.d("MainActivity", "Map3DMarker onMarkerClick markerInElViso")
+            }
+          }
+        }
+        if (!::markerInIrishRover.isInitialized) {
+          googleMap3D.addMarker(markerOptionsInIrishRover)?.let {
+            markerInIrishRover = it
+            it.setClickListener {
+              Log.d("MainActivity", "Map3DMarker onMarkerClick markerInIrishRover")
+            }
+          }
+        }
+        if (!::markerInMadrid.isInitialized) {
+          googleMap3D.addMarker(markerOptionsInMadrid)?.let {
+            markerInMadrid = it
+            it.setClickListener {
+              Log.d("MainActivity", "Map3DMarker onMarkerClick markerInMadrid")
+            }
+          }
+        }
+        if (!::markerInSanRafael.isInitialized) {
+          googleMap3D.addMarker(markerOptionsInSanRafael)?.let {
+            markerInSanRafael = it
+            it.setClickListener {
+              Log.d("MainActivity", "Map3DMarker onMarkerClick markerInSanRafael")
+            }
+          }
+        }
+        if (!::popover.isInitialized) {
+          setupPopover(googleMap3D)
+        }
       }
-    )
+    }
 
     googleMap3D.setOnMapSteadyListener(
       object : OnMapSteadyListener {
@@ -442,19 +430,19 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
       }
     }
     popover = googleMap3D.addPopover(popoverOptions)
-    markerInGoldenGate?.let {
-      it.setClickListener {
-        Log.d("MainActivity", "Marker clicked")
-        if (popoverToggleCount > 5) {
-          runOnUiThread { popover.remove() }
-          Log.d("MainActivity", "Popover removed")
-          popoverToggleCount = 0
-        } else {
-          Log.d("MainActivity", "Popover toggled")
-          runOnUiThread { popover.toggle() }
-          popoverToggleCount++
+    markerInGoldenGate.let {
+        it.setClickListener {
+            Log.d("MainActivity", "Marker clicked")
+            if (popoverToggleCount > 5) {
+                runOnUiThread { popover.remove() }
+                Log.d("MainActivity", "Popover removed")
+                popoverToggleCount = 0
+            } else {
+                Log.d("MainActivity", "Popover toggled")
+                runOnUiThread { popover.toggle() }
+                popoverToggleCount++
+            }
         }
-      }
     }
 
     Log.d("MainActivity", "Popover created")

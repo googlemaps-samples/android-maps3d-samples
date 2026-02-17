@@ -21,19 +21,16 @@ import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.CollisionBehavior
+import com.google.android.gms.maps3d.model.Glyph
+import com.google.android.gms.maps3d.model.ImageView
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.markerOptions
 import com.google.android.gms.maps3d.model.pinConfiguration
-import com.google.android.gms.maps3d.model.PinConfiguration
-import com.google.android.gms.maps3d.model.Glyph
-import com.google.android.gms.maps3d.model.ImageView
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * This activity demonstrates the various altitude modes available for markers on a 3D map.
@@ -165,7 +162,7 @@ class MarkersActivity : SampleBaseActivity() {
             }
             label = "Styled Pin"
             altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-            setStyle(com.google.android.gms.maps3d.model.pinConfiguration {
+            setStyle(pinConfiguration {
                 backgroundColor = android.graphics.Color.BLUE
                 borderColor = android.graphics.Color.WHITE
                 scale = 1.5f
@@ -192,9 +189,9 @@ class MarkersActivity : SampleBaseActivity() {
             altitudeMode = AltitudeMode.CLAMP_TO_GROUND
             setStyle(pinConfiguration {
                 setGlyph(glyphImage)
-                setScale(1.5f)
-                setBackgroundColor(android.graphics.Color.BLUE)
-                setBorderColor(android.graphics.Color.GREEN)
+                scale = 1.5f
+                backgroundColor = android.graphics.Color.BLUE
+                borderColor = android.graphics.Color.GREEN
             })
         })?.let(::setupMarkerClickListener)
 
@@ -211,9 +208,9 @@ class MarkersActivity : SampleBaseActivity() {
             altitudeMode = AltitudeMode.CLAMP_TO_GROUND
             setStyle(pinConfiguration {
                 setGlyph(glyphText)
-                setScale(1.2f)
-                setBackgroundColor(android.graphics.Color.BLUE)
-                setBorderColor(android.graphics.Color.GREEN)
+                scale = 1.2f
+                backgroundColor = android.graphics.Color.BLUE
+                borderColor = android.graphics.Color.GREEN
             })
         })?.let(::setupMarkerClickListener)
 
@@ -236,14 +233,4 @@ class MarkersActivity : SampleBaseActivity() {
             }
         }
     }
-}
-
-/**
- * Builds a [PinConfiguration] using a DSL-style builder.
- *
- * @param action The action to configure the [PinConfiguration.Builder].
- * @return The built [PinConfiguration].
- */
-inline fun pinConfiguration(action: com.google.android.gms.maps3d.model.PinConfiguration.Builder.() -> Unit): com.google.android.gms.maps3d.model.PinConfiguration {
-    return com.google.android.gms.maps3d.model.PinConfiguration.builder().apply(action).build()
 }
