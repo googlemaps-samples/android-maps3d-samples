@@ -32,6 +32,10 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        // To use a locally published library version, enable mavenLocal
+        // by passing a Gradle property via the command line:
+        // ./gradlew assembleDebug -Puse_local_maven=true
+        // Alternatively, add `use_local_maven=true` to your gradle.properties file.
         val useLocalMaven = providers.gradleProperty("use_local_maven")
             .getOrElse("false")
             .toBoolean()
