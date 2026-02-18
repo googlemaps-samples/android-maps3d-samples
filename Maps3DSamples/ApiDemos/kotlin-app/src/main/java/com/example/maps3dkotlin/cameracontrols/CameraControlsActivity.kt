@@ -187,7 +187,6 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         googleMap3D.setOnMapSteadyListener { isSteady ->
             if (isSteady) {
                 googleMap3D.setOnMapSteadyListener(null)
-                // Add a small delay for dramatic effect before flying to the Empire State Building.
                  CoroutineScope(Dispatchers.Main).launch {
                     delay(2000.milliseconds)
                     flyToEmpireStateBuilding()
