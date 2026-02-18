@@ -171,16 +171,16 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         .setGlyph(glyphImage)
         .build()
     )
-    Log.d("MainActivity", "onCreate")
+    Log.d(TAG, "onCreate")
     
     // Experiment: Initialize Map3DView on IO thread to avoid Main thread freeze during SDK loading.
     lifecycleScope.launch(Dispatchers.IO) {
         try {
-            Log.d("MainActivity", "Initializing Map3DView on IO thread")
+            Log.d(TAG, "Initializing Map3DView on IO thread")
             view.onCreate(savedInstanceState)
             view.getMap3DViewAsync(this@MainActivity)
         } catch (e: Exception) {
-            Log.e("MainActivity", "Error initializing Map3DView on IO", e)
+            Log.e(TAG, "Error initializing Map3DView on IO", e)
         }
     }
   }
@@ -188,7 +188,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
   override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
     googleMap3D.setMap3DClickListener { location: LatLngAltitude, placeId: String? ->
       Log.d(
-        "MainActivity",
+        TAG,
         "onMap3DClick: ${location.latitude}, ${location.longitude}, ${location.altitude}, ${placeId}",
       )
     }
@@ -208,7 +208,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     // LINT.ThenChange(//depot/google3/java/com/google/android/gmscore/integ/testapps/maps3d/basic/res/layout/main.xml)
 
     flyToButton.setOnClickListener {
-      Log.d("MainActivity", "flyToButton clicked")
+      Log.d(TAG, "flyToButton clicked")
       val flyToSF = flyToOptions {
         endCamera = camera {
           center = SF_COORDINATES
@@ -223,7 +223,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
       googleMap3D.flyCameraTo(flyToSF)
     }
     flyAroundButton.setOnClickListener {
-      Log.d("MainActivity", "flyAroundButton clicked")
+      Log.d(TAG, "flyAroundButton clicked")
       val flyAroundMadrid = flyAroundOptions {
         center = camera {
           center = SANTIAGO_BERNABEU_COORDINATES
@@ -239,7 +239,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
       googleMap3D.flyCameraAround(flyAroundMadrid)
     }
     updateCameraButton.setOnClickListener {
-      Log.d("MainActivity", "updateCameraButton clicked")
+      Log.d(TAG, "updateCameraButton clicked")
       googleMap3D.stopCameraAnimation()
       googleMap3D.setCamera(
         camera =
@@ -254,28 +254,28 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     }
 
     googleMap3D.setCameraAnimationEndListener {
-      Logger.getLogger("MainActivity").fine("onCameraAnimationEnd ")
+      Logger.getLogger(TAG).fine("onCameraAnimationEnd ")
     }
 
     googleMap3D.setCameraChangedListener { camera ->
       this@MainActivity.currentCamera = camera
-      Logger.getLogger("MainActivity")
+      Logger.getLogger(TAG)
         .fine("onCameraChanged: ${camera.center.latitude}, ${camera.center.longitude}")
     }
 
     googleMap3D.setOnMapReadyListener { sceneReadiness ->
-      Logger.getLogger("MainActivity").fine("onMapReady sceneReadiness: ${sceneReadiness}")
+      Logger.getLogger(TAG).fine("onMapReady sceneReadiness: ${sceneReadiness}")
       // Use lifecycleScope to run heavy 3D object creation on a background thread.
       lifecycleScope.launch(Dispatchers.Default) {
         if (!::balloonModel.isInitialized) {
           balloonModel = googleMap3D.addModel(modelOptions)
-          balloonModel.setClickListener { Log.d("MainActivity", "Map3DModel onModelClick") }
+          balloonModel.setClickListener { Log.d(TAG, "Map3DModel onModelClick") }
         }
         if (!::markerInAvdaDeBrasil.isInitialized) {
           googleMap3D.addMarker(markerOptionsInAvdaDeBrasil)?.let {
             markerInAvdaDeBrasil = it
             it.setClickListener {
-              Log.d("MainActivity", "Map3DMarker onMarkerClick markerInAvdaDeBrasil")
+              Log.d(TAG, "Map3DMarker onMarkerClick markerInAvdaDeBrasil")
             }
           }
         }
@@ -283,7 +283,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
           googleMap3D.addMarker(markerOptionsInElViso)?.let {
             markerInElViso = it
             it.setClickListener {
-              Log.d("MainActivity", "Map3DMarker onMarkerClick markerInElViso")
+              Log.d(TAG, "Map3DMarker onMarkerClick markerInElViso")
             }
           }
         }
@@ -291,7 +291,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
           googleMap3D.addMarker(markerOptionsInIrishRover)?.let {
             markerInIrishRover = it
             it.setClickListener {
-              Log.d("MainActivity", "Map3DMarker onMarkerClick markerInIrishRover")
+              Log.d(TAG, "Map3DMarker onMarkerClick markerInIrishRover")
             }
           }
         }
@@ -299,7 +299,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
           googleMap3D.addMarker(markerOptionsInMadrid)?.let {
             markerInMadrid = it
             it.setClickListener {
-              Log.d("MainActivity", "Map3DMarker onMarkerClick markerInMadrid")
+              Log.d(TAG, "Map3DMarker onMarkerClick markerInMadrid")
             }
           }
         }
@@ -307,7 +307,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
           googleMap3D.addMarker(markerOptionsInSanRafael)?.let {
             markerInSanRafael = it
             it.setClickListener {
-              Log.d("MainActivity", "Map3DMarker onMarkerClick markerInSanRafael")
+              Log.d(TAG, "Map3DMarker onMarkerClick markerInSanRafael")
             }
           }
         }
@@ -320,7 +320,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     googleMap3D.setOnMapSteadyListener(
       object : OnMapSteadyListener {
         override fun onMapSteadyChange(isSceneSteady: Boolean) {
-          Logger.getLogger("MainActivity").fine("onMapSteadyChange isSceneSteady: ${isSceneSteady}")
+          Logger.getLogger(TAG).fine("onMapSteadyChange isSceneSteady: ${isSceneSteady}")
         }
       }
     )
@@ -366,11 +366,11 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
       }
     }
 
-    Log.d("MainActivity", "onMap3DViewReady")
+    Log.d(TAG, "onMap3DViewReady")
   }
 
   override fun onError(error: Exception) {
-    Log.d("MainActivity", "onError: $error")
+    Log.d(TAG, "onError: $error")
   }
 
   override fun onDestroy() {
@@ -432,20 +432,20 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     popover = googleMap3D.addPopover(popoverOptions)
     markerInGoldenGate.let {
         it.setClickListener {
-            Log.d("MainActivity", "Marker clicked")
+            Log.d(TAG, "Marker clicked")
             if (popoverToggleCount > 5) {
                 runOnUiThread { popover.remove() }
-                Log.d("MainActivity", "Popover removed")
+                Log.d(TAG, "Popover removed")
                 popoverToggleCount = 0
             } else {
-                Log.d("MainActivity", "Popover toggled")
+                Log.d(TAG, "Popover toggled")
                 runOnUiThread { popover.toggle() }
                 popoverToggleCount++
             }
         }
     }
 
-    Log.d("MainActivity", "Popover created")
+    Log.d(TAG, "Popover created")
   }
 
   private fun createGoldenGateInfoView(): View {
@@ -489,6 +489,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
   }
 
   private companion object {
+    private const val TAG = "MainActivity"
     private const val BASE_METRIC_NAME = "SystemHealthMaps3DFetch"
 
     val BALLOON_COORDINATES = latLngAltitude {

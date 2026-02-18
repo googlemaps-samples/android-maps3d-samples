@@ -99,20 +99,20 @@ class PopoversActivity : SampleBaseActivity() {
         popover = googleMap3D.addPopover(popoverOptions)
         markerInGoldenGate.let {
             it.setClickListener {
-                Log.d("MainActivity", "Marker clicked")
+                Log.d(TAG, "Marker clicked")
                 if (popoverToggleCount > 5) {
                     runOnUiThread { popover.remove() }
-                    Log.d("MainActivity", "Popover removed")
+                    Log.d(TAG, "Popover removed")
                     popoverToggleCount = 0
                 } else {
-                    Log.d("MainActivity", "Popover toggled")
+                    Log.d(TAG, "Popover toggled")
                     runOnUiThread { popover.toggle() }
                     popoverToggleCount++
                 }
             }
         }
 
-        Log.d("MainActivity", "Popover created")
+        Log.d(TAG, "Popover created")
     }
 
     private fun createGoldenGateInfoView(): View {
