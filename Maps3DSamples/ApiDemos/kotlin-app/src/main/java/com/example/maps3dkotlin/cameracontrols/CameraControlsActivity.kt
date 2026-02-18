@@ -187,12 +187,7 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         googleMap3D.setOnMapSteadyListener { isSteady ->
             if (isSteady) {
                 googleMap3D.setOnMapSteadyListener(null)
-                // Use setOnMapReadyListener inside here? No, we are already ready.
-                // But we used delay before.
-                // The delay in CameraControlsActivity was: 
-                // CoroutineScope(Dispatchers.Main).launch { delay(2000.milliseconds); flyToEmpireStateBuilding() }
-                // This was for dramatic effect, not initialization.
-                // So I will KEEP the delay here as it is likely intentional for the demo flow.
+                // Add a small delay for dramatic effect before flying to the Empire State Building.
                  CoroutineScope(Dispatchers.Main).launch {
                     delay(2000.milliseconds)
                     flyToEmpireStateBuilding()

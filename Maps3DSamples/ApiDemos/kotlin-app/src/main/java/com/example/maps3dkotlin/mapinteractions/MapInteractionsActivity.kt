@@ -29,17 +29,6 @@ class MapInteractionsActivity : SampleBaseActivity() {
         googleMap3D.setMapMode(Map3DMode.HYBRID)
 
         // Listeners for map clicks. We use lifecycleScope to ensure coroutines are cancelled when the activity is destroyed.
-        // setMap3DClickListener is a suspend function (or at least we treating it as one by launching a coroutine? 
-        // Wait, actually setMap3DClickListener is NOT a suspend function in the SDK usually, it takes a listener.
-        // But the original code was wrapping it in a coroutine. 
-        // Checking the original code: "CoroutineScope(Dispatchers.Main).launch { googleMap3D.setMap3DClickListener { ... } }"
-        // This suggests `setMap3DClickListener` might NOT be a suspend function, but the user wanted to launch a coroutine to set it?
-        // OR `setMap3DClickListener` IS a suspend extension (KTX)?
-        // If it's the standard listener setter, it doesn't need a coroutine unless we are doing something async inside.
-        // Assuming the original intent was just to set the listener safely on Main thread (if it wasn't already).
-        // However, `setMap3DClickListener` usually takes a lambda.
-        // Let's stick to `lifecycleScope.launch` to be safe and consistent with "fixing leaky scope".
-        
         lifecycleScope.launch {
             googleMap3D.setMap3DClickListener { location, placeId ->
                 if (placeId != null) {

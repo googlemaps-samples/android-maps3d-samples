@@ -1,0 +1,36 @@
+- **File**: `Maps3DSamples/advanced/app/build.gradle.kts`
+- **Comment**: "Why are we downgrading the version here?"
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/src/main/java/com/example/maps3dkotlin/cameracontrols/CameraControlsActivity.kt`
+- **Comment**: "Rewrite documentation a bit."
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/src/main/java/com/example/maps3dkotlin/mapinteractions/MapInteractionsActivity.kt`
+- **Comment**: "Rewrite comments a bit."
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/src/main/java/com/example/maps3dkotlin/models/ModelsActivity.kt`
+- **Comment**: "Better to import than using a FQDN"
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/build.gradle.kts`
+- **Comment**: "Same version change"
+- **File**: `Maps3DSamples/ApiDemos/build_log.txt`
+- **Comment**: "This build log file needs to be removed."
+- **File**: `Maps3DSamples/ApiDemos/settings.gradle.kts`
+- **Comment**: "This would need to be removed before merging it"
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/src/main/java/com/example/maps3dkotlin/popovers/PopoversActivity.kt`
+- **Comment**: "Use `Log.d(TAG...` here"
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/src/main/java/com/example/maps3dkotlin/popovers/PopoversActivity.kt`
+- **Comment**: "Use `Log.d(TAG...` here"
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/src/main/java/com/example/maps3dkotlin/popovers/PopoversActivity.kt`
+- **Comment**: "nit, space"
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/src/main/java/com/example/maps3dkotlin/newmain/MainActivity.kt`
+- **Comment**: "I am not very convinced about keeping this in a folder called `newmain`. What about moving it somewhere else?"
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/src/main/java/com/example/maps3dkotlin/newmain/MainActivity.kt`
+- **Comment**: "is there any reason to use this Logger over the Android one?"
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/src/main/java/com/example/maps3dkotlin/newmain/MainActivity.kt`
+- **Comment**: "`Log.d`, instead of Java Logger"
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/src/main/java/com/example/maps3dkotlin/newmain/MainActivity.kt`
+- **Comment**: "`Log.d`, instead of Java Logger"
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/src/main/java/com/example/maps3dkotlin/newmain/MainActivity.kt`
+- **Comment**: "`Log.d`, instead of Java Logger"
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/src/main/java/com/example/maps3dkotlin/newmain/MainActivity.kt`
+- **Comment**: "`Log.d`, instead of Java Logger"
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/src/main/java/com/example/maps3dkotlin/newmain/MainActivity.kt`
+- **Comment**: "Wouldn't it be better declaring these properties as nullable? `lateinit` modifier generally applies to variables that are going to be initialised later (i.e., due to dependency injection or due to framework requirements, like a GoogleMap), or due to their size in memory. Not sure if this could be a good reason."
+- **File**: `Maps3DSamples/ApiDemos/kotlin-app/src/main/java/com/example/maps3dkotlin/newmain/MainActivity.kt`
+- **Comment**: "Oh.  I meant to remove this before the final release."

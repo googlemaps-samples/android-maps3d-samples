@@ -31,7 +31,6 @@ class PopoversActivity : SampleBaseActivity() {
     private lateinit var popover: Popover
     private var popoverToggleCount = 0
 
-
     override val initialCamera = camera {
         center = latLngAltitude {
             latitude = CONTENT_LAT
@@ -59,7 +58,6 @@ class PopoversActivity : SampleBaseActivity() {
         val markerInGoldenGate =
             googleMap3D.addMarker(
                 markerOptions {
-
                     position = center
                     label = "Golden Gate Bridge"
                     zIndex = 1
