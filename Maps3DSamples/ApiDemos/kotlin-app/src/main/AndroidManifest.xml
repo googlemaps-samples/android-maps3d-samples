@@ -102,11 +102,7 @@
             android:exported="true"
             />
 
-        <activity android:name=".newmain.MainActivity"
-            android:theme="@style/Theme.Maps3DSamples"
-            android:label="The other main"
-            android:exported="true"
-            />
+
 
     </application>
 
