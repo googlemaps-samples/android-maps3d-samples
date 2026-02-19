@@ -28,6 +28,7 @@ class MapInteractionsActivity : SampleBaseActivity() {
         super.onMapReady(googleMap3D)
         googleMap3D.setMapMode(Map3DMode.HYBRID)
 
+        // Listeners for map clicks. We use lifecycleScope to ensure coroutines are cancelled when the activity is destroyed.
         lifecycleScope.launch {
             googleMap3D.setMap3DClickListener { location, placeId ->
                 if (placeId != null) {
