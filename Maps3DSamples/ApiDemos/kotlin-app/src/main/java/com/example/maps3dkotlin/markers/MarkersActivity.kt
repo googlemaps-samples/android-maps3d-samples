@@ -15,6 +15,8 @@
 package com.example.maps3dkotlin.markers
 
 import android.util.Log
+import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
@@ -52,10 +54,7 @@ import kotlinx.coroutines.launch
 class MarkersActivity : SampleBaseActivity() {
     override val TAG = MarkersActivity::class.java.simpleName
 
-    // The initial camera position is defined declaratively, providing a clear overview of
-    // the starting view of the map. This makes it easy to understand and modify the initial
-    // scene without digging into the logic of the activity.
-    override val initialCamera = camera {
+    val berlinCamera = camera {
         center = latLngAltitude {
             latitude = 52.51974795
             longitude = 13.40715553
@@ -66,11 +65,73 @@ class MarkersActivity : SampleBaseActivity() {
         range = 1500.0
     }
 
+    val nycCamera = camera {
+        center = latLngAltitude {
+            latitude = 40.748425
+            longitude = -73.985590
+            altitude = 348.7
+        }
+        heading = 22.0
+        tilt = 80.0
+        range = 1518.0
+    }
+
+    val tokyoCamera = camera {
+        center = latLngAltitude {
+            latitude = 35.658708
+            longitude = 139.702206
+            altitude = 23.3
+        }
+        heading = 117.0
+        tilt = 55.0
+        range = 2868.0
+    }
+
+    // The initial camera position is defined declaratively, providing a clear overview of
+    // the starting view of the map. This makes it easy to understand and modify the initial
+    // scene without digging into the logic of the activity.
+    override val initialCamera = nycCamera
+
     override fun onMapReady(googleMap3D: GoogleMap3D) {
         super.onMapReady(googleMap3D)
         googleMap3D.setMapMode(Map3DMode.SATELLITE)
-        // Adding markers can be a heavy operation, so we do it on a background thread
-        // to avoid prolonged blocking of the main thread.
+
+        findViewById<Button>(com.example.maps3dcommon.R.id.fly_berlin_button)?.apply {
+            runOnUiThread {
+                visibility = View.VISIBLE
+            }
+            setOnClickListener {
+                googleMap3D.flyCameraTo(com.google.android.gms.maps3d.model.flyToOptions {
+                    endCamera = berlinCamera
+                    durationInMillis = 2_000
+                })
+            }
+        }
+
+        findViewById<Button>(com.example.maps3dcommon.R.id.fly_nyc_button)?.apply {
+            runOnUiThread {
+                visibility = View.VISIBLE
+            }
+            setOnClickListener {
+                googleMap3D.flyCameraTo(com.google.android.gms.maps3d.model.flyToOptions {
+                    endCamera = nycCamera
+                    durationInMillis = 2_000
+                })
+            }
+        }
+
+        findViewById<Button>(com.example.maps3dcommon.R.id.fly_tokyo_button)?.apply {
+            runOnUiThread {
+                visibility = View.VISIBLE
+            }
+            setOnClickListener {
+                googleMap3D.flyCameraTo(com.google.android.gms.maps3d.model.flyToOptions {
+                    endCamera = tokyoCamera
+                    durationInMillis = 2_000
+                })
+            }
+        }
+
         lifecycleScope.launch(Dispatchers.Default) {
             addMarkers(googleMap3D)
         }
@@ -152,66 +213,73 @@ class MarkersActivity : SampleBaseActivity() {
             collisionBehavior = CollisionBehavior.REQUIRED
         })?.let(::setupMarkerClickListener)
 
-        // Marker 5: Styled Pin
-        // This marker demonstrates custom styling using PinConfiguration.
+        // Marker 8: Empire State Building Ape
         googleMap3D.addMarker(markerOptions {
             position = latLngAltitude {
-                latitude = 52.5213
-                longitude = 13.4105
-                altitude = 0.0
+                latitude = 40.7484
+                longitude = -73.9857
+                altitude = 100.0
             }
-            label = "Styled Pin"
-            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+            zIndex = 1
+            label = "King Kong / Empire State Building"
+            isExtruded = true
+            isDrawnWhenOccluded = true
+            altitudeMode = AltitudeMode.RELATIVE_TO_MESH
+            setStyle(ImageView(com.example.maps3dcommon.R.drawable.ook))
+        })?.let(::setupMarkerClickListener)
+
+        // Marker 9: Custom Color Pin near ESB
+        val customColorGlyph = Glyph.fromColor(android.graphics.Color.CYAN)
+        googleMap3D.addMarker(markerOptions {
+            position = latLngAltitude {
+                latitude = 40.7486
+                longitude = -73.9848
+                altitude = 600.0
+            }
+            isExtruded = true
+            isDrawnWhenOccluded = true
+            label = "Custom Color Pin"
+            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
             setStyle(pinConfiguration {
-                backgroundColor = android.graphics.Color.BLUE
+                backgroundColor = android.graphics.Color.RED
                 borderColor = android.graphics.Color.WHITE
-                scale = 1.5f
+                setGlyph(customColorGlyph)
             })
         })?.let(::setupMarkerClickListener)
 
-        // New Styled Markers based on User Request
-        val glyphImage = Glyph.fromColor(android.graphics.Color.YELLOW)
-        glyphImage.setImage(ImageView(com.example.maps3dcommon.R.drawable.ook))
-        
-        val glyphText = Glyph.fromColor(android.graphics.Color.YELLOW)
-        glyphText.setText("ABCDEFGHIJKLMNOPQ")
-
-        // Marker 6: Image Glyph
+        // Marker 10: Custom Text Pin near ESB
+        val textGlyph = Glyph.fromColor(android.graphics.Color.RED).apply {
+            setText("NYC\n 🍎 ")
+        }
         googleMap3D.addMarker(markerOptions {
             position = latLngAltitude {
-                latitude = 52.5220
-                longitude = 13.4110
-                altitude = 0.0
+                latitude = 40.7482
+                longitude = -73.9862
+                altitude = 600.0
             }
-            label = "Image Glyph"
             isExtruded = true
             isDrawnWhenOccluded = true
-            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+            label = "Custom Text Pin"
+            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
             setStyle(pinConfiguration {
-                setGlyph(glyphImage)
-                scale = 1.5f
-                backgroundColor = android.graphics.Color.BLUE
-                borderColor = android.graphics.Color.GREEN
+                setGlyph(textGlyph)
+                backgroundColor = android.graphics.Color.YELLOW
+                borderColor = android.graphics.Color.BLUE
             })
         })?.let(::setupMarkerClickListener)
 
-        // Marker 7: Text Glyph
+        // Marker 11: Shibuya Crossing
         googleMap3D.addMarker(markerOptions {
             position = latLngAltitude {
-                latitude = 52.5225
-                longitude = 13.4115
-                altitude = 0.0
+                latitude = 35.6595
+                longitude = 139.7005
+                altitude = 50.0
             }
-            label = "Text Glyph"
             isExtruded = true
             isDrawnWhenOccluded = true
-            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-            setStyle(pinConfiguration {
-                setGlyph(glyphText)
-                scale = 1.2f
-                backgroundColor = android.graphics.Color.BLUE
-                borderColor = android.graphics.Color.GREEN
-            })
+            label = "🦖 🥚"
+            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+            setStyle(ImageView(com.example.maps3dcommon.R.drawable.gz))
         })?.let(::setupMarkerClickListener)
 
         Log.d(TAG, "addMarkers: finished")

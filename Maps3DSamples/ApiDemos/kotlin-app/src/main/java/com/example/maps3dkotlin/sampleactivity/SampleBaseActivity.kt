@@ -16,6 +16,7 @@ package com.example.maps3dkotlin.sampleactivity
 
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.CallSuper
@@ -26,12 +27,16 @@ import androidx.core.view.updatePadding
 import com.example.maps3d.common.DEFAULT_CAMERA
 import com.example.maps3d.common.toCameraString
 import com.example.maps3d.common.toValidCamera
+import com.example.maps3d.common.toHeading
+import com.example.maps3d.common.toTilt
+import com.example.maps3d.common.toRange
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnCameraChangedListener
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.Camera
+import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
@@ -126,20 +131,25 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
 
         setContentView(R.layout.activity_common_map)
         val rootView = findViewById<View>(R.id.map_container)
+        val topBar = findViewById<MaterialToolbar>(R.id.top_bar)
+        
+        topBar.title = title
 
-        ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, insets ->
             val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val navigationBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            val navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
 
-            view.updatePadding(
-                top = view.paddingTop + statusBarInsets.top,
-                bottom = view.paddingBottom + navigationBarInsets.bottom
-            )
+            findViewById<View>(R.id.app_bar_layout)?.updatePadding(top = statusBarInsets.top)
+
+            findViewById<View>(R.id.button_flow)?.let { flowLayout ->
+                val layoutParams = flowLayout.layoutParams as android.view.ViewGroup.MarginLayoutParams
+                val margin8dp = (8 * flowLayout.resources.displayMetrics.density).toInt()
+                layoutParams.bottomMargin = navInsets.bottom + margin8dp
+                flowLayout.layoutParams = layoutParams
+            }
 
             WindowInsetsCompat.CONSUMED
         }
-
-        findViewById<MaterialToolbar>(R.id.top_bar).title = title
 
         map3DView = findViewById(R.id.map3dView)
         map3DView.onCreate(savedInstanceState)
@@ -253,5 +263,41 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
 
     protected fun snapshot(camera: Camera) {
         Log.d(TAG, camera.toCameraString())
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        val map = googleMap3D ?: return super.onKeyDown(keyCode, event)
+        val currentCamera = map.getCamera() ?: return super.onKeyDown(keyCode, event)
+
+        var dTilt = 0.0
+        var dHeading = 0.0
+        var dRange = 0.0
+
+        val incrementAmount = 5.0
+        val rangeIncrementAmount = 200.0
+        var handled = true
+
+        when (keyCode) {
+            KeyEvent.KEYCODE_W -> dTilt = -incrementAmount
+            KeyEvent.KEYCODE_S -> dTilt = incrementAmount
+            KeyEvent.KEYCODE_A -> dHeading = -incrementAmount
+            KeyEvent.KEYCODE_D -> dHeading = incrementAmount
+            KeyEvent.KEYCODE_Z -> dRange = -rangeIncrementAmount
+            KeyEvent.KEYCODE_X -> dRange = rangeIncrementAmount
+            else -> handled = false
+        }
+
+        if (handled) {
+            val newCamera = camera {
+                center = currentCamera.center
+                heading = ((currentCamera.heading ?: 0.0) + dHeading).toHeading()
+                tilt = ((currentCamera.tilt ?: 0.0) + dTilt).toTilt()
+                roll = currentCamera.roll
+                range = ((currentCamera.range ?: 0.0) + dRange).toRange()
+            }
+            map.setCamera(newCamera)
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 }

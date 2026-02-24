@@ -16,14 +16,21 @@ package com.example.maps3djava.markers;
 
 import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
 
+import android.view.View;
+import android.widget.Button;
+
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.CollisionBehavior;
+import com.google.android.gms.maps3d.model.FlyToOptions;
+import com.google.android.gms.maps3d.model.Glyph;
+import com.google.android.gms.maps3d.model.ImageView;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.Map3DMode;
 import com.google.android.gms.maps3d.model.MarkerOptions;
+import com.google.android.gms.maps3d.model.PinConfiguration;
 
 /**
  * Demonstrates the use of different altitude modes for markers in a 3D map.
@@ -41,8 +48,7 @@ public class MarkersActivity extends SampleBaseActivity {
         return this.getClass().getSimpleName();
     }
 
-    @Override
-    public final Camera getInitialCamera() {
+    public final Camera getBerlinCamera() {
         return toValidCamera(new Camera(
                 new LatLngAltitude(
                         52.51974795,
@@ -56,10 +62,62 @@ public class MarkersActivity extends SampleBaseActivity {
         ));
     }
 
+    public final Camera getTokyoCamera() {
+        return toValidCamera(new Camera(
+                new LatLngAltitude(
+                        35.658708,
+                        139.702206,
+                        23.3),
+                117.0,
+                55.0,
+                0.0,
+                2868.0));
+    }
+
+    @Override
+    public final Camera getInitialCamera() {
+        return toValidCamera(new Camera(
+                new LatLngAltitude(
+                        40.748425,
+                        -73.985590,
+                        348.7),
+                22.0,
+                80.0,
+                0.0,
+                1518.0));
+    }
+
     @Override
     public void onMap3DViewReady(GoogleMap3D googleMap3D) {
         super.onMap3DViewReady(googleMap3D);
         googleMap3D.setMapMode(Map3DMode.SATELLITE);
+
+        Button flyBerlinButton = findViewById(com.example.maps3dcommon.R.id.fly_berlin_button);
+        if (flyBerlinButton != null) {
+            runOnUiThread(() -> flyBerlinButton.setVisibility(View.VISIBLE));
+            flyBerlinButton.setOnClickListener(v -> {
+                FlyToOptions options = new FlyToOptions(getBerlinCamera(), 2000L);
+                googleMap3D.flyCameraTo(options);
+            });
+        }
+
+        Button flyNycButton = findViewById(com.example.maps3dcommon.R.id.fly_nyc_button);
+        if (flyNycButton != null) {
+            runOnUiThread(() -> flyNycButton.setVisibility(View.VISIBLE));
+            flyNycButton.setOnClickListener(v -> {
+                FlyToOptions options = new FlyToOptions(getInitialCamera(), 2000L);
+                googleMap3D.flyCameraTo(options);
+            });
+        }
+
+        Button flyTokyoButton = findViewById(com.example.maps3dcommon.R.id.fly_tokyo_button);
+        if (flyTokyoButton != null) {
+            runOnUiThread(() -> flyTokyoButton.setVisibility(View.VISIBLE));
+            flyTokyoButton.setOnClickListener(v -> {
+                FlyToOptions options = new FlyToOptions(getTokyoCamera(), 2000L);
+                googleMap3D.flyCameraTo(options);
+            });
+        }
 
         addMarkerWithToastListener(googleMap3D,
             new LatLngAltitude(52.519605780912585, 13.406867190588198, 150.0),
@@ -88,6 +146,77 @@ public class MarkersActivity extends SampleBaseActivity {
             AltitudeMode.RELATIVE_TO_MESH,
             CollisionBehavior.REQUIRED
         );
+
+        MarkerOptions apeOptions = new MarkerOptions();
+        apeOptions.setPosition(new LatLngAltitude(40.7484, -73.9857, 100.0));
+        apeOptions.setZIndex(1);
+        apeOptions.setLabel("King Kong / Empire State Building");
+        apeOptions.setAltitudeMode(AltitudeMode.RELATIVE_TO_MESH);
+        apeOptions.setCollisionBehavior(CollisionBehavior.REQUIRED);
+        apeOptions.setExtruded(true);
+        apeOptions.setDrawnWhenOccluded(true);
+
+        apeOptions.setStyle(new ImageView(com.example.maps3dcommon.R.drawable.ook));
+
+        com.google.android.gms.maps3d.model.Marker apeMarker = googleMap3D.addMarker(apeOptions);
+        if (apeMarker != null) {
+            apeMarker.setClickListener(
+                    () -> MarkersActivity.this.showToast("Clicked on marker: " + apeMarker.getLabel()));
+        }
+
+        Glyph customColorGlyph = Glyph.fromColor(android.graphics.Color.CYAN);
+        MarkerOptions customColorOptions = new MarkerOptions();
+        customColorOptions.setPosition(new LatLngAltitude(40.7486, -73.9848, 600.0));
+        customColorOptions.setExtruded(true);
+        customColorOptions.setDrawnWhenOccluded(true);
+        customColorOptions.setLabel("Custom Color Pin");
+        customColorOptions.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
+        PinConfiguration.Builder colorPinBuilder = PinConfiguration.builder();
+        colorPinBuilder.setBackgroundColor(android.graphics.Color.RED);
+        colorPinBuilder.setBorderColor(android.graphics.Color.WHITE);
+        colorPinBuilder.setGlyph(customColorGlyph);
+        customColorOptions.setStyle(colorPinBuilder.build());
+
+        com.google.android.gms.maps3d.model.Marker colorMarker = googleMap3D.addMarker(customColorOptions);
+        if (colorMarker != null) {
+            colorMarker.setClickListener(
+                    () -> MarkersActivity.this.showToast("Clicked on marker: " + colorMarker.getLabel()));
+        }
+
+        Glyph textGlyph = Glyph.fromColor(android.graphics.Color.RED);
+        textGlyph.setText("NYC\n 🍎 ");
+        MarkerOptions textOptions = new MarkerOptions();
+        textOptions.setPosition(new LatLngAltitude(40.7482, -73.9862, 600.0));
+        textOptions.setExtruded(true);
+        textOptions.setDrawnWhenOccluded(true);
+        textOptions.setLabel("Custom Text Pin");
+        textOptions.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
+        PinConfiguration.Builder textPinBuilder = PinConfiguration.builder();
+        textPinBuilder.setBackgroundColor(android.graphics.Color.YELLOW);
+        textPinBuilder.setBorderColor(android.graphics.Color.BLUE);
+        textPinBuilder.setGlyph(textGlyph);
+        textOptions.setStyle(textPinBuilder.build());
+
+        com.google.android.gms.maps3d.model.Marker textMarker = googleMap3D.addMarker(textOptions);
+        if (textMarker != null) {
+            textMarker.setClickListener(
+                    () -> MarkersActivity.this.showToast("Clicked on marker: " + textMarker.getLabel()));
+        }
+
+        MarkerOptions shibuyaOptions = new MarkerOptions();
+        shibuyaOptions.setPosition(new LatLngAltitude(35.6595, 139.7005, 50.0));
+        shibuyaOptions.setLabel("Shibuya Crossing Easter Egg");
+        shibuyaOptions.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
+        shibuyaOptions.setExtruded(true);
+        shibuyaOptions.setDrawnWhenOccluded(true);
+        shibuyaOptions.setStyle(new ImageView(com.example.maps3dcommon.R.drawable.gz));
+
+        com.google.android.gms.maps3d.model.Marker shibuyaMarker = googleMap3D.addMarker(shibuyaOptions);
+        if (shibuyaMarker != null) {
+            shibuyaMarker.setClickListener(
+                    () -> MarkersActivity.this.showToast("Clicked on marker: " + shibuyaMarker.getLabel()));
+        }
+
     }
 
     private void addMarkerWithToastListener(

@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import org.gradle.api.GradleException
-import java.io.File
-
 // Check for secrets.properties file before proceeding with build tasks.
 val secretsFile = rootProject.file("secrets.properties")
 val isCI = System.getenv("CI")?.toBoolean() ?: false
