@@ -1,4 +1,8 @@
 [versions]
+compileSdk = "36"
+minSdk = "26"
+targetSdk = "36"
+
 agp = "8.13.2"
 coreKtx = "1.17.0"
 junit = "4.13.2"
@@ -12,6 +16,11 @@ activityCompose = "1.12.3"
 composeBom = "2026.01.01"
 kotlin = "2.3.0"
 lifecycleRuntimeKtx = "2.10.0"
+
+# TODO: Prerequisites - Add the Maps 3D SDK version
+# playServicesMaps3d = "0.1.0"
+# TODO: Prerequisites - Add the Secrets Gradle Plugin version
+# secretsGradlePlugin = "2.0.1"
 
 [libraries]
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
@@ -31,7 +40,13 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
+# TODO: Prerequisites - Add the Maps 3D SDK library
+# play-services-maps3d = { group = "com.google.android.gms", name = "play-services-maps3d", version.ref = "playServicesMaps3d" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+# TODO: Prerequisites - Add the Secrets Gradle Plugin
+# secrets-gradle-plugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }

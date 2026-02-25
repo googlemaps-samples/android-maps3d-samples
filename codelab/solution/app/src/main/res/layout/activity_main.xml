@@ -43,6 +43,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
+
             style="?android:attr/buttonBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -78,7 +79,24 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Models" />
+                android:text="Models"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btn_tour"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tour"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btn_clear"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clear"
+                android:textColor="@android:color/holo_red_dark" />
 
         </LinearLayout>
     </HorizontalScrollView>

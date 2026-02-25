@@ -648,7 +648,82 @@ balloon.setClickListener {
 
 ---
 
-## 8. Popovers (Info Windows)
+## 8. The Scenic Tour (Animating Between Markers)
+
+Let's spread our wings and explore the whole island! In this step, we'll scatter markers across Oahu's most famous landmarks and animate the camera flying point-to-point. 
+
+1. Add the `btn_tour` and `btn_clear` buttons to your `activity_main.xml` layout, next to the other buttons.
+2. In `MainActivity.kt`, add the geographic constants for the landmarks to the `companion object`.
+3. Add a helper function `flyTour` to orchestrate the flight:
+
+```kotlin
+    private suspend fun flyTour(map: GoogleMap3D) {
+        val locations = listOf(
+            HONOLULU to "Honolulu",
+            DIAMOND_HEAD to "Diamond Head",
+            HANAUMA_BAY to "Hanauma Bay",
+            KOKO_HEAD to "Koko Head",
+            LANIKAI_BEACH to "Lanikai Beach",
+            MOUNT_KAALA to "Mount Ka'ala",
+            PEARL_HARBOR to "Pearl Harbor"
+        )
+        
+        // Add all markers for the tour
+        resetMap()
+        locations.forEach { (location, name) ->
+            activeMarkers.add(map.addMarker(
+                markerOptions {
+                    position = location
+                    label = name
+                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                    isExtruded = true
+                }
+            )!!)
+        }
+
+        // Fly to each location
+        for ((location, _) in locations) {
+            map.flyCameraTo(
+                flyToOptions {
+                    endCamera = camera {
+                        center = location
+                        tilt = 45.0
+                        range = 2500.0
+                        heading = 0.0
+                    }
+                    durationInMillis = 3000L
+                }
+            )
+            awaitCameraAnimation(map)
+            // Pause at each location to enjoy the view!
+            kotlinx.coroutines.delay(1500)
+        }
+    }
+```
+
+### Stopping Animations
+
+If the tour is running and the user clicks another button, we must cancel the existing animation. Notice in the solution code we wrap `lifecycleScope.launch` in a variable `currentAnimationJob` and call `currentAnimationJob?.cancel()` before starting any new action!
+
+Wire up the new buttons in `setupButtons`:
+
+```kotlin
+        findViewById<Button>(R.id.btn_tour).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch { 
+                flyTour(map) 
+            }
+        }
+
+        findViewById<Button>(R.id.btn_clear).setOnClickListener {
+            currentAnimationJob?.cancel()
+            resetMap()
+        }
+```
+
+---
+
+## 9. Popovers (Info Windows)
 
 Markers are great, but sometimes you need to show more information. **Popovers** are 2D views that "stick" to a 3D location. Unlike Markers, they always face the camera and can contain any Android View (button, text, image, etc.).
 
