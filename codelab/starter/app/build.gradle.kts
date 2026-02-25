@@ -2,20 +2,18 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    // TODO: Prerequisites - Apply the Secrets Gradle Plugin
+    // alias(libs.plugins.secrets.gradle.plugin)
 }
 
 android {
     namespace = "com.example.alohaexplorer"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "com.example.alohaexplorer"
-        minSdk = 25
-        targetSdk = 36
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
 
@@ -67,4 +65,18 @@ dependencies {
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // TODO: Prerequisites - Add the Maps 3D SDK dependency
+    // implementation(libs.play.services.maps3d)
 }
+
+// TODO: Prerequisites - Configure the Secrets Gradle Plugin
+// secrets {
+//     // Optionally specify a different file name containing your secrets.
+//     // The plugin defaults to "local.properties"
+//     propertiesFileName = "secrets.properties"
+//
+//     // A properties file containing default secret values. This file can be
+//     // checked in version control.
+//     defaultPropertiesFileName = "local.defaults.properties"
+// }

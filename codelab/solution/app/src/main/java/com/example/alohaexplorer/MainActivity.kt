@@ -13,6 +13,8 @@ import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.Glyph
+import com.google.android.gms.maps3d.model.ImageView
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.Model
@@ -25,6 +27,7 @@ import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.markerOptions
 import com.google.android.gms.maps3d.model.modelOptions
 import com.google.android.gms.maps3d.model.orientation
+import com.google.android.gms.maps3d.model.pinConfiguration
 import com.google.android.gms.maps3d.model.polygonOptions
 import com.google.android.gms.maps3d.model.polylineOptions
 import com.google.android.gms.maps3d.model.vector3D
@@ -84,6 +87,42 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             altitude = 0.0
         }
 
+        val DIAMOND_HEAD = latLngAltitude {
+            latitude = 21.26194
+            longitude = -157.80556
+            altitude = 0.0
+        }
+
+        val KOKO_HEAD = latLngAltitude {
+            latitude = 21.270856
+            longitude = -157.694442
+            altitude = 0.0
+        }
+
+        val PEARL_HARBOR = latLngAltitude {
+            latitude = 21.31861
+            longitude = -157.92250
+            altitude = 0.0
+        }
+
+        val MOUNT_KAALA = latLngAltitude {
+            latitude = 21.50694
+            longitude = -158.14278
+            altitude = 0.0
+        }
+
+        val HANAUMA_BAY = latLngAltitude {
+            latitude = 21.27139
+            longitude = -157.69444
+            altitude = 0.0
+        }
+
+        val LANIKAI_BEACH = latLngAltitude {
+            latitude = 21.39309
+            longitude = -157.71546
+            altitude = 0.0
+        }
+
         // Models must be loaded from the internet.  Here we use Cloud Storage.
         const val BALLOON_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/balloon-pin-BlXF32yD.glb"
         const val BALLOON_SCALE = 5.0
@@ -140,9 +179,6 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
         this@MainActivity.googleMap3D = googleMap3D
 
-        // We use lifecycleScope to launch coroutines. This ensures our animations
-        // and background work are automatically cancelled if the Activity is destroyed,
-        // preventing memory leaks and crashes.
         lifecycleScope.launch {
             // Step 0: Start from Global View
             startFromGlobalView(googleMap3D)
@@ -152,6 +188,8 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         }
     }
 
+    private var currentAnimationJob: kotlinx.coroutines.Job? = null
+
     /**
      * Sets up click listeners for the UI buttons to trigger camera animations.
      * Note how we wrap the calls in `lifecycleScope.launch`. This is because:
@@ -160,56 +198,146 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
      */
     private fun setupButtons(map: GoogleMap3D) {
         findViewById<Button>(R.id.btn_fly_honolulu).setOnClickListener {
+            // Cancel any ongoing tour or flight
+            currentAnimationJob?.cancel()
             // "Launch" starts a new coroutine.
-            lifecycleScope.launch { flyToHonolulu(map) }
+            currentAnimationJob = lifecycleScope.launch { flyToHonolulu(map) }
         }
 
         findViewById<Button>(R.id.btn_show_markers).setOnClickListener {
-            addMarkers(map)
-            lifecycleScope.launch { flyToMarkers(map) }
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch { 
+                addMarkers(map)
+                flyToMarkers(map) 
+            }
         }
 
         findViewById<Button>(R.id.btn_show_polygons).setOnClickListener {
-            addPolygon(map)
-            // Re-use marker view for polygons as it's the same geographic location
-            lifecycleScope.launch { flyToMarkers(map) }
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch { 
+                addPolygon(map)
+                // Re-use marker view for polygons as it's the same geographic location
+                flyToMarkers(map) 
+            }
         }
 
         findViewById<Button>(R.id.btn_show_balloon).setOnClickListener {
-            setupBalloon(map)
-            lifecycleScope.launch { flyToBalloon(map) }
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch { 
+                setupBalloon(map)
+                flyToBalloon(map) 
+            }
+        }
+
+        findViewById<Button>(R.id.btn_tour).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch { 
+                flyTour(map) 
+            }
+        }
+
+        findViewById<Button>(R.id.btn_clear).setOnClickListener {
+            currentAnimationJob?.cancel()
+            resetMap()
         }
     }
 
     private suspend fun flyToMarkers(map: GoogleMap3D) {
-        map.flyCameraTo(
-            flyToOptions {
-                endCamera = camera {
-                    center = IOLANI_PALACE
-                    tilt = 60.0    // Look down at a 60-degree angle
-                    range = 500.0  // 500 meters away for a closer view
-                    heading = 0.0  // North up
+        if (activeMarkers.isEmpty()) {
+            map.flyCameraTo(
+                flyToOptions {
+                    endCamera = camera {
+                        center = IOLANI_PALACE
+                        tilt = 60.0    // Look down at a 60-degree angle
+                        range = 500.0  // 500 meters away for a closer view
+                        heading = 0.0  // North up
+                    }
+                    durationInMillis = 2000L
                 }
-                durationInMillis = 2000L
-            }
-        )
-        // **Critical Step**: Wait for the animation to actually finish before doing anything else.
-        awaitCameraAnimation(map)
+            )
+            awaitCameraAnimation(map)
+            return
+        }
+
+        for (marker in activeMarkers) {
+            map.flyCameraTo(
+                flyToOptions {
+                    endCamera = camera {
+                        center = marker.position
+                        tilt = 60.0    // Look down at a 60-degree angle
+                        range = 500.0  // 500 meters away for a closer view
+                        heading = 0.0  // North up
+                    }
+                    durationInMillis = 2000L
+                }
+            )
+            // **Critical Step**: Wait for the animation to actually finish before doing anything else.
+            awaitCameraAnimation(map)
+            
+            // Wait for map steady (tiles loaded)
+            awaitMapSteady(map)
+
+            // Pause for 3 seconds at each marker
+            kotlinx.coroutines.delay(3000L)
+        }
     }
 
     private suspend fun flyToBalloon(map: GoogleMap3D) {
         map.flyCameraTo(
-            flyToOptions {
-                endCamera = camera {
-                    center = WAIKIKI
-                    tilt = 60.0
-                    range = 1000.0
-                    heading = 0.0
-                }
-                durationInMillis = 2000L
-            }
+             flyToOptions {
+                 endCamera = camera {
+                     center = WAIKIKI
+                     tilt = 60.0
+                     range = 1000.0
+                     heading = 0.0
+                 }
+                 durationInMillis = 2000L
+             }
         )
         awaitCameraAnimation(map)
+    }
+
+    private suspend fun flyTour(map: GoogleMap3D) {
+        val locations = listOf(
+            HONOLULU to "Honolulu",
+            DIAMOND_HEAD to "Diamond Head",
+            HANAUMA_BAY to "Hanauma Bay",
+            KOKO_HEAD to "Koko Head",
+            LANIKAI_BEACH to "Lanikai Beach",
+            MOUNT_KAALA to "Mount Ka'ala",
+            PEARL_HARBOR to "Pearl Harbor"
+        )
+        
+        // Add all markers for the tour
+        resetMap()
+        locations.forEach { (location, name) ->
+            activeMarkers.add(map.addMarker(
+                markerOptions {
+                    position = location
+                    label = name
+                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                    isExtruded = true
+                }
+            )!!)
+        }
+
+        // Fly to each location
+        for ((location, _) in locations) {
+            map.flyCameraTo(
+                flyToOptions {
+                    endCamera = camera {
+                        center = location
+                        tilt = 45.0
+                        range = 2500.0
+                        heading = 0.0
+                    }
+                    durationInMillis = 3000L
+                }
+            )
+            awaitCameraAnimation(map)
+            // Pause at each location
+            kotlinx.coroutines.delay(1500)
+        }
     }
 
     /**
@@ -486,6 +614,91 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 setClickListener {
                     lifecycleScope.launch(Dispatchers.Main) {
                         Toast.makeText(this@MainActivity, "Clicked Clamped Marker", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            })
+
+            // 4. Styled Pin
+            add(map.addMarker(
+                markerOptions {
+                    position = latLngAltitude {
+                        latitude = 52.5213
+                        longitude = 13.4105
+                        altitude = 0.0
+                    }
+                    label = "Styled Pin"
+                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                    setStyle(pinConfiguration {
+                        backgroundColor = android.graphics.Color.BLUE
+                        borderColor = android.graphics.Color.WHITE
+                        scale = 1.5f
+                    })
+                }
+            )?.apply {
+                setClickListener {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "Clicked Styled Pin", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            })
+
+            // 5. Image Glyph
+            val glyphImage = Glyph.fromColor(android.graphics.Color.YELLOW)
+            // Using standard Android drawable
+            glyphImage.setImage(ImageView(android.R.drawable.star_on))
+
+            add(map.addMarker(
+                markerOptions {
+                    position = latLngAltitude {
+                        latitude = 52.5220
+                        longitude = 13.4110
+                        altitude = 0.0
+                    }
+                    label = "Image Glyph"
+                    isExtruded = true
+                    isDrawnWhenOccluded = true
+                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                    setStyle(pinConfiguration {
+                        setGlyph(glyphImage)
+                        scale = 1.5f
+                        backgroundColor = android.graphics.Color.BLUE
+                        borderColor = android.graphics.Color.GREEN
+                    })
+                }
+            )?.apply {
+                setClickListener {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "Clicked Image Glyph", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            })
+
+            // 6. Text Glyph
+            val glyphText = Glyph.fromColor(android.graphics.Color.YELLOW)
+            glyphText.setText("ABCDEFGHIJKLMNOPQ")
+
+            add(map.addMarker(
+                markerOptions {
+                    position = latLngAltitude {
+                        latitude = 52.5225
+                        longitude = 13.4115
+                        altitude = 0.0
+                    }
+                    label = "Text Glyph"
+                    isExtruded = true
+                    isDrawnWhenOccluded = true
+                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                    setStyle(pinConfiguration {
+                        setGlyph(glyphText)
+                        scale = 1.2f
+                        backgroundColor = android.graphics.Color.BLUE
+                        borderColor = android.graphics.Color.GREEN
+                    })
+                }
+            )?.apply {
+                setClickListener {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "Clicked Text Glyph", Toast.LENGTH_SHORT).show()
                     }
                 }
             })
