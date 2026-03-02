@@ -28,7 +28,7 @@ class PopoversActivity : SampleBaseActivity() {
     private val CONTENT_LNG = -122.478549
     private val CONTENT_ALT = 1500.0
 
-    private lateinit var popover: Popover
+    private var popover: Popover? = null
     private var popoverToggleCount = 0
 
     override val initialCamera = camera {
@@ -99,12 +99,12 @@ class PopoversActivity : SampleBaseActivity() {
             it.setClickListener {
                 Log.d(TAG, "Marker clicked")
                 if (popoverToggleCount > 5) {
-                    runOnUiThread { popover.remove() }
+                    runOnUiThread { popover?.remove() }
                     Log.d(TAG, "Popover removed")
                     popoverToggleCount = 0
                 } else {
                     Log.d(TAG, "Popover toggled")
-                    runOnUiThread { popover.toggle() }
+                    runOnUiThread { popover?.toggle() }
                     popoverToggleCount++
                 }
             }

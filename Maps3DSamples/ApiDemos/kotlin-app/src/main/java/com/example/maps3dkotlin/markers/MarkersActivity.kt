@@ -14,11 +14,13 @@
 
 package com.example.maps3dkotlin.markers
 
+import android.graphics.Color
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import com.example.maps3dcommon.R
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
@@ -28,6 +30,7 @@ import com.google.android.gms.maps3d.model.ImageView
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.markerOptions
 import com.google.android.gms.maps3d.model.pinConfiguration
@@ -96,36 +99,36 @@ class MarkersActivity : SampleBaseActivity() {
         super.onMapReady(googleMap3D)
         googleMap3D.setMapMode(Map3DMode.SATELLITE)
 
-        findViewById<Button>(com.example.maps3dcommon.R.id.fly_berlin_button)?.apply {
+        findViewById<Button>(R.id.fly_berlin_button)?.apply {
             runOnUiThread {
                 visibility = View.VISIBLE
             }
             setOnClickListener {
-                googleMap3D.flyCameraTo(com.google.android.gms.maps3d.model.flyToOptions {
+                googleMap3D.flyCameraTo(flyToOptions {
                     endCamera = berlinCamera
                     durationInMillis = 2_000
                 })
             }
         }
 
-        findViewById<Button>(com.example.maps3dcommon.R.id.fly_nyc_button)?.apply {
+        findViewById<Button>(R.id.fly_nyc_button)?.apply {
             runOnUiThread {
                 visibility = View.VISIBLE
             }
             setOnClickListener {
-                googleMap3D.flyCameraTo(com.google.android.gms.maps3d.model.flyToOptions {
+                googleMap3D.flyCameraTo(flyToOptions {
                     endCamera = nycCamera
                     durationInMillis = 2_000
                 })
             }
         }
 
-        findViewById<Button>(com.example.maps3dcommon.R.id.fly_tokyo_button)?.apply {
+        findViewById<Button>(R.id.fly_tokyo_button)?.apply {
             runOnUiThread {
                 visibility = View.VISIBLE
             }
             setOnClickListener {
-                googleMap3D.flyCameraTo(com.google.android.gms.maps3d.model.flyToOptions {
+                googleMap3D.flyCameraTo(flyToOptions {
                     endCamera = tokyoCamera
                     durationInMillis = 2_000
                 })
@@ -225,11 +228,11 @@ class MarkersActivity : SampleBaseActivity() {
             isExtruded = true
             isDrawnWhenOccluded = true
             altitudeMode = AltitudeMode.RELATIVE_TO_MESH
-            setStyle(ImageView(com.example.maps3dcommon.R.drawable.ook))
+            setStyle(ImageView(R.drawable.ook))
         })?.let(::setupMarkerClickListener)
 
         // Marker 9: Custom Color Pin near ESB
-        val customColorGlyph = Glyph.fromColor(android.graphics.Color.CYAN)
+        val customColorGlyph = Glyph.fromColor(Color.CYAN)
         googleMap3D.addMarker(markerOptions {
             position = latLngAltitude {
                 latitude = 40.7486
@@ -241,14 +244,14 @@ class MarkersActivity : SampleBaseActivity() {
             label = "Custom Color Pin"
             altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
             setStyle(pinConfiguration {
-                backgroundColor = android.graphics.Color.RED
-                borderColor = android.graphics.Color.WHITE
+                backgroundColor = Color.RED
+                borderColor = Color.WHITE
                 setGlyph(customColorGlyph)
             })
         })?.let(::setupMarkerClickListener)
 
         // Marker 10: Custom Text Pin near ESB
-        val textGlyph = Glyph.fromColor(android.graphics.Color.RED).apply {
+        val textGlyph = Glyph.fromColor(Color.RED).apply {
             setText("NYC\n 🍎 ")
         }
         googleMap3D.addMarker(markerOptions {
@@ -263,8 +266,8 @@ class MarkersActivity : SampleBaseActivity() {
             altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
             setStyle(pinConfiguration {
                 setGlyph(textGlyph)
-                backgroundColor = android.graphics.Color.YELLOW
-                borderColor = android.graphics.Color.BLUE
+                backgroundColor = Color.YELLOW
+                borderColor = Color.BLUE
             })
         })?.let(::setupMarkerClickListener)
 
@@ -279,7 +282,7 @@ class MarkersActivity : SampleBaseActivity() {
             isDrawnWhenOccluded = true
             label = "🦖 🥚"
             altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-            setStyle(ImageView(com.example.maps3dcommon.R.drawable.gz))
+            setStyle(ImageView(R.drawable.gz))
         })?.let(::setupMarkerClickListener)
 
         Log.d(TAG, "addMarkers: finished")

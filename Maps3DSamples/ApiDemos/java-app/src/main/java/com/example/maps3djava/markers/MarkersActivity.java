@@ -19,6 +19,7 @@ import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.maps3dcommon.R;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
@@ -29,6 +30,7 @@ import com.google.android.gms.maps3d.model.Glyph;
 import com.google.android.gms.maps3d.model.ImageView;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.Map3DMode;
+import com.google.android.gms.maps3d.model.Marker;
 import com.google.android.gms.maps3d.model.MarkerOptions;
 import com.google.android.gms.maps3d.model.PinConfiguration;
 
@@ -92,7 +94,7 @@ public class MarkersActivity extends SampleBaseActivity {
         super.onMap3DViewReady(googleMap3D);
         googleMap3D.setMapMode(Map3DMode.SATELLITE);
 
-        Button flyBerlinButton = findViewById(com.example.maps3dcommon.R.id.fly_berlin_button);
+        Button flyBerlinButton = findViewById(R.id.fly_berlin_button);
         if (flyBerlinButton != null) {
             runOnUiThread(() -> flyBerlinButton.setVisibility(View.VISIBLE));
             flyBerlinButton.setOnClickListener(v -> {
@@ -101,7 +103,7 @@ public class MarkersActivity extends SampleBaseActivity {
             });
         }
 
-        Button flyNycButton = findViewById(com.example.maps3dcommon.R.id.fly_nyc_button);
+        Button flyNycButton = findViewById(R.id.fly_nyc_button);
         if (flyNycButton != null) {
             runOnUiThread(() -> flyNycButton.setVisibility(View.VISIBLE));
             flyNycButton.setOnClickListener(v -> {
@@ -110,7 +112,7 @@ public class MarkersActivity extends SampleBaseActivity {
             });
         }
 
-        Button flyTokyoButton = findViewById(com.example.maps3dcommon.R.id.fly_tokyo_button);
+        Button flyTokyoButton = findViewById(R.id.fly_tokyo_button);
         if (flyTokyoButton != null) {
             runOnUiThread(() -> flyTokyoButton.setVisibility(View.VISIBLE));
             flyTokyoButton.setOnClickListener(v -> {
@@ -156,9 +158,9 @@ public class MarkersActivity extends SampleBaseActivity {
         apeOptions.setExtruded(true);
         apeOptions.setDrawnWhenOccluded(true);
 
-        apeOptions.setStyle(new ImageView(com.example.maps3dcommon.R.drawable.ook));
+        apeOptions.setStyle(new ImageView(R.drawable.ook));
 
-        com.google.android.gms.maps3d.model.Marker apeMarker = googleMap3D.addMarker(apeOptions);
+        Marker apeMarker = googleMap3D.addMarker(apeOptions);
         if (apeMarker != null) {
             apeMarker.setClickListener(
                     () -> MarkersActivity.this.showToast("Clicked on marker: " + apeMarker.getLabel()));
@@ -177,7 +179,7 @@ public class MarkersActivity extends SampleBaseActivity {
         colorPinBuilder.setGlyph(customColorGlyph);
         customColorOptions.setStyle(colorPinBuilder.build());
 
-        com.google.android.gms.maps3d.model.Marker colorMarker = googleMap3D.addMarker(customColorOptions);
+        Marker colorMarker = googleMap3D.addMarker(customColorOptions);
         if (colorMarker != null) {
             colorMarker.setClickListener(
                     () -> MarkersActivity.this.showToast("Clicked on marker: " + colorMarker.getLabel()));
@@ -197,7 +199,7 @@ public class MarkersActivity extends SampleBaseActivity {
         textPinBuilder.setGlyph(textGlyph);
         textOptions.setStyle(textPinBuilder.build());
 
-        com.google.android.gms.maps3d.model.Marker textMarker = googleMap3D.addMarker(textOptions);
+        Marker textMarker = googleMap3D.addMarker(textOptions);
         if (textMarker != null) {
             textMarker.setClickListener(
                     () -> MarkersActivity.this.showToast("Clicked on marker: " + textMarker.getLabel()));
@@ -209,9 +211,9 @@ public class MarkersActivity extends SampleBaseActivity {
         shibuyaOptions.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
         shibuyaOptions.setExtruded(true);
         shibuyaOptions.setDrawnWhenOccluded(true);
-        shibuyaOptions.setStyle(new ImageView(com.example.maps3dcommon.R.drawable.gz));
+        shibuyaOptions.setStyle(new ImageView(R.drawable.gz));
 
-        com.google.android.gms.maps3d.model.Marker shibuyaMarker = googleMap3D.addMarker(shibuyaOptions);
+        Marker shibuyaMarker = googleMap3D.addMarker(shibuyaOptions);
         if (shibuyaMarker != null) {
             shibuyaMarker.setClickListener(
                     () -> MarkersActivity.this.showToast("Clicked on marker: " + shibuyaMarker.getLabel()));
@@ -234,7 +236,7 @@ public class MarkersActivity extends SampleBaseActivity {
         options.setExtruded(true);
         options.setDrawnWhenOccluded(true);
 
-        com.google.android.gms.maps3d.model.Marker marker = map.addMarker(options);
+        Marker marker = map.addMarker(options);
         marker.setClickListener(() -> MarkersActivity.this.showToast("Clicked on marker: " + label));
     }
 }
