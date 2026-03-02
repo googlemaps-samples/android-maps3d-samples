@@ -24,9 +24,9 @@ class PopoversActivity : SampleBaseActivity() {
     override val TAG = "PopoversActivity"
 
     // San Francisco
-    private val CONTENT_LAT = 37.819852
-    private val CONTENT_LNG = -122.478549
-    private val CONTENT_ALT = 1500.0
+    private val CONTENT_LAT = 37.820642
+    private val CONTENT_LNG = -122.478227
+    private val CONTENT_ALT = 0.0
 
     private var popover: Popover? = null
     private var popoverToggleCount = 0
@@ -39,7 +39,7 @@ class PopoversActivity : SampleBaseActivity() {
         }
         heading = 0.0
         tilt = 45.0
-        range = 2000.0
+        range = 4075.0
     }
 
     override fun onMapReady(googleMap3D: GoogleMap3D) {
