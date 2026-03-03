@@ -23,22 +23,31 @@
     android:layout_height="match_parent"
     >
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/top_bar"
-        style="@style/Widget.MaterialComponents.Toolbar.Primary"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="#80BB86FC"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:title="@string/feature_title_overview_hello_3d_map"
-        app:titleTextColor="?attr/colorOnPrimary"
-        android:fitsSystemWindows="true"
-        />
+        app:elevation="0dp"
+        >
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/top_bar"
+            style="@style/Widget.MaterialComponents.Toolbar.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            app:title="@string/feature_title_overview_hello_3d_map"
+            app:titleTextColor="@android:color/white"
+            />
+    </com.google.android.material.appbar.AppBarLayout>
 
     <com.google.android.gms.maps3d.Map3DView
         android:id="@+id/map3dView"
-        map3d:mode="hybrid"
+        map3d:mode="satellite"
         map3d:centerLat="40.748392"
         map3d:centerLng="-73.986060"
         map3d:centerAlt="175"
@@ -52,12 +61,12 @@
         map3d:maxHeading="360"
         map3d:minTilt="0"
         map3d:maxTilt="90"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/top_bar"
+        app:layout_constraintTop_toTopOf="parent"
         />
 
     <com.google.android.material.button.MaterialButton
@@ -90,7 +99,45 @@
         android:visibility="gone"
         />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/fly_berlin_button"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/public_24px"
+        android:contentDescription="Fly to Berlin"
+        android:visibility="gone"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/fly_nyc_button"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/location_city_24px"
+        android:contentDescription="Fly to NYC"
+        android:visibility="gone"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/fly_tokyo_button"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:padding="0dp"
+        android:insetBottom="0dp"
+        android:insetTop="0dp"
+        android:alpha="0.2"
+        android:text="🦖"
+        android:textSize="20sp"
+        android:contentDescription="Fly to Tokyo"
+        android:visibility="gone"
+        />
+
     <androidx.constraintlayout.helper.widget.Flow
+        android:id="@+id/button_flow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -101,7 +148,7 @@
         app:flow_horizontalStyle="packed"
         app:flow_horizontalBias="0"
         app:flow_horizontalGap="8dp"
-        app:constraint_referenced_ids="stop_button,reset_view_button,snapshot_button"
+        app:constraint_referenced_ids="fly_tokyo_button,fly_berlin_button,fly_nyc_button,stop_button,reset_view_button,snapshot_button"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

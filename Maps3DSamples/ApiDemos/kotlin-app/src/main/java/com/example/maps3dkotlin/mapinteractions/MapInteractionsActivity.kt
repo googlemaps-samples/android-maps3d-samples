@@ -1,6 +1,7 @@
 package com.example.maps3dkotlin.mapinteractions
 
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Map3DMode
@@ -23,11 +24,12 @@ class MapInteractionsActivity : SampleBaseActivity() {
         range = 3757.0
     }
 
-    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-        super.onMap3DViewReady(googleMap3D)
+    override fun onMapReady(googleMap3D: GoogleMap3D) {
+        super.onMapReady(googleMap3D)
         googleMap3D.setMapMode(Map3DMode.HYBRID)
 
-        CoroutineScope(Dispatchers.Main).launch {
+        // Listeners for map clicks. We use lifecycleScope to ensure coroutines are cancelled when the activity is destroyed.
+        lifecycleScope.launch {
             googleMap3D.setMap3DClickListener { location, placeId ->
                 if (placeId != null) {
                     showToast("Clicked on place with ID: $placeId")
@@ -38,9 +40,9 @@ class MapInteractionsActivity : SampleBaseActivity() {
         }
     }
 
-    fun showToast(message: String) {
-        CoroutineScope(Dispatchers.Main).launch {
-            Toast.makeText(this@MapInteractionsActivity, message, android.widget.Toast.LENGTH_SHORT).show()
+    private fun showToast(message: String) {
+        lifecycleScope.launch {
+            Toast.makeText(this@MapInteractionsActivity, message, Toast.LENGTH_SHORT).show()
         }
     }
 

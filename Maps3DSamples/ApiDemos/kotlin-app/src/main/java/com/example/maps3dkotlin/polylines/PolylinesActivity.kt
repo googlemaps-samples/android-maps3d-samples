@@ -26,6 +26,7 @@ import com.google.android.gms.maps3d.model.Polyline
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.polylineOptions
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -41,7 +42,7 @@ import kotlin.time.Duration.Companion.milliseconds
  *     the background.
  *
  * A click listener is attached to the foreground polyline, which displays a toast message
- * when the trail is tapped.
+ * when a trail is tapped.
  */
 class PolylinesActivity : SampleBaseActivity() {
     override val TAG = this::class.java.simpleName
@@ -84,13 +85,11 @@ class PolylinesActivity : SampleBaseActivity() {
         }
     }
 
-    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-        super.onMap3DViewReady(googleMap3D)
+    override fun onMapReady(googleMap3D: GoogleMap3D) {
+        super.onMapReady(googleMap3D)
         googleMap3D.setMapMode(Map3DMode.HYBRID)
-
-        // The polylines are added to the map within a lifecycle-aware coroutine.
-        lifecycleScope.launch {
-            delay(1.milliseconds)
+        // Adding polylines can be a heavy operation (parsers), so we do it on a background thread.
+        lifecycleScope.launch(Dispatchers.Default) {
             addPolylines(googleMap3D)
         }
     }
@@ -114,7 +113,7 @@ class PolylinesActivity : SampleBaseActivity() {
     private fun setupPolylineClickListener(polyline: Polyline) {
         polyline.setClickListener {
             Log.d(TAG, "Clicked on trail polyline")
-            lifecycleScope.launch {
+            lifecycleScope.launch(Dispatchers.Main) {
                 Toast.makeText(this@PolylinesActivity, "Hiking time!", Toast.LENGTH_SHORT).show()
             }
         }

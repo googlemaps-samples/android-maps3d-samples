@@ -37,6 +37,7 @@ import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -99,27 +100,19 @@ class ModelsActivity : SampleBaseActivity() {
         }
     }
 
-    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-        super.onMap3DViewReady(googleMap3D)
+    @OptIn(FlowPreview::class)
+    override fun onMapReady(googleMap3D: GoogleMap3D) {
+        super.onMapReady(googleMap3D)
         googleMap3D.setMapMode(Map3DMode.SATELLITE)
 
-        // A coroutine is launched to collect camera updates and generate snapshots.
-        // This is done in a lifecycle-aware manner to prevent memory leaks.
-        lifecycleScope.launch {
-            cameraUpdates.sample(1.seconds).collect { camera ->
-                snapshot(camera.toValidCamera())
-            }
-        }
-
-        lifecycleScope.launch {
-            delay(10.milliseconds)
-
+        // Loading and adding models can be synonymous with network or disk I/O, so we do it on a background thread.
+        lifecycleScope.launch(Dispatchers.Default) {
             // The 3D model is added to the map.
             addPlaneModel(googleMap3D)
-
-            // The animation sequence is started.
-            startAnimationSequence(googleMap3D)
         }
+
+        // The animation sequence is started.
+        startAnimationSequence(googleMap3D)
     }
 
     /**

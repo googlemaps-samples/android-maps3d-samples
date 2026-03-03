@@ -170,8 +170,8 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
      *
      * @param googleMap3D The [GoogleMap3D] object representing the 3D map.
      */
-    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-        super.onMap3DViewReady(googleMap3D)
+    override fun onMapReady(googleMap3D: GoogleMap3D) {
+        super.onMapReady(googleMap3D)
         this.googleMap3D = googleMap3D
 
         // Set the initial camera position
@@ -187,7 +187,7 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         googleMap3D.setOnMapSteadyListener { isSteady ->
             if (isSteady) {
                 googleMap3D.setOnMapSteadyListener(null)
-                CoroutineScope(Dispatchers.Main).launch {
+                 CoroutineScope(Dispatchers.Main).launch {
                     delay(2000.milliseconds)
                     flyToEmpireStateBuilding()
                 }

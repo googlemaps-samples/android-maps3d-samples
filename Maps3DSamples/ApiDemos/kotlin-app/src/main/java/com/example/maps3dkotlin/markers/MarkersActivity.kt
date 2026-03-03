@@ -14,22 +14,28 @@
 
 package com.example.maps3dkotlin.markers
 
+import android.graphics.Color
 import android.util.Log
+import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import com.example.maps3dcommon.R
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.CollisionBehavior
+import com.google.android.gms.maps3d.model.Glyph
+import com.google.android.gms.maps3d.model.ImageView
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.markerOptions
+import com.google.android.gms.maps3d.model.pinConfiguration
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * This activity demonstrates the various altitude modes available for markers on a 3D map.
@@ -51,10 +57,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class MarkersActivity : SampleBaseActivity() {
     override val TAG = MarkersActivity::class.java.simpleName
 
-    // The initial camera position is defined declaratively, providing a clear overview of
-    // the starting view of the map. This makes it easy to understand and modify the initial
-    // scene without digging into the logic of the activity.
-    override val initialCamera = camera {
+    val berlinCamera = camera {
         center = latLngAltitude {
             latitude = 52.51974795
             longitude = 13.40715553
@@ -65,14 +68,74 @@ class MarkersActivity : SampleBaseActivity() {
         range = 1500.0
     }
 
-    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-        super.onMap3DViewReady(googleMap3D)
+    val nycCamera = camera {
+        center = latLngAltitude {
+            latitude = 40.748425
+            longitude = -73.985590
+            altitude = 348.7
+        }
+        heading = 22.0
+        tilt = 80.0
+        range = 1518.0
+    }
+
+    val tokyoCamera = camera {
+        center = latLngAltitude {
+            latitude = 35.658708
+            longitude = 139.702206
+            altitude = 23.3
+        }
+        heading = 117.0
+        tilt = 55.0
+        range = 2868.0
+    }
+
+    // The initial camera position is defined declaratively, providing a clear overview of
+    // the starting view of the map. This makes it easy to understand and modify the initial
+    // scene without digging into the logic of the activity.
+    override val initialCamera = nycCamera
+
+    override fun onMapReady(googleMap3D: GoogleMap3D) {
+        super.onMapReady(googleMap3D)
         googleMap3D.setMapMode(Map3DMode.SATELLITE)
 
-        // Using lifecycleScope ensures that the coroutine is automatically cancelled when the
-        // activity is destroyed, preventing potential memory leaks.
-        lifecycleScope.launch {
-            delay(1.milliseconds)
+        findViewById<Button>(R.id.fly_berlin_button)?.apply {
+            runOnUiThread {
+                visibility = View.VISIBLE
+            }
+            setOnClickListener {
+                googleMap3D.flyCameraTo(flyToOptions {
+                    endCamera = berlinCamera
+                    durationInMillis = 2_000
+                })
+            }
+        }
+
+        findViewById<Button>(R.id.fly_nyc_button)?.apply {
+            runOnUiThread {
+                visibility = View.VISIBLE
+            }
+            setOnClickListener {
+                googleMap3D.flyCameraTo(flyToOptions {
+                    endCamera = nycCamera
+                    durationInMillis = 2_000
+                })
+            }
+        }
+
+        findViewById<Button>(R.id.fly_tokyo_button)?.apply {
+            runOnUiThread {
+                visibility = View.VISIBLE
+            }
+            setOnClickListener {
+                googleMap3D.flyCameraTo(flyToOptions {
+                    endCamera = tokyoCamera
+                    durationInMillis = 2_000
+                })
+            }
+        }
+
+        lifecycleScope.launch(Dispatchers.Default) {
             addMarkers(googleMap3D)
         }
     }
@@ -85,6 +148,8 @@ class MarkersActivity : SampleBaseActivity() {
      * @param googleMap3D The map object to which the markers will be added.
      */
     private fun addMarkers(googleMap3D: GoogleMap3D) {
+        Log.d(TAG, "addMarkers: start")
+
         // Marker 1: Absolute Altitude
         // This marker is placed at a fixed altitude of 150 meters above sea level.
         googleMap3D.addMarker(markerOptions {
@@ -150,6 +215,77 @@ class MarkersActivity : SampleBaseActivity() {
             isDrawnWhenOccluded = true
             collisionBehavior = CollisionBehavior.REQUIRED
         })?.let(::setupMarkerClickListener)
+
+        // Marker 8: Empire State Building Ape
+        googleMap3D.addMarker(markerOptions {
+            position = latLngAltitude {
+                latitude = 40.7484
+                longitude = -73.9857
+                altitude = 100.0
+            }
+            zIndex = 1
+            label = "King Kong / Empire State Building"
+            isExtruded = true
+            isDrawnWhenOccluded = true
+            altitudeMode = AltitudeMode.RELATIVE_TO_MESH
+            setStyle(ImageView(R.drawable.ook))
+        })?.let(::setupMarkerClickListener)
+
+        // Marker 9: Custom Color Pin near ESB
+        val customColorGlyph = Glyph.fromColor(Color.CYAN)
+        googleMap3D.addMarker(markerOptions {
+            position = latLngAltitude {
+                latitude = 40.7486
+                longitude = -73.9848
+                altitude = 600.0
+            }
+            isExtruded = true
+            isDrawnWhenOccluded = true
+            label = "Custom Color Pin"
+            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+            setStyle(pinConfiguration {
+                backgroundColor = Color.RED
+                borderColor = Color.WHITE
+                setGlyph(customColorGlyph)
+            })
+        })?.let(::setupMarkerClickListener)
+
+        // Marker 10: Custom Text Pin near ESB
+        val textGlyph = Glyph.fromColor(Color.RED).apply {
+            setText("NYC\n 🍎 ")
+        }
+        googleMap3D.addMarker(markerOptions {
+            position = latLngAltitude {
+                latitude = 40.7482
+                longitude = -73.9862
+                altitude = 600.0
+            }
+            isExtruded = true
+            isDrawnWhenOccluded = true
+            label = "Custom Text Pin"
+            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+            setStyle(pinConfiguration {
+                setGlyph(textGlyph)
+                backgroundColor = Color.YELLOW
+                borderColor = Color.BLUE
+            })
+        })?.let(::setupMarkerClickListener)
+
+        // Marker 11: Shibuya Crossing
+        googleMap3D.addMarker(markerOptions {
+            position = latLngAltitude {
+                latitude = 35.6595
+                longitude = 139.7005
+                altitude = 50.0
+            }
+            isExtruded = true
+            isDrawnWhenOccluded = true
+            label = "🦖 🥚"
+            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+            setStyle(ImageView(R.drawable.gz))
+        })?.let(::setupMarkerClickListener)
+
+        Log.d(TAG, "addMarkers: finished")
     }
 
     /**

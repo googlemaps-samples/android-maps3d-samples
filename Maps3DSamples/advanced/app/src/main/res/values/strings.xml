@@ -44,7 +44,6 @@
     -->
     <string name="in_kilometers" translatable="false">%1$,.1f km</string>
 
-    <string name="title_activity_camera" translatable="false">CameraActivity</string>
 
     <string name="scenarios_none" translatable="false">Pick a scenario</string>
     <string name="scenarios_tower_bridge" translatable="false">Tower Bridge</string>

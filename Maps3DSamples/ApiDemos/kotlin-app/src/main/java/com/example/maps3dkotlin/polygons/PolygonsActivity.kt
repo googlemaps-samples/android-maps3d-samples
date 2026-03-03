@@ -89,24 +89,20 @@ class PolygonsActivity : SampleBaseActivity() {
         }
     }
 
-    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-        super.onMap3DViewReady(googleMap3D)
+    override fun onMapReady(googleMap3D: GoogleMap3D) {
+        super.onMapReady(googleMap3D)
         googleMap3D.setMapMode(Map3DMode.HYBRID)
 
-        // A coroutine is launched in the lifecycleScope to add the polygons to the map.
-        // This ensures that the coroutine is automatically canceled when the activity is
-        // destroyed, preventing potential memory leaks.
-        lifecycleScope.launch {
-            kotlinx.coroutines.delay(1.milliseconds)
+        // The camera is animated to the initial position.
+        googleMap3D.flyCameraTo(
+            flyToOptions {
+                endCamera = initialCamera
+                durationInMillis = 1_000
+            }
+        )
 
-            // The camera is animated to the initial position.
-            googleMap3D.flyCameraTo(
-                flyToOptions {
-                    endCamera = initialCamera
-                    durationInMillis = 1_000
-                }
-            )
-
+        // Adding polygons can involve heavy operations (extrusion, parsing), so we do it on a background thread.
+        lifecycleScope.launch(Dispatchers.Default) {
             // The polygons for the museum and the zoo are added to the map.
             addMuseumPolygons(googleMap3D)
             addZooPolygon(googleMap3D)

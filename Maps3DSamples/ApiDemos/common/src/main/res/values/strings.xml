@@ -29,6 +29,7 @@
     <string name="feature_title_polygons">Polygons</string>
     <string name="feature_title_polylines">Polylines</string>
     <string name="feature_title_3d_models">3D models</string>
+    <string name="feature_title_popovers">Popovers</string>
 
     <string name="feature_not_implemented">Coming soon!</string>
 
