@@ -1,0 +1,74 @@
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.example.snippets.kotlin.snippets
+
+import android.graphics.Color
+import com.google.android.gms.maps3d.GoogleMap3D
+import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.latLngAltitude
+import com.google.android.gms.maps3d.model.polylineOptions
+
+class PolylineSnippets(private val map: GoogleMap3D) {
+
+    // [START maps_android_3d_polyline_add_kt]
+    /**
+     * Adds a basic polyline to the map.
+     */
+    fun addBasicPolyline() {
+        val points = listOf(
+            latLngAltitude { latitude = 37.42; longitude = -122.08; altitude = 0.0 },
+            latLngAltitude { latitude = 37.43; longitude = -122.09; altitude = 0.0 },
+            latLngAltitude { latitude = 37.44; longitude = -122.08; altitude = 0.0 }
+        )
+
+        val options = polylineOptions {
+            path = points
+            strokeColor = Color.RED
+            strokeWidth = 10.0
+            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+        }
+        
+        val polyline = map.addPolyline(options)
+    }
+    // [END maps_android_3d_polyline_add_kt]
+
+    // [START maps_android_3d_polyline_options_kt]
+    /**
+     * Adds a styled polyline with complex configuration.
+     */
+    fun addStyledPolyline() {
+        val points = listOf(
+            latLngAltitude { latitude = 37.42; longitude = -122.08; altitude = 50.0 },
+            latLngAltitude { latitude = 37.43; longitude = -122.09; altitude = 100.0 }
+        )
+
+        val options = polylineOptions {
+            path = points
+            strokeColor = 0xFFFF00FF.toInt() // Magenta
+            strokeWidth = 20.0
+            outerColor = 0xFF00FF00.toInt() // Green
+            outerWidth = 2.0
+            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+            extruded = true
+            geodesic = true
+            drawsOccludedSegments = true
+        }
+        
+        val polyline = map.addPolyline(options)
+    }
+    // [END maps_android_3d_polyline_options_kt]
+}
