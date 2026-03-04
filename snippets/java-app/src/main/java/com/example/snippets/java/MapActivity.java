@@ -58,7 +58,7 @@ public class MapActivity extends AppCompatActivity {
         runSnippet();  // <-- This will fail if the map is not ready
 
         map.setOnMapReadyListener(sceneReadiness -> {
-          if (!triggered && sceneReadiness >= 99.0) {
+          if (!triggered && sceneReadiness >= 99.9) {
             Log.w("MapActivity", "onMapReady sceneReadiness: " + sceneReadiness);
             triggered = true;
             runSnippet();  // <-- This will only be called the first time the map is ready
