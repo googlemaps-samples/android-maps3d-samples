@@ -14,28 +14,31 @@
  * limitations under the License.
  */
 
-package com.example.maps3dkotlin
+package com.example.snippets.kotlin
 
-import androidx.test.core.app.ActivityScenario
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.maps3dcommon.R
-import com.example.maps3dkotlin.hellomap.HelloMapActivity
-import com.google.common.truth.Truth.assertThat
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class HelloMapActivityTest {
+class ExampleInstrumentedTest {
+
+    @get:Rule
+    val composeTestRule = createAndroidComposeRule<MainActivity>()
+
     @Test
-    fun testMapIsDisplayed() {
-        val scenario = ActivityScenario.launch(HelloMapActivity::class.java)
-        onView(withId(R.id.map3dView)).check(matches(isDisplayed()))
-        scenario.onActivity { activity ->
-            assertThat(activity.isFinishing).isFalse()
+    fun mainActivityLaunches() {
+        // Check if "Map Initialization" is displayed (substring because of description)
+        composeTestRule.waitForIdle()
+        try {
+            composeTestRule.onNodeWithText("Map Initialization", substring = true).assertExists()
+        } catch (e: AssertionError) {
+            println("Hierarchy check failed. Printing tree:")
+            composeTestRule.onRoot().printToLog("HierarchyTree")
+            throw e
         }
     }
 }
