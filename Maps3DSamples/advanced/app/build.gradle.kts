@@ -42,7 +42,7 @@ if (!isCI) {
         }
 
         val isDebugTask = requestedTasks.any { task ->
-            task.contains("Debug", ignoreCase = true)
+            task.contains("Debug", ignoreCase = true) || task.contains("installAndLaunch", ignoreCase = true)
         }
 
         if (isBuildTask && !isTestTask && isDebugTask) {
