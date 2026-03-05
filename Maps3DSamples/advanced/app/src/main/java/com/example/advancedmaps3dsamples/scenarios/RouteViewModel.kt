@@ -33,7 +33,10 @@ import javax.inject.Inject
 sealed interface RouteUiState {
     object Idle : RouteUiState
     object Loading : RouteUiState
-    data class Success(val decodedPolyline: List<LatLng>) : RouteUiState
+    data class Success(
+        val decodedPolyline: List<LatLng>,
+        val navigationPoints: List<LatLng>
+    ) : RouteUiState
     data class Error(val message: String) : RouteUiState
 }
 
@@ -74,7 +77,18 @@ class RouteViewModel @Inject constructor() : ViewModel() {
                 if (encodedPolyline != null) {
                     // Decode the polyline so Map3D can consume it (or further convert it to Polyline3DOptions)
                     val decoded = PolyUtil.decode(encodedPolyline)
-                    _uiState.value = RouteUiState.Success(decoded)
+                    
+                    // Extract important navigation points from legs/steps
+                    val navPoints = route.legs.flatMap { leg ->
+                        leg.steps.mapNotNull { step ->
+                            step.startLocation?.latLng?.let { LatLng(it.latitude, it.longitude) }
+                        }
+                    }.toMutableList()
+                    
+                    // Ensure the destination is the last point
+                    navPoints.add(dest)
+                    
+                    _uiState.value = RouteUiState.Success(decoded, navPoints)
                 } else {
                     _uiState.value = RouteUiState.Error("No route returned from the Maps API.")
                 }

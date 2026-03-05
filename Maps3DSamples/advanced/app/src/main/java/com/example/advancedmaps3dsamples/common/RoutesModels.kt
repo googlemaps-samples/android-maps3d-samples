@@ -60,7 +60,18 @@ data class RoutesResponse(
 data class Route(
     val distanceMeters: Int? = null,
     val duration: String? = null,
-    val polyline: Polyline? = null
+    val polyline: Polyline? = null,
+    val legs: List<RouteLeg> = emptyList()
+)
+
+@Serializable
+data class RouteLeg(
+    val steps: List<RouteStep> = emptyList()
+)
+
+@Serializable
+data class RouteStep(
+    val startLocation: Location? = null
 )
 
 @Serializable

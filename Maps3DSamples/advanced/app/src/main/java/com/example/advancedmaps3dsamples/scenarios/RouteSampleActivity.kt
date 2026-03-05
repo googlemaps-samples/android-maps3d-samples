@@ -20,11 +20,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
@@ -39,7 +35,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,25 +43,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.advancedmaps3dsamples.BuildConfig
-import com.example.advancedmaps3dsamples.R
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
+import com.example.advancedmaps3dsamples.utils.awaitCameraAnimation
+import com.example.advancedmaps3dsamples.utils.calculateHeading
+import com.example.advancedmaps3dsamples.utils.haversineDistance
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DOptions
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
-import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Polyline
-import com.google.android.gms.maps3d.model.PolylineOptions
-import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.polylineOptions
 import dagger.hilt.android.AndroidEntryPoint
@@ -145,10 +138,114 @@ class RouteSampleActivity : ComponentActivity() {
                                 viewModel.fetchRoute(BuildConfig.MAPS_API_KEY, origin, dest)
                             },
                             modifier = Modifier
-                                .align(Alignment.BottomCenter)
+                                .align(Alignment.BottomStart)
                                 .padding(32.dp)
                         ) {
                             Text("Fetch & Draw Route")
+                        }
+
+                                Button(
+                                    onClick = {
+                                        val state = uiState as? RouteUiState.Success ?: return@Button
+                                        val safeMap = map3D ?: return@Button
+                                        
+                                        coroutineScope.launch {
+                                            // 1. Merge waypoints that are too close to avoid "stuttering" at start/end
+                                            val thresholdMeters = 200.0
+                                            val rawPoints = state.navigationPoints
+                                            val turnPoints = mutableListOf<LatLng>()
+                                            
+                                            if (rawPoints.isNotEmpty()) {
+                                                turnPoints.add(rawPoints.first())
+                                                for (i in 1 until rawPoints.size - 1) {
+                                                    if (haversineDistance(turnPoints.last(), rawPoints[i]) >= thresholdMeters) {
+                                                        turnPoints.add(rawPoints[i])
+                                                    }
+                                                }
+                                                // Always include the actual destination
+                                                if (haversineDistance(turnPoints.last(), rawPoints.last()) > 10.0) {
+                                                    turnPoints.add(rawPoints.last())
+                                                }
+                                            }
+
+                                            // 2. Inject intermediate points from the raw polyline for long stretches
+                                            // This ensures the camera follows highway curves rather than flying in a straight line.
+                                            val finalFlightPath = mutableListOf<LatLng>()
+                                            if (turnPoints.isNotEmpty()) {
+                                                finalFlightPath.add(turnPoints.first())
+                                                for (i in 0 until turnPoints.size - 1) {
+                                                    val start = turnPoints[i]
+                                                    val end = turnPoints[i + 1]
+                                                    
+                                                    if (haversineDistance(start, end) > 500.0) {
+                                                        // Find indices in raw polyline to pull curve details
+                                                        val startIndex = state.decodedPolyline.indexOfFirst { haversineDistance(it, start) < 20.0 }
+                                                        val endIndex = state.decodedPolyline.indexOfFirst { haversineDistance(it, end) < 20.0 }
+                                                        
+                                                        if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
+                                                            for (j in (startIndex + 1) until endIndex) {
+                                                                val p = state.decodedPolyline[j]
+                                                                // Subsample for smooth camera motion
+                                                                if (haversineDistance(finalFlightPath.last(), p) > 400.0) {
+                                                                    finalFlightPath.add(p)
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    if (haversineDistance(finalFlightPath.last(), end) > 10.0) {
+                                                        finalFlightPath.add(end)
+                                                    }
+                                                }
+                                            }
+
+                                            // 3. Fly along the curve-aware path
+                                            val targetSpeedMetersPerSecond = 750.0
+                                            
+                                            for (i in 0 until finalFlightPath.size - 1) {
+                                                val current = finalFlightPath[i]
+                                                val next = finalFlightPath[i + 1]
+                                                
+                                                // Calculate heading towards the next point
+                                                val flightHeading = calculateHeading(current, next)
+                                                
+                                                // Calculate distance to determine duration
+                                                val distanceMeters = haversineDistance(current, next)
+                                                
+                                                // Duration = distance / speed
+                                                // Clamp duration to [100ms, 10000ms]
+                                                val calculatedDuration = (distanceMeters / targetSpeedMetersPerSecond * 1000).toLong()
+                                                val segmentDuration = calculatedDuration.coerceIn(250, 2000)
+                                                
+                                                val flightCamera = camera {
+                                                    center = latLngAltitude {
+                                                        latitude = current.latitude
+                                                        longitude = current.longitude
+                                                        altitude = 0.0
+                                                    }
+                                                    heading = flightHeading
+                                                    tilt = 50.0
+                                                    range = 3000.0
+                                                }
+                                                
+                                                // Animate to this segment's view
+                                                safeMap.flyCameraTo(
+                                                    flyToOptions {
+                                                        endCamera = flightCamera
+                                                        durationInMillis = segmentDuration
+                                                    }
+                                                )
+                                                
+                                                // Wait for this segment to finish
+                                                safeMap.awaitCameraAnimation()
+                                            }
+                                        }
+                                    },
+                            enabled = uiState is RouteUiState.Success,
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(32.dp)
+                        ) {
+                            Text("Fly Along")
                         }
 
                         // State interpretation UI
@@ -166,6 +263,7 @@ class RouteSampleActivity : ComponentActivity() {
                                     // Clean up previous line if it exists
                                     currentPolyline?.remove()
                                     
+                                    // DRAW POLYLINE (Raw version, as requested)
                                     val polylinePath = state.decodedPolyline.map { latLng ->
                                         latLngAltitude {
                                             latitude = latLng.latitude
@@ -177,7 +275,7 @@ class RouteSampleActivity : ComponentActivity() {
                                     val lineOptions = polylineOptions {
                                         this.path = polylinePath
                                         strokeColor = android.graphics.Color.BLUE
-                                        strokeWidth = 20.0
+                                        strokeWidth = 10.0
                                     }
 
                                     currentPolyline = safeMap.addPolyline(lineOptions)

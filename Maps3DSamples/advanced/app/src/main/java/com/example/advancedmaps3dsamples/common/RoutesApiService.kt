@@ -82,7 +82,7 @@ object RoutesApiService {
             contentType(ContentType.Application.Json)
             header("X-Goog-Api-Key", apiKey)
             // Requesting only the most relevant fields to optimize payload size
-            header("X-Goog-FieldMask", "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline")
+            header("X-Goog-FieldMask", "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline,routes.legs.steps.startLocation")
             setBody(requestBody)
         }
 
