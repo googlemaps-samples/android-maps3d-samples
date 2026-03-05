@@ -1,0 +1,42 @@
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:autoMirrored="true"
+    android:height="256dp"
+    android:viewportHeight="256"
+    android:viewportWidth="256"
+    android:width="256dp"
+    >
+
+    <path android:fillAlpha="0.5" android:fillColor="#E0E0E0" android:pathData="M40,180L128,220L216,180L128,140Z" android:strokeAlpha="0.5"/>
+
+    <path android:fillAlpha="0.7" android:fillColor="#F5F5F5" android:pathData="M40,170L128,210L216,170L128,130Z" android:strokeAlpha="0.7"/>
+
+    <path android:fillColor="#ffffff" android:pathData="M40,160L128,200L216,160L128,120Z"/>
+
+    <path android:fillAlpha="0.2" android:fillColor="#000000" android:pathData="M88,185a40,10 0,1 0,80 0a40,10 0,1 0,-80 0z" android:strokeAlpha="0.2"/>
+
+    <path android:fillColor="#EA4335" android:pathData="M128,50C100,50 80,70 80,100C80,140 128,190 128,190C128,190 176,140 176,100C176,70 156,50 128,50Z"/>
+
+    <path android:fillColor="#ffffff" android:pathData="M128,50C100,50 80,70 80,100C80,102 80.5,104 81.5,106C90,80 110,60 128,60C146,60 166,80 174.5,106C175.5,104 176,102 176,100C176,70 156,50 128,50Z"/>
+
+    <path android:fillColor="#ffffff" android:pathData="M128,100m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0"/>
+
+    <path android:fillColor="#DB4437" android:pathData="M128,100m-16,0a16,16 0,1 1,32 0a16,16 0,1 1,-32 0"/>
+
+
+</vector>

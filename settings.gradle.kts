@@ -42,6 +42,17 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Advanced Maps 3D Samples"
-include(":app")
- 
+rootProject.name = "Android Maps 3D Samples"
+
+// Snippets
+include(":snippets:kotlin-app")
+include(":snippets:java-app")
+include(":snippets:common")
+
+// Maps3DSamples Advanced
+include(":Maps3DSamples:advanced:app")
+
+// Maps3DSamples ApiDemos
+include(":Maps3DSamples:ApiDemos:kotlin-app")
+include(":Maps3DSamples:ApiDemos:java-app")
+include(":Maps3DSamples:ApiDemos:common")

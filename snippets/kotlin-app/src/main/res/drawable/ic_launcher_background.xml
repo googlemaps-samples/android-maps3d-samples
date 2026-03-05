@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:autoMirrored="true"
+    android:height="256dp"
+    android:viewportHeight="256"
+    android:viewportWidth="256"
+    android:width="256dp"
+    >
+    <path android:pathData="M48,0L208,0A48,48 0,0 1,256 48L256,208A48,48 0,0 1,208 256L48,256A48,48 0,0 1,0 208L0,48A48,48 0,0 1,48 0z">
+
+        <aapt:attr name="android:fillColor">
+
+            <gradient android:endX="65536" android:endY="65536" android:startX="-0" android:startY="0" android:type="linear">
+
+                <item android:color="#FF4285F4" android:offset="0"/>
+
+                <item android:color="#FF34A853" android:offset="1"/>
+
+            </gradient>
+
+        </aapt:attr>
+
+    </path>
+
+</vector>
