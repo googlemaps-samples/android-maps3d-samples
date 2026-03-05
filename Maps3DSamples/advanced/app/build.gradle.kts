@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-// Check for secrets.properties file before proceeding with build tasks.
+import java.util.Properties
+import org.gradle.api.GradleException
+
+// Check for secrets.properties file and valid API key before proceeding with build tasks.
 val secretsFile = rootProject.file("secrets.properties")
 val isCI = System.getenv("CI")?.toBoolean() ?: false
 
-if (!secretsFile.exists() && !isCI) {
+if (!isCI) {
     val requestedTasks = gradle.startParameter.taskNames
-    if (requestedTasks.isEmpty()) {
+    if (requestedTasks.isEmpty() && !secretsFile.exists()) {
         // It's likely an IDE sync if no tasks are specified, so just issue a warning.
         println("Warning: secrets.properties not found. Gradle sync may succeed, but building/running the app will fail.")
-    } else {
+    } else if (requestedTasks.isNotEmpty()) {
         val buildTaskKeywords = listOf("build", "install", "assemble")
         val isBuildTask = requestedTasks.any { task ->
             buildTaskKeywords.any { keyword ->
@@ -47,12 +50,24 @@ if (!secretsFile.exists() && !isCI) {
             val requiredKeysMessage = if (defaultsFile.exists()) {
                 defaultsFile.readText()
             } else {
-                "MAPS_API_KEY=<YOUR_API_KEY>"
+                "MAPS3D_API_KEY=<YOUR_API_KEY>"
             }
 
-            throw GradleException("secrets.properties file not found. Please create a 'secrets.properties' file in the root project directory with the following content:\n" +
-                    "\n" +
-                    requiredKeysMessage)
+            if (!secretsFile.exists()) {
+                throw GradleException("secrets.properties file not found. Please create a 'secrets.properties' file in the root project directory with the following content:\n\n$requiredKeysMessage")
+            }
+
+            val secrets = Properties()
+            secretsFile.inputStream().use { secrets.load(it) }
+            val apiKey = secrets.getProperty("MAPS3D_API_KEY")
+
+            if (apiKey.isNullOrBlank() || !apiKey.matches(Regex("^AIza[a-zA-Z0-9_-]{35}$"))) {
+                throw GradleException("Invalid or missing MAPS3D_API_KEY in secrets.properties. Please provide a valid Google Maps API key (starts with 'AIza').")
+            }
+
+            if (secrets.getProperty("MAPS_API_KEY") != null) {
+                println("Warning: Found MAPS_API_KEY in secrets.properties. This project relies exclusively on MAPS3D_API_KEY.")
+            }
         }
     }
 }
@@ -150,4 +165,11 @@ secrets {
     // A properties file containing default secret values. This file can be
     // checked in version control.
     defaultPropertiesFileName = "local.defaults.properties"
+}
+
+tasks.register<Exec>("installAndLaunch") {
+    description = "Installs and launches the demo app."
+    group = "install"
+    dependsOn("installDebug")
+    commandLine("adb", "shell", "am", "start", "-n", "com.example.advancedmaps3dsamples/.MainActivity")
 }
