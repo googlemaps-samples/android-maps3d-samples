@@ -133,7 +133,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.play.services.base)
-    implementation(project(":common"))
+    implementation(project(":Maps3DSamples:ApiDemos:common"))
 }
 
 secrets {

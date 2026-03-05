@@ -112,12 +112,12 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.play.services.base)
-    implementation(project(":common"))
+    implementation(project(":Maps3DSamples:ApiDemos:common"))
 
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(project(":common"))
+    androidTestImplementation(project(":Maps3DSamples:ApiDemos:common"))
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
