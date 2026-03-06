@@ -135,7 +135,7 @@ class RouteSampleActivity : ComponentActivity() {
                                 // Hardcoded parameters as requested (Honolulu to Kailua)
                                 val origin = LatLng(21.307043, -157.858984)
                                 val dest = LatLng(21.390177, -157.719454)
-                                viewModel.fetchRoute(BuildConfig.MAPS_API_KEY, origin, dest)
+                                viewModel.fetchRoute(BuildConfig.MAPS3D_API_KEY, origin, dest)
                             },
                             modifier = Modifier
                                 .align(Alignment.BottomStart)
