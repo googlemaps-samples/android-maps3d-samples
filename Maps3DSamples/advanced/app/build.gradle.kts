@@ -80,6 +80,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.secrets.gradle.plugin)
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 android {
@@ -153,6 +154,12 @@ dependencies {
 
     // Google Maps Utils for the polyline decoder
     implementation(libs.maps.utils.ktx)
+
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.material.icons.extended)
 }
