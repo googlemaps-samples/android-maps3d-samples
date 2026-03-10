@@ -197,6 +197,8 @@ public class MarkersActivity extends SampleBaseActivity {
             });
         });
 
+        // Marker 1: Absolute Altitude
+        // This marker is placed at a fixed altitude of 150 meters above sea level.
         addMarkerWithToastListener(googleMap3D,
             new LatLngAltitude(52.519605780912585, 13.406867190588198, 150.0),
             "Absolute (150m)",
@@ -204,6 +206,8 @@ public class MarkersActivity extends SampleBaseActivity {
             CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL
         );
 
+        // Marker 2: Relative to Ground
+        // This marker is positioned 50 meters above the ground directly beneath it.
         addMarkerWithToastListener(googleMap3D,
             new LatLngAltitude(52.519882191069016, 13.407410777254293, 50.0),
             "Relative to Ground (50m)",
@@ -211,6 +215,10 @@ public class MarkersActivity extends SampleBaseActivity {
             CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY
         );
 
+        // Marker 3: Clamped to Ground
+        // This marker is attached to the ground. Its altitude value is effectively
+        // ignored
+        // for rendering purposes, but it's often set to 0.0 for clarity.
         addMarkerWithToastListener(googleMap3D,
             new LatLngAltitude(52.52027645136134, 13.408271658592406, 0.0),
             "Clamped to Ground",
@@ -218,6 +226,10 @@ public class MarkersActivity extends SampleBaseActivity {
             CollisionBehavior.REQUIRED
         );
 
+        // Marker 4: Relative to Mesh
+        // This marker is placed 10 meters above the 3D mesh, which includes buildings
+        // and other structures. This is ideal for placing markers on or relative to 3D
+        // objects.
         addMarkerWithToastListener(googleMap3D,
             new LatLngAltitude(52.520835071144226, 13.409426847943774, 10.0),
             "Relative to Mesh (10m)",
