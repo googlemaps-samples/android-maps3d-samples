@@ -250,7 +250,7 @@ public class MarkersActivity extends SampleBaseActivity {
                 popoverOptions.setAltitudeMode(AltitudeMode.RELATIVE_TO_MESH);
                 popoverOptions.setContent(textView);
                 popoverOptions.setAutoCloseEnabled(true);
-                popoverOptions.setAutoPanEnabled(true);
+                popoverOptions.setAutoPanEnabled(false);
 
                 if (activePopover != null) {
                     runOnUiThread(() -> activePopover.remove());

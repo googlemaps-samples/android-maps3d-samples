@@ -373,7 +373,7 @@ class MarkersActivity : SampleBaseActivity() {
                         altitudeMode = AltitudeMode.ABSOLUTE
                         content = textView
                         autoCloseEnabled = true
-                        autoPanEnabled = true
+                        autoPanEnabled = false
                     })
                     
                     activePopover?.remove()
