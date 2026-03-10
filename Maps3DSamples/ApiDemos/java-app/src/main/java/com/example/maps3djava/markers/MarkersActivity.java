@@ -20,11 +20,13 @@ import com.google.android.gms.maps3d.Popover;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import android.graphics.Color;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.PopupMenu;
 import android.os.Looper;
 import android.os.Handler;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
 
@@ -107,6 +109,17 @@ public class MarkersActivity extends SampleBaseActivity {
     @Override
     public void onMap3DViewReady(GoogleMap3D googleMap3D) {
         super.onMap3DViewReady(googleMap3D);
+        
+        Log.d(getTAG(), "onMap3DViewReady called");
+        
+        googleMap3D.setOnMapReadyListener((map) -> {
+            Log.w(getTAG(), "on map ready listener fired");
+            googleMap3D.setOnMapReadyListener(null);
+            onMapReady(googleMap3D);
+        });
+    }
+
+    private void onMapReady(GoogleMap3D googleMap3D) {
         googleMap3D.setMapMode(Map3DMode.SATELLITE);
 
         Button flyBerlinButton = findViewById(R.id.fly_berlin_button);
@@ -291,49 +304,32 @@ public class MarkersActivity extends SampleBaseActivity {
             byte[] buffer = new byte[is.available()];
             is.read(buffer);
             is.close();
-            String jsonString = new String(buffer, "UTF-8");
-            JSONArray jsonArray = new JSONArray(jsonString);
+            String jsonString = new String(buffer, StandardCharsets.UTF_8);
 
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject obj = jsonArray.getJSONObject(i);
+            List<com.example.maps3djava.markers.data.Monster> parsedMonsters = com.example.maps3djava.markers.data.MonsterParser
+                    .parse(jsonString);
 
+            for (com.example.maps3djava.markers.data.Monster monster : parsedMonsters) {
                 Camera cam = new Camera(
                         new LatLngAltitude(
-                                obj.getDouble("latitude"),
-                                obj.getDouble("longitude"),
-                                obj.getDouble("altitude")),
-                        obj.getDouble("heading"),
-                        obj.getDouble("tilt"),
+                                monster.latitude,
+                                        monster.longitude,
+                                monster.altitude),
+                        monster.heading,
+                        monster.tilt,
                         0.0,
-                        obj.getDouble("range"));
+                        monster.range);
 
                 LatLngAltitude markerPos = new LatLngAltitude(
-                        obj.getDouble("markerLatitude"),
-                        obj.getDouble("markerLongitude"),
-                        obj.getDouble("markerAltitude"));
+                        monster.markerLatitude,
+                        monster.markerLongitude,
+                        monster.markerAltitude);
 
-                String monsterId = obj.getString("id");
-                String label = obj.getString("label");
+                String monsterId = monster.id;
+                String label = monster.label;
+                int parsedAltitudeMode = monster.altitudeMode;
 
-                String altitudeModeStr = obj.optString("altitudeMode", "ABSOLUTE");
-                int parsedAltitudeMode;
-                switch (altitudeModeStr) {
-                    case "RELATIVE_TO_GROUND":
-                        parsedAltitudeMode = AltitudeMode.RELATIVE_TO_GROUND;
-                        break;
-                    case "CLAMP_TO_GROUND":
-                        parsedAltitudeMode = AltitudeMode.CLAMP_TO_GROUND;
-                        break;
-                    case "RELATIVE_TO_MESH":
-                        parsedAltitudeMode = AltitudeMode.RELATIVE_TO_MESH;
-                        break;
-                    case "ABSOLUTE":
-                    default:
-                        parsedAltitudeMode = AltitudeMode.ABSOLUTE;
-                        break;
-                }
-
-                int drawableId = getMonsterDrawableId(obj.getString("drawable"));
+                int drawableId = getMonsterDrawableId(monster.drawable);
                 if (drawableId != 0) {
                     MarkerOptions monsterOptions = new MarkerOptions();
                     monsterOptions.setPosition(markerPos);
@@ -355,7 +351,7 @@ public class MarkersActivity extends SampleBaseActivity {
                 }
             }
         } catch (Exception e) {
-            android.util.Log.e(getTAG(), "Error loading monsters.json", e);
+            Log.e(getTAG(), "Error loading monsters.json", e);
         }
 
     }
@@ -375,8 +371,19 @@ public class MarkersActivity extends SampleBaseActivity {
         options.setExtruded(true);
         options.setDrawnWhenOccluded(true);
 
+        Log.d(getTAG(), "Adding marker with options: "
+            + "position=" + options.getPosition()
+            + ", label=" + options.getLabel()
+            + ", altitudeMode=" + options.getAltitudeMode()
+            + ", collisionBehavior=" + options.getCollisionBehavior()
+            + ", extruded=" + options.isExtruded()
+            + ", drawnWhenOccluded=" + options.isDrawnWhenOccluded()
+        );
         Marker marker = map.addMarker(options);
-        marker.setClickListener(() -> MarkersActivity.this.showToast("Clicked on marker: " + label));
+        if (marker != null) {
+            Log.d(getTAG(), "Marker was not null!");
+            marker.setClickListener(() -> MarkersActivity.this.showToast("Clicked on marker: " + label));
+        }
     }
 
     private void setupMarkerClickListener(Marker marker, int blurbResId, GoogleMap3D googleMap3D) {

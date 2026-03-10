@@ -415,59 +415,49 @@ class MarkersActivity : SampleBaseActivity() {
         // Monsters from JSON
         try {
             val jsonString = assets.open("monsters.json").bufferedReader().use { it.readText() }
-            val jsonArray = org.json.JSONArray(jsonString)
+            val parsedMonsters = com.example.maps3dkotlin.markers.data.MonsterParser.parse(jsonString)
+            
             val cameras = mutableListOf<Camera>()
             val markers = mutableListOf<Marker>()
             val ids = mutableListOf<String>()
             val labels = mutableListOf<String>()
             
-            for (i in 0 until jsonArray.length()) {
-                val obj = jsonArray.getJSONObject(i)
+            for (monster in parsedMonsters) {
                 val cam = camera {
                     center = latLngAltitude {
-                        latitude = obj.getDouble("latitude")
-                        longitude = obj.getDouble("longitude")
-                        altitude = obj.getDouble("altitude")
+                        latitude = monster.latitude
+                        longitude = monster.longitude
+                        altitude = monster.altitude
                     }
-                    heading = obj.getDouble("heading")
-                    tilt = obj.getDouble("tilt")
-                    range = obj.getDouble("range")
+                    heading = monster.heading
+                    tilt = monster.tilt
+                    range = monster.range
                 }
                 
                 val markerPos = latLngAltitude {
-                    latitude = obj.getDouble("markerLatitude")
-                    longitude = obj.getDouble("markerLongitude")
-                    altitude = obj.getDouble("markerAltitude")
+                    latitude = monster.markerLatitude
+                    longitude = monster.markerLongitude
+                    altitude = monster.markerAltitude
                 }
                 
-                val drawableId = getMonsterDrawableId(obj.getString("drawable"))
-                val monsterId = obj.getString("id")
-                
-                val altitudeModeStr = obj.optString("altitudeMode", "ABSOLUTE")
-                val parsedAltitudeMode = when (altitudeModeStr) {
-                    "RELATIVE_TO_GROUND" -> AltitudeMode.RELATIVE_TO_GROUND
-                    "CLAMP_TO_GROUND" -> AltitudeMode.CLAMP_TO_GROUND
-                    "RELATIVE_TO_MESH" -> AltitudeMode.RELATIVE_TO_MESH
-                    "ABSOLUTE" -> AltitudeMode.ABSOLUTE
-                    else -> AltitudeMode.ABSOLUTE
-                }
+                val drawableId = getMonsterDrawableId(monster.drawable)
                 
                 if (drawableId != 0) {
                     val m = googleMap3D.addMarker(markerOptions {
                         position = markerPos
-                        label = obj.getString("label")
+                        label = monster.label
                         isExtruded = true
                         isDrawnWhenOccluded = true
-                        this.altitudeMode = parsedAltitudeMode
+                        this.altitudeMode = monster.altitudeMode
                         setStyle(ImageView(drawableId))
                     })
                     
                     if (m != null) {
                         cameras.add(cam)
                         markers.add(m)
-                        ids.add(monsterId)
-                        labels.add(obj.getString("label"))
-                        setupMarkerClickListener(m, getMonsterBlurbResId(monsterId), googleMap3D)
+                        ids.add(monster.id)
+                        labels.add(monster.label)
+                        setupMarkerClickListener(m, getMonsterBlurbResId(monster.id), googleMap3D)
                     }
                 }
             }
