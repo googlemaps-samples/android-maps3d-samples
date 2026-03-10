@@ -40,6 +40,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import com.example.maps3dkotlin.common.awaitCameraAnimation
+import com.example.maps3dkotlin.common.awaitMapSteady
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * This activity demonstrates the various altitude modes available for markers on a 3D map.
@@ -209,53 +212,30 @@ class MarkersActivity : SampleBaseActivity() {
                 val marker = monsterMarkers[i]
                 val monsterId = monsterIds[i]
                 
-                var isCameraDone = false
-                map.setCameraAnimationEndListener {
-                    isCameraDone = true
-                }
-                
-                var isMapSteady = false
-                map.setOnMapSteadyListener { steady ->
-                    if (steady) {
-                        isMapSteady = true
-                        map.setOnMapSteadyListener(null)
-                    }
-                }
-                
-                map.flyCameraTo(flyToOptions {
+                // Fly to the monster
+                map.awaitCameraAnimation(flyToOptions {
                     endCamera = camera
                     durationInMillis = 4_000
                 })
-                
-                delay(500)
-                while ((!isCameraDone || !isMapSteady) && isActive) {
-                    delay(100)
-                }
+
+                // Wait for the 3D mesh building geometry to load, but don't hang forever
+                map.awaitMapSteady(5.seconds)
                 if (!isActive) break
 
-                isCameraDone = false
-                map.setCameraAnimationEndListener {
-                    isCameraDone = true
-                }
-                map.flyCameraAround(com.google.android.gms.maps3d.model.flyAroundOptions {
+                // Perform an orbit
+                map.awaitCameraAnimation(com.google.android.gms.maps3d.model.flyAroundOptions {
                     center = camera
                     durationInMillis = 5_000
                     rounds = 1.0
                 })
-                
-                delay(500)
-                while (!isCameraDone && isActive) {
-                    delay(100)
-                }
                 if (!isActive) break
-                
+
                 showMonsterPopover(marker, getMonsterBlurbResId(monsterId), map)
                 
                 delay(4000)
                 
                 i = (i + 1) % monsterCameras.size
             }
-            map.setCameraAnimationEndListener(null)
         }
     }
 
