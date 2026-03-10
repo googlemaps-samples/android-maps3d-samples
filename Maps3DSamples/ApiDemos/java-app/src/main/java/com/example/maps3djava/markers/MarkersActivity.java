@@ -472,20 +472,18 @@ public class MarkersActivity extends SampleBaseActivity {
         Marker marker = monsterMarkers.get(tourIndex);
         String monsterId = monsterIds.get(tourIndex);
 
-        FlyToOptions flyOptions = new FlyToOptions(camera, 4000L);
-        CompletableFuture<Void> flyFuture = com.example.maps3djava.common.MapUtils.awaitCameraAnimation(map,
-                flyOptions);
-        CompletableFuture<Boolean> steadyFuture = com.example.maps3djava.common.MapUtils.awaitMapSteady(map, 5,
-                java.util.concurrent.TimeUnit.SECONDS);
-
         java.util.concurrent.Executor mainThread = this::runOnUiThread;
 
-        CompletableFuture.allOf(flyFuture, steadyFuture).thenComposeAsync(v -> {
-            if (!isTourActive)
-                return CompletableFuture.completedFuture((Void) null);
+        FlyToOptions flyOptions = new FlyToOptions(camera, 4000L);
+        com.example.maps3djava.common.MapUtils.awaitCameraAnimation(map, flyOptions)
+                .thenComposeAsync(v -> com.example.maps3djava.common.MapUtils.awaitMapSteady(map, 5,
+                        java.util.concurrent.TimeUnit.SECONDS), mainThread)
+                .thenComposeAsync(isSteady -> {
+                    if (!isTourActive)
+                        return CompletableFuture.completedFuture((Void) null);
 
-            FlyAroundOptions orbitOptions = new FlyAroundOptions(camera, 5000L, 1.0);
-            return com.example.maps3djava.common.MapUtils.awaitCameraAnimation(map, orbitOptions);
+                    FlyAroundOptions orbitOptions = new FlyAroundOptions(camera, 5000L, 1.0);
+                    return com.example.maps3djava.common.MapUtils.awaitCameraAnimation(map, orbitOptions);
         }, mainThread).thenAcceptAsync(v -> {
             if (!isTourActive)
                 return;
