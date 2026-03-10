@@ -463,6 +463,7 @@ public class MarkersActivity extends SampleBaseActivity {
         if (!isTourActive)
             return;
 
+        // Clear any existing popover before moving to the next location
         if (activePopover != null) {
             activePopover.remove();
             activePopover = null;
@@ -472,30 +473,49 @@ public class MarkersActivity extends SampleBaseActivity {
         Marker marker = monsterMarkers.get(tourIndex);
         String monsterId = monsterIds.get(tourIndex);
 
+        // We use the main UI thread executor so our UI-modifying code (like showing
+        // popovers)
+        // runs safely after the background CompletableFutures resolve.
         java.util.concurrent.Executor mainThread = this::runOnUiThread;
 
         FlyToOptions flyOptions = new FlyToOptions(camera, 4000L);
+
+        // Step 1: Start the camera flight to the monster's location.
         com.example.maps3djava.common.MapUtils.awaitCameraAnimation(map, flyOptions)
+
+                // Step 2: Once the flight completes, wait for the 3D map tiles to fully load
+                // (become "steady").
+                // We set a 5-second timeout so the tour doesn't hang indefinitely if network is
+                // slow.
                 .thenComposeAsync(v -> com.example.maps3djava.common.MapUtils.awaitMapSteady(map, 5,
                         java.util.concurrent.TimeUnit.SECONDS), mainThread)
+
+                // Step 3: Now that we've arrived and the map is steady, begin an orbit
+                // animation.
                 .thenComposeAsync(isSteady -> {
+                    // If the user tapped "Stop" while we were waiting, gracefully exit the chain.
                     if (!isTourActive)
                         return CompletableFuture.completedFuture((Void) null);
 
                     FlyAroundOptions orbitOptions = new FlyAroundOptions(camera, 5000L, 1.0);
                     return com.example.maps3djava.common.MapUtils.awaitCameraAnimation(map, orbitOptions);
-        }, mainThread).thenAcceptAsync(v -> {
-            if (!isTourActive)
-                return;
+                }, mainThread)
 
-            showMonsterPopover(marker, getMonsterBlurbResId(monsterId), map);
+                // Step 4: After the full orbit is complete, show the monster's popover.
+                .thenAcceptAsync(v -> {
+                    if (!isTourActive)
+                        return;
 
-            tourRunnable = () -> {
-                tourIndex = (tourIndex + 1) % monsterCameras.size();
-                advanceTour(map);
-            };
-            tourHandler.postDelayed(tourRunnable, 4000);
-        }, mainThread);
+                    showMonsterPopover(marker, getMonsterBlurbResId(monsterId), map);
+
+                    // Step 5: Schedule the next leg of the tour to begin after a 4-second pause,
+                    // allowing the user time to read the popover blurb.
+                    tourRunnable = () -> {
+                        tourIndex = (tourIndex + 1) % monsterCameras.size();
+                        advanceTour(map);
+                    };
+                    tourHandler.postDelayed(tourRunnable, 4000);
+                }, mainThread);
     }
 
     private void stopMonsterTour(GoogleMap3D map) {
