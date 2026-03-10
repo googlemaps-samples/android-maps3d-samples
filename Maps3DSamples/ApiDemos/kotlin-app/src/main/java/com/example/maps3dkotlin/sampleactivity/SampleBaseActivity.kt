@@ -141,11 +141,11 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
 
             findViewById<View>(R.id.app_bar_layout)?.updatePadding(top = statusBarInsets.top)
 
-            findViewById<View>(R.id.button_flow)?.let { flowLayout ->
-                val layoutParams = flowLayout.layoutParams as android.view.ViewGroup.MarginLayoutParams
-                val margin8dp = (8 * flowLayout.resources.displayMetrics.density).toInt()
-                layoutParams.bottomMargin = navInsets.bottom + margin8dp
-                flowLayout.layoutParams = layoutParams
+            findViewById<View>(R.id.control_scroll_view)?.let { scrollView ->
+                val layoutParams = scrollView.layoutParams as android.view.ViewGroup.MarginLayoutParams
+                val margin16dp = (16 * scrollView.resources.displayMetrics.density).toInt()
+                layoutParams.bottomMargin = navInsets.bottom + margin16dp
+                scrollView.layoutParams = layoutParams
             }
 
             WindowInsetsCompat.CONSUMED

@@ -69,86 +69,119 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/reset_view_button"
-        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-        android:layout_width="wrap_content"
+    <!-- Floating Pill Control Bar (HorizontalScrollView) -->
+    <HorizontalScrollView
+        android:id="@+id/control_scroll_view"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:icon="@drawable/restart_alt_24px"
-        android:contentDescription="@string/reset_view"
-        android:visibility="gone"
-        />
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:scrollbars="none"
+        android:clipToPadding="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/snapshot_button"
-        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:icon="@drawable/photo_camera_24px"
-        android:contentDescription="@string/snapshot_camera"
-        android:visibility="gone"
-        />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/pill_background"
+            android:padding="8dp">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/stop_button"
-        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:icon="@drawable/stop_24px"
-        android:contentDescription="@string/stop_camera"
-        android:visibility="gone"
-        />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tour_monsters_button"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:padding="0dp"
+                android:insetBottom="0dp"
+                android:insetTop="0dp"
+                android:alpha="0.4"
+                android:text="🗺️"
+                android:textSize="20sp"
+                android:contentDescription="@string/tour_monsters"
+                android:visibility="gone"
+                />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/fly_berlin_button"
-        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:icon="@drawable/public_24px"
-        android:contentDescription="Fly to Berlin"
-        android:visibility="gone"
-        />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fly_random_monster_button"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:padding="0dp"
+                android:insetBottom="0dp"
+                android:insetTop="0dp"
+                android:alpha="0.4"
+                android:text="🎲"
+                android:textSize="20sp"
+                android:contentDescription="Fly to Random Monster"
+                android:visibility="gone"
+                />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/fly_nyc_button"
-        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:icon="@drawable/location_city_24px"
-        android:contentDescription="Fly to NYC"
-        android:visibility="gone"
-        />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fly_berlin_button"
+                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                app:icon="@drawable/public_24px"
+                android:contentDescription="Fly to Berlin"
+                android:visibility="gone"
+                />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/fly_tokyo_button"
-        style="@style/Widget.Material3.Button.TonalButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
-        android:padding="0dp"
-        android:insetBottom="0dp"
-        android:insetTop="0dp"
-        android:alpha="0.2"
-        android:text="🦖"
-        android:textSize="20sp"
-        android:contentDescription="Fly to Tokyo"
-        android:visibility="gone"
-        />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fly_nyc_button"
+                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                app:icon="@drawable/location_city_24px"
+                android:contentDescription="Fly to NYC"
+                android:visibility="gone"
+                />
 
-    <androidx.constraintlayout.helper.widget.Flow
-        android:id="@+id/button_flow"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintEnd_toEndOf="@+id/map3dView"
-        app:layout_constraintBottom_toBottomOf="@+id/map3dView"
-        app:flow_wrapMode="chain"
-        app:flow_horizontalStyle="packed"
-        app:flow_horizontalBias="0"
-        app:flow_horizontalGap="8dp"
-        app:constraint_referenced_ids="fly_tokyo_button,fly_berlin_button,fly_nyc_button,stop_button,reset_view_button,snapshot_button"
-        />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/stop_button"
+                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                app:icon="@drawable/stop_24px"
+                android:contentDescription="@string/stop_camera"
+                android:visibility="gone"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/reset_view_button"
+                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                app:icon="@drawable/restart_alt_24px"
+                android:contentDescription="@string/reset_view"
+                android:visibility="gone"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/snapshot_button"
+                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:icon="@drawable/photo_camera_24px"
+                android:contentDescription="@string/snapshot_camera"
+                android:visibility="gone"
+                />
+
+        </LinearLayout>
+    </HorizontalScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

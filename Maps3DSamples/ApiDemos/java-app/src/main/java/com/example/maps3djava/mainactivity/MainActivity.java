@@ -20,8 +20,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import com.example.maps3dcommon.R;
-
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -32,6 +30,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.maps3dcommon.R;
 import com.example.maps3djava.cameracontrols.CameraControlsActivity;
 import com.example.maps3djava.hellomap.HelloMapActivity;
 import com.example.maps3djava.markers.MarkersActivity;
@@ -52,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
         put(R.string.feature_title_polygons, PolygonsActivity.class);
         put(R.string.feature_title_polylines, PolylinesActivity.class);
         put(R.string.feature_title_3d_models, ModelsActivity.class);
+        put(R.string.feature_title_popovers, com.example.maps3djava.popovers.PopoversActivity.class);
+        put(R.string.feature_title_map_interactions, com.example.maps3djava.mapinteractions.MapInteractionsActivity.class);
     }};
 
     @Override

@@ -3,6 +3,10 @@ compileSdk = "36"
 minSdk = "26"
 targetSdk = "36"
 
+core = "1.7.0"
+json = "20251224"
+robolectric = "4.16.1"
+
 activityCompose = "1.12.4"
 agp = "8.13.2"
 appcompat = "1.7.1"
@@ -28,8 +32,10 @@ ksp = "2.2.20-2.0.2"
 mapsUtilsKtx = "6.0.0"
 
 [libraries]
+androidx-core = { module = "androidx.test:core", version.ref = "core" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
+json = { module = "org.json:json", version.ref = "json" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -49,6 +55,7 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "playServicesBase" }
 play-services-maps3d = { module = "com.google.android.gms:play-services-maps3d", version.ref = "playServicesMaps3d" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
