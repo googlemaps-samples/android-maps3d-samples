@@ -120,7 +120,7 @@
         />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/fly_tokyo_button"
+        android:id="@+id/fly_random_monster_button"
         style="@style/Widget.Material3.Button.TonalButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -130,9 +130,26 @@
         android:insetBottom="0dp"
         android:insetTop="0dp"
         android:alpha="0.2"
-        android:text="🦖"
+        android:text="🎲"
         android:textSize="20sp"
-        android:contentDescription="Fly to Tokyo"
+        android:contentDescription="Fly to Random Monster"
+        android:visibility="gone"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/tour_monsters_button"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:padding="0dp"
+        android:insetBottom="0dp"
+        android:insetTop="0dp"
+        android:alpha="0.2"
+        android:text="🗺️"
+        android:textSize="20sp"
+        android:contentDescription="@string/tour_monsters"
         android:visibility="gone"
         />
 
@@ -148,7 +165,7 @@
         app:flow_horizontalStyle="packed"
         app:flow_horizontalBias="0"
         app:flow_horizontalGap="8dp"
-        app:constraint_referenced_ids="fly_tokyo_button,fly_berlin_button,fly_nyc_button,stop_button,reset_view_button,snapshot_button"
+        app:constraint_referenced_ids="tour_monsters_button,fly_random_monster_button,fly_berlin_button,fly_nyc_button,stop_button,reset_view_button,snapshot_button"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
