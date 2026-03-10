@@ -104,6 +104,7 @@ class MarkersActivity : SampleBaseActivity() {
                 visibility = View.VISIBLE
             }
             setOnClickListener {
+                stopMonsterTour()
                 googleMap3D.flyCameraTo(flyToOptions {
                     endCamera = berlinCamera
                     durationInMillis = 4_000
@@ -116,6 +117,7 @@ class MarkersActivity : SampleBaseActivity() {
                 visibility = View.VISIBLE
             }
             setOnClickListener {
+                stopMonsterTour()
                 googleMap3D.flyCameraTo(flyToOptions {
                     endCamera = nycCamera
                     durationInMillis = 4_000
@@ -128,6 +130,7 @@ class MarkersActivity : SampleBaseActivity() {
                 visibility = View.VISIBLE
             }
             setOnClickListener {
+                stopMonsterTour()
                 if (monsterCameras.isNotEmpty()) {
                     googleMap3D.flyCameraTo(flyToOptions {
                         endCamera = monsterCameras.random()
@@ -142,6 +145,7 @@ class MarkersActivity : SampleBaseActivity() {
                         popup.menu.add(0, index, index, label)
                     }
                     popup.setOnMenuItemClickListener { item ->
+                        stopMonsterTour()
                         val selectedCamera = monsterCameras[item.itemId]
                         googleMap3D.flyCameraTo(flyToOptions {
                             endCamera = selectedCamera
@@ -209,13 +213,21 @@ class MarkersActivity : SampleBaseActivity() {
                     isCameraDone = true
                 }
                 
+                var isMapSteady = false
+                map.setOnMapSteadyListener { steady ->
+                    if (steady) {
+                        isMapSteady = true
+                        map.setOnMapSteadyListener(null)
+                    }
+                }
+                
                 map.flyCameraTo(flyToOptions {
                     endCamera = camera
                     durationInMillis = 4_000
                 })
                 
                 delay(500)
-                while (!isCameraDone && isActive) {
+                while ((!isCameraDone || !isMapSteady) && isActive) {
                     delay(100)
                 }
                 if (!isActive) break
@@ -251,6 +263,7 @@ class MarkersActivity : SampleBaseActivity() {
         tourJob = null
         googleMap3D?.stopCameraAnimation()
         googleMap3D?.setCameraAnimationEndListener(null)
+        googleMap3D?.setOnMapSteadyListener(null)
         
         runOnUiThread {
             findViewById<Button>(R.id.stop_button)?.visibility = View.GONE
@@ -359,7 +372,7 @@ class MarkersActivity : SampleBaseActivity() {
                     }
                     val newPopover = googleMap3D.addPopover(com.google.android.gms.maps3d.model.popoverOptions {
                         positionAnchor = marker
-                        altitudeMode = AltitudeMode.RELATIVE_TO_MESH
+                        altitudeMode = AltitudeMode.ABSOLUTE
                         content = textView
                         autoCloseEnabled = true
                         autoPanEnabled = true
@@ -502,7 +515,7 @@ class MarkersActivity : SampleBaseActivity() {
             }
             val newPopover = googleMap3D.addPopover(com.google.android.gms.maps3d.model.popoverOptions {
                 positionAnchor = marker
-                altitudeMode = marker.altitudeMode
+                altitudeMode = if (marker.altitudeMode == AltitudeMode.RELATIVE_TO_MESH) AltitudeMode.ABSOLUTE else marker.altitudeMode
                 content = textView
                 autoCloseEnabled = true
                 autoPanEnabled = true

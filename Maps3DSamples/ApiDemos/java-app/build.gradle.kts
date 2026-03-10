@@ -131,14 +131,14 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.play.services.base)
+    implementation(libs.play.services.base) // "com.google.android.gms:play-services-base:18.10.0"
     implementation(project(":Maps3DSamples:ApiDemos:common"))
 
-    testImplementation(libs.junit)
-    testImplementation(libs.json)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.core)
-    testImplementation(libs.truth)
+    testImplementation(libs.junit) // "junit:junit:4.13.2"
+    testImplementation(libs.json) // "org.json:json:20251224"
+    testImplementation(libs.robolectric) // "org.robolectric:robolectric:4.16.1"
+    testImplementation(libs.androidx.core) // "androidx.test:core:1.7.0"
+    testImplementation(libs.truth) // "com.google.truth:truth:1.4.5"
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(project(":Maps3DSamples:ApiDemos:common"))

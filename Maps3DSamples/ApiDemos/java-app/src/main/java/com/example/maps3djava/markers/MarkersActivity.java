@@ -120,12 +120,14 @@ public class MarkersActivity extends SampleBaseActivity {
     }
 
     private void onMapReady(GoogleMap3D googleMap3D) {
+        googleMap3D.setCamera(getInitialCamera());
         googleMap3D.setMapMode(Map3DMode.SATELLITE);
 
         Button flyBerlinButton = findViewById(R.id.fly_berlin_button);
         if (flyBerlinButton != null) {
             runOnUiThread(() -> flyBerlinButton.setVisibility(View.VISIBLE));
             flyBerlinButton.setOnClickListener(v -> {
+                stopMonsterTour(googleMap3D);
                 FlyToOptions options = new FlyToOptions(getBerlinCamera(), 4000L);
                 googleMap3D.flyCameraTo(options);
             });
@@ -135,6 +137,7 @@ public class MarkersActivity extends SampleBaseActivity {
         if (flyNycButton != null) {
             runOnUiThread(() -> flyNycButton.setVisibility(View.VISIBLE));
             flyNycButton.setOnClickListener(v -> {
+                stopMonsterTour(googleMap3D);
                 FlyToOptions options = new FlyToOptions(getInitialCamera(), 4000L);
                 googleMap3D.flyCameraTo(options);
             });
@@ -144,6 +147,7 @@ public class MarkersActivity extends SampleBaseActivity {
         if (flyRandomMonsterButton != null) {
             runOnUiThread(() -> flyRandomMonsterButton.setVisibility(View.VISIBLE));
             flyRandomMonsterButton.setOnClickListener(v -> {
+                stopMonsterTour(googleMap3D);
                 if (!monsterCameras.isEmpty()) {
                     Camera randomCamera = monsterCameras.get(new Random().nextInt(monsterCameras.size()));
                     FlyToOptions options = new FlyToOptions(randomCamera, 4000L);
@@ -157,6 +161,7 @@ public class MarkersActivity extends SampleBaseActivity {
                         popup.getMenu().add(0, i, i, monsterLabels.get(i));
                     }
                     popup.setOnMenuItemClickListener(item -> {
+                        stopMonsterTour(googleMap3D);
                         Camera selectedCamera = monsterCameras.get(item.getItemId());
                         FlyToOptions options = new FlyToOptions(selectedCamera, 4000L);
                         googleMap3D.flyCameraTo(options);
@@ -409,7 +414,7 @@ public class MarkersActivity extends SampleBaseActivity {
             popOptions.setAltitudeMode(marker.getAltitudeMode());
             popOptions.setContent(textView);
             popOptions.setAutoCloseEnabled(true);
-            popOptions.setAutoPanEnabled(true);
+            popOptions.setAutoPanEnabled(false);
 
             Popover newPopover = googleMap3D.addPopover(popOptions);
 
@@ -441,6 +446,38 @@ public class MarkersActivity extends SampleBaseActivity {
         advanceTour(map);
     }
 
+    private boolean javaIsCameraDone = false;
+    private boolean javaIsMapSteady = false;
+
+    private void checkAndTriggerOrbit(GoogleMap3D map, Camera camera) {
+        if (!isTourActive)
+            return;
+        if (javaIsCameraDone && javaIsMapSteady) {
+            javaIsCameraDone = false;
+            javaIsMapSteady = false;
+
+            map.setCameraAnimationEndListener(() -> {
+                if (isTourActive) {
+                    map.setCameraAnimationEndListener(null);
+
+                    Marker marker = monsterMarkers.get(tourIndex);
+                    String monsterId = monsterIds.get(tourIndex);
+                    showMonsterPopover(marker, getMonsterBlurbResId(monsterId), map);
+
+                    tourRunnable = () -> {
+                        tourIndex = (tourIndex + 1) % monsterCameras.size();
+                        advanceTour(map);
+                    };
+                    tourHandler.postDelayed(tourRunnable, 4000);
+                }
+            });
+
+            FlyAroundOptions orbitOptions = new FlyAroundOptions(
+                    camera, 5000L, 1.0);
+            map.flyCameraAround(orbitOptions);
+        }
+    }
+
     private void advanceTour(GoogleMap3D map) {
         if (!isTourActive)
             return;
@@ -451,30 +488,22 @@ public class MarkersActivity extends SampleBaseActivity {
         }
 
         Camera camera = monsterCameras.get(tourIndex);
+        javaIsCameraDone = false;
+        javaIsMapSteady = false;
 
         map.setCameraAnimationEndListener(() -> {
             if (isTourActive) {
                 map.setCameraAnimationEndListener(null);
+                javaIsCameraDone = true;
+                checkAndTriggerOrbit(map, camera);
+            }
+        });
 
-                map.setCameraAnimationEndListener(() -> {
-                    if (isTourActive) {
-                        map.setCameraAnimationEndListener(null);
-
-                        Marker marker = monsterMarkers.get(tourIndex);
-                        String monsterId = monsterIds.get(tourIndex);
-                        showMonsterPopover(marker, getMonsterBlurbResId(monsterId), map);
-
-                        tourRunnable = () -> {
-                            tourIndex = (tourIndex + 1) % monsterCameras.size();
-                            advanceTour(map);
-                        };
-                        tourHandler.postDelayed(tourRunnable, 4000);
-                    }
-                });
-
-                FlyAroundOptions orbitOptions = new FlyAroundOptions(
-                        camera, 5000L, 1.0);
-                map.flyCameraAround(orbitOptions);
+        map.setOnMapSteadyListener(isSteady -> {
+            if (isSteady && isTourActive) {
+                map.setOnMapSteadyListener(null);
+                javaIsMapSteady = true;
+                checkAndTriggerOrbit(map, camera);
             }
         });
 
@@ -489,6 +518,7 @@ public class MarkersActivity extends SampleBaseActivity {
         }
         map.stopCameraAnimation();
         map.setCameraAnimationEndListener(null);
+        map.setOnMapSteadyListener(null);
 
         runOnUiThread(() -> {
             Button stopButton = findViewById(R.id.stop_button);
