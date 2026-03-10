@@ -23,6 +23,7 @@ import android.graphics.Color;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.PopupMenu;
+import java.util.concurrent.CompletableFuture;
 import android.os.Looper;
 import android.os.Handler;
 import java.io.InputStream;
@@ -458,38 +459,6 @@ public class MarkersActivity extends SampleBaseActivity {
         advanceTour(map);
     }
 
-    private boolean javaIsCameraDone = false;
-    private boolean javaIsMapSteady = false;
-
-    private void checkAndTriggerOrbit(GoogleMap3D map, Camera camera) {
-        if (!isTourActive)
-            return;
-        if (javaIsCameraDone && javaIsMapSteady) {
-            javaIsCameraDone = false;
-            javaIsMapSteady = false;
-
-            map.setCameraAnimationEndListener(() -> {
-                if (isTourActive) {
-                    map.setCameraAnimationEndListener(null);
-
-                    Marker marker = monsterMarkers.get(tourIndex);
-                    String monsterId = monsterIds.get(tourIndex);
-                    showMonsterPopover(marker, getMonsterBlurbResId(monsterId), map);
-
-                    tourRunnable = () -> {
-                        tourIndex = (tourIndex + 1) % monsterCameras.size();
-                        advanceTour(map);
-                    };
-                    tourHandler.postDelayed(tourRunnable, 4000);
-                }
-            });
-
-            FlyAroundOptions orbitOptions = new FlyAroundOptions(
-                    camera, 5000L, 1.0);
-            map.flyCameraAround(orbitOptions);
-        }
-    }
-
     private void advanceTour(GoogleMap3D map) {
         if (!isTourActive)
             return;
@@ -500,27 +469,35 @@ public class MarkersActivity extends SampleBaseActivity {
         }
 
         Camera camera = monsterCameras.get(tourIndex);
-        javaIsCameraDone = false;
-        javaIsMapSteady = false;
-
-        map.setCameraAnimationEndListener(() -> {
-            if (isTourActive) {
-                map.setCameraAnimationEndListener(null);
-                javaIsCameraDone = true;
-                checkAndTriggerOrbit(map, camera);
-            }
-        });
-
-        map.setOnMapSteadyListener(isSteady -> {
-            if (isSteady && isTourActive) {
-                map.setOnMapSteadyListener(null);
-                javaIsMapSteady = true;
-                checkAndTriggerOrbit(map, camera);
-            }
-        });
+        Marker marker = monsterMarkers.get(tourIndex);
+        String monsterId = monsterIds.get(tourIndex);
 
         FlyToOptions flyOptions = new FlyToOptions(camera, 4000L);
-        map.flyCameraTo(flyOptions);
+        CompletableFuture<Void> flyFuture = com.example.maps3djava.common.MapUtils.awaitCameraAnimation(map,
+                flyOptions);
+        CompletableFuture<Boolean> steadyFuture = com.example.maps3djava.common.MapUtils.awaitMapSteady(map, 5,
+                java.util.concurrent.TimeUnit.SECONDS);
+
+        java.util.concurrent.Executor mainThread = this::runOnUiThread;
+
+        CompletableFuture.allOf(flyFuture, steadyFuture).thenComposeAsync(v -> {
+            if (!isTourActive)
+                return CompletableFuture.completedFuture((Void) null);
+
+            FlyAroundOptions orbitOptions = new FlyAroundOptions(camera, 5000L, 1.0);
+            return com.example.maps3djava.common.MapUtils.awaitCameraAnimation(map, orbitOptions);
+        }, mainThread).thenAcceptAsync(v -> {
+            if (!isTourActive)
+                return;
+
+            showMonsterPopover(marker, getMonsterBlurbResId(monsterId), map);
+
+            tourRunnable = () -> {
+                tourIndex = (tourIndex + 1) % monsterCameras.size();
+                advanceTour(map);
+            };
+            tourHandler.postDelayed(tourRunnable, 4000);
+        }, mainThread);
     }
 
     private void stopMonsterTour(GoogleMap3D map) {
