@@ -52,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
         put(R.string.feature_title_polygons, PolygonsActivity.class);
         put(R.string.feature_title_polylines, PolylinesActivity.class);
         put(R.string.feature_title_3d_models, ModelsActivity.class);
+            put(R.string.feature_title_popovers, com.example.maps3djava.popovers.PopoversActivity.class);
+            put(R.string.feature_title_map_interactions,
+                    com.example.maps3djava.mapinteractions.MapInteractionsActivity.class);
     }};
 
     @Override

@@ -35,6 +35,7 @@ import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.markerOptions
 import com.google.android.gms.maps3d.model.pinConfiguration
+import com.google.android.gms.maps3d.model.popoverOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
@@ -279,8 +280,6 @@ class MarkersActivity : SampleBaseActivity() {
      * @param googleMap3D The map object to which the markers will be added.
      */
     private fun addMarkers(googleMap3D: GoogleMap3D) {
-        Log.d(TAG, "addMarkers: start")
-
         // Marker 1: Absolute Altitude
         // This marker is placed at a fixed altitude of 150 meters above sea level.
         googleMap3D.addMarker(markerOptions {
@@ -361,7 +360,6 @@ class MarkersActivity : SampleBaseActivity() {
             altitudeMode = AltitudeMode.RELATIVE_TO_MESH
             setStyle(ImageView(R.drawable.ook))
         })?.let { marker ->
-            Log.d(TAG, "Marker added: ${marker.id}")
             marker.setClickListener {
                 lifecycleScope.launch(Dispatchers.Main) {
                     val textView = android.widget.TextView(this@MarkersActivity).apply {
@@ -370,7 +368,7 @@ class MarkersActivity : SampleBaseActivity() {
                         setTextColor(Color.BLACK)
                         setBackgroundColor(Color.WHITE)
                     }
-                    val newPopover = googleMap3D.addPopover(com.google.android.gms.maps3d.model.popoverOptions {
+                    val newPopover = googleMap3D.addPopover(popoverOptions {
                         positionAnchor = marker
                         altitudeMode = AltitudeMode.ABSOLUTE
                         content = textView
@@ -481,8 +479,6 @@ class MarkersActivity : SampleBaseActivity() {
         } catch (e: Exception) {
             Log.e(TAG, "Error loading monsters.json", e)
         }
-
-        Log.d(TAG, "addMarkers: finished")
     }
 
     /**
@@ -492,7 +488,6 @@ class MarkersActivity : SampleBaseActivity() {
      * @param marker The marker to which the click listener will be attached.
      */
     private fun setupMarkerClickListener(marker: Marker, blurbResId: Int?, googleMap3D: GoogleMap3D) {
-        Log.d(TAG, "Marker added: ${marker.id}")
         marker.setClickListener {
             lifecycleScope.launch(Dispatchers.Main) {
                 if (blurbResId != null && blurbResId != 0) {
@@ -510,15 +505,16 @@ class MarkersActivity : SampleBaseActivity() {
             val textView = android.widget.TextView(this@MarkersActivity).apply {
                 text = getString(blurbResId)
                 setPadding(32, 16, 32, 16)
-                setTextColor(android.graphics.Color.BLACK)
-                setBackgroundColor(android.graphics.Color.WHITE)
+                setTextColor(Color.BLACK)
+                setBackgroundColor(Color.WHITE)
             }
-            val newPopover = googleMap3D.addPopover(com.google.android.gms.maps3d.model.popoverOptions {
+
+            val newPopover = googleMap3D.addPopover(popoverOptions {
                 positionAnchor = marker
-                altitudeMode = if (marker.altitudeMode == AltitudeMode.RELATIVE_TO_MESH) AltitudeMode.ABSOLUTE else marker.altitudeMode
+                altitudeMode = marker.altitudeMode
                 content = textView
                 autoCloseEnabled = true
-                autoPanEnabled = true
+                autoPanEnabled = false
             })
 
             activePopover?.remove()
