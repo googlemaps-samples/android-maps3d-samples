@@ -14,6 +14,18 @@
 
 package com.example.maps3djava.markers;
 
+import com.google.android.gms.maps3d.model.FlyAroundOptions;
+import com.google.android.gms.maps3d.model.PopoverOptions;
+import com.google.android.gms.maps3d.Popover;
+import org.json.JSONObject;
+import org.json.JSONArray;
+import android.graphics.Color;
+import android.widget.TextView;
+import android.widget.PopupMenu;
+import android.os.Looper;
+import android.os.Handler;
+import java.io.InputStream;
+import java.util.Random;
 import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
 
 import android.view.View;
@@ -34,6 +46,9 @@ import com.google.android.gms.maps3d.model.Marker;
 import com.google.android.gms.maps3d.model.MarkerOptions;
 import com.google.android.gms.maps3d.model.PinConfiguration;
 
+import java.util.List;
+import java.util.ArrayList;
+
 /**
  * Demonstrates the use of different altitude modes for markers in a 3D map.
  * <p>
@@ -45,7 +60,7 @@ import com.google.android.gms.maps3d.model.PinConfiguration;
  */
 public class MarkersActivity extends SampleBaseActivity {
 
-    private com.google.android.gms.maps3d.Popover activePopover = null;
+    private Popover activePopover = null;
 
     @Override
     public final String getTAG() {
@@ -66,12 +81,12 @@ public class MarkersActivity extends SampleBaseActivity {
         ));
     }
 
-    private final java.util.List<Camera> monsterCameras = new java.util.ArrayList<>();
-    private final java.util.List<Marker> monsterMarkers = new java.util.ArrayList<>();
-    private final java.util.List<String> monsterIds = new java.util.ArrayList<>();
-    private final java.util.List<String> monsterLabels = new java.util.ArrayList<>();
+    private final List<Camera> monsterCameras = new ArrayList<>();
+    private final List<Marker> monsterMarkers = new ArrayList<>();
+    private final List<String> monsterIds = new ArrayList<>();
+    private final List<String> monsterLabels = new ArrayList<>();
 
-    private android.os.Handler tourHandler;
+    private Handler tourHandler;
     private Runnable tourRunnable;
     private int tourIndex = 0;
     private boolean isTourActive = false;
@@ -117,14 +132,14 @@ public class MarkersActivity extends SampleBaseActivity {
             runOnUiThread(() -> flyRandomMonsterButton.setVisibility(View.VISIBLE));
             flyRandomMonsterButton.setOnClickListener(v -> {
                 if (!monsterCameras.isEmpty()) {
-                    Camera randomCamera = monsterCameras.get(new java.util.Random().nextInt(monsterCameras.size()));
+                    Camera randomCamera = monsterCameras.get(new Random().nextInt(monsterCameras.size()));
                     FlyToOptions options = new FlyToOptions(randomCamera, 4000L);
                     googleMap3D.flyCameraTo(options);
                 }
             });
             flyRandomMonsterButton.setOnLongClickListener(v -> {
                 if (!monsterLabels.isEmpty()) {
-                    android.widget.PopupMenu popup = new android.widget.PopupMenu(MarkersActivity.this, v);
+                    PopupMenu popup = new PopupMenu(MarkersActivity.this, v);
                     for (int i = 0; i < monsterLabels.size(); i++) {
                         popup.getMenu().add(0, i, i, monsterLabels.get(i));
                     }
@@ -206,13 +221,13 @@ public class MarkersActivity extends SampleBaseActivity {
         Marker apeMarker = googleMap3D.addMarker(apeOptions);
         if (apeMarker != null) {
             apeMarker.setClickListener(() -> {
-                android.widget.TextView textView = new android.widget.TextView(MarkersActivity.this);
+                TextView textView = new TextView(MarkersActivity.this);
                 textView.setText(getString(R.string.monster_ape_blurb));
                 textView.setPadding(32, 16, 32, 16);
-                textView.setTextColor(android.graphics.Color.BLACK);
-                textView.setBackgroundColor(android.graphics.Color.WHITE);
+                textView.setTextColor(Color.BLACK);
+                textView.setBackgroundColor(Color.WHITE);
 
-                com.google.android.gms.maps3d.model.PopoverOptions popoverOptions = new com.google.android.gms.maps3d.model.PopoverOptions();
+                PopoverOptions popoverOptions = new PopoverOptions();
                 popoverOptions.setPositionAnchor(apeMarker);
                 popoverOptions.setAltitudeMode(AltitudeMode.RELATIVE_TO_MESH);
                 popoverOptions.setContent(textView);
@@ -223,7 +238,7 @@ public class MarkersActivity extends SampleBaseActivity {
                     runOnUiThread(() -> activePopover.remove());
                 }
 
-                com.google.android.gms.maps3d.Popover popover = googleMap3D.addPopover(popoverOptions);
+                Popover popover = googleMap3D.addPopover(popoverOptions);
                 activePopover = popover;
                 if (popover != null) {
                     runOnUiThread(() -> popover.show());
@@ -231,7 +246,7 @@ public class MarkersActivity extends SampleBaseActivity {
             });
         }
 
-        Glyph customColorGlyph = Glyph.fromColor(android.graphics.Color.CYAN);
+        Glyph customColorGlyph = Glyph.fromColor(Color.CYAN);
         MarkerOptions customColorOptions = new MarkerOptions();
         customColorOptions.setPosition(new LatLngAltitude(40.7486, -73.9848, 600.0));
         customColorOptions.setExtruded(true);
@@ -239,8 +254,8 @@ public class MarkersActivity extends SampleBaseActivity {
         customColorOptions.setLabel("Custom Color Pin");
         customColorOptions.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
         PinConfiguration.Builder colorPinBuilder = PinConfiguration.builder();
-        colorPinBuilder.setBackgroundColor(android.graphics.Color.RED);
-        colorPinBuilder.setBorderColor(android.graphics.Color.WHITE);
+        colorPinBuilder.setBackgroundColor(Color.RED);
+        colorPinBuilder.setBorderColor(Color.WHITE);
         colorPinBuilder.setGlyph(customColorGlyph);
         customColorOptions.setStyle(colorPinBuilder.build());
 
@@ -250,7 +265,7 @@ public class MarkersActivity extends SampleBaseActivity {
                     () -> MarkersActivity.this.showToast("Clicked on marker: " + colorMarker.getLabel()));
         }
 
-        Glyph textGlyph = Glyph.fromColor(android.graphics.Color.RED);
+        Glyph textGlyph = Glyph.fromColor(Color.RED);
         textGlyph.setText("NYC\n 🍎 ");
         MarkerOptions textOptions = new MarkerOptions();
         textOptions.setPosition(new LatLngAltitude(40.7482, -73.9862, 600.0));
@@ -259,8 +274,8 @@ public class MarkersActivity extends SampleBaseActivity {
         textOptions.setLabel("Custom Text Pin");
         textOptions.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
         PinConfiguration.Builder textPinBuilder = PinConfiguration.builder();
-        textPinBuilder.setBackgroundColor(android.graphics.Color.YELLOW);
-        textPinBuilder.setBorderColor(android.graphics.Color.BLUE);
+        textPinBuilder.setBackgroundColor(Color.YELLOW);
+        textPinBuilder.setBorderColor(Color.BLUE);
         textPinBuilder.setGlyph(textGlyph);
         textOptions.setStyle(textPinBuilder.build());
 
@@ -272,15 +287,15 @@ public class MarkersActivity extends SampleBaseActivity {
 
         // Monsters from JSON
         try {
-            java.io.InputStream is = getAssets().open("monsters.json");
+            InputStream is = getAssets().open("monsters.json");
             byte[] buffer = new byte[is.available()];
             is.read(buffer);
             is.close();
             String jsonString = new String(buffer, "UTF-8");
-            org.json.JSONArray jsonArray = new org.json.JSONArray(jsonString);
+            JSONArray jsonArray = new JSONArray(jsonString);
 
             for (int i = 0; i < jsonArray.length(); i++) {
-                org.json.JSONObject obj = jsonArray.getJSONObject(i);
+                JSONObject obj = jsonArray.getJSONObject(i);
 
                 Camera cam = new Camera(
                         new LatLngAltitude(
@@ -376,20 +391,20 @@ public class MarkersActivity extends SampleBaseActivity {
 
     private void showMonsterPopover(Marker marker, int blurbResId, GoogleMap3D googleMap3D) {
         if (blurbResId != 0) {
-            android.widget.TextView textView = new android.widget.TextView(MarkersActivity.this);
+            TextView textView = new TextView(MarkersActivity.this);
             textView.setText(getString(blurbResId));
             textView.setPadding(32, 16, 32, 16);
-            textView.setTextColor(android.graphics.Color.BLACK);
-            textView.setBackgroundColor(android.graphics.Color.WHITE);
+            textView.setTextColor(Color.BLACK);
+            textView.setBackgroundColor(Color.WHITE);
 
-            com.google.android.gms.maps3d.model.PopoverOptions popOptions = new com.google.android.gms.maps3d.model.PopoverOptions();
+            PopoverOptions popOptions = new PopoverOptions();
             popOptions.setPositionAnchor(marker);
             popOptions.setAltitudeMode(marker.getAltitudeMode());
             popOptions.setContent(textView);
             popOptions.setAutoCloseEnabled(true);
             popOptions.setAutoPanEnabled(true);
 
-            com.google.android.gms.maps3d.Popover newPopover = googleMap3D.addPopover(popOptions);
+            Popover newPopover = googleMap3D.addPopover(popOptions);
 
             if (activePopover != null) {
                 activePopover.remove();
@@ -413,7 +428,7 @@ public class MarkersActivity extends SampleBaseActivity {
         });
 
         if (tourHandler == null) {
-            tourHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+            tourHandler = new Handler(Looper.getMainLooper());
         }
 
         advanceTour(map);
@@ -450,7 +465,7 @@ public class MarkersActivity extends SampleBaseActivity {
                     }
                 });
 
-                com.google.android.gms.maps3d.model.FlyAroundOptions orbitOptions = new com.google.android.gms.maps3d.model.FlyAroundOptions(
+                FlyAroundOptions orbitOptions = new FlyAroundOptions(
                         camera, 5000L, 1.0);
                 map.flyCameraAround(orbitOptions);
             }
