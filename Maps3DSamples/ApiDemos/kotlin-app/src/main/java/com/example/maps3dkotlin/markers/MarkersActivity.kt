@@ -215,7 +215,7 @@ class MarkersActivity : SampleBaseActivity() {
                 // Fly to the monster
                 map.awaitCameraAnimation(flyToOptions {
                     endCamera = camera
-                    durationInMillis = 4_000
+                    durationInMillis = 4.seconds.inWholeMilliseconds
                 })
 
                 // Wait for the 3D mesh building geometry to load, but don't hang forever
@@ -225,14 +225,14 @@ class MarkersActivity : SampleBaseActivity() {
                 // Perform an orbit
                 map.awaitCameraAnimation(com.google.android.gms.maps3d.model.flyAroundOptions {
                     center = camera
-                    durationInMillis = 5_000
+                    durationInMillis = 5.seconds.inWholeMilliseconds
                     rounds = 1.0
                 })
                 if (!isActive) break
 
                 showMonsterPopover(marker, getMonsterBlurbResId(monsterId), map)
                 
-                delay(4000)
+                delay(4.seconds)
                 
                 i = (i + 1) % monsterCameras.size
             }
