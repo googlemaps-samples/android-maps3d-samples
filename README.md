@@ -58,6 +58,32 @@ To run the samples, you will need:
 - (for the advanced sample, copy `Maps3DSamples/advanced/local.defaults.properties` to `Maps3DSamples/advanced/secrets.properties` and set the value of `MAPS3D_API_KEY` to your API key.)
 - All samples require up-to-date versions of the Android build tools and the Android support repository.
 
+## Gemini Code Assist Integration
+
+This repository includes custom instructions (Skills) for **Gemini Code Assist** to help generate code adhering to Maps3D best practices. 
+
+You can install this skill globally so your coding agent has access to it across projects.
+
+#### Install with skills.sh
+
+```bash
+npx skills add googlemaps-samples/android-maps3d-samples --skill android-maps3d-sdk --global
+```
+
+#### Install with Context7
+
+```bash
+npx ctx7 skills install /googlemaps-samples/android-maps3d-samples android-maps3d-sdk
+```
+
+#### Install for Gemini CLI
+
+If you are using the [Gemini CLI](https://geminicli.com/), it automatically discovers skills located in the `.gemini/skills` directory of your project.
+
+To use the `android-maps3d-sdk` skill in your own projects:
+1. Copy the `.gemini` directory from the root of this repository into the root directory of your own Android project.
+2. Verify it is installed by running `/skills list` in the Gemini CLI.
+
 ## Running the sample(s)
 
 1.  Download the samples by cloning this repository:
