@@ -36,6 +36,7 @@ import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.MarkerOptions
 import com.google.android.gms.maps3d.model.Model
 import com.google.android.gms.maps3d.model.ModelOptions
+import com.google.android.gms.maps3d.model.Polygon
 import com.google.android.gms.maps3d.model.PolygonOptions
 import com.google.android.gms.maps3d.model.PolylineOptions
 import com.google.android.gms.maps3d.model.flyAroundOptions
@@ -301,6 +302,10 @@ abstract class Map3dViewModel : ViewModel() {
 
   fun onMapSteadyChange(isSteady: Boolean) {
     _isMapSteady.value = isSteady
+    if (isSteady) {
+        val cam = currentCamera.value
+        Log.i(TAG, "Steady Camera Position: lat=${cam.center.latitude}, lng=${cam.center.longitude}, alt=${cam.center.altitude}, hdg=${cam.heading}, tilt=${cam.tilt}, range=${cam.range}, roll=${cam.roll}")
+    }
   }
 
   /**
@@ -380,6 +385,15 @@ abstract class Map3dViewModel : ViewModel() {
     activeMapObjects[key]?.let { activeObject ->
       if (activeObject is ActiveMapObject.ActiveModel) {
         return activeObject.model
+      }
+    }
+    return null
+  }
+
+  fun getPolygon(key: String): Polygon? {
+    activeMapObjects[key]?.let { activeObject ->
+      if (activeObject is ActiveMapObject.ActivePolygon) {
+        return activeObject.polygon
       }
     }
     return null

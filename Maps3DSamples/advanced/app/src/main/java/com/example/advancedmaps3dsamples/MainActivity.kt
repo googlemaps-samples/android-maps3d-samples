@@ -40,7 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.advancedmaps3dsamples.scenarios.ScenariosActivity
+import com.example.advancedmaps3dsamples.animatedpolygon.AnimatedPolygonActivity
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
+import com.google.android.libraries.places.api.Places
 import dagger.hilt.android.AndroidEntryPoint
 
 data class MapSample(@StringRes val label: Int, val clazz: Class<*>)
@@ -48,6 +50,7 @@ data class MapSample(@StringRes val label: Int, val clazz: Class<*>)
 private val samples =
     listOf(
         MapSample(R.string.map_sample_scenarios, ScenariosActivity::class.java),
+        MapSample(R.string.scenarios_altitude_slider, AnimatedPolygonActivity::class.java),
     )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +58,11 @@ private val samples =
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        if (!Places.isInitialized()) {
+            Places.initializeWithNewPlacesApiEnabled(applicationContext, BuildConfig.MAPS3D_API_KEY)
+        }
+        
         enableEdgeToEdge()
         setContent {
             AdvancedMaps3DSamplesTheme {
