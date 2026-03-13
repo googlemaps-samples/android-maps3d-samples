@@ -21,6 +21,7 @@ import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
+import com.example.advancedmaps3dsamples.data.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -68,7 +69,9 @@ private val NEUSCHWANSTEIN_CAMERA = camera {
 }
 
 @HiltViewModel
-class ScenariosViewModel @Inject constructor() : Map3dViewModel() {
+class ScenariosViewModel @Inject constructor(
+    private val settingsRepository: SettingsRepository
+) : Map3dViewModel() {
   override val TAG = this::class.java.simpleName
   private val _viewState = MutableStateFlow(ScenarioViewState())
   val viewState = _viewState as StateFlow<ScenarioViewState>
@@ -79,6 +82,27 @@ class ScenariosViewModel @Inject constructor() : Map3dViewModel() {
 
   private val _roll = MutableStateFlow(DEFAULT_ROLL)
   val roll = _roll as StateFlow<Double>
+
+  val minAltitudeFlow = settingsRepository.minAltitudeFlow
+  val maxAltitudeFlow = settingsRepository.maxAltitudeFlow
+  val sweepSpeedFlow = settingsRepository.sweepSpeedFlow
+  val savedCameraFlow = settingsRepository.cameraFlow
+
+  fun saveMinAltitude(min: Float) = viewModelScope.launch {
+      settingsRepository.saveMinAltitude(min)
+  }
+
+  fun saveMaxAltitude(max: Float) = viewModelScope.launch {
+      settingsRepository.saveMaxAltitude(max)
+  }
+
+  fun saveSweepSpeed(speed: Float) = viewModelScope.launch {
+      settingsRepository.saveSweepSpeed(speed)
+  }
+
+  fun saveCameraSettings(camera: Camera) = viewModelScope.launch {
+      settingsRepository.saveCamera(camera)
+  }
 
   init {
     viewModelScope.launch {
@@ -107,6 +131,14 @@ class ScenariosViewModel @Inject constructor() : Map3dViewModel() {
           _viewState.value.scenario?.reset(this@ScenariosViewModel)
         }
       }
+    }
+
+    viewModelScope.launch {
+        isMapSteady.collect { steady ->
+            if (steady) {
+                saveCameraSettings(currentCamera.value)
+            }
+        }
     }
   }
 

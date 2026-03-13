@@ -50,6 +50,11 @@
             android:name=".scenarios.ScenariosActivity"
             android:exported="true"
             />
+        <activity
+            android:name=".animatedpolygon.AnimatedPolygonActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AdvancedMaps3DSamples"
+            />
     </application>
 
 </manifest>

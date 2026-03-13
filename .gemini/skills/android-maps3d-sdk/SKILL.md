@@ -147,6 +147,83 @@ suspend fun awaitCameraAnimation(map: GoogleMap3D) = suspendCancellableCoroutine
 ```
 
 *   **Lifecycle:** You must pass lifecycle events down to `Map3DView`. In Compose, `factory` block takes care of instantiation and `onRelease` handles cleanup (`onDestroy()`). Ensure `onCreate` is called in the factory block.
+    *   *Critical Note:* The underlying `GoogleMap3D` engine instance is effectively created once per application lifecycle. If your `AndroidView` Composable leaves the composition and later returns (creating a new `Map3DView`), the underlying 3D engine may still retain previously added objects (like Polygons) from the destroyed view. You must manually clear or track your objects to avoid duplicates across recompositions or Navigation transitions.
+*   **Initialization & Adding Objects:** Do **not** attempt to set the camera or add 3D objects (like Polygons) immediately after the `GoogleMap3D` reference is ready. The renderer needs time to warm up.
+    *   **Initial Camera:** Always set the initial camera position declaratively via `Map3DOptions` (passed into your container view) rather than imperatively moving the camera after the map loads. This avoids dizzying "flight" animations from coordinate `(0,0)` on startup.
+    *   **Adding Objects:** Only inject geometries into the scene after the map has signaled it is fully ready and stable. Typically, this means waiting for an `onMapSteady` callback.
+*   **Updating Map Objects:** When updating an existing Map Object (e.g., `Polygon`, `Polyline`), do **not** use `remove()` and re-add a new one, as this causes flickering. Instead, use `getId()` from the existing object and pass it to a new `PolygonOptions` (or equivalent) builder, then call `addPolygon()` with those new options on the same `GoogleMap3D` instance. The SDK uses the matching ID to update the existing object gracefully without flickering.
+*   **Nullable Camera Properties:** The 3D SDK's `Camera` object has 6 degrees of freedom. Properties like `heading`, `tilt`, `roll`, and `range` are returned as `Double?` (nullable) since the renderer does not always guarantee a value for every property. Handle these nulls defensively when extracting camera telemetry, especially when persisting position data.
+*   **Parameter Validation:** The Maps 3D library will throw exceptions and crash if passed out-of-bounds telemetry for camera movements or locations. Standardize a validation/coercion layer (e.g., returning a `toValidCamera()` extension object) covering:
+    *   `latitude`: clamped to `[-90.0, 90.0]`
+    *   `longitude`: clamped to `[-180.0, 180.0]`
+    *   `tilt`: clamped to `[0.0, 90.0]`
+    *   `range`: clamped to `[0.0, 63170000.0]`
+    *   `heading`: wrapped to `[0.0, 360.0]`
+    *   `roll`: wrapped to `[-360.0, 360.0]`
+    *   `altitude`: clamped to `[0.0, MAX_ALTITUDE_METERS]`
+
+    **Example Extension:**
+    ```kotlin
+    /** Helper to wrap cyclic values like heading and roll */
+    fun Double.wrapIn(lower: Double, upper: Double): Double {
+        val range = upper - lower
+        if (range <= 0) return this
+        val offset = this - lower
+        return lower + (offset - Math.floor(offset / range) * range)
+    }
+
+    /** Extension to sanitize camera telemetry before passing to engine */
+    fun Camera?.toValidCamera(): Camera {
+        val source = this ?: return Camera.DEFAULT_CAMERA
+        return camera {
+            center = latLngAltitude {
+                latitude = source.center.latitude.coerceIn(-90.0..90.0)
+                longitude = source.center.longitude.coerceIn(-180.0..180.0)
+                altitude = source.center.altitude.coerceIn(0.0..LatLngAltitude.MAX_ALTITUDE_METERS)
+            }
+            heading = source.heading?.toDouble()?.wrapIn(0.0, 360.0) ?: 0.0
+            tilt = source.tilt?.toDouble()?.coerceIn(0.0..90.0) ?: 60.0
+            roll = source.roll?.toDouble()?.wrapIn(-360.0, 360.0) ?: 0.0
+            range = source.range?.toDouble()?.coerceIn(0.0..63170000.0) ?: 1500.0
+        }
+    }
+    ```
+
+*   **Immutable Updates (`copy` Extensions):** The 3D SDK builders (like `camera {}` or `latLngAltitude {}`) do not natively provide a `copy()` method like Kotlin data classes. To gracefully update a single property (like altitude) while retaining the rest of the object's complex state, implement custom `.copy()` extensions:
+
+    ```kotlin
+    /** Extension to clone and modify a Camera */
+    fun Camera.copy(
+        center: LatLngAltitude? = null,
+        heading: Double? = null,
+        tilt: Double? = null,
+        range: Double? = null,
+        roll: Double? = null,
+    ): Camera {
+        val objectToCopy = this
+        return camera {
+            this.center = center ?: objectToCopy.center
+            this.heading = heading ?: objectToCopy.heading
+            this.tilt = tilt ?: objectToCopy.tilt
+            this.range = range ?: objectToCopy.range
+            this.roll = roll ?: objectToCopy.roll
+        }
+    }
+
+    /** Extension to clone and modify a LatLngAltitude */
+    fun LatLngAltitude.copy(
+        latitude: Double? = null,
+        longitude: Double? = null,
+        altitude: Double? = null,
+    ): LatLngAltitude {
+        val objectToCopy = this
+        return latLngAltitude {
+            this.latitude = latitude ?: objectToCopy.latitude
+            this.longitude = longitude ?: objectToCopy.longitude
+            this.altitude = altitude ?: objectToCopy.altitude
+        }
+    }
+    ```
 
 ## 5. Execution Steps
 1. Add the 3D Maps SDK dependencies.
