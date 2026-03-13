@@ -143,12 +143,17 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.kotlinx.datetime)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.junit)
     implementation(libs.dagger)
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.android)
 
     implementation(libs.play.services.base)
     implementation(libs.play.services.maps3d)
+    implementation(libs.play.services.places)
 
     testImplementation(libs.google.truth)
 

@@ -18,6 +18,15 @@ import javax.inject.Singleton
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "altitude_settings")
 
+/**
+ * Repository for persisting application preferences via Jetpack DataStore.
+ *
+ * This class abstracts the DataStore implementation from the rest of the application,
+ * providing a clean, reactive API for observing and updating settings such as
+ * the 3D polygon's dimensions, sweep speed, and the last known camera position.
+ * The use of DataStore ensures asynchronous, safe, and consistent reads/writes,
+ * moving away from traditional SharedPreferences which are prone to UI thread blocking.
+ */
 @Singleton
 class SettingsRepository @Inject constructor(@ApplicationContext private val context: Context) {
 
@@ -39,6 +48,15 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         val CAMERA_TILT_KEY = doublePreferencesKey("camera_tilt")
         val CAMERA_ROLL_KEY = doublePreferencesKey("camera_roll")
         val CAMERA_RANGE_KEY = doublePreferencesKey("camera_range")
+
+        val POLYGON_CENTER_LAT_KEY = doublePreferencesKey("polygon_center_lat")
+        val POLYGON_CENTER_LNG_KEY = doublePreferencesKey("polygon_center_lng")
+        val POLYGON_WIDTH_MILES_KEY = floatPreferencesKey("polygon_width_miles")
+        val POLYGON_HEIGHT_MILES_KEY = floatPreferencesKey("polygon_height_miles")
+        const val DEFAULT_POLYGON_CENTER_LAT = 40.0
+        const val DEFAULT_POLYGON_CENTER_LNG = -105.5
+        const val DEFAULT_POLYGON_WIDTH_MILES = 26f
+        const val DEFAULT_POLYGON_HEIGHT_MILES = 27f
     }
 
     val minAltitudeFlow: Flow<Float> = dataStore.data
@@ -71,6 +89,25 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
     suspend fun saveSweepSpeed(speed: Float) {
         dataStore.edit { preferences ->
             preferences[SWEEP_SPEED_KEY] = speed
+        }
+    }
+
+    val polygonCenterLatFlow: Flow<Double> = dataStore.data.map { it[POLYGON_CENTER_LAT_KEY] ?: DEFAULT_POLYGON_CENTER_LAT }
+    val polygonCenterLngFlow: Flow<Double> = dataStore.data.map { it[POLYGON_CENTER_LNG_KEY] ?: DEFAULT_POLYGON_CENTER_LNG }
+    val polygonWidthMilesFlow: Flow<Float> = dataStore.data.map { it[POLYGON_WIDTH_MILES_KEY] ?: DEFAULT_POLYGON_WIDTH_MILES }
+    val polygonHeightMilesFlow: Flow<Float> = dataStore.data.map { it[POLYGON_HEIGHT_MILES_KEY] ?: DEFAULT_POLYGON_HEIGHT_MILES }
+
+    suspend fun savePolygonCenter(lat: Double, lng: Double) {
+        dataStore.edit { preferences ->
+            preferences[POLYGON_CENTER_LAT_KEY] = lat
+            preferences[POLYGON_CENTER_LNG_KEY] = lng
+        }
+    }
+
+    suspend fun savePolygonDimensions(width: Float, height: Float) {
+        dataStore.edit { preferences ->
+            preferences[POLYGON_WIDTH_MILES_KEY] = width
+            preferences[POLYGON_HEIGHT_MILES_KEY] = height
         }
     }
 

@@ -19,11 +19,15 @@ material = "1.13.0"
 
 playServicesBase = "18.10.0"
 playServicesMaps3d = "0.2.0"
+playServicesPlaces = "4.1.0"
 secretsGradlePlugin = "2.0.1"
 truth = "1.4.5"
 uiautomator = "2.3.0"
+robolectric = "4.12.1"
+androidxTestCore = "1.6.1"
 
 kotlinxDatetime = "0.7.1"
+kotlinxCoroutinesTest = "1.9.0"
 hilt = "2.57.2"
 ksp = "2.2.20-2.0.2"
 mapsUtilsKtx = "6.0.0"
@@ -51,14 +55,18 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "playServicesBase" }
 play-services-maps3d = { module = "com.google.android.gms:play-services-maps3d", version.ref = "playServicesMaps3d" }
+play-services-places = { module = "com.google.android.libraries.places:places", version.ref = "playServicesPlaces" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+androidx-test-core = { module = "androidx.test:core-ktx", version.ref = "androidxTestCore" }
 
 dagger = { group = "com.google.dagger", name = "dagger", version.ref = "hilt" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version.ref = "mapsUtilsKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 

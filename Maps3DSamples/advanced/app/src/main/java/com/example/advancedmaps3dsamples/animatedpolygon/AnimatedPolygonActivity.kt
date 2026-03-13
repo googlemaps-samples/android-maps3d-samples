@@ -43,13 +43,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import android.app.Activity
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.material.icons.filled.Search
 import com.example.advancedmaps3dsamples.R
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
 import com.example.advancedmaps3dsamples.utils.toValidCamera
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.widget.Autocomplete
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
+import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.latLngAltitude
+import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.polygonOptions
 import dagger.hilt.android.AndroidEntryPoint
 import com.google.android.gms.maps3d.Map3DOptions
@@ -77,6 +87,42 @@ class AnimatedPolygonActivity : ComponentActivity() {
         var showSettingsDialog by mutableStateOf(false)
 
         setContent {
+            val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    result.data?.let { intent ->
+                        // Retrieve the Place selected by the user.
+                        val place = Autocomplete.getPlaceFromIntent(intent)
+                        place.latLng?.let { latLng ->
+                            // When a new location is picked, we persist the coordinates to DataStore
+                            // so that the 3D polygon's geometry is recalculated around this new center.
+                            viewModel.savePolygonCenter(latLng.latitude, latLng.longitude)
+                            
+                            // Reset the user's zoom/altitude bounds. Since we don't know the exact elevation of the new place,
+                            // expanding the bounds from 0 to 15K feet allows them to easily find the polygon.
+                            viewModel.saveMinAltitude(0f)
+                            viewModel.saveMaxAltitude(15000f)
+                            
+                            // Immediately fly the camera to the new location to center it in the view,
+                            // overriding whatever camera position the user previously had.
+                            val newCam = camera {
+                                center = latLngAltitude {
+                                    latitude = latLng.latitude
+                                    longitude = latLng.longitude
+                                    altitude = 10000.0
+                                }
+                                heading = 0.0
+                                tilt = 0.0
+                            }
+                            viewModel.setCamera(newCam)
+                            
+                            // Force a save of the new camera right away so that if the user backgrounds
+                            // the app before the map becomes "steady", they don't lose this new location.
+                            viewModel.saveCameraSettings(newCam)
+                        }
+                    }
+                }
+            }
+
             AdvancedMaps3DSamplesTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -87,9 +133,20 @@ class AnimatedPolygonActivity : ComponentActivity() {
                                 titleContentColor = MaterialTheme.colorScheme.primary,
                             ),
                             title = {
-                                Text(stringResource(R.string.scenarios_altitude_slider))
+                                Text(stringResource(R.string.map_sample_animated_polygon))
                             },
                             actions = {
+                                IconButton(onClick = { 
+                                    val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
+                                    val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
+                                        .build(this@AnimatedPolygonActivity)
+                                    launcher.launch(intent)
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Search,
+                                        contentDescription = "Search Location"
+                                    )
+                                }
                                 IconButton(onClick = { showSettingsDialog = true }) {
                                     Icon(
                                         imageVector = Icons.Filled.Settings,
@@ -137,6 +194,11 @@ fun AnimatedPolygon(
     val sweepSpeed by viewModel.sweepSpeedFlow.collectAsStateWithLifecycle(initialValue = 50f)
     val savedCamera by viewModel.savedCameraFlow.collectAsStateWithLifecycle(initialValue = null)
     
+    val centerLat by viewModel.polygonCenterLatFlow.collectAsStateWithLifecycle(initialValue = 40.0)
+    val centerLng by viewModel.polygonCenterLngFlow.collectAsStateWithLifecycle(initialValue = -105.5)
+    val widthMiles by viewModel.polygonWidthMilesFlow.collectAsStateWithLifecycle(initialValue = 26f)
+    val heightMiles by viewModel.polygonHeightMilesFlow.collectAsStateWithLifecycle(initialValue = 27f)
+    
     // Ensure altitude is clamped within the min and max bounds
     var altitudeFeet by remember(minAltitude, maxAltitude) { 
         mutableFloatStateOf((minAltitude + maxAltitude) / 2f) 
@@ -145,12 +207,26 @@ fun AnimatedPolygon(
     var isSweeping by remember { mutableStateOf(false) }
     var sweepDirection by remember(sweepSpeed) { mutableFloatStateOf(sweepSpeed) }
 
-    val boulderPolygonPoints = remember {
+    val boulderPolygonPoints = remember(centerLat, centerLng, widthMiles, heightMiles) {
+        val center = LatLng(centerLat, centerLng)
+        val widthMeters = widthMiles * 1609.34
+        val heightMeters = heightMiles * 1609.34
+        
+        // 0=North, 90=East, 180=South, 270=West
+        val north = com.google.maps.android.SphericalUtil.computeOffset(center, heightMeters / 2.0, 0.0)
+        val south = com.google.maps.android.SphericalUtil.computeOffset(center, heightMeters / 2.0, 180.0)
+        
+        // Compute corners by offsetting north/south points east/west
+        val nw = com.google.maps.android.SphericalUtil.computeOffset(north, widthMeters / 2.0, 270.0)
+        val ne = com.google.maps.android.SphericalUtil.computeOffset(north, widthMeters / 2.0, 90.0)
+        val sw = com.google.maps.android.SphericalUtil.computeOffset(south, widthMeters / 2.0, 270.0)
+        val se = com.google.maps.android.SphericalUtil.computeOffset(south, widthMeters / 2.0, 90.0)
+
         listOf(
-            latLngAltitude { latitude = 40.20; longitude = -105.26; altitude = 0.0 }, // NW
-            latLngAltitude { latitude = 40.20; longitude = -105.77; altitude = 0.0 }, // NE
-            latLngAltitude { latitude = 39.80; longitude = -105.77; altitude = 0.0 }, // SE
-            latLngAltitude { latitude = 39.80; longitude = -105.26; altitude = 0.0 }  // SW
+            latLngAltitude { latitude = nw.latitude; longitude = nw.longitude; altitude = 0.0 }, // NW
+            latLngAltitude { latitude = ne.latitude; longitude = ne.longitude; altitude = 0.0 }, // NE
+            latLngAltitude { latitude = se.latitude; longitude = se.longitude; altitude = 0.0 }, // SE
+            latLngAltitude { latitude = sw.latitude; longitude = sw.longitude; altitude = 0.0 }  // SW
         )
     }
 
@@ -256,6 +332,8 @@ fun AnimatedPolygon(
             var tempMin by remember(minAltitude) { mutableStateOf(minAltitude.toInt().toString()) }
             var tempMax by remember(maxAltitude) { mutableStateOf(maxAltitude.toInt().toString()) }
             var tempSpeed by remember(sweepSpeed) { mutableStateOf(sweepSpeed.toInt().toString()) }
+            var tempWidth by remember(widthMiles) { mutableStateOf(widthMiles.toString()) }
+            var tempHeight by remember(heightMiles) { mutableStateOf(heightMiles.toString()) }
 
             AlertDialog(
                 onDismissRequest = onDismissSettings,
@@ -281,6 +359,20 @@ fun AnimatedPolygon(
                             onValueChange = { tempSpeed = it },
                             label = { Text("Sweep Speed (ft/frame)") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        )
+                        OutlinedTextField(
+                            value = tempWidth,
+                            onValueChange = { tempWidth = it },
+                            label = { Text("Width (miles)") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        )
+                        OutlinedTextField(
+                            value = tempHeight,
+                            onValueChange = { tempHeight = it },
+                            label = { Text("Height (miles)") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -294,6 +386,13 @@ fun AnimatedPolygon(
                             // Match the current direction (positive or negative) with the new speed magnitude
                             sweepDirection = if (sweepDirection < 0) -it else it
                         }
+                        
+                        val w = tempWidth.toFloatOrNull()
+                        val h = tempHeight.toFloatOrNull()
+                        if (w != null && h != null) {
+                            viewModel.savePolygonDimensions(w, h)
+                        }
+                        
                         onDismissSettings()
                     }) {
                         Text("Save")

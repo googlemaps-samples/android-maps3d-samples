@@ -88,6 +88,11 @@ class ScenariosViewModel @Inject constructor(
   val sweepSpeedFlow = settingsRepository.sweepSpeedFlow
   val savedCameraFlow = settingsRepository.cameraFlow
 
+  val polygonCenterLatFlow = settingsRepository.polygonCenterLatFlow
+  val polygonCenterLngFlow = settingsRepository.polygonCenterLngFlow
+  val polygonWidthMilesFlow = settingsRepository.polygonWidthMilesFlow
+  val polygonHeightMilesFlow = settingsRepository.polygonHeightMilesFlow
+
   fun saveMinAltitude(min: Float) = viewModelScope.launch {
       settingsRepository.saveMinAltitude(min)
   }
@@ -102,6 +107,14 @@ class ScenariosViewModel @Inject constructor(
 
   fun saveCameraSettings(camera: Camera) = viewModelScope.launch {
       settingsRepository.saveCamera(camera)
+  }
+
+  fun savePolygonCenter(lat: Double, lng: Double) = viewModelScope.launch {
+      settingsRepository.savePolygonCenter(lat, lng)
+  }
+
+  fun savePolygonDimensions(width: Float, height: Float) = viewModelScope.launch {
+      settingsRepository.savePolygonDimensions(width, height)
   }
 
   init {
