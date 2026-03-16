@@ -3,11 +3,11 @@ compileSdk = "36"
 minSdk = "26"
 targetSdk = "36"
 
-activityCompose = "1.12.4"
+activityCompose = "1.13.0"
 agp = "8.13.2"
 appcompat = "1.7.1"
-composeBom = "2026.02.01"
-coreKtx = "1.17.0"
+composeBom = "2026.03.00"
+coreKtx = "1.18.0"
 desugar_jdk_libs = "2.1.5"
 espressoCore = "3.7.0"
 junit = "4.13.2"
@@ -18,6 +18,7 @@ material = "1.13.0"
 
 playServicesBase = "18.10.0"
 playServicesMaps3d = "0.2.0"
+places = "5.1.1"
 secretsGradlePlugin = "2.0.1"
 truth = "1.4.5"
 uiautomator = "2.3.0"
@@ -25,7 +26,8 @@ uiautomator = "2.3.0"
 kotlinxDatetime = "0.7.1"
 hilt = "2.57.2"
 ksp = "2.2.20-2.0.2"
-mapsUtilsKtx = "6.0.0"
+mapsUtilsKtx = "6.0.1"
+androidx-core-ktx = "1.8.9"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,9 +49,11 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "androidx-core-ktx" }
+androidx-fragment-compose = { group = "androidx.fragment", name = "fragment-compose", version.ref = "androidx-core-ktx" }
 play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "playServicesBase" }
 play-services-maps3d = { module = "com.google.android.gms:play-services-maps3d", version.ref = "playServicesMaps3d" }
-truth = { module = "com.google.truth:truth", version.ref = "truth" }
+places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
 
@@ -68,3 +72,5 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 secrets-gradle-plugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+jetbrains-kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+
