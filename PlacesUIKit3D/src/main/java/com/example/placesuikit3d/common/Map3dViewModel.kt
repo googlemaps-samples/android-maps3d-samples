@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -186,7 +187,7 @@ abstract class Map3dViewModel : ViewModel() {
         Log.d(TAG, "Detaching CameraChangeListener")
         controller.setCameraChangedListener(null)
       }
-    }
+    }.conflate()
   }
 
   /**

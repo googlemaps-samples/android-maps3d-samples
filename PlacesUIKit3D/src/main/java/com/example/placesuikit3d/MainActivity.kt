@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
@@ -62,6 +63,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.example.placesuikit3d.ui.theme.PlacesUIKit3DTheme
 import com.example.placesuikit3d.utils.feet
 import com.example.placesuikit3d.utils.toValidCamera
+import dagger.hilt.android.AndroidEntryPoint
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps3d.GoogleMap3D
@@ -76,6 +78,7 @@ import com.google.android.libraries.places.widget.PlaceDetailsCompactFragment
 import com.google.android.libraries.places.widget.PlaceLoadListener
 import com.google.android.libraries.places.widget.model.Orientation
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.LaunchedEffect
 
 /**
  * The main activity for the 3D map demo.
@@ -83,6 +86,7 @@ import kotlinx.coroutines.launch
  * This activity demonstrates how to integrate the Places UI Kit with a 3D map view using Jetpack Compose.
  * It handles map initialization, landmark selection, and displaying place details.
  */
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private val TAG = this::class.java.simpleName
     private var googleMap3D: GoogleMap3D? = null
@@ -217,6 +221,26 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         )
     }
 
+    /**
+     * A Composable overlay that hosts the Places UI Kit [PlaceDetailsCompactFragment].
+     *
+     * IMPORTANT INTEROP PATTERN:
+     * This Composable demonstrates a critical architectural pattern for hosting Android Fragments
+     * inside Jetpack Compose safely:
+     *
+     * 1. The Fragment must NOT be instantiated or transacted within an `AndroidView`'s `update` block.
+     *    The `update` block can be called unpredictably during recompositions, which would lead to
+     *    multiple fragment transactions, memory leaks, or "No view found for id" errors if the
+     *    container isn't fully attached during recomposition loops.
+     * 2. Instead, the [FragmentContainerView] and the [PlaceDetailsCompactFragment] are
+     *    instantiated exactly ONCE inside the `AndroidView`'s `factory` block.
+     * 3. Subsequent state changes (like selecting a new [placeId]) are processed by a
+     *    `LaunchedEffect` keyed on [placeId]. This acts as a decoupled state observer that
+     *    updates the *existing* fragment, avoiding full fragment re-creations.
+     * 4. We use the Activity's native `supportFragmentManager` instead of casting `LocalContext.current`.
+     *    Frameworks like Hilt often wrap the Compose context in a `ViewComponentManager`, which causes
+     *    `ClassCastException`s if blindly cast to a `FragmentActivity`.
+     */
     @Composable
     fun PlaceDetailsOverlay(
         placeId: String,
@@ -224,6 +248,17 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         modifier: Modifier = Modifier
     ) {
         val containerId = remember { View.generateViewId() }
+
+        // IMPORTANT: Use LaunchedEffect ONLY to handle subsequent placeId updates cleanly.
+        // This is decoupled from the rapid recomposition cycles that affect the AndroidView's update block.
+        // It guarantees that `fragment.loadWithPlaceId` is only triggered when the `placeId` actually changes.
+        LaunchedEffect(placeId) {
+            val fragment = supportFragmentManager.findFragmentById(containerId) as? PlaceDetailsCompactFragment
+            if (fragment != null) {
+                Log.d(TAG, "Updating existing fragment for new placeId: $placeId")
+                fragment.loadWithPlaceId(placeId)
+            }
+        }
 
         Box(
             modifier = modifier
@@ -235,11 +270,9 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 factory = { ctx ->
                     FragmentContainerView(ctx).apply {
                         id = containerId
-                    }
-                },
-                update = { view ->
-                    val fragment = supportFragmentManager.findFragmentById(containerId) as? PlaceDetailsCompactFragment
-                    if (fragment == null) {
+                        
+                        // IMPORTANT: Inflate and add the Fragment exactly *once* when the container is created.
+                        // Do NOT attempt fragment transactions in an AndroidView `update` block.
                         val newFragment = PlaceDetailsCompactFragment.newInstance(
                             PlaceDetailsCompactFragment.ALL_CONTENT,
                             Orientation.VERTICAL,
@@ -252,26 +285,17 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
                                 override fun onFailure(e: Exception) {
                                     Log.e(TAG, "Place failed to load for ID: $placeId", e)
-                                    // Don't auto-dismiss on failure to prevent "disappearing" components.
-                                    // The fragment should handle its own error state.
                                 }
                             })
                         }
+                        
                         supportFragmentManager.commit {
                             replace(containerId, newFragment)
                         }
-                        // Tag the view with the current ID and post the load
-                        view.tag = placeId
-                        Log.e(TAG, "Loading new fragment for placeId: $placeId")
-                        view.post { newFragment.loadWithPlaceId(placeId) }
-                    } else {
-                        // Crucially, ONLY load if the place actually changed
-                        val currentlyLoaded = view.tag as? String
-                        if (currentlyLoaded != placeId) {
-                            view.tag = placeId
-                            Log.e(TAG, "Updating existing fragment for placeId: $placeId")
-                            fragment.loadWithPlaceId(placeId)
-                        }
+                        
+                        // Post the initial load so the fragment attaches first
+                        Log.d(TAG, "Loading initial placeId via factory: $placeId")
+                        post { newFragment.loadWithPlaceId(placeId) }
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
