@@ -114,7 +114,8 @@ sealed interface RouteTracker {
         val url: String,
         val scale: Double,
         val tilt: Double,
-        val hoverAltitude: Double
+        val hoverAltitude: Double,
+        val headingOffset: Double
     ) : RouteTracker
 
     data object RedCar : Model(
@@ -122,7 +123,8 @@ sealed interface RouteTracker {
         url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb",
         scale = 60.0,
         tilt = -90.0,
-        hoverAltitude = 1.0
+        hoverAltitude = 3.0,
+        headingOffset = 180.0
     )
 
     data object BananaCar : Model(
@@ -130,7 +132,8 @@ sealed interface RouteTracker {
         url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb",
         scale = 20.0,
         tilt = -90.0,
-        hoverAltitude = 0.0
+        hoverAltitude = 0.0,
+        headingOffset = 0.0
     )
 }
 
@@ -342,7 +345,7 @@ class RouteSampleActivity : ComponentActivity() {
                                                     }
                                                     url = tracker.url
                                                     scale = if (isActive) vector3D { x = tracker.scale; y = tracker.scale; z = tracker.scale } else vector3D { x = 0.001; y = 0.001; z = 0.001 }
-                                                    orientation = if (isActive) orientation { heading = currentHeading.toDouble().toHeading(); tilt = tracker.tilt; roll = 0.0 } else orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
+                                                    orientation = if (isActive) orientation { heading = (currentHeading.toDouble() + tracker.headingOffset).toHeading(); tilt = tracker.tilt; roll = 0.0 } else orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
                                                 })
                                                 if (m != null && !trackerIds.containsKey(tracker)) trackerIds[tracker] = m.id
                                             }
