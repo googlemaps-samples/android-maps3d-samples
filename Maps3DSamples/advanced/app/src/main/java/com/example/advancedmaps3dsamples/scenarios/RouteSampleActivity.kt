@@ -124,7 +124,7 @@ sealed interface RouteTracker {
         scale = 60.0,
         tilt = -90.0,
         hoverAltitude = 10.0,
-        headingOffset = 0.0
+        headingOffset = 90.0
     )
 
     data object BananaCar : Model(
@@ -347,7 +347,17 @@ class RouteSampleActivity : ComponentActivity() {
                                                     scale = if (isActive) vector3D { x = tracker.scale; y = tracker.scale; z = tracker.scale } else vector3D { x = 0.001; y = 0.001; z = 0.001 }
                                                     orientation = if (isActive) orientation { heading = (currentHeading.toDouble() + tracker.headingOffset).toHeading(); tilt = tracker.tilt; roll = 0.0 } else orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
                                                 })
-                                                if (m != null && !trackerIds.containsKey(tracker)) trackerIds[tracker] = m.id
+                                                if (m != null) {
+                                                    if (!trackerIds.containsKey(tracker)) trackerIds[tracker] = m.id
+                                                    
+                                                    // Immediately mutate properties directly on the Model object 
+                                                    // to ensure the SDK runtime applies the changes bypassing any upsert builder caching
+                                                    if (isActive) {
+                                                        m.orientation = orientation { heading = (currentHeading.toDouble() + tracker.headingOffset).toHeading(); tilt = tracker.tilt; roll = 0.0 }
+                                                    } else {
+                                                        m.orientation = orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
