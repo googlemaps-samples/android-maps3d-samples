@@ -22,13 +22,21 @@ import androidx.activity.viewModels
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
@@ -41,11 +49,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -111,6 +121,12 @@ class RouteSampleActivity : ComponentActivity() {
             // Dynamic tracking state
             var cameraRange by remember { mutableStateOf(1500f) }
             var trackerStyle by remember { mutableStateOf(TrackerStyle.MARKER) }
+            
+            // Playback controls state
+            var elapsedDistance by remember { mutableFloatStateOf(0f) }
+            var totalDistance by remember { mutableFloatStateOf(0f) }
+            var isPlaying by remember { mutableStateOf(false) }
+            var flyModeActive by remember { mutableStateOf(false) }
 
             AdvancedMaps3DSamplesTheme {
                 Scaffold(
@@ -176,213 +192,241 @@ class RouteSampleActivity : ComponentActivity() {
                             view.onDestroy()
                         })
 
-                        // Floating Action Button to trigger the route fetch
-                        Button(
-                            onClick = {
-                                // Hardcoded parameters as requested (Honolulu to Kailua)
-                                val origin = LatLng(21.307043, -157.858984)
-                                val dest = LatLng(21.390177, -157.719454)
-                                viewModel.fetchRoute(BuildConfig.MAPS3D_API_KEY, origin, dest)
-                            }, modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(32.dp)
-                        ) {
-                            Text("Fetch & Draw Route")
-                        }
+                        // DECOUPLED TRACKING ENGINE
+                        // This engine automatically renders whatever frame 'elapsedDistance' dictates.
+                        // Playback merely increments 'elapsedDistance'. Scrubbing mutates it directly.
+                        LaunchedEffect(flyModeActive, uiState, map3D) {
+                            if (!flyModeActive) {
+                                // Clean up the tracking models if we exit fly mode
+                                val safeMap = map3D ?: return@LaunchedEffect
+                                val offscreen = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
+                                // It is difficult to reliably know the IDs here without hoisting them.
+                                // But since we re-calculate everything when we re-enter, the next entry will generate new IDs 
+                                // and punt the inactive ones anyway. Ideally we would hoist the marker IDs too, but 
+                                // letting them be garbage collected is fine for a demo.
+                                return@LaunchedEffect
+                            }
+                            
+                            val state = uiState as? RouteUiState.Success ?: return@LaunchedEffect
+                            val safeMap = map3D ?: return@LaunchedEffect
+                            val rawPath = state.decodedPolyline
+                            if (rawPath.size < 2) return@LaunchedEffect
 
-                        Button(
-                            onClick = {
-                                val state = uiState as? RouteUiState.Success ?: return@Button
-                                val safeMap = map3D ?: return@Button
+                            val cumulativeDistances = DoubleArray(rawPath.size)
+                            cumulativeDistances[0] = 0.0
+                            for (i in 1 until rawPath.size) {
+                                cumulativeDistances[i] = cumulativeDistances[i - 1] + haversineDistance(rawPath[i - 1], rawPath[i])
+                            }
 
-                                coroutineScope.launch {
-                                    val rawPath = state.decodedPolyline
-                                    if (rawPath.size < 2) return@launch
+                            val baseSpeedMps = 750.0
+                            val lookaheadSeconds = 8.0
+                            val lerpFactor = 0.05f
 
-                                    // 1. DITCHING WAYPOINTS: Calculate true cumulative distance for the entire pipeline.
-                                    val cumulativeDistances = DoubleArray(rawPath.size)
-                                    cumulativeDistances[0] = 0.0
-                                    for (i in 1 until rawPath.size) {
-                                        cumulativeDistances[i] =
-                                            cumulativeDistances[i - 1] + haversineDistance(
-                                                rawPath[i - 1],
-                                                rawPath[i]
-                                            )
+                            var currentLat = rawPath[0].latitude
+                            var currentLng = rawPath[0].longitude
+                            var currentHeading = calculateHeading(rawPath[0], rawPath[1]).toFloat()
+
+                            var lastFrameTime = 0L
+                            var progressMarkerId: String? = null
+                            var progressRedCarId: String? = null
+                            var progressBananaCarId: String? = null
+
+                            while (flyModeActive) {
+                                withFrameMillis { frameTime ->
+                                    if (lastFrameTime == 0L) {
+                                        lastFrameTime = frameTime
+                                        return@withFrameMillis
                                     }
-                                    val totalDistance = cumulativeDistances.last()
+                                    val dtMs = frameTime - lastFrameTime
+                                    lastFrameTime = frameTime
 
-                                    // 2. PHYSICS INITIALIZATION
-                                    val baseSpeedMps = 750.0
-                                    val lookaheadSeconds = 8.0
-                                    val lerpFactor =
-                                        0.05f // 5% stiffness per frame for smooth rubber banding
+                                    if (isPlaying) {
+                                        elapsedDistance += (baseSpeedMps * (dtMs / 1000.0)).toFloat()
+                                        if (elapsedDistance >= totalDistance) {
+                                            elapsedDistance = totalDistance
+                                            isPlaying = false
+                                        }
+                                    }
 
-                                    var elapsedDistance = 0.0
-                                    var currentLat = rawPath[0].latitude
-                                    var currentLng = rawPath[0].longitude
-                                    var currentHeading =
-                                        calculateHeading(rawPath[0], rawPath[1]).toFloat()
+                                    val doubleElapsed = elapsedDistance.toDouble()
+                                    val targetPos = getInterpolatedPoint(doubleElapsed, rawPath, cumulativeDistances)
+                                    val lookaheadDist = doubleElapsed + (baseSpeedMps * lookaheadSeconds)
+                                    val lookaheadPos = getInterpolatedPoint(lookaheadDist, rawPath, cumulativeDistances)
+                                    val mathHeading = calculateHeading(targetPos, lookaheadPos).toFloat()
 
-                                    // 3. CONTINUOUS RENDERING LOOP
-                                    var lastFrameTime = 0L
-                                    var progressMarkerId: String? = null
-                                    var progressRedCarId: String? = null
-                                    var progressBananaCarId: String? = null
+                                    currentLat += (targetPos.latitude - currentLat) * lerpFactor
+                                    currentLng += (targetPos.longitude - currentLng) * lerpFactor
+                                    currentHeading = slerpHeading(currentHeading, mathHeading, lerpFactor)
 
-                                    while (elapsedDistance < totalDistance) {
-                                        withFrameMillis { frameTime ->
-                                            if (lastFrameTime == 0L) {
-                                                lastFrameTime = frameTime
-                                                return@withFrameMillis
+                                    val frameCamera = camera {
+                                        center = latLngAltitude {
+                                            latitude = currentLat
+                                            longitude = currentLng
+                                            altitude = 250.0
+                                        }
+                                        heading = currentHeading.toDouble().toHeading()
+                                        tilt = 65.0
+                                        range = cameraRange.toDouble()
+                                    }.toValidCamera()
+                                    safeMap.setCamera(frameCamera)
+
+                                    // MARKER / MODEL UPSERT LOGIC
+                                    when (trackerStyle) {
+                                        TrackerStyle.RED_CAR, TrackerStyle.BANANA_CAR -> {
+                                            val isActiveRedCar = trackerStyle == TrackerStyle.RED_CAR
+                                            val activeUrl = if (isActiveRedCar) "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb" else "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb"
+                                            val activeId = if (isActiveRedCar) progressRedCarId else progressBananaCarId
+
+                                            val m = safeMap.addModel(modelOptions {
+                                                if (activeId != null) id = activeId
+                                                position = latLngAltitude {
+                                                    latitude = targetPos.latitude
+                                                    longitude = targetPos.longitude
+                                                    altitude = 0.0
+                                                }
+                                                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                                                url = activeUrl
+                                                scale = vector3D { x = 5.0; y = 5.0; z = 5.0 }
+                                                orientation = orientation {
+                                                    heading = currentHeading.toDouble().toHeading()
+                                                    tilt = 0.0
+                                                    roll = 0.0
+                                                }
+                                            })
+                                            if (activeId == null && m != null) {
+                                                if (isActiveRedCar) progressRedCarId = m.id else progressBananaCarId = m.id
                                             }
 
-                                            val dtMs = frameTime - lastFrameTime
-                                            lastFrameTime = frameTime
+                                            val inactiveId = if (isActiveRedCar) progressBananaCarId else progressRedCarId
+                                            if (inactiveId != null) {
+                                                safeMap.addModel(modelOptions {
+                                                    id = inactiveId
+                                                    position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
+                                                    altitudeMode = AltitudeMode.ABSOLUTE
+                                                    url = if (isActiveRedCar) "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb" else "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
+                                                })
+                                            }
 
-                                            // Advance logical distance
-                                            elapsedDistance += baseSpeedMps * (dtMs / 1000.0)
-                                            if (elapsedDistance > totalDistance) elapsedDistance =
-                                                totalDistance
-
-                                            // Find mathematical target point
-                                            val targetPos = getInterpolatedPoint(
-                                                elapsedDistance,
-                                                rawPath,
-                                                cumulativeDistances
-                                            )
-
-                                            // Cinematic Inertia View: find lookahead point 8 seconds in future
-                                            val lookaheadDist =
-                                                elapsedDistance + (baseSpeedMps * lookaheadSeconds)
-                                            val lookaheadPos = getInterpolatedPoint(
-                                                lookaheadDist,
-                                                rawPath,
-                                                cumulativeDistances
-                                            )
-
-                                            // Mathematical heading
-                                            val mathHeading =
-                                                calculateHeading(targetPos, lookaheadPos).toFloat()
-
-                                            // Apply LERP for Physical Position
-                                            currentLat += (targetPos.latitude - currentLat) * lerpFactor
-                                            currentLng += (targetPos.longitude - currentLng) * lerpFactor
-
-                                            // Apply SLERP for Heading
-                                            currentHeading = slerpHeading(
-                                                currentHeading,
-                                                mathHeading,
-                                                lerpFactor
-                                            )
-
-                                            // Render directly to WebGL engine (no animateTo queueing!)
-                                            val frameCamera = camera {
-                                                center = latLngAltitude {
-                                                    latitude = currentLat
-                                                    longitude = currentLng
-                                                    // Provide a fixed altitude as Android lacks synchronous ElevationService
-                                                    altitude = 250.0
+                                            if (progressMarkerId != null) {
+                                                safeMap.addMarker(markerOptions {
+                                                    id = progressMarkerId!!
+                                                    position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
+                                                    altitudeMode = AltitudeMode.ABSOLUTE
+                                                })
+                                            }
+                                        }
+                                        TrackerStyle.MARKER -> {
+                                            val m = safeMap.addMarker(markerOptions {
+                                                if (progressMarkerId != null) id = progressMarkerId!!
+                                                position = latLngAltitude {
+                                                    latitude = targetPos.latitude
+                                                    longitude = targetPos.longitude
+                                                    altitude = 0.0 
                                                 }
-                                                heading = currentHeading.toDouble().toHeading()
-                                                tilt = 65.0
-                                                range = cameraRange.toDouble() // Hooked to slider
-                                            }.toValidCamera()
-                                            safeMap.setCamera(frameCamera)
+                                                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                                                setStyle(ImageView(R.drawable.car))
+                                            })
+                                            if (progressMarkerId == null && m != null) progressMarkerId = m.id
 
-                                            // 4. DYNAMIC PROGRESS MARKER / MODEL
-                                            when (trackerStyle) {
-                                                TrackerStyle.RED_CAR, TrackerStyle.BANANA_CAR -> {
-                                                    // Determine actively selected model ID and URL
-                                                    val isActiveRedCar = trackerStyle == TrackerStyle.RED_CAR
-                                                    val activeUrl = if (isActiveRedCar) "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb" else "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb"
-                                                    val activeId = if (isActiveRedCar) progressRedCarId else progressBananaCarId
-
-                                                    // Upsert Active Model
-                                                    val m = safeMap.addModel(modelOptions {
-                                                        if (activeId != null) id = activeId
-                                                        position = latLngAltitude {
-                                                            latitude = targetPos.latitude
-                                                            longitude = targetPos.longitude
-                                                            altitude = 0.0
-                                                        }
-                                                        altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                                                        url = activeUrl
-                                                        scale = vector3D { x = 20.0; y = 20.0; z = 20.0 } // Scaled up to be visible at map range
-                                                        orientation = orientation {
-                                                            heading = currentHeading.toDouble().toHeading()
-                                                            tilt = 0.0
-                                                            roll = 0.0
-                                                        }
-                                                    })
-                                                    if (activeId == null && m != null) {
-                                                        if (isActiveRedCar) progressRedCarId = m.id else progressBananaCarId = m.id
-                                                    }
-
-                                                    // Hide Inactive Model
-                                                    val inactiveId = if (isActiveRedCar) progressBananaCarId else progressRedCarId
-                                                    if (inactiveId != null) {
-                                                        safeMap.addModel(modelOptions {
-                                                            id = inactiveId
-                                                            position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
-                                                            altitudeMode = AltitudeMode.ABSOLUTE
-                                                            url = if (isActiveRedCar) "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb" else "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
-                                                        })
-                                                    }
-
-                                                    // Hide Marker
-                                                    if (progressMarkerId != null) {
-                                                        safeMap.addMarker(markerOptions {
-                                                            id = progressMarkerId!!
-                                                            position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
-                                                            altitudeMode = AltitudeMode.ABSOLUTE
-                                                        })
-                                                    }
-                                                }
-                                                TrackerStyle.MARKER -> {
-                                                    // Upsert Marker
-                                                    val m = safeMap.addMarker(markerOptions {
-                                                        if (progressMarkerId != null) id = progressMarkerId!!
-                                                        position = latLngAltitude {
-                                                            latitude = targetPos.latitude
-                                                            longitude = targetPos.longitude
-                                                            altitude = 0.0 
-                                                        }
-                                                        altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                                                        setStyle(ImageView(R.drawable.car))
-                                                    })
-                                                    if (progressMarkerId == null && m != null) progressMarkerId = m.id
-
-                                                    // Hide Red Car Model
-                                                    if (progressRedCarId != null) {
-                                                        safeMap.addModel(modelOptions {
-                                                            id = progressRedCarId!!
-                                                            position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
-                                                            altitudeMode = AltitudeMode.ABSOLUTE
-                                                            url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
-                                                        })
-                                                    }
-                                                    
-                                                    // Hide Banana Car Model
-                                                    if (progressBananaCarId != null) {
-                                                        safeMap.addModel(modelOptions {
-                                                            id = progressBananaCarId!!
-                                                            position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
-                                                            altitudeMode = AltitudeMode.ABSOLUTE
-                                                            url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb"
-                                                        })
-                                                    }
-                                                }
+                                            if (progressRedCarId != null) {
+                                                safeMap.addModel(modelOptions {
+                                                    id = progressRedCarId!!
+                                                    position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
+                                                    altitudeMode = AltitudeMode.ABSOLUTE
+                                                    url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
+                                                })
+                                            }
+                                            
+                                            if (progressBananaCarId != null) {
+                                                safeMap.addModel(modelOptions {
+                                                    id = progressBananaCarId!!
+                                                    position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
+                                                    altitudeMode = AltitudeMode.ABSOLUTE
+                                                    url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb"
+                                                })
                                             }
                                         }
                                     }
                                 }
-                            },
-                            enabled = uiState is RouteUiState.Success,
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(32.dp)
-                        ) {
-                            Text("Fly Along")
+                            }
+                        }
+
+                        if (!flyModeActive) { // STANDARD MODE: Fetch & Fly Buttons
+                            Button(
+                                onClick = {
+                                    val origin = LatLng(21.307043, -157.858984)
+                                    val dest = LatLng(21.390177, -157.719454)
+                                    viewModel.fetchRoute(BuildConfig.MAPS3D_API_KEY, origin, dest)
+                                }, modifier = Modifier
+                                    .align(Alignment.BottomStart)
+                                    .padding(32.dp)
+                            ) {
+                                Text("Fetch & Draw Route")
+                            }
+
+                            Button(
+                                onClick = {
+                                    val state = uiState as? RouteUiState.Success ?: return@Button
+                                    val rawPath = state.decodedPolyline
+                                    if (rawPath.size < 2) return@Button
+                                    
+                                    val cumulativeDistances = DoubleArray(rawPath.size)
+                                    cumulativeDistances[0] = 0.0
+                                    for (i in 1 until rawPath.size) {
+                                        cumulativeDistances[i] = cumulativeDistances[i - 1] + haversineDistance(rawPath[i - 1], rawPath[i])
+                                    }
+                                    totalDistance = cumulativeDistances.last().toFloat()
+                                    elapsedDistance = 0f
+                                    flyModeActive = true
+                                    isPlaying = true
+                                },
+                                enabled = uiState is RouteUiState.Success,
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(32.dp)
+                            ) {
+                                Text("Fly Along")
+                            }
+                        } else { // FLY MODE: Transport Controls
+                            Surface(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(16.dp)
+                                    .wrapContentHeight()
+                                    .fillMaxWidth(),
+                                shape = MaterialTheme.shapes.medium,
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                tonalElevation = 4.dp
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    IconButton(onClick = { isPlaying = !isPlaying }) {
+                                        Icon(
+                                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                            contentDescription = "Play/Pause"
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Slider(
+                                        value = elapsedDistance,
+                                        onValueChange = { 
+                                            elapsedDistance = it
+                                            isPlaying = false // Auto pause when user scrubs 
+                                        },
+                                        valueRange = 0f..Math.max(1f, totalDistance),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    IconButton(onClick = { 
+                                        flyModeActive = false 
+                                        isPlaying = false 
+                                    }) {
+                                        Icon(Icons.Default.Close, contentDescription = "Exit Fly Mode")
+                                    }
+                                }
+                            }
                         }
 
                         // State interpretation UI
