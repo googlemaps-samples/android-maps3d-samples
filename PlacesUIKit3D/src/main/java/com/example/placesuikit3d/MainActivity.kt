@@ -103,7 +103,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true || permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
                     fetchLastLocation()
                 } else {
-                    Toast.makeText(this, "Location permission denied. Showing default location.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.location_permission_denied), Toast.LENGTH_SHORT).show()
                     moveToDefaultLocation()
                 }
             }
@@ -130,11 +130,12 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 initialValue = SheetValue.PartiallyExpanded
             )
         )
+        val sheetPeekHeight = 120.dp
 
         Box(modifier = Modifier.fillMaxSize()) {
             BottomSheetScaffold(
                 scaffoldState = scaffoldState,
-                sheetPeekHeight = 120.dp,
+                sheetPeekHeight = sheetPeekHeight,
                 sheetContent = {
                     LandmarkList(
                         landmarks = landmarks,
@@ -145,9 +146,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight(0.6f)
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             ) { _ ->
@@ -161,7 +160,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                             .align(Alignment.TopEnd)
                             .padding(top = 48.dp, end = 16.dp)
                     ) {
-                        Icon(Icons.Default.MyLocation, contentDescription = "My Location")
+                        Icon(Icons.Default.MyLocation, contentDescription = androidx.compose.ui.res.stringResource(id = R.string.my_location))
                     }
                 }
             }
@@ -173,8 +172,8 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                     onDismiss = { viewModel.setSelectedPlaceId(null) },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        // Anchor above the bottom sheet peek height (120dp + 16dp margin)
-                        .padding(bottom = 136.dp, start = 16.dp, end = 16.dp)
+                        // Anchor dynamically above the bottom sheet
+                        .padding(bottom = sheetPeekHeight + 16.dp, start = 16.dp, end = 16.dp)
                 )
             }
         }
@@ -310,7 +309,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             ) {
                 Icon(
                     painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_close),
-                    contentDescription = "Dismiss"
+                    contentDescription = androidx.compose.ui.res.stringResource(id = R.string.dismiss_button_content_description)
                 )
             }
         }
@@ -388,8 +387,14 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                             durationInMillis = 3000
                         }
                     )
-                } ?: moveToDefaultLocation()
-            }.addOnFailureListener { moveToDefaultLocation() }
+                } ?: run {
+                    Toast.makeText(this, getString(R.string.location_services_disabled), Toast.LENGTH_LONG).show()
+                    moveToDefaultLocation()
+                }
+            }.addOnFailureListener { 
+                Toast.makeText(this, getString(R.string.location_services_disabled), Toast.LENGTH_LONG).show()
+                moveToDefaultLocation() 
+            }
         }
     }
 
