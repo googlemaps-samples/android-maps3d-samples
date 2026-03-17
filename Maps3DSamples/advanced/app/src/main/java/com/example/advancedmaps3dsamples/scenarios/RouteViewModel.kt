@@ -16,15 +16,17 @@ package com.example.advancedmaps3dsamples.scenarios
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.advancedmaps3dsamples.common.DirectionsErrorException
-import com.example.advancedmaps3dsamples.common.RoutesApiService
+import com.example.advancedmaps3dsamples.modules.DirectionsErrorException
+import com.example.advancedmaps3dsamples.modules.RouteRepository
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -44,10 +46,22 @@ sealed interface RouteUiState {
  * ViewModel responsible for orchestrating the route fetch and 
  * converting the API's encoded polyline into a List of LatLngs
  * to be consumed by the UI.
+ * 
+ * WHY A VIEWMODEL?
+ * Activities and Fragments in Android can be destroyed and recreated (e.g., when the device rotates). 
+ * The ViewModel survives these configuration changes! By keeping our route data here, we ensure that a user 
+ * doesn't lose their downloaded route just because they turned their phone sideways.
  */
 @HiltViewModel
-class RouteViewModel @Inject constructor() : ViewModel() {
+class RouteViewModel @Inject constructor(
+    private val routeRepository: RouteRepository
+) : ViewModel() {
 
+    // WHY STATEFLOW?
+    // StateFlow acts as an observable data holder. The ViewModel updates the StateFlow, 
+    // and the Compose UI automatically 'listens' (collects) and redraws itself whenever the state changes.
+    // We use a backing property (_uiState) that is mutable within the ViewModel, but expose 
+    // a read-only StateFlow (uiState) to the UI so it can't accidentally alter the data.
     private val _uiState = MutableStateFlow<RouteUiState>(RouteUiState.Idle)
     val uiState: StateFlow<RouteUiState> = _uiState.asStateFlow()
 
@@ -62,7 +76,7 @@ class RouteViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             try {
                 // Execute network call via Ktor
-                val response = RoutesApiService.fetchRoute(
+                val response = routeRepository.fetchRoute(
                     apiKey = apiKey,
                     originLat = origin.latitude,
                     originLng = origin.longitude,
@@ -75,8 +89,15 @@ class RouteViewModel @Inject constructor() : ViewModel() {
                 val encodedPolyline = route?.polyline?.encodedPolyline
 
                 if (encodedPolyline != null) {
-                    // Decode the polyline so Map3D can consume it (or further convert it to Polyline3DOptions)
-                    val decoded = PolyUtil.decode(encodedPolyline)
+                    // WHY DECODE ON DISPATCHERS.DEFAULT?
+                    // While a standard route response might only contain a few hundred points,
+                    // other data sources like high-resolution GPX files can contain thousands.
+                    // PolyUtil.decode is a synchronous, CPU-heavy math operation. By explicitly
+                    // shifting to the Default dispatcher (optimized for CPU work), we ensure that
+                    // processing massive polyline strings will never drop UI frames or cause "jank".
+                    val decoded = withContext(Dispatchers.Default) {
+                        PolyUtil.decode(encodedPolyline)
+                    }
                     
                     // Extract important navigation points from legs/steps
                     val navPoints = route.legs.flatMap { leg ->

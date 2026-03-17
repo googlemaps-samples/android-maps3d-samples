@@ -41,6 +41,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +53,7 @@ import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
 import com.example.advancedmaps3dsamples.utils.awaitCameraAnimation
 import com.example.advancedmaps3dsamples.utils.calculateHeading
 import com.example.advancedmaps3dsamples.utils.haversineDistance
+import com.example.advancedmaps3dsamples.utils.toValidCamera
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DOptions
@@ -100,6 +102,11 @@ class RouteSampleActivity : ComponentActivity() {
                     Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                         
                         // The Map3D View wrapper
+                        // WHY ANDROIDVIEW?
+                        // Map3DView is a traditional Android View, but our UI is built using Modern Jetpack Compose.
+                        // AndroidView acts as a bridge, allowing us to embed traditional Views directly into our Compose hierarchy.
+                        // We provide a factory to create the view, an update block to handle changes, and an onRelease 
+                        // block to clean up resources when the Compose node leaves the screen.
                         AndroidView(
                             modifier = Modifier.fillMaxSize(),
                             factory = { context ->
@@ -151,93 +158,75 @@ class RouteSampleActivity : ComponentActivity() {
                                         val safeMap = map3D ?: return@Button
                                         
                                         coroutineScope.launch {
-                                            // 1. Merge waypoints that are too close to avoid "stuttering" at start/end
-                                            val thresholdMeters = 200.0
-                                            val rawPoints = state.navigationPoints
-                                            val turnPoints = mutableListOf<LatLng>()
-                                            
-                                            if (rawPoints.isNotEmpty()) {
-                                                turnPoints.add(rawPoints.first())
-                                                for (i in 1 until rawPoints.size - 1) {
-                                                    if (haversineDistance(turnPoints.last(), rawPoints[i]) >= thresholdMeters) {
-                                                        turnPoints.add(rawPoints[i])
-                                                    }
-                                                }
-                                                // Always include the actual destination
-                                                if (haversineDistance(turnPoints.last(), rawPoints.last()) > 10.0) {
-                                                    turnPoints.add(rawPoints.last())
-                                                }
-                                            }
+                                            val rawPath = state.decodedPolyline
+                                            if (rawPath.size < 2) return@launch
 
-                                            // 2. Inject intermediate points from the raw polyline for long stretches
-                                            // This ensures the camera follows highway curves rather than flying in a straight line.
-                                            val finalFlightPath = mutableListOf<LatLng>()
-                                            if (turnPoints.isNotEmpty()) {
-                                                finalFlightPath.add(turnPoints.first())
-                                                for (i in 0 until turnPoints.size - 1) {
-                                                    val start = turnPoints[i]
-                                                    val end = turnPoints[i + 1]
+                                            // 1. DITCHING WAYPOINTS: Calculate true cumulative distance for the entire pipeline.
+                                            val cumulativeDistances = DoubleArray(rawPath.size)
+                                            cumulativeDistances[0] = 0.0
+                                            for (i in 1 until rawPath.size) {
+                                                cumulativeDistances[i] = cumulativeDistances[i - 1] + haversineDistance(rawPath[i - 1], rawPath[i])
+                                            }
+                                            val totalDistance = cumulativeDistances.last()
+
+                                            // 2. PHYSICS INITIALIZATION
+                                            val baseSpeedMps = 750.0
+                                            val lookaheadSeconds = 8.0 
+                                            val lerpFactor = 0.05f // 5% stiffness per frame for smooth rubber banding
+
+                                            var elapsedDistance = 0.0
+                                            var currentLat = rawPath[0].latitude
+                                            var currentLng = rawPath[0].longitude
+                                            var currentHeading = calculateHeading(rawPath[0], rawPath[1]).toFloat()
+
+                                            // 3. CONTINUOUS RENDERING LOOP
+                                            var lastFrameTime = 0L
+
+                                            while (elapsedDistance < totalDistance) {
+                                                withFrameMillis { frameTime ->
+                                                    if (lastFrameTime == 0L) {
+                                                        lastFrameTime = frameTime
+                                                        return@withFrameMillis
+                                                    }
                                                     
-                                                    if (haversineDistance(start, end) > 500.0) {
-                                                        // Find indices in raw polyline to pull curve details
-                                                        val startIndex = state.decodedPolyline.indexOfFirst { haversineDistance(it, start) < 20.0 }
-                                                        val endIndex = state.decodedPolyline.indexOfFirst { haversineDistance(it, end) < 20.0 }
-                                                        
-                                                        if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
-                                                            for (j in (startIndex + 1) until endIndex) {
-                                                                val p = state.decodedPolyline[j]
-                                                                // Subsample for smooth camera motion
-                                                                if (haversineDistance(finalFlightPath.last(), p) > 400.0) {
-                                                                    finalFlightPath.add(p)
-                                                                }
-                                                            }
+                                                    val dtMs = frameTime - lastFrameTime
+                                                    lastFrameTime = frameTime
+                                                    
+                                                    // Advance logical distance
+                                                    elapsedDistance += baseSpeedMps * (dtMs / 1000.0)
+                                                    if (elapsedDistance > totalDistance) elapsedDistance = totalDistance
+                                                    
+                                                    // Find mathematical target point
+                                                    val targetPos = getInterpolatedPoint(elapsedDistance, rawPath, cumulativeDistances)
+                                                    
+                                                    // Cinematic Inertia View: find lookahead point 8 seconds in future
+                                                    val lookaheadDist = elapsedDistance + (baseSpeedMps * lookaheadSeconds)
+                                                    val lookaheadPos = getInterpolatedPoint(lookaheadDist, rawPath, cumulativeDistances)
+                                                    
+                                                    // Mathematical heading
+                                                    val mathHeading = calculateHeading(targetPos, lookaheadPos).toFloat()
+                                                    
+                                                    // Apply LERP for Physical Position
+                                                    currentLat += (targetPos.latitude - currentLat) * lerpFactor
+                                                    currentLng += (targetPos.longitude - currentLng) * lerpFactor
+                                                    
+                                                    // Apply SLERP for Heading
+                                                    currentHeading = slerpHeading(currentHeading, mathHeading, lerpFactor)
+                                                    
+                                                    // Render directly to WebGL engine (no animateTo queueing!)
+                                                    val frameCamera = camera {
+                                                        center = latLngAltitude {
+                                                            latitude = currentLat
+                                                            longitude = currentLng
+                                                            // Provide a fixed altitude as Android lacks synchronous ElevationService
+                                                            altitude = 250.0
                                                         }
-                                                    }
-                                                    if (haversineDistance(finalFlightPath.last(), end) > 10.0) {
-                                                        finalFlightPath.add(end)
-                                                    }
+                                                        heading = currentHeading.toDouble()
+                                                        tilt = 65.0
+                                                        range = 1500.0
+                                                    }.toValidCamera()
+                                                    safeMap.setCamera(frameCamera)
                                                 }
-                                            }
-
-                                            // 3. Fly along the curve-aware path
-                                            val targetSpeedMetersPerSecond = 750.0
-                                            
-                                            for (i in 0 until finalFlightPath.size - 1) {
-                                                val current = finalFlightPath[i]
-                                                val next = finalFlightPath[i + 1]
-                                                
-                                                // Calculate heading towards the next point
-                                                val flightHeading = calculateHeading(current, next)
-                                                
-                                                // Calculate distance to determine duration
-                                                val distanceMeters = haversineDistance(current, next)
-                                                
-                                                // Duration = distance / speed
-                                                // Clamp duration to [100ms, 10000ms]
-                                                val calculatedDuration = (distanceMeters / targetSpeedMetersPerSecond * 1000).toLong()
-                                                val segmentDuration = calculatedDuration.coerceIn(250, 2000)
-                                                
-                                                val flightCamera = camera {
-                                                    center = latLngAltitude {
-                                                        latitude = current.latitude
-                                                        longitude = current.longitude
-                                                        altitude = 0.0
-                                                    }
-                                                    heading = flightHeading
-                                                    tilt = 50.0
-                                                    range = 3000.0
-                                                }
-                                                
-                                                // Animate to this segment's view
-                                                safeMap.flyCameraTo(
-                                                    flyToOptions {
-                                                        endCamera = flightCamera
-                                                        durationInMillis = segmentDuration
-                                                    }
-                                                )
-                                                
-                                                // Wait for this segment to finish
-                                                safeMap.awaitCameraAnimation()
                                             }
                                         }
                                     },
@@ -333,4 +322,43 @@ class RouteSampleActivity : ComponentActivity() {
             }
         }
     }
+}
+
+/**
+ * Instantly finds the mathematical coordinate along the path given an absolute distance in meters.
+ * Replaces expensive haversine math inside the render loop with a precomputed distance array lookup.
+ */
+private fun getInterpolatedPoint(distance: Double, path: List<LatLng>, cumulativeDistances: DoubleArray): LatLng {
+    if (distance <= 0.0) return path.first()
+    if (distance >= cumulativeDistances.last()) return path.last()
+    
+    var idx = cumulativeDistances.binarySearch(distance)
+    if (idx < 0) {
+        idx = -(idx + 1) - 1 // insertion point - 1
+    }
+    idx = idx.coerceIn(0, cumulativeDistances.size - 2)
+    
+    val p1 = path[idx]
+    val p2 = path[idx + 1]
+    val d1 = cumulativeDistances[idx]
+    val d2 = cumulativeDistances[idx + 1]
+    
+    val fraction = (distance - d1) / (d2 - d1)
+    if (fraction <= 0.0) return p1
+    if (fraction >= 1.0) return p2
+    
+    val lat = p1.latitude + (p2.latitude - p1.latitude) * fraction
+    val lng = p1.longitude + (p2.longitude - p1.longitude) * fraction
+    return LatLng(lat, lng)
+}
+
+/**
+ * Ensures the camera takes the shortest rotational path (e.g., crossing 359 to 0 smoothly)
+ * instead of violently spinning backward.
+ */
+private fun slerpHeading(current: Float, target: Float, factor: Float): Float {
+    var dh = target - current
+    while (dh > 180f) dh -= 360f
+    while (dh <= -180f) dh += 360f
+    return current + dh * factor
 }
