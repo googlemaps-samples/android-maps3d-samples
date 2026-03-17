@@ -14,6 +14,7 @@
 
 package com.example.advancedmaps3dsamples.scenarios
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -68,6 +69,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -115,8 +117,12 @@ class RouteSampleActivity : ComponentActivity() {
             val coroutineScope = rememberCoroutineScope()
             var currentPolyline by remember { mutableStateOf<Polyline?>(null) }
 
-            // Show the critical API Key leakage warning immediately on load
-            var displayWarning by remember { mutableStateOf(true) }
+            val context = LocalContext.current
+            val sharedPrefs = remember { context.getSharedPreferences("route_prefs", Context.MODE_PRIVATE) }
+            val warningCount = remember { sharedPrefs.getInt("warning_count", 0) }
+
+            // Show the critical API Key leakage warning immediately on load (max 2 times)
+            var displayWarning by remember { mutableStateOf(warningCount < 2) }
 
             // Dynamic tracking state
             var cameraRange by remember { mutableStateOf(1500f) }
@@ -286,12 +292,17 @@ class RouteSampleActivity : ComponentActivity() {
                                                 }
                                                 altitudeMode = AltitudeMode.CLAMP_TO_GROUND
                                                 url = activeUrl
-                                                scale = vector3D { x = 20.0; y = 20.0; z = 20.0 }
-                                                orientation = orientation {
-                                                    heading = currentHeading.toDouble().toHeading()
-                                                    tilt = 0.0
-                                                    roll = 0.0
-                                                }
+                                                    // Custom orientation parameters for different models
+                                                    val customScale = if (isActiveRedCar) 20.0 else 20.0
+                                                    val customTilt = -90.0 // Pitch upright 
+                                                    val customHeadingOffset = 0.0 // To adjust if facing sideways
+                                                    
+                                                    scale = vector3D { x = customScale; y = customScale; z = customScale }
+                                                    orientation = orientation {
+                                                        heading = (currentHeading.toDouble() + customHeadingOffset).toHeading()
+                                                        tilt = customTilt
+                                                        roll = 0.0
+                                                    }
                                             })
                                             if (activeId == null && m != null) {
                                                 if (isActiveRedCar) progressRedCarId = m.id else progressBananaCarId = m.id
@@ -552,17 +563,27 @@ class RouteSampleActivity : ComponentActivity() {
                         }
 
                         if (displayWarning) {
-                            AlertDialog(onDismissRequest = { displayWarning = false }, icon = {
-                                Icon(Icons.Filled.Warning, contentDescription = null)
-                            }, title = {
-                                Text("Security Warning")
-                            }, text = {
-                                Text("This sample makes a direct REST API call from a mobile client to the Google Maps Routes API. In a production application, doing this exposes your API key to malicious extraction.\n\nAlways proxy your Routes API requests through a secure backend server!")
-                            }, confirmButton = {
-                                TextButton(onClick = { displayWarning = false }) {
-                                    Text("I Understand")
+                            val dismissWarning = {
+                                displayWarning = false
+                                sharedPrefs.edit().putInt("warning_count", warningCount + 1).apply()
+                            }
+                            AlertDialog(
+                                onDismissRequest = dismissWarning,
+                                icon = {
+                                    Icon(Icons.Filled.Warning, contentDescription = null)
+                                },
+                                title = {
+                                    Text("Security Warning")
+                                },
+                                text = {
+                                    Text("This sample makes a direct REST API call from a mobile client to the Google Maps Routes API. In a production application, doing this exposes your API key to malicious extraction.\n\nAlways proxy your Routes API requests through a secure backend server!")
+                                },
+                                confirmButton = {
+                                    TextButton(onClick = dismissWarning) {
+                                        Text("I Understand")
+                                    }
                                 }
-                            })
+                            )
                         }
                     }
                 }
