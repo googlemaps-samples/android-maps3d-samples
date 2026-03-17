@@ -22,6 +22,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -279,12 +280,16 @@ class RouteSampleActivity : ComponentActivity() {
                                         if (elapsedDistance >= totalDistance) {
                                             elapsedDistance = totalDistance
                                             isPlaying = false
+                                        } else if (elapsedDistance <= 0f) {
+                                            elapsedDistance = 0f
+                                            isPlaying = false
                                         }
                                     }
 
                                     val doubleElapsed = elapsedDistance.toDouble()
                                     val targetPos = getInterpolatedPoint(doubleElapsed, rawPath, cumulativeDistances)
-                                    val lookaheadDist = doubleElapsed + (baseSpeedMps * lookaheadSeconds)
+                                    val lookaheadSpeed = if (kotlin.math.abs(baseSpeedMps) < 1f) 150.0 else kotlin.math.abs(baseSpeedMps).toDouble()
+                                    val lookaheadDist = doubleElapsed + (lookaheadSpeed * lookaheadSeconds)
                                     val lookaheadPos = getInterpolatedPoint(lookaheadDist, rawPath, cumulativeDistances)
                                     val mathHeading = calculateHeading(targetPos, lookaheadPos).toFloat()
 
@@ -565,8 +570,10 @@ class RouteSampleActivity : ComponentActivity() {
                                     }) {
                                 Slider(
                                     value = baseSpeedMps,
-                                    onValueChange = { baseSpeedMps = it },
-                                    valueRange = 10f..1500f,
+                                    onValueChange = { 
+                                        baseSpeedMps = if (kotlin.math.abs(it) < 150f) 0f else it
+                                    },
+                                    valueRange = -1500f..1500f,
                                     modifier = Modifier
                                         .requiredWidth(300.dp)
                                         .requiredHeight(48.dp)
@@ -575,6 +582,14 @@ class RouteSampleActivity : ComponentActivity() {
                                             transformOrigin = TransformOrigin(0.5f, 0.5f)
                                         }
                                         .align(Alignment.Center))
+                                        
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .requiredWidth(16.dp)
+                                        .requiredHeight(4.dp)
+                                        .background(androidx.compose.ui.graphics.Color.White, shape = androidx.compose.foundation.shape.CircleShape)
+                                )
                             }
                         }
 
