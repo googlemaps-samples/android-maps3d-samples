@@ -66,9 +66,7 @@ import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -80,6 +78,7 @@ import com.example.advancedmaps3dsamples.R
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
 import com.example.advancedmaps3dsamples.utils.calculateHeading
 import com.example.advancedmaps3dsamples.utils.haversineDistance
+import com.example.advancedmaps3dsamples.utils.toHeading
 import com.example.advancedmaps3dsamples.utils.toValidCamera
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.GoogleMap3D
@@ -88,7 +87,6 @@ import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.ImageView
-import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.Polyline
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
@@ -97,10 +95,8 @@ import com.google.android.gms.maps3d.model.modelOptions
 import com.google.android.gms.maps3d.model.orientation
 import com.google.android.gms.maps3d.model.polylineOptions
 import com.google.android.gms.maps3d.model.vector3D
-import com.example.advancedmaps3dsamples.utils.toHeading
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 sealed interface RouteTracker {
     val name: String
@@ -123,17 +119,17 @@ sealed interface RouteTracker {
         url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb",
         scale = 60.0,
         tilt = -90.0,
-        hoverAltitude = 10.0,
+        hoverAltitude = 20.0,
         headingOffset = 90.0
     )
 
     data object BananaCar : Model(
         name = "Banana Car",
         url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb",
-        scale = 0.02,
+        scale = 0.15,
         tilt = -90.0,
-        hoverAltitude = 0.0,
-        headingOffset = 0.0
+        hoverAltitude = 20.0,
+        headingOffset = 90.0
     )
 }
 
@@ -345,7 +341,7 @@ class RouteSampleActivity : ComponentActivity() {
                                                     }
                                                     url = tracker.url
                                                     scale = if (isActive) vector3D { x = tracker.scale; y = tracker.scale; z = tracker.scale } else vector3D { x = 0.001; y = 0.001; z = 0.001 }
-                                                    orientation = if (isActive) orientation { heading = 0.0; tilt = tracker.tilt; roll = (currentHeading.toDouble() + tracker.headingOffset).toHeading() } else orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
+                                                    orientation = if (isActive) orientation { heading = (currentHeading.toDouble() + tracker.headingOffset).toHeading(); tilt = tracker.tilt; roll = 0.0 } else orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
                                                 })
                                                 if (m != null) {
                                                     if (!trackerIds.containsKey(tracker)) trackerIds[tracker] = m.id
@@ -353,7 +349,7 @@ class RouteSampleActivity : ComponentActivity() {
                                                     // Immediately mutate properties directly on the Model object 
                                                     // to ensure the SDK runtime applies the changes bypassing any upsert builder caching
                                                     if (isActive) {
-                                                        m.orientation = orientation { heading = 0.0; tilt = tracker.tilt; roll = (currentHeading.toDouble() + tracker.headingOffset).toHeading() }
+                                                        m.orientation = orientation { heading = (currentHeading.toDouble() + tracker.headingOffset).toHeading(); tilt = tracker.tilt; roll = 0.0 }
                                                     } else {
                                                         m.orientation = orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
                                                     }
