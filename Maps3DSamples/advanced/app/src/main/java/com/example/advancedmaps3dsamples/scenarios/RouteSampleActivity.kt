@@ -206,7 +206,7 @@ class RouteSampleActivity : ComponentActivity() {
                             if (!flyModeActive) {
                                 // Clean up the tracking models if we exit fly mode
                                 val safeMap = map3D ?: return@LaunchedEffect
-                                val offscreen = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
+                                val offscreen = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
                                 // It is difficult to reliably know the IDs here without hoisting them.
                                 // But since we re-calculate everything when we re-enter, the next entry will generate new IDs 
                                 // and punt the inactive ones anyway. Ideally we would hoist the marker IDs too, but 
