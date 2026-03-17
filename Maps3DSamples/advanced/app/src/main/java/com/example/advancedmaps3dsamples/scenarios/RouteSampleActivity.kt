@@ -296,7 +296,7 @@ class RouteSampleActivity : ComponentActivity() {
                                                 altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
                                                 url = activeUrl
                                                     // Custom orientation parameters for different models
-                                                    val customScale = if (isActiveRedCar) 20.0 else 20.0
+                                                    val customScale = if (isActiveRedCar) 60.0 else 20.0
                                                     val customTilt = -90.0 // Pitch upright 
                                                     val customHeadingOffset = 0.0 // To adjust if facing sideways
                                                     
