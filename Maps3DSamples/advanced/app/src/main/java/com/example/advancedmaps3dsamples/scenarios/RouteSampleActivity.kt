@@ -130,7 +130,7 @@ sealed interface RouteTracker {
     data object BananaCar : Model(
         name = "Banana Car",
         url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb",
-        scale = 20.0,
+        scale = 2.0,
         tilt = -90.0,
         hoverAltitude = 0.0,
         headingOffset = 0.0
@@ -345,7 +345,7 @@ class RouteSampleActivity : ComponentActivity() {
                                                     }
                                                     url = tracker.url
                                                     scale = if (isActive) vector3D { x = tracker.scale; y = tracker.scale; z = tracker.scale } else vector3D { x = 0.001; y = 0.001; z = 0.001 }
-                                                    orientation = if (isActive) orientation { heading = (currentHeading.toDouble() + tracker.headingOffset).toHeading(); tilt = tracker.tilt; roll = 0.0 } else orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
+                                                    orientation = if (isActive) orientation { heading = 0.0; tilt = tracker.tilt; roll = (currentHeading.toDouble() + tracker.headingOffset) } else orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
                                                 })
                                                 if (m != null) {
                                                     if (!trackerIds.containsKey(tracker)) trackerIds[tracker] = m.id
@@ -353,7 +353,7 @@ class RouteSampleActivity : ComponentActivity() {
                                                     // Immediately mutate properties directly on the Model object 
                                                     // to ensure the SDK runtime applies the changes bypassing any upsert builder caching
                                                     if (isActive) {
-                                                        m.orientation = orientation { heading = (currentHeading.toDouble() + tracker.headingOffset).toHeading(); tilt = tracker.tilt; roll = 0.0 }
+                                                        m.orientation = orientation { heading = 0.0; tilt = tracker.tilt; roll = (currentHeading.toDouble() + tracker.headingOffset) }
                                                     } else {
                                                         m.orientation = orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
                                                     }
