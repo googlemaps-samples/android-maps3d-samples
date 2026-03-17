@@ -286,7 +286,7 @@ class RouteSampleActivity : ComponentActivity() {
                                                 }
                                                 altitudeMode = AltitudeMode.CLAMP_TO_GROUND
                                                 url = activeUrl
-                                                scale = vector3D { x = 5.0; y = 5.0; z = 5.0 }
+                                                scale = vector3D { x = 20.0; y = 20.0; z = 20.0 }
                                                 orientation = orientation {
                                                     heading = currentHeading.toDouble().toHeading()
                                                     tilt = 0.0
