@@ -50,6 +50,10 @@
             android:name=".scenarios.ScenariosActivity"
             android:exported="true"
             />
+        <activity
+            android:name=".scenarios.RouteSampleActivity"
+            android:exported="true"
+            />
     </application>
 
 </manifest>
