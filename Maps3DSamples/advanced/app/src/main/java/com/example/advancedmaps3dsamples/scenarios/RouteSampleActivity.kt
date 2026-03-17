@@ -24,6 +24,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
@@ -34,15 +36,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.material3.Slider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -60,7 +60,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.advancedmaps3dsamples.BuildConfig
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
-import com.example.advancedmaps3dsamples.utils.awaitCameraAnimation
 import com.example.advancedmaps3dsamples.utils.calculateHeading
 import com.example.advancedmaps3dsamples.utils.haversineDistance
 import com.example.advancedmaps3dsamples.utils.toValidCamera
@@ -69,10 +68,12 @@ import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DOptions
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
+import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.Polyline
 import com.google.android.gms.maps3d.model.camera
-import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
+import com.google.android.gms.maps3d.model.markerOptions
 import com.google.android.gms.maps3d.model.polylineOptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -91,65 +92,59 @@ class RouteSampleActivity : ComponentActivity() {
             var map3D by remember { mutableStateOf<GoogleMap3D?>(null) }
             val coroutineScope = rememberCoroutineScope()
             var currentPolyline by remember { mutableStateOf<Polyline?>(null) }
-            
+
             // Show the critical API Key leakage warning immediately on load
             var displayWarning by remember { mutableStateOf(true) }
-            
+
             // Dynamic tracking state
             var cameraRange by remember { mutableStateOf(1500f) }
 
             AdvancedMaps3DSamplesTheme {
                 Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    topBar = {
+                    modifier = Modifier.fillMaxSize(), topBar = {
                         CenterAlignedTopAppBar(
                             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                 titleContentColor = MaterialTheme.colorScheme.primary,
-                            ),
-                            title = {
+                            ), title = {
                                 Text("Routes API Integration")
-                            }
-                        )
-                    }
-                ) { innerPadding ->
-                    Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-                        
+                            })
+                    }) { innerPadding ->
+                    Box(modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)) {
+
                         // The Map3D View wrapper
                         // WHY ANDROIDVIEW?
                         // Map3DView is a traditional Android View, but our UI is built using Modern Jetpack Compose.
                         // AndroidView acts as a bridge, allowing us to embed traditional Views directly into our Compose hierarchy.
                         // We provide a factory to create the view, an update block to handle changes, and an onRelease 
                         // block to clean up resources when the Compose node leaves the screen.
-                        AndroidView(
-                            modifier = Modifier.fillMaxSize(),
-                            factory = { context ->
-                                val options = Map3DOptions(
-                                    centerLat = 21.350,
-                                    centerLng = -157.800,
-                                    centerAlt = 0.0,
-                                    tilt = 60.0,
-                                    range = 25000.0
-                                )
-                                val view = Map3DView(context, options)
-                                view.onCreate(savedInstanceState)
-                                view
-                            },
-                            update = { view ->
-                                view.getMap3DViewAsync(object : OnMap3DViewReadyCallback {
-                                    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-                                        map3D = googleMap3D
-                                    }
-                                    override fun onError(e: Exception) {
-                                        // Simple error log
-                                    }
-                                })
-                            },
-                            onRelease = { view ->
-                                map3D = null
-                                view.onDestroy()
-                            }
-                        )
+                        AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
+                            val options = Map3DOptions(
+                                centerLat = 21.350,
+                                centerLng = -157.800,
+                                centerAlt = 0.0,
+                                tilt = 60.0,
+                                range = 25000.0
+                            )
+                            val view = Map3DView(context, options)
+                            view.onCreate(savedInstanceState)
+                            view
+                        }, update = { view ->
+                            view.getMap3DViewAsync(object : OnMap3DViewReadyCallback {
+                                override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
+                                    map3D = googleMap3D
+                                }
+
+                                override fun onError(e: Exception) {
+                                    // Simple error log
+                                }
+                            })
+                        }, onRelease = { view ->
+                            map3D = null
+                            view.onDestroy()
+                        })
 
                         // Floating Action Button to trigger the route fetch
                         Button(
@@ -158,92 +153,133 @@ class RouteSampleActivity : ComponentActivity() {
                                 val origin = LatLng(21.307043, -157.858984)
                                 val dest = LatLng(21.390177, -157.719454)
                                 viewModel.fetchRoute(BuildConfig.MAPS3D_API_KEY, origin, dest)
-                            },
-                            modifier = Modifier
+                            }, modifier = Modifier
                                 .align(Alignment.BottomStart)
                                 .padding(32.dp)
                         ) {
                             Text("Fetch & Draw Route")
                         }
 
-                                Button(
-                                    onClick = {
-                                        val state = uiState as? RouteUiState.Success ?: return@Button
-                                        val safeMap = map3D ?: return@Button
-                                        
-                                        coroutineScope.launch {
-                                            val rawPath = state.decodedPolyline
-                                            if (rawPath.size < 2) return@launch
+                        Button(
+                            onClick = {
+                                val state = uiState as? RouteUiState.Success ?: return@Button
+                                val safeMap = map3D ?: return@Button
 
-                                            // 1. DITCHING WAYPOINTS: Calculate true cumulative distance for the entire pipeline.
-                                            val cumulativeDistances = DoubleArray(rawPath.size)
-                                            cumulativeDistances[0] = 0.0
-                                            for (i in 1 until rawPath.size) {
-                                                cumulativeDistances[i] = cumulativeDistances[i - 1] + haversineDistance(rawPath[i - 1], rawPath[i])
+                                coroutineScope.launch {
+                                    val rawPath = state.decodedPolyline
+                                    if (rawPath.size < 2) return@launch
+
+                                    // 1. DITCHING WAYPOINTS: Calculate true cumulative distance for the entire pipeline.
+                                    val cumulativeDistances = DoubleArray(rawPath.size)
+                                    cumulativeDistances[0] = 0.0
+                                    for (i in 1 until rawPath.size) {
+                                        cumulativeDistances[i] =
+                                            cumulativeDistances[i - 1] + haversineDistance(
+                                                rawPath[i - 1],
+                                                rawPath[i]
+                                            )
+                                    }
+                                    val totalDistance = cumulativeDistances.last()
+
+                                    // 2. PHYSICS INITIALIZATION
+                                    val baseSpeedMps = 750.0
+                                    val lookaheadSeconds = 8.0
+                                    val lerpFactor =
+                                        0.05f // 5% stiffness per frame for smooth rubber banding
+
+                                    var elapsedDistance = 0.0
+                                    var currentLat = rawPath[0].latitude
+                                    var currentLng = rawPath[0].longitude
+                                    var currentHeading =
+                                        calculateHeading(rawPath[0], rawPath[1]).toFloat()
+
+                                    // 3. CONTINUOUS RENDERING LOOP
+                                    var lastFrameTime = 0L
+                                    var progressMarkerId: String? = null
+
+                                    while (elapsedDistance < totalDistance) {
+                                        withFrameMillis { frameTime ->
+                                            if (lastFrameTime == 0L) {
+                                                lastFrameTime = frameTime
+                                                return@withFrameMillis
                                             }
-                                            val totalDistance = cumulativeDistances.last()
 
-                                            // 2. PHYSICS INITIALIZATION
-                                            val baseSpeedMps = 750.0
-                                            val lookaheadSeconds = 8.0 
-                                            val lerpFactor = 0.05f // 5% stiffness per frame for smooth rubber banding
+                                            val dtMs = frameTime - lastFrameTime
+                                            lastFrameTime = frameTime
 
-                                            var elapsedDistance = 0.0
-                                            var currentLat = rawPath[0].latitude
-                                            var currentLng = rawPath[0].longitude
-                                            var currentHeading = calculateHeading(rawPath[0], rawPath[1]).toFloat()
+                                            // Advance logical distance
+                                            elapsedDistance += baseSpeedMps * (dtMs / 1000.0)
+                                            if (elapsedDistance > totalDistance) elapsedDistance =
+                                                totalDistance
 
-                                            // 3. CONTINUOUS RENDERING LOOP
-                                            var lastFrameTime = 0L
+                                            // Find mathematical target point
+                                            val targetPos = getInterpolatedPoint(
+                                                elapsedDistance,
+                                                rawPath,
+                                                cumulativeDistances
+                                            )
 
-                                            while (elapsedDistance < totalDistance) {
-                                                withFrameMillis { frameTime ->
-                                                    if (lastFrameTime == 0L) {
-                                                        lastFrameTime = frameTime
-                                                        return@withFrameMillis
-                                                    }
-                                                    
-                                                    val dtMs = frameTime - lastFrameTime
-                                                    lastFrameTime = frameTime
-                                                    
-                                                    // Advance logical distance
-                                                    elapsedDistance += baseSpeedMps * (dtMs / 1000.0)
-                                                    if (elapsedDistance > totalDistance) elapsedDistance = totalDistance
-                                                    
-                                                    // Find mathematical target point
-                                                    val targetPos = getInterpolatedPoint(elapsedDistance, rawPath, cumulativeDistances)
-                                                    
-                                                    // Cinematic Inertia View: find lookahead point 8 seconds in future
-                                                    val lookaheadDist = elapsedDistance + (baseSpeedMps * lookaheadSeconds)
-                                                    val lookaheadPos = getInterpolatedPoint(lookaheadDist, rawPath, cumulativeDistances)
-                                                    
-                                                    // Mathematical heading
-                                                    val mathHeading = calculateHeading(targetPos, lookaheadPos).toFloat()
-                                                    
-                                                    // Apply LERP for Physical Position
-                                                    currentLat += (targetPos.latitude - currentLat) * lerpFactor
-                                                    currentLng += (targetPos.longitude - currentLng) * lerpFactor
-                                                    
-                                                    // Apply SLERP for Heading
-                                                    currentHeading = slerpHeading(currentHeading, mathHeading, lerpFactor)
-                                                    
-                                                    // Render directly to WebGL engine (no animateTo queueing!)
-                                                    val frameCamera = camera {
-                                                        center = latLngAltitude {
-                                                            latitude = currentLat
-                                                            longitude = currentLng
-                                                            // Provide a fixed altitude as Android lacks synchronous ElevationService
-                                                            altitude = 250.0
-                                                        }
-                                                        heading = currentHeading.toDouble()
-                                                        tilt = 65.0
-                                                        range = cameraRange.toDouble() // Hooked to slider
-                                                    }.toValidCamera()
-                                                    safeMap.setCamera(frameCamera)
+                                            // Cinematic Inertia View: find lookahead point 8 seconds in future
+                                            val lookaheadDist =
+                                                elapsedDistance + (baseSpeedMps * lookaheadSeconds)
+                                            val lookaheadPos = getInterpolatedPoint(
+                                                lookaheadDist,
+                                                rawPath,
+                                                cumulativeDistances
+                                            )
+
+                                            // Mathematical heading
+                                            val mathHeading =
+                                                calculateHeading(targetPos, lookaheadPos).toFloat()
+
+                                            // Apply LERP for Physical Position
+                                            currentLat += (targetPos.latitude - currentLat) * lerpFactor
+                                            currentLng += (targetPos.longitude - currentLng) * lerpFactor
+
+                                            // Apply SLERP for Heading
+                                            currentHeading = slerpHeading(
+                                                currentHeading,
+                                                mathHeading,
+                                                lerpFactor
+                                            )
+
+                                            // Render directly to WebGL engine (no animateTo queueing!)
+                                            val frameCamera = camera {
+                                                center = latLngAltitude {
+                                                    latitude = currentLat
+                                                    longitude = currentLng
+                                                    // Provide a fixed altitude as Android lacks synchronous ElevationService
+                                                    altitude = 250.0
                                                 }
+                                                heading = currentHeading.toDouble()
+                                                tilt = 65.0
+                                                range = cameraRange.toDouble() // Hooked to slider
+                                            }.toValidCamera()
+                                            safeMap.setCamera(frameCamera)
+
+                                            // 4. DYNAMIC PROGRESS MARKER 
+                                            // 'Upsert' pattern: Map3D allows us to update a marker by passing 
+                                            // an identical ID into addMarker, bypassing standard property setters.
+                                            val markerInstance = safeMap.addMarker(markerOptions {
+                                                if (progressMarkerId != null) {
+                                                    id = progressMarkerId!!
+                                                }
+                                                position = latLngAltitude {
+                                                    latitude = targetPos.latitude
+                                                    longitude = targetPos.longitude
+                                                    altitude = 0.0 
+                                                }
+                                                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                                            })
+                                            
+                                            // Capture the generated ID on the first frame
+                                            if (progressMarkerId == null && markerInstance != null) {
+                                                progressMarkerId = markerInstance.id
                                             }
                                         }
-                                    },
+                                    }
+                                }
+                            },
                             enabled = uiState is RouteUiState.Success,
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
@@ -259,14 +295,15 @@ class RouteSampleActivity : ComponentActivity() {
                                     modifier = Modifier.align(Alignment.Center)
                                 )
                             }
+
                             is RouteUiState.Success -> {
                                 // Draw the polyline once the map is ready and we have successful data
                                 LaunchedEffect(state.decodedPolyline, map3D) {
                                     val safeMap = map3D ?: return@LaunchedEffect
-                                    
+
                                     // Clean up previous line if it exists
                                     currentPolyline?.remove()
-                                    
+
                                     // DRAW POLYLINE (Raw version, as requested)
                                     val polylinePath = state.decodedPolyline.map { latLng ->
                                         latLngAltitude {
@@ -275,7 +312,7 @@ class RouteSampleActivity : ComponentActivity() {
                                             altitude = 0.0
                                         }
                                     }
-                                    
+
                                     val lineOptions = polylineOptions {
                                         this.path = polylinePath
                                         strokeColor = android.graphics.Color.BLUE
@@ -283,7 +320,7 @@ class RouteSampleActivity : ComponentActivity() {
                                     }
 
                                     currentPolyline = safeMap.addPolyline(lineOptions)
-                                    
+
                                     // Move the camera to see the full route
                                     val routeCamera = camera {
                                         center = latLngAltitude {
@@ -297,11 +334,14 @@ class RouteSampleActivity : ComponentActivity() {
                                     safeMap.setCamera(routeCamera)
                                 }
                             }
+
                             is RouteUiState.Error -> {
                                 // Display error overlay
-                                Box(modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .padding(32.dp)) {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .padding(32.dp)
+                                ) {
                                     Text(
                                         text = state.message,
                                         color = MaterialTheme.colorScheme.error,
@@ -309,9 +349,11 @@ class RouteSampleActivity : ComponentActivity() {
                                     )
                                 }
                             }
-                            RouteUiState.Idle -> { /* Do nothing */ }
+
+                            RouteUiState.Idle -> { /* Do nothing */
+                            }
                         }
-                        
+
                         // Vertical Range Slider Hooked to Dynamic UI State
                         // 
                         // WHY A CUSTOM VERTICAL SLIDER?
@@ -325,13 +367,13 @@ class RouteSampleActivity : ComponentActivity() {
                         if (uiState is RouteUiState.Success) {
                             var sliderInteractionTime by remember { mutableStateOf(System.currentTimeMillis()) }
                             var isSliderActive by remember { mutableStateOf(true) }
-                            
+
                             LaunchedEffect(sliderInteractionTime) {
                                 isSliderActive = true
                                 delay(3000)
                                 isSliderActive = false
                             }
-                            
+
                             val sliderAlpha by animateFloatAsState(
                                 targetValue = if (isSliderActive) 0.9f else 0.3f,
                                 animationSpec = tween(durationMillis = 500),
@@ -352,8 +394,7 @@ class RouteSampleActivity : ComponentActivity() {
                                                 sliderInteractionTime = System.currentTimeMillis()
                                             }
                                         }
-                                    }
-                            ) {
+                                    }) {
                                 Slider(
                                     value = cameraRange,
                                     onValueChange = { cameraRange = it },
@@ -365,29 +406,22 @@ class RouteSampleActivity : ComponentActivity() {
                                             rotationZ = 270f
                                             transformOrigin = TransformOrigin(0.5f, 0.5f)
                                         }
-                                        .align(Alignment.Center)
-                                )
+                                        .align(Alignment.Center))
                             }
                         }
 
                         if (displayWarning) {
-                            AlertDialog(
-                                onDismissRequest = { displayWarning = false },
-                                icon = {
-                                    Icon(Icons.Filled.Warning, contentDescription = null)
-                                },
-                                title = {
-                                    Text("Security Warning")
-                                },
-                                text = {
-                                    Text("This sample makes a direct REST API call from a mobile client to the Google Maps Routes API. In a production application, doing this exposes your API key to malicious extraction.\n\nAlways proxy your Routes API requests through a secure backend server!")
-                                },
-                                confirmButton = {
-                                    TextButton(onClick = { displayWarning = false }) {
-                                        Text("I Understand")
-                                    }
+                            AlertDialog(onDismissRequest = { displayWarning = false }, icon = {
+                                Icon(Icons.Filled.Warning, contentDescription = null)
+                            }, title = {
+                                Text("Security Warning")
+                            }, text = {
+                                Text("This sample makes a direct REST API call from a mobile client to the Google Maps Routes API. In a production application, doing this exposes your API key to malicious extraction.\n\nAlways proxy your Routes API requests through a secure backend server!")
+                            }, confirmButton = {
+                                TextButton(onClick = { displayWarning = false }) {
+                                    Text("I Understand")
                                 }
-                            )
+                            })
                         }
                     }
                 }
@@ -400,25 +434,29 @@ class RouteSampleActivity : ComponentActivity() {
  * Instantly finds the mathematical coordinate along the path given an absolute distance in meters.
  * Replaces expensive haversine math inside the render loop with a precomputed distance array lookup.
  */
-private fun getInterpolatedPoint(distance: Double, path: List<LatLng>, cumulativeDistances: DoubleArray): LatLng {
+private fun getInterpolatedPoint(
+    distance: Double,
+    path: List<LatLng>,
+    cumulativeDistances: DoubleArray
+): LatLng {
     if (distance <= 0.0) return path.first()
     if (distance >= cumulativeDistances.last()) return path.last()
-    
+
     var idx = cumulativeDistances.binarySearch(distance)
     if (idx < 0) {
         idx = -(idx + 1) - 1 // insertion point - 1
     }
     idx = idx.coerceIn(0, cumulativeDistances.size - 2)
-    
+
     val p1 = path[idx]
     val p2 = path[idx + 1]
     val d1 = cumulativeDistances[idx]
     val d2 = cumulativeDistances[idx + 1]
-    
+
     val fraction = (distance - d1) / (d2 - d1)
     if (fraction <= 0.0) return p1
     if (fraction >= 1.0) return p2
-    
+
     val lat = p1.latitude + (p2.latitude - p1.latitude) * fraction
     val lng = p1.longitude + (p2.longitude - p1.longitude) * fraction
     return LatLng(lat, lng)
