@@ -101,7 +101,37 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-enum class TrackerStyle { MARKER, RED_CAR, BANANA_CAR }
+sealed interface RouteTracker {
+    val name: String
+
+    data object Marker : RouteTracker {
+        override val name = "Marker"
+    }
+
+    sealed class Model(
+        override val name: String,
+        val url: String,
+        val scale: Double,
+        val tilt: Double,
+        val hoverAltitude: Double
+    ) : RouteTracker
+
+    data object RedCar : Model(
+        name = "Red Car",
+        url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb",
+        scale = 60.0,
+        tilt = -90.0,
+        hoverAltitude = 1.0
+    )
+
+    data object BananaCar : Model(
+        name = "Banana Car",
+        url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb",
+        scale = 20.0,
+        tilt = -90.0,
+        hoverAltitude = 0.0
+    )
+}
 
 @AndroidEntryPoint
 @OptIn(ExperimentalMaterial3Api::class)
@@ -127,7 +157,7 @@ class RouteSampleActivity : ComponentActivity() {
             // Dynamic tracking state
             var cameraRange by remember { mutableStateOf(1500f) }
             var baseSpeedMps by remember { mutableFloatStateOf(150f) }
-            var trackerStyle by remember { mutableStateOf(TrackerStyle.MARKER) }
+            var currentTracker by remember { mutableStateOf<RouteTracker>(RouteTracker.Marker) }
             
             // Playback controls state
             var elapsedDistance by remember { mutableFloatStateOf(0f) }
@@ -146,17 +176,17 @@ class RouteSampleActivity : ComponentActivity() {
                                 Text("Routes API Integration")
                             }, actions = {
                                 IconButton(onClick = {
-                                    trackerStyle = when (trackerStyle) {
-                                        TrackerStyle.MARKER -> TrackerStyle.RED_CAR
-                                        TrackerStyle.RED_CAR -> TrackerStyle.BANANA_CAR
-                                        TrackerStyle.BANANA_CAR -> TrackerStyle.MARKER
+                                    currentTracker = when (currentTracker) {
+                                        RouteTracker.Marker -> RouteTracker.RedCar
+                                        RouteTracker.RedCar -> RouteTracker.BananaCar
+                                        RouteTracker.BananaCar -> RouteTracker.Marker
                                     }
                                 }) {
                                     Icon(
-                                        imageVector = when (trackerStyle) {
-                                            TrackerStyle.MARKER -> Icons.Default.Place
-                                            TrackerStyle.RED_CAR -> Icons.Default.DirectionsCar
-                                            TrackerStyle.BANANA_CAR -> Icons.Default.Star
+                                        imageVector = when (currentTracker) {
+                                            RouteTracker.Marker -> Icons.Default.Place
+                                            RouteTracker.RedCar -> Icons.Default.DirectionsCar
+                                            RouteTracker.BananaCar -> Icons.Default.Star
                                         },
                                         contentDescription = "Toggle Tracker Style"
                                     )
@@ -233,9 +263,7 @@ class RouteSampleActivity : ComponentActivity() {
                             var currentHeading = calculateHeading(rawPath[0], rawPath[1]).toFloat()
 
                             var lastFrameTime = 0L
-                            var progressMarkerId: String? = null
-                            var progressRedCarId: String? = null
-                            var progressBananaCarId: String? = null
+                            val trackerIds = mutableMapOf<RouteTracker, String>()
 
                             while (flyModeActive) {
                                 withFrameMillis { frameTime ->
@@ -277,93 +305,41 @@ class RouteSampleActivity : ComponentActivity() {
                                     safeMap.setCamera(frameCamera)
 
                                     // MARKER / MODEL UPSERT LOGIC
-                                    when (trackerStyle) {
-                                        TrackerStyle.RED_CAR, TrackerStyle.BANANA_CAR -> {
-                                            val isActiveRedCar = trackerStyle == TrackerStyle.RED_CAR
-                                            val activeUrl = if (isActiveRedCar) "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb" else "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb"
-                                            val activeId = if (isActiveRedCar) progressRedCarId else progressBananaCarId
-
-                                            val m = safeMap.addModel(modelOptions {
-                                                if (activeId != null) id = activeId
-                                                // Custom positional parameters for different models
-                                                val customAltitude = if (isActiveRedCar) 1.0 else 0.0
-                                                
-                                                position = latLngAltitude {
-                                                    latitude = targetPos.latitude
-                                                    longitude = targetPos.longitude
-                                                    altitude = customAltitude
-                                                }
-                                                altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-                                                url = activeUrl
-                                                    // Custom orientation parameters for different models
-                                                    val customScale = if (isActiveRedCar) 60.0 else 20.0
-                                                    val customTilt = -90.0 // Pitch upright 
-                                                    val customHeadingOffset = 0.0 // To adjust if facing sideways
-                                                    
-                                                    scale = vector3D { x = customScale; y = customScale; z = customScale }
-                                                    orientation = orientation {
-                                                        heading = (currentHeading.toDouble() + customHeadingOffset).toHeading()
-                                                        tilt = customTilt
-                                                        roll = 0.0
+                                    // MARKER / MODEL UPSERT LOGIC
+                                    val trackers = listOf(RouteTracker.Marker, RouteTracker.RedCar, RouteTracker.BananaCar)
+                                    for (tracker in trackers) {
+                                        val isActive = tracker == currentTracker
+                                        
+                                        when (tracker) {
+                                            is RouteTracker.Marker -> {
+                                                val m = safeMap.addMarker(markerOptions {
+                                                    trackerIds[tracker]?.let { id = it }
+                                                    if (isActive) {
+                                                        position = latLngAltitude { latitude = targetPos.latitude; longitude = targetPos.longitude; altitude = 0.0 }
+                                                        altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                                                    } else {
+                                                        position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
+                                                        altitudeMode = AltitudeMode.ABSOLUTE
                                                     }
-                                            })
-                                            if (activeId == null && m != null) {
-                                                if (isActiveRedCar) progressRedCarId = m.id else progressBananaCarId = m.id
-                                            }
-
-                                            val inactiveId = if (isActiveRedCar) progressBananaCarId else progressRedCarId
-                                            if (inactiveId != null) {
-                                                safeMap.addModel(modelOptions {
-                                                    id = inactiveId
-                                                    position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
-                                                    altitudeMode = AltitudeMode.ABSOLUTE
-                                                    url = if (isActiveRedCar) "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb" else "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
-                                                    scale = vector3D { x = 0.001; y = 0.001; z = 0.001 }
-                                                    orientation = orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
+                                                    setStyle(ImageView(R.drawable.car))
                                                 })
+                                                if (m != null && !trackerIds.containsKey(tracker)) trackerIds[tracker] = m.id
                                             }
-
-                                            if (progressMarkerId != null) {
-                                                safeMap.addMarker(markerOptions {
-                                                    id = progressMarkerId!!
-                                                    position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
-                                                    altitudeMode = AltitudeMode.ABSOLUTE
+                                            is RouteTracker.Model -> {
+                                                val m = safeMap.addModel(modelOptions {
+                                                    trackerIds[tracker]?.let { id = it }
+                                                    if (isActive) {
+                                                        position = latLngAltitude { latitude = targetPos.latitude; longitude = targetPos.longitude; altitude = tracker.hoverAltitude }
+                                                        altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+                                                    } else {
+                                                        position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
+                                                        altitudeMode = AltitudeMode.ABSOLUTE
+                                                    }
+                                                    url = tracker.url
+                                                    scale = if (isActive) vector3D { x = tracker.scale; y = tracker.scale; z = tracker.scale } else vector3D { x = 0.001; y = 0.001; z = 0.001 }
+                                                    orientation = if (isActive) orientation { heading = currentHeading.toDouble().toHeading(); tilt = tracker.tilt; roll = 0.0 } else orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
                                                 })
-                                            }
-                                        }
-                                        TrackerStyle.MARKER -> {
-                                            val m = safeMap.addMarker(markerOptions {
-                                                if (progressMarkerId != null) id = progressMarkerId!!
-                                                position = latLngAltitude {
-                                                    latitude = targetPos.latitude
-                                                    longitude = targetPos.longitude
-                                                    altitude = 0.0 
-                                                }
-                                                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                                                setStyle(ImageView(R.drawable.car))
-                                            })
-                                            if (progressMarkerId == null && m != null) progressMarkerId = m.id
-
-                                            if (progressRedCarId != null) {
-                                                safeMap.addModel(modelOptions {
-                                                    id = progressRedCarId!!
-                                                    position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
-                                                    altitudeMode = AltitudeMode.ABSOLUTE
-                                                    url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
-                                                    scale = vector3D { x = 0.001; y = 0.001; z = 0.001 }
-                                                    orientation = orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
-                                                })
-                                            }
-                                            
-                                            if (progressBananaCarId != null) {
-                                                safeMap.addModel(modelOptions {
-                                                    id = progressBananaCarId!!
-                                                    position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
-                                                    altitudeMode = AltitudeMode.ABSOLUTE
-                                                    url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb"
-                                                    scale = vector3D { x = 0.001; y = 0.001; z = 0.001 }
-                                                    orientation = orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
-                                                })
+                                                if (m != null && !trackerIds.containsKey(tracker)) trackerIds[tracker] = m.id
                                             }
                                         }
                                     }
