@@ -84,6 +84,7 @@ import com.google.android.gms.maps3d.model.modelOptions
 import com.google.android.gms.maps3d.model.orientation
 import com.google.android.gms.maps3d.model.polylineOptions
 import com.google.android.gms.maps3d.model.vector3D
+import com.example.advancedmaps3dsamples.utils.toHeading
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -282,7 +283,7 @@ class RouteSampleActivity : ComponentActivity() {
                                                     // Provide a fixed altitude as Android lacks synchronous ElevationService
                                                     altitude = 250.0
                                                 }
-                                                heading = currentHeading.toDouble()
+                                                heading = currentHeading.toDouble().toHeading()
                                                 tilt = 65.0
                                                 range = cameraRange.toDouble() // Hooked to slider
                                             }.toValidCamera()
@@ -308,7 +309,7 @@ class RouteSampleActivity : ComponentActivity() {
                                                         url = activeUrl
                                                         scale = vector3D { x = 20.0; y = 20.0; z = 20.0 } // Scaled up to be visible at map range
                                                         orientation = orientation {
-                                                            heading = currentHeading.toDouble()
+                                                            heading = currentHeading.toDouble().toHeading()
                                                             tilt = 0.0
                                                             roll = 0.0
                                                         }
