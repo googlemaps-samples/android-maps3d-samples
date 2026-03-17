@@ -126,6 +126,7 @@ class RouteSampleActivity : ComponentActivity() {
 
             // Dynamic tracking state
             var cameraRange by remember { mutableStateOf(1500f) }
+            var baseSpeedMps by remember { mutableFloatStateOf(150f) }
             var trackerStyle by remember { mutableStateOf(TrackerStyle.MARKER) }
             
             // Playback controls state
@@ -224,7 +225,6 @@ class RouteSampleActivity : ComponentActivity() {
                                 cumulativeDistances[i] = cumulativeDistances[i - 1] + haversineDistance(rawPath[i - 1], rawPath[i])
                             }
 
-                            val baseSpeedMps = 750.0
                             val lookaheadSeconds = 8.0
                             val lerpFactor = 0.05f
 
@@ -535,6 +535,7 @@ class RouteSampleActivity : ComponentActivity() {
                                 label = "sliderAlpha"
                             )
 
+                            // CAMERA RANGE SLIDER (RIGHT)
                             Box(
                                 modifier = Modifier
                                     .align(Alignment.CenterEnd)
@@ -554,6 +555,36 @@ class RouteSampleActivity : ComponentActivity() {
                                     value = cameraRange,
                                     onValueChange = { cameraRange = it },
                                     valueRange = 200f..10000f,
+                                    modifier = Modifier
+                                        .requiredWidth(300.dp)
+                                        .requiredHeight(48.dp)
+                                        .graphicsLayer {
+                                            rotationZ = 270f
+                                            transformOrigin = TransformOrigin(0.5f, 0.5f)
+                                        }
+                                        .align(Alignment.Center))
+                            }
+
+                            // FLIGHT SPEED SLIDER (LEFT)
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.CenterStart)
+                                    .padding(start = 16.dp)
+                                    .requiredWidth(48.dp)
+                                    .requiredHeight(300.dp)
+                                    .alpha(sliderAlpha)
+                                    .pointerInput(Unit) {
+                                        awaitPointerEventScope {
+                                            while (true) {
+                                                awaitPointerEvent(PointerEventPass.Initial)
+                                                sliderInteractionTime = System.currentTimeMillis()
+                                            }
+                                        }
+                                    }) {
+                                Slider(
+                                    value = baseSpeedMps,
+                                    onValueChange = { baseSpeedMps = it },
+                                    valueRange = 10f..1500f,
                                     modifier = Modifier
                                         .requiredWidth(300.dp)
                                         .requiredHeight(48.dp)
