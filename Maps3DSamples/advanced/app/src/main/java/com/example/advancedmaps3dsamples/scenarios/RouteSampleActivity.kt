@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.advancedmaps3dsamples.BuildConfig
+import com.example.advancedmaps3dsamples.R
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
 import com.example.advancedmaps3dsamples.utils.calculateHeading
 import com.example.advancedmaps3dsamples.utils.haversineDistance
@@ -69,6 +70,7 @@ import com.google.android.gms.maps3d.Map3DOptions
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.ImageView
 import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.Polyline
 import com.google.android.gms.maps3d.model.camera
@@ -270,6 +272,7 @@ class RouteSampleActivity : ComponentActivity() {
                                                     altitude = 0.0 
                                                 }
                                                 altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                                                setStyle(ImageView(R.drawable.car))
                                             })
                                             
                                             // Capture the generated ID on the first frame
