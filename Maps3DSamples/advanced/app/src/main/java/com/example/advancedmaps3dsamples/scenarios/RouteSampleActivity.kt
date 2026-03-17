@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -87,6 +88,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+enum class TrackerStyle { MARKER, RED_CAR, BANANA_CAR }
+
 @AndroidEntryPoint
 @OptIn(ExperimentalMaterial3Api::class)
 class RouteSampleActivity : ComponentActivity() {
@@ -106,7 +109,7 @@ class RouteSampleActivity : ComponentActivity() {
 
             // Dynamic tracking state
             var cameraRange by remember { mutableStateOf(1500f) }
-            var use3DModel by remember { mutableStateOf(false) }
+            var trackerStyle by remember { mutableStateOf(TrackerStyle.MARKER) }
 
             AdvancedMaps3DSamplesTheme {
                 Scaffold(
@@ -118,10 +121,20 @@ class RouteSampleActivity : ComponentActivity() {
                             ), title = {
                                 Text("Routes API Integration")
                             }, actions = {
-                                IconButton(onClick = { use3DModel = !use3DModel }) {
+                                IconButton(onClick = {
+                                    trackerStyle = when (trackerStyle) {
+                                        TrackerStyle.MARKER -> TrackerStyle.RED_CAR
+                                        TrackerStyle.RED_CAR -> TrackerStyle.BANANA_CAR
+                                        TrackerStyle.BANANA_CAR -> TrackerStyle.MARKER
+                                    }
+                                }) {
                                     Icon(
-                                        imageVector = if (use3DModel) Icons.Default.DirectionsCar else Icons.Default.Place,
-                                        contentDescription = "Toggle Marker/Model"
+                                        imageVector = when (trackerStyle) {
+                                            TrackerStyle.MARKER -> Icons.Default.Place
+                                            TrackerStyle.RED_CAR -> Icons.Default.DirectionsCar
+                                            TrackerStyle.BANANA_CAR -> Icons.Default.Star
+                                        },
+                                        contentDescription = "Toggle Tracker Style"
                                     )
                                 }
                             })
@@ -212,7 +225,8 @@ class RouteSampleActivity : ComponentActivity() {
                                     // 3. CONTINUOUS RENDERING LOOP
                                     var lastFrameTime = 0L
                                     var progressMarkerId: String? = null
-                                    var progressModelId: String? = null
+                                    var progressRedCarId: String? = null
+                                    var progressBananaCarId: String? = null
 
                                     while (elapsedDistance < totalDistance) {
                                         withFrameMillis { frameTime ->
@@ -275,56 +289,87 @@ class RouteSampleActivity : ComponentActivity() {
                                             safeMap.setCamera(frameCamera)
 
                                             // 4. DYNAMIC PROGRESS MARKER / MODEL
-                                            if (use3DModel) {
-                                                // Upsert Model
-                                                val m = safeMap.addModel(modelOptions {
-                                                    if (progressModelId != null) id = progressModelId!!
-                                                    position = latLngAltitude {
-                                                        latitude = targetPos.latitude
-                                                        longitude = targetPos.longitude
-                                                        altitude = 0.0
-                                                    }
-                                                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                                                    url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
-                                                    scale = vector3D { x = 20.0; y = 20.0; z = 20.0 } // Scaled up to be visible at map range
-                                                    orientation = orientation {
-                                                        heading = currentHeading.toDouble()
-                                                        tilt = 0.0
-                                                        roll = 0.0
-                                                    }
-                                                })
-                                                if (progressModelId == null && m != null) progressModelId = m.id
+                                            when (trackerStyle) {
+                                                TrackerStyle.RED_CAR, TrackerStyle.BANANA_CAR -> {
+                                                    // Determine actively selected model ID and URL
+                                                    val isActiveRedCar = trackerStyle == TrackerStyle.RED_CAR
+                                                    val activeUrl = if (isActiveRedCar) "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb" else "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb"
+                                                    val activeId = if (isActiveRedCar) progressRedCarId else progressBananaCarId
 
-                                                // Hide Marker
-                                                if (progressMarkerId != null) {
-                                                    safeMap.addMarker(markerOptions {
-                                                        id = progressMarkerId!!
-                                                        position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
-                                                        altitudeMode = AltitudeMode.ABSOLUTE
+                                                    // Upsert Active Model
+                                                    val m = safeMap.addModel(modelOptions {
+                                                        if (activeId != null) id = activeId
+                                                        position = latLngAltitude {
+                                                            latitude = targetPos.latitude
+                                                            longitude = targetPos.longitude
+                                                            altitude = 0.0
+                                                        }
+                                                        altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                                                        url = activeUrl
+                                                        scale = vector3D { x = 20.0; y = 20.0; z = 20.0 } // Scaled up to be visible at map range
+                                                        orientation = orientation {
+                                                            heading = currentHeading.toDouble()
+                                                            tilt = 0.0
+                                                            roll = 0.0
+                                                        }
                                                     })
+                                                    if (activeId == null && m != null) {
+                                                        if (isActiveRedCar) progressRedCarId = m.id else progressBananaCarId = m.id
+                                                    }
+
+                                                    // Hide Inactive Model
+                                                    val inactiveId = if (isActiveRedCar) progressBananaCarId else progressRedCarId
+                                                    if (inactiveId != null) {
+                                                        safeMap.addModel(modelOptions {
+                                                            id = inactiveId
+                                                            position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
+                                                            altitudeMode = AltitudeMode.ABSOLUTE
+                                                            url = if (isActiveRedCar) "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb" else "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
+                                                        })
+                                                    }
+
+                                                    // Hide Marker
+                                                    if (progressMarkerId != null) {
+                                                        safeMap.addMarker(markerOptions {
+                                                            id = progressMarkerId!!
+                                                            position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
+                                                            altitudeMode = AltitudeMode.ABSOLUTE
+                                                        })
+                                                    }
                                                 }
-                                            } else {
-                                                // Upsert Marker
-                                                val m = safeMap.addMarker(markerOptions {
-                                                    if (progressMarkerId != null) id = progressMarkerId!!
-                                                    position = latLngAltitude {
-                                                        latitude = targetPos.latitude
-                                                        longitude = targetPos.longitude
-                                                        altitude = 0.0 
-                                                    }
-                                                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                                                    setStyle(ImageView(R.drawable.car))
-                                                })
-                                                if (progressMarkerId == null && m != null) progressMarkerId = m.id
-
-                                                // Hide Model
-                                                if (progressModelId != null) {
-                                                    safeMap.addModel(modelOptions {
-                                                        id = progressModelId!!
-                                                        position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
-                                                        altitudeMode = AltitudeMode.ABSOLUTE
-                                                        url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
+                                                TrackerStyle.MARKER -> {
+                                                    // Upsert Marker
+                                                    val m = safeMap.addMarker(markerOptions {
+                                                        if (progressMarkerId != null) id = progressMarkerId!!
+                                                        position = latLngAltitude {
+                                                            latitude = targetPos.latitude
+                                                            longitude = targetPos.longitude
+                                                            altitude = 0.0 
+                                                        }
+                                                        altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                                                        setStyle(ImageView(R.drawable.car))
                                                     })
+                                                    if (progressMarkerId == null && m != null) progressMarkerId = m.id
+
+                                                    // Hide Red Car Model
+                                                    if (progressRedCarId != null) {
+                                                        safeMap.addModel(modelOptions {
+                                                            id = progressRedCarId!!
+                                                            position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
+                                                            altitudeMode = AltitudeMode.ABSOLUTE
+                                                            url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
+                                                        })
+                                                    }
+                                                    
+                                                    // Hide Banana Car Model
+                                                    if (progressBananaCarId != null) {
+                                                        safeMap.addModel(modelOptions {
+                                                            id = progressBananaCarId!!
+                                                            position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
+                                                            altitudeMode = AltitudeMode.ABSOLUTE
+                                                            url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb"
+                                                        })
+                                                    }
                                                 }
                                             }
                                         }
