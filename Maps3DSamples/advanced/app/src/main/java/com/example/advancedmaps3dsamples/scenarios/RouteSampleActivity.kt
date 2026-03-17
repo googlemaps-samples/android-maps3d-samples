@@ -345,7 +345,7 @@ class RouteSampleActivity : ComponentActivity() {
                                                     }
                                                     url = tracker.url
                                                     scale = if (isActive) vector3D { x = tracker.scale; y = tracker.scale; z = tracker.scale } else vector3D { x = 0.001; y = 0.001; z = 0.001 }
-                                                    orientation = if (isActive) orientation { heading = 0.0; tilt = tracker.tilt; roll = (currentHeading.toDouble() + tracker.headingOffset) } else orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
+                                                    orientation = if (isActive) orientation { heading = 0.0; tilt = tracker.tilt; roll = (currentHeading.toDouble() + tracker.headingOffset).toHeading() } else orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
                                                 })
                                                 if (m != null) {
                                                     if (!trackerIds.containsKey(tracker)) trackerIds[tracker] = m.id
@@ -353,7 +353,7 @@ class RouteSampleActivity : ComponentActivity() {
                                                     // Immediately mutate properties directly on the Model object 
                                                     // to ensure the SDK runtime applies the changes bypassing any upsert builder caching
                                                     if (isActive) {
-                                                        m.orientation = orientation { heading = 0.0; tilt = tracker.tilt; roll = (currentHeading.toDouble() + tracker.headingOffset) }
+                                                        m.orientation = orientation { heading = 0.0; tilt = tracker.tilt; roll = (currentHeading.toDouble() + tracker.headingOffset).toHeading() }
                                                     } else {
                                                         m.orientation = orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
                                                     }
