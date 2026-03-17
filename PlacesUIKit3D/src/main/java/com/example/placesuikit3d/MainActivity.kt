@@ -28,11 +28,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.BottomSheetScaffold
@@ -44,6 +43,7 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
-import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
@@ -63,7 +62,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.example.placesuikit3d.ui.theme.PlacesUIKit3DTheme
 import com.example.placesuikit3d.utils.feet
 import com.example.placesuikit3d.utils.toValidCamera
-import dagger.hilt.android.AndroidEntryPoint
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps3d.GoogleMap3D
@@ -77,8 +75,8 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.PlaceDetailsCompactFragment
 import com.google.android.libraries.places.widget.PlaceLoadListener
 import com.google.android.libraries.places.widget.model.Orientation
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.LaunchedEffect
 
 /**
  * The main activity for the 3D map demo.
@@ -132,7 +130,18 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         )
         val sheetPeekHeight = 120.dp
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        // Dismiss the place details overlay if the user fully expands the bottom sheet
+        LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
+            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+                viewModel.setSelectedPlaceId(null)
+            }
+        }
+
+        // Use contentAlignment to center the constrained BottomSheet on wide screens
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
             BottomSheetScaffold(
                 scaffoldState = scaffoldState,
                 sheetPeekHeight = sheetPeekHeight,
@@ -146,7 +155,8 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        // Limit list width so the sheet doesn't stretch across a tablet
+                        modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp)
                     )
                 }
             ) { _ ->
@@ -261,8 +271,8 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
         Box(
             modifier = modifier
+                .widthIn(max = 600.dp)
                 .fillMaxWidth()
-                .heightIn(max = 400.dp)
                 .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
         ) {
             AndroidView(
