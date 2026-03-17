@@ -318,6 +318,8 @@ class RouteSampleActivity : ComponentActivity() {
                                                     position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
                                                     altitudeMode = AltitudeMode.ABSOLUTE
                                                     url = if (isActiveRedCar) "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb" else "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
+                                                    scale = vector3D { x = 0.001; y = 0.001; z = 0.001 }
+                                                    orientation = orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
                                                 })
                                             }
 
@@ -348,15 +350,19 @@ class RouteSampleActivity : ComponentActivity() {
                                                     position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
                                                     altitudeMode = AltitudeMode.ABSOLUTE
                                                     url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
+                                                    scale = vector3D { x = 0.001; y = 0.001; z = 0.001 }
+                                                    orientation = orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
                                                 })
                                             }
                                             
                                             if (progressBananaCarId != null) {
                                                 safeMap.addModel(modelOptions {
                                                     id = progressBananaCarId!!
-                                                    position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = -1000.0 }
+                                                    position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
                                                     altitudeMode = AltitudeMode.ABSOLUTE
                                                     url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/banana_car.glb"
+                                                    scale = vector3D { x = 0.001; y = 0.001; z = 0.001 }
+                                                    orientation = orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
                                                 })
                                             }
                                         }
