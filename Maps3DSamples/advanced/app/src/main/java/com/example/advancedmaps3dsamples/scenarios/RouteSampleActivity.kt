@@ -19,6 +19,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -38,12 +40,20 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.material3.Slider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -65,6 +75,7 @@ import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.polylineOptions
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -83,6 +94,9 @@ class RouteSampleActivity : ComponentActivity() {
             
             // Show the critical API Key leakage warning immediately on load
             var displayWarning by remember { mutableStateOf(true) }
+            
+            // Dynamic tracking state
+            var cameraRange by remember { mutableStateOf(1500f) }
 
             AdvancedMaps3DSamplesTheme {
                 Scaffold(
@@ -223,7 +237,7 @@ class RouteSampleActivity : ComponentActivity() {
                                                         }
                                                         heading = currentHeading.toDouble()
                                                         tilt = 65.0
-                                                        range = 1500.0
+                                                        range = cameraRange.toDouble() // Hooked to slider
                                                     }.toValidCamera()
                                                     safeMap.setCamera(frameCamera)
                                                 }
@@ -296,6 +310,64 @@ class RouteSampleActivity : ComponentActivity() {
                                 }
                             }
                             RouteUiState.Idle -> { /* Do nothing */ }
+                        }
+                        
+                        // Vertical Range Slider Hooked to Dynamic UI State
+                        // 
+                        // WHY A CUSTOM VERTICAL SLIDER?
+                        // Jetpack Compose Material 3 currently lacks a native 'VerticalSlider' component.
+                        // To achieve a vertical layout without importing heavy third-party libraries, we leverage
+                        // hardware composition overlays:
+                        // 1. We swap the requiredWidth and requiredHeight of the standard horizontal Slider.
+                        // 2. We use graphicsLayer { rotationZ = 270f } to natively render it sideways.
+                        // 3. We trap pointer events at the Initial routing pass using pointerInput so that tapping 
+                        //    and dragging the slider automatically resets the interaction auto-fade timer.
+                        if (uiState is RouteUiState.Success) {
+                            var sliderInteractionTime by remember { mutableStateOf(System.currentTimeMillis()) }
+                            var isSliderActive by remember { mutableStateOf(true) }
+                            
+                            LaunchedEffect(sliderInteractionTime) {
+                                isSliderActive = true
+                                delay(3000)
+                                isSliderActive = false
+                            }
+                            
+                            val sliderAlpha by animateFloatAsState(
+                                targetValue = if (isSliderActive) 0.9f else 0.3f,
+                                animationSpec = tween(durationMillis = 500),
+                                label = "sliderAlpha"
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .padding(end = 16.dp)
+                                    .requiredWidth(48.dp)
+                                    .requiredHeight(300.dp)
+                                    .alpha(sliderAlpha)
+                                    .pointerInput(Unit) {
+                                        awaitPointerEventScope {
+                                            while (true) {
+                                                awaitPointerEvent(PointerEventPass.Initial)
+                                                sliderInteractionTime = System.currentTimeMillis()
+                                            }
+                                        }
+                                    }
+                            ) {
+                                Slider(
+                                    value = cameraRange,
+                                    onValueChange = { cameraRange = it },
+                                    valueRange = 200f..10000f,
+                                    modifier = Modifier
+                                        .requiredWidth(300.dp)
+                                        .requiredHeight(48.dp)
+                                        .graphicsLayer {
+                                            rotationZ = 270f
+                                            transformOrigin = TransformOrigin(0.5f, 0.5f)
+                                        }
+                                        .align(Alignment.Center)
+                                )
+                            }
                         }
 
                         if (displayWarning) {
