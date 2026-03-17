@@ -123,8 +123,8 @@ sealed interface RouteTracker {
         url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb",
         scale = 60.0,
         tilt = -90.0,
-        hoverAltitude = 3.0,
-        headingOffset = 180.0
+        hoverAltitude = 10.0,
+        headingOffset = 0.0
     )
 
     data object BananaCar : Model(
