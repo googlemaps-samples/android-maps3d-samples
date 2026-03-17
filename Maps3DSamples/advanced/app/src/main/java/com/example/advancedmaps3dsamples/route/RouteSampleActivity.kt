@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.example.advancedmaps3dsamples.scenarios
+package com.example.advancedmaps3dsamples.route
 
 import android.content.Context
 import android.os.Bundle
@@ -105,6 +105,7 @@ import com.google.android.gms.maps3d.model.markerOptions
 import com.google.android.gms.maps3d.model.modelOptions
 import com.google.android.gms.maps3d.model.orientation
 import com.google.android.gms.maps3d.model.polylineOptions
+import com.example.advancedmaps3dsamples.utils.GeoMathUtils
 import com.google.android.gms.maps3d.model.vector3D
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -170,7 +171,7 @@ class RouteSampleActivity : ComponentActivity() {
 fun RouteSampleScreen(viewModel: RouteViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var map3D by remember { mutableStateOf<GoogleMap3D?>(null) }
-    
+
     val context = LocalContext.current
     val sharedPrefs = remember { context.getSharedPreferences("route_prefs", Context.MODE_PRIVATE) }
     val warningCount = remember { sharedPrefs.getInt("warning_count", 0) }
@@ -183,7 +184,7 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
     var baseSpeedMps by remember { mutableFloatStateOf(150f) }
     var currentTracker by remember { mutableStateOf<RouteTracker>(RouteTracker.Marker) }
     var currentPolyline by remember { mutableStateOf<Polyline?>(null) }
-    
+
     // Playback controls state
     var elapsedDistance by remember { mutableFloatStateOf(0f) }
     var totalDistance by remember { mutableFloatStateOf(0f) }
@@ -193,96 +194,92 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
 
     AdvancedMaps3DSamplesTheme {
         Scaffold(
-            modifier = Modifier.fillMaxSize(), 
-            topBar = {
+            modifier = Modifier.fillMaxSize(), topBar = {
                 CenterAlignedTopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        scrolledContainerColor = Color.Unspecified,
-                        navigationIconContentColor = Color.Unspecified,
-                        titleContentColor = MaterialTheme.colorScheme.primary,
-                        actionIconContentColor = Color.Unspecified
-                    ),
-                    title = { Text("Routes API Integration") }, 
-                    actions = {
-                        IconButton(onClick = {
-                            currentTracker = when (currentTracker) {
-                                RouteTracker.Marker -> RouteTracker.RedCar
-                                RouteTracker.RedCar -> RouteTracker.BananaCar
-                                RouteTracker.BananaCar -> RouteTracker.Marker
-                            }
-                        }) {
-                            Icon(
-                                imageVector = when (currentTracker) {
-                                    RouteTracker.Marker -> Icons.Default.Place
-                                    RouteTracker.RedCar -> Icons.Default.DirectionsCar
-                                    RouteTracker.BananaCar -> Icons.Default.Star
-                                },
-                                contentDescription = "Toggle Tracker Style"
-                            )
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    scrolledContainerColor = Color.Unspecified,
+                    navigationIconContentColor = Color.Unspecified,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    actionIconContentColor = Color.Unspecified
+                ), title = { Text("Routes API Integration") }, actions = {
+                    IconButton(onClick = {
+                        currentTracker = when (currentTracker) {
+                            RouteTracker.Marker -> RouteTracker.RedCar
+                            RouteTracker.RedCar -> RouteTracker.BananaCar
+                            RouteTracker.BananaCar -> RouteTracker.Marker
                         }
+                    }) {
+                        Icon(
+                            imageVector = when (currentTracker) {
+                                RouteTracker.Marker -> Icons.Default.Place
+                                RouteTracker.RedCar -> Icons.Default.DirectionsCar
+                                RouteTracker.BananaCar -> Icons.Default.Star
+                            }, contentDescription = "Toggle Tracker Style"
+                        )
                     }
-                )
-            }
-        ) { innerPadding ->
+                })
+            }) { innerPadding ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                
+
                 // 1. The Map Viewport Layer
-                Map3DViewport(
-                    onMapReady = { map3D = it },
-                    onMapCleared = { map3D = null }
-                )
+                Map3DViewport(onMapReady = { map3D = it }, onMapCleared = { map3D = null })
 
                 // 2. The Headless Routing Engine
                 // This decoupled engine manages the continuous animation frame calculations required for silky smooth route tracking
                 RouteFlightEngine(
                     map3D = map3D,
                     uiState = uiState,
-                    flyModeActive = flyModeActive,
-                    isPlaying = isPlaying,
-                    currentTracker = currentTracker,
-                    elapsedDistance = elapsedDistance,
-                    totalDistance = totalDistance,
-                    baseSpeedMps = baseSpeedMps,
-                    cameraRange = cameraRange,
-                    cameraHeadingOffset = cameraHeadingOffset,
+                    config = FlightEngineConfig(
+                        flyModeActive = flyModeActive,
+                        isPlaying = isPlaying,
+                        currentTracker = currentTracker,
+                        elapsedDistance = elapsedDistance,
+                        totalDistance = totalDistance,
+                        baseSpeedMps = baseSpeedMps,
+                        cameraRange = cameraRange,
+                        cameraHeadingOffset = cameraHeadingOffset
+                    ),
                     onElapsedDistanceChange = { elapsedDistance = it },
-                    onIsPlayingChange = { isPlaying = it }
-                )
+                    onIsPlayingChange = { isPlaying = it })
 
                 // 3. UI Path Drawing (Once Success Reached)
-                PolylineDrawer(uiState = uiState, map3D = map3D, currentPolyline = currentPolyline, onPolylineUpdate = { currentPolyline = it })
+                PolylineDrawer(
+                    uiState = uiState,
+                    map3D = map3D,
+                    currentPolyline = currentPolyline,
+                    onPolylineUpdate = { currentPolyline = it })
 
                 // 4. Interactive Overlay UI
                 if (!flyModeActive) {
-                    StandardControlsOverlay(
-                        uiState = uiState,
-                        onFetchClicked = {
-                            val origin = LatLng(21.307043, -157.858984)
-                            val dest = LatLng(21.390177, -157.719454)
-                            viewModel.fetchRoute(BuildConfig.MAPS3D_API_KEY, origin, dest)
-                        },
-                        onFlyClicked = {
-                            val state = uiState as? RouteUiState.Success ?: return@StandardControlsOverlay
-                            val rawPath = state.decodedPolyline
-                            if (rawPath.size < 2) return@StandardControlsOverlay
-                            
-                            val cumulativeDistances = DoubleArray(rawPath.size)
-                            cumulativeDistances[0] = 0.0
-                            for (i in 1 until rawPath.size) {
-                                cumulativeDistances[i] = cumulativeDistances[i - 1] + haversineDistance(rawPath[i - 1], rawPath[i])
-                            }
-                            totalDistance = cumulativeDistances.last().toFloat()
-                            elapsedDistance = 0f
-                            
-                            flyModeActive = true
-                            isPlaying = true
+                    StandardControlsOverlay(uiState = uiState, onFetchClicked = {
+                        val origin = LatLng(21.307043, -157.858984)
+                        val dest = LatLng(21.390177, -157.719454)
+                        viewModel.fetchRoute(BuildConfig.MAPS3D_API_KEY, origin, dest)
+                    }, onFlyClicked = {
+                        val state =
+                            uiState as? RouteUiState.Success ?: return@StandardControlsOverlay
+                        val rawPath = state.decodedPolyline
+                        if (rawPath.size < 2) return@StandardControlsOverlay
+
+                        val cumulativeDistances = DoubleArray(rawPath.size)
+                        cumulativeDistances[0] = 0.0
+                        for (i in 1 until rawPath.size) {
+                            cumulativeDistances[i] = cumulativeDistances[i - 1] + haversineDistance(
+                                rawPath[i - 1],
+                                rawPath[i]
+                            )
                         }
-                    )
+                        totalDistance = cumulativeDistances.last().toFloat()
+                        elapsedDistance = 0f
+
+                        flyModeActive = true
+                        isPlaying = true
+                    })
                 } else {
                     PlaybackControlsOverlay(
                         isPlaying = isPlaying,
@@ -293,8 +290,7 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                         onExitFlyMode = {
                             flyModeActive = false
                             isPlaying = false
-                        }
-                    )
+                        })
                 }
 
                 // 5. Loading/Error Overlays
@@ -309,8 +305,7 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                         baseSpeedMps = baseSpeedMps,
                         onBaseSpeedChange = { baseSpeedMps = it },
                         cameraHeadingOffset = cameraHeadingOffset,
-                        onCameraHeadingChange = { cameraHeadingOffset = it }
-                    )
+                        onCameraHeadingChange = { cameraHeadingOffset = it })
                 }
 
                 // 7. Dialogs
@@ -319,8 +314,7 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                         onDismiss = {
                             displayWarning = false
                             sharedPrefs.edit { putInt("warning_count", warningCount + 1) }
-                        }
-                    )
+                        })
                 }
             }
         }
@@ -336,62 +330,64 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
  */
 @Composable
 private fun Map3DViewport(
-    onMapReady: (GoogleMap3D) -> Unit,
-    onMapCleared: () -> Unit
+    onMapReady: (GoogleMap3D) -> Unit, onMapCleared: () -> Unit
 ) {
     val context = LocalContext.current
-    AndroidView(
-        modifier = Modifier.fillMaxSize(), 
-        factory = {
-            val options = Map3DOptions(
-                centerLat = 21.350,
-                centerLng = -157.800,
-                centerAlt = 0.0,
-                tilt = 60.0,
-                range = 25000.0
-            )
-            val view = Map3DView(context, options)
-            view.onCreate(null)
-            view
-        }, 
-        update = { view ->
-            view.getMap3DViewAsync(object : OnMap3DViewReadyCallback {
-                override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-                    onMapReady(googleMap3D)
-                }
+    AndroidView(modifier = Modifier.fillMaxSize(), factory = {
+        val options = Map3DOptions(
+            centerLat = 21.350,
+            centerLng = -157.800,
+            centerAlt = 0.0,
+            tilt = 60.0,
+            range = 25000.0
+        )
+        val view = Map3DView(context, options)
+        view.onCreate(null)
+        view
+    }, update = { view ->
+        view.getMap3DViewAsync(object : OnMap3DViewReadyCallback {
+            override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
+                onMapReady(googleMap3D)
+            }
 
-                override fun onError(error: Exception) {}
-            })
-        }, 
-        onRelease = { view ->
-            onMapCleared()
-            view.onDestroy()
-        }
-    )
+            override fun onError(error: Exception) {}
+        })
+    }, onRelease = { view ->
+        onMapCleared()
+        view.onDestroy()
+    })
 }
 
 /**
  * The physical routing logic and frame animation.
  * Abstracted into a strictly headless calculation component. 
  */
+data class FlightEngineConfig(
+    val flyModeActive: Boolean,
+    val isPlaying: Boolean,
+    val currentTracker: RouteTracker,
+    val elapsedDistance: Float,
+    val totalDistance: Float,
+    val baseSpeedMps: Float,
+    val cameraRange: Float,
+    val cameraHeadingOffset: Float
+)
+
 @Composable
 private fun RouteFlightEngine(
     map3D: GoogleMap3D?,
     uiState: RouteUiState,
-    flyModeActive: Boolean,
-    isPlaying: Boolean,
-    currentTracker: RouteTracker,
-    elapsedDistance: Float,
-    totalDistance: Float,
-    baseSpeedMps: Float,
-    cameraRange: Float,
-    cameraHeadingOffset: Float,
+    config: FlightEngineConfig,
     onElapsedDistanceChange: (Float) -> Unit,
     onIsPlayingChange: (Boolean) -> Unit
 ) {
-    LaunchedEffect(flyModeActive, uiState, map3D) {
-        if (!flyModeActive) return@LaunchedEffect
-        
+    val updatedConfig by rememberUpdatedState(config)
+    val updatedOnElapsedDistanceChange by rememberUpdatedState(onElapsedDistanceChange)
+    val updatedOnIsPlayingChange by rememberUpdatedState(onIsPlayingChange)
+
+    LaunchedEffect(config.flyModeActive, uiState, map3D) {
+        if (!config.flyModeActive) return@LaunchedEffect
+
         val state = uiState as? RouteUiState.Success ?: return@LaunchedEffect
         val safeMap = map3D ?: return@LaunchedEffect
         val rawPath = state.decodedPolyline
@@ -400,7 +396,8 @@ private fun RouteFlightEngine(
         val cumulativeDistances = DoubleArray(rawPath.size)
         cumulativeDistances[0] = 0.0
         for (i in 1 until rawPath.size) {
-            cumulativeDistances[i] = cumulativeDistances[i - 1] + haversineDistance(rawPath[i - 1], rawPath[i])
+            cumulativeDistances[i] =
+                cumulativeDistances[i - 1] + haversineDistance(rawPath[i - 1], rawPath[i])
         }
 
         val lookaheadSeconds = 8.0
@@ -412,11 +409,11 @@ private fun RouteFlightEngine(
 
         var lastFrameTime = 0L
         val trackerIds = mutableMapOf<RouteTracker, String>()
-        
-        // Hoist internal distance copy to avoid recomposition loops while animating across frames
-        var internalDistance = elapsedDistance
 
-        while (flyModeActive) {
+        // Hoist internal distance copy to avoid recomposition loops while animating across frames
+        var internalDistance = updatedConfig.elapsedDistance
+
+        while (config.flyModeActive) { // Checking the non-updated primitive for effect lifecycle
             withFrameMillis { frameTime ->
                 if (lastFrameTime == 0L) {
                     lastFrameTime = frameTime
@@ -425,37 +422,40 @@ private fun RouteFlightEngine(
                 val dtMs = frameTime - lastFrameTime
                 lastFrameTime = frameTime
 
+                val cfg = updatedConfig
+
                 // Always ingest the external scrubber state to allow the UI to forcefully override position
-                if (elapsedDistance != internalDistance && !isPlaying) {
-                    internalDistance = elapsedDistance
+                if (cfg.elapsedDistance != internalDistance && !cfg.isPlaying) {
+                    internalDistance = cfg.elapsedDistance
                 }
 
-                if (isPlaying) {
-                    internalDistance += (baseSpeedMps * (dtMs / 1000.0)).toFloat()
-                    if (internalDistance >= totalDistance) {
-                        internalDistance = totalDistance
-                        onIsPlayingChange(false)
-                        onElapsedDistanceChange(internalDistance)
+                if (cfg.isPlaying) {
+                    internalDistance += (cfg.baseSpeedMps * (dtMs / 1000.0)).toFloat()
+                    if (internalDistance >= cfg.totalDistance) {
+                        internalDistance = cfg.totalDistance
+                        updatedOnIsPlayingChange(false)
+                        updatedOnElapsedDistanceChange(internalDistance)
                     } else if (internalDistance <= 0f) {
                         internalDistance = 0f
-                        onIsPlayingChange(false)
-                        onElapsedDistanceChange(internalDistance)
+                        updatedOnIsPlayingChange(false)
+                        updatedOnElapsedDistanceChange(internalDistance)
                     } else {
                         // Push standard updates back up to the UI so scrubber physically advances
-                        onElapsedDistanceChange(internalDistance)
+                        updatedOnElapsedDistanceChange(internalDistance)
                     }
                 }
 
                 val doubleElapsed = internalDistance.toDouble()
-                val targetPos = getInterpolatedPoint(doubleElapsed, rawPath, cumulativeDistances)
-                val lookaheadSpeed = if (abs(baseSpeedMps) < 1f) 150.0 else abs(baseSpeedMps).toDouble()
+                val targetPos = GeoMathUtils.getInterpolatedPoint(doubleElapsed, rawPath, cumulativeDistances)
+                val lookaheadSpeed =
+                    if (abs(cfg.baseSpeedMps) < 1f) 150.0 else abs(cfg.baseSpeedMps).toDouble()
                 val lookaheadDist = doubleElapsed + (lookaheadSpeed * lookaheadSeconds)
-                val lookaheadPos = getInterpolatedPoint(lookaheadDist, rawPath, cumulativeDistances)
+                val lookaheadPos = GeoMathUtils.getInterpolatedPoint(lookaheadDist, rawPath, cumulativeDistances)
                 val mathHeading = calculateHeading(targetPos, lookaheadPos).toFloat()
 
                 currentLat += (targetPos.latitude - currentLat) * lerpFactor
                 currentLng += (targetPos.longitude - currentLng) * lerpFactor
-                currentHeading = slerpHeading(currentHeading, mathHeading, lerpFactor)
+                currentHeading = GeoMathUtils.slerpHeading(currentHeading, mathHeading, lerpFactor)
 
                 val frameCamera = camera {
                     center = latLngAltitude {
@@ -463,52 +463,76 @@ private fun RouteFlightEngine(
                         longitude = currentLng
                         altitude = 0.0
                     }
-                    heading = (currentHeading.toDouble() + cameraHeadingOffset).toHeading()
+                    heading = (currentHeading.toDouble() + cfg.cameraHeadingOffset).toHeading()
                     tilt = 65.0
-                    range = cameraRange.toDouble()
+                    range = cfg.cameraRange.toDouble()
                 }.toValidCamera()
                 safeMap.setCamera(frameCamera)
 
                 // UPSERT ALL TRACKERS (Inactive models hide at Null Island)
-                val trackers = listOf(RouteTracker.Marker, RouteTracker.RedCar, RouteTracker.BananaCar)
+                val trackers =
+                    listOf(RouteTracker.Marker, RouteTracker.RedCar, RouteTracker.BananaCar)
                 for (tracker in trackers) {
-                    val isActive = tracker == currentTracker
-                    
+                    val isActive = tracker == cfg.currentTracker
+
                     when (tracker) {
                         is RouteTracker.Marker -> {
                             val m = safeMap.addMarker(markerOptions {
                                 trackerIds[tracker]?.let { id = it }
                                 if (isActive) {
-                                    position = latLngAltitude { latitude = targetPos.latitude; longitude = targetPos.longitude; altitude = 0.0 }
+                                    position = latLngAltitude {
+                                        latitude = targetPos.latitude; longitude =
+                                        targetPos.longitude; altitude = 0.0
+                                    }
                                     altitudeMode = AltitudeMode.CLAMP_TO_GROUND
                                 } else {
-                                    position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
+                                    position = latLngAltitude {
+                                        latitude = 0.0; longitude = 0.0; altitude = 0.0
+                                    }
                                     altitudeMode = AltitudeMode.ABSOLUTE
                                 }
                                 setStyle(ImageView(R.drawable.car))
                             })
-                            if (m != null && !trackerIds.containsKey(tracker)) trackerIds[tracker] = m.id
+                            if (m != null && !trackerIds.containsKey(tracker)) trackerIds[tracker] =
+                                m.id
                         }
+
                         is RouteTracker.Model -> {
                             val m = safeMap.addModel(modelOptions {
                                 trackerIds[tracker]?.let { id = it }
                                 if (isActive) {
-                                    position = latLngAltitude { latitude = targetPos.latitude; longitude = targetPos.longitude; altitude = tracker.hoverAltitude }
+                                    position = latLngAltitude {
+                                        latitude = targetPos.latitude; longitude =
+                                        targetPos.longitude; altitude = tracker.hoverAltitude
+                                    }
                                     altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
                                 } else {
-                                    position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
+                                    position = latLngAltitude {
+                                        latitude = 0.0; longitude = 0.0; altitude = 0.0
+                                    }
                                     altitudeMode = AltitudeMode.ABSOLUTE
                                 }
                                 url = tracker.url
-                                scale = if (isActive) vector3D { x = tracker.scale; y = tracker.scale; z = tracker.scale } else vector3D { x = 0.001; y = 0.001; z = 0.001 }
-                                orientation = if (isActive) orientation { heading = (currentHeading.toDouble() + tracker.headingOffset).toHeading(); tilt = tracker.tilt; roll = 0.0 } else orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
+                                scale = if (isActive) vector3D {
+                                    x = tracker.scale; y = tracker.scale; z = tracker.scale
+                                } else vector3D { x = 0.001; y = 0.001; z = 0.001 }
+                                orientation = if (isActive) orientation {
+                                    heading =
+                                        (currentHeading.toDouble() + tracker.headingOffset).toHeading(); tilt =
+                                    tracker.tilt; roll = 0.0
+                                } else orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
                             })
                             if (!trackerIds.containsKey(tracker)) trackerIds[tracker] = m.id
                             // Direct mutation is faster than MapModel object redeclares
                             if (isActive) {
-                                m.orientation = orientation { heading = (currentHeading.toDouble() + tracker.headingOffset).toHeading(); tilt = tracker.tilt; roll = 0.0 }
+                                m.orientation = orientation {
+                                    heading =
+                                        (currentHeading.toDouble() + tracker.headingOffset).toHeading(); tilt =
+                                    tracker.tilt; roll = 0.0
+                                }
                             } else {
-                                m.orientation = orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
+                                m.orientation =
+                                    orientation { heading = 0.0; tilt = 0.0; roll = 0.0 }
                             }
                         }
                     }
@@ -534,7 +558,9 @@ private fun PolylineDrawer(
             currentPolyline?.remove()
 
             val polylinePath = uiState.decodedPolyline.map { latLng ->
-                latLngAltitude { latitude = latLng.latitude; longitude = latLng.longitude; altitude = 0.0 }
+                latLngAltitude {
+                    latitude = latLng.latitude; longitude = latLng.longitude; altitude = 0.0
+                }
             }
 
             val lineOptions = polylineOptions {
@@ -557,13 +583,12 @@ private fun PolylineDrawer(
 
 @Composable
 private fun BoxScope.StandardControlsOverlay(
-    uiState: RouteUiState,
-    onFetchClicked: () -> Unit,
-    onFlyClicked: () -> Unit
+    uiState: RouteUiState, onFetchClicked: () -> Unit, onFlyClicked: () -> Unit
 ) {
     Button(
-        onClick = onFetchClicked, 
-        modifier = Modifier.align(Alignment.BottomStart).padding(32.dp)
+        onClick = onFetchClicked, modifier = Modifier
+            .align(Alignment.BottomStart)
+            .padding(32.dp)
     ) {
         Text("Fetch & Draw Route")
     }
@@ -571,7 +596,9 @@ private fun BoxScope.StandardControlsOverlay(
     Button(
         onClick = onFlyClicked,
         enabled = uiState is RouteUiState.Success,
-        modifier = Modifier.align(Alignment.BottomEnd).padding(32.dp)
+        modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(32.dp)
     ) {
         Text("Fly Along")
     }
@@ -587,14 +614,17 @@ private fun BoxScope.PlaybackControlsOverlay(
     onExitFlyMode: () -> Unit
 ) {
     Surface(
-        modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp).wrapContentHeight().fillMaxWidth(),
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .padding(16.dp)
+            .wrapContentHeight()
+            .fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceVariant,
         tonalElevation = 4.dp
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { onIsPlayingChange(!isPlaying) }) {
                 Icon(
@@ -605,9 +635,9 @@ private fun BoxScope.PlaybackControlsOverlay(
             Spacer(modifier = Modifier.width(8.dp))
             Slider(
                 value = elapsedDistance,
-                onValueChange = { 
+                onValueChange = {
                     onElapsedDistanceChange(it)
-                    onIsPlayingChange(false) 
+                    onIsPlayingChange(false)
                 },
                 valueRange = 0f..kotlin.math.max(1f, totalDistance),
                 modifier = Modifier.weight(1f)
@@ -625,11 +655,19 @@ private fun BoxScope.StateStatusOverlay(uiState: RouteUiState) {
     when (uiState) {
         is RouteUiState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         is RouteUiState.Error -> {
-            Box(modifier = Modifier.align(Alignment.Center).padding(32.dp)) {
-                Text(text = uiState.message, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+            Box(modifier = Modifier
+                .align(Alignment.Center)
+                .padding(32.dp)) {
+                Text(
+                    text = uiState.message,
+                    color = MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
-        else -> { /* Do nothing */ }
+
+        else -> { /* Do nothing */
+        }
     }
 }
 
@@ -647,7 +685,9 @@ private fun BoxScope.CameraControlsOverlay(
         value = cameraRange,
         onValueChange = onCameraRangeChange,
         valueRange = 200f..10000f,
-        modifier = Modifier.align(Alignment.CenterEnd).padding(end = 16.dp)
+        modifier = Modifier
+            .align(Alignment.CenterEnd)
+            .padding(end = 16.dp)
     )
 
     FadingVerticalSlider(
@@ -655,14 +695,19 @@ private fun BoxScope.CameraControlsOverlay(
         onValueChange = { onBaseSpeedChange(if (abs(it) < 150f) 0f else it) },
         valueRange = -1500f..1500f,
         drawCenterDeadZone = true,
-        modifier = Modifier.align(Alignment.CenterStart).padding(start = 16.dp)
+        modifier = Modifier
+            .align(Alignment.CenterStart)
+            .padding(start = 16.dp)
     )
-    
+
     if (flyModeActive) {
         FadingThumbWheel(
             value = cameraHeadingOffset,
             onValueChange = onCameraHeadingChange,
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = 48.dp).padding(horizontal = 16.dp)
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 48.dp)
+                .padding(horizontal = 16.dp)
         )
     }
 }
@@ -674,58 +719,14 @@ private fun SecurityWarningDialog(onDismiss: () -> Unit) {
         icon = { Icon(Icons.Filled.Warning, contentDescription = null) },
         title = { Text("Security Warning") },
         text = { Text("This sample makes a direct REST API call from a mobile client to the Google Maps Routes API. In a production application, doing this exposes your API key to malicious extraction.\n\nAlways proxy your Routes API requests through a secure backend server!") },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("I Understand") } }
-    )
+        confirmButton = { TextButton(onClick = onDismiss) { Text("I Understand") } })
 }
 
-/**
- * Instantly finds the mathematical coordinate along the path given an absolute distance in meters.
- * Replaces expensive haversine math inside the render loop with a precomputed distance array lookup.
- */
-private fun getInterpolatedPoint(
-    distance: Double,
-    path: List<LatLng>,
-    cumulativeDistances: DoubleArray
-): LatLng {
-    if (distance <= 0.0) return path.first()
-    if (distance >= cumulativeDistances.last()) return path.last()
 
-    var idx = cumulativeDistances.binarySearch(distance)
-    if (idx < 0) {
-        idx = -(idx + 1) - 1 // insertion point - 1
-    }
-    idx = idx.coerceIn(0, cumulativeDistances.size - 2)
-
-    val p1 = path[idx]
-    val p2 = path[idx + 1]
-    val d1 = cumulativeDistances[idx]
-    val d2 = cumulativeDistances[idx + 1]
-
-    val fraction = (distance - d1) / (d2 - d1)
-    if (fraction <= 0.0) return p1
-    if (fraction >= 1.0) return p2
-
-    val lat = p1.latitude + (p2.latitude - p1.latitude) * fraction
-    val lng = p1.longitude + (p2.longitude - p1.longitude) * fraction
-    return LatLng(lat, lng)
-}
-
-/**
- * Ensures the camera takes the shortest rotational path (e.g., crossing 359 to 0 smoothly)
- * instead of violently spinning backward.
- */
-private fun slerpHeading(current: Float, target: Float, factor: Float): Float {
-    var dh = target - current
-    while (dh > 180f) dh -= 360f
-    while (dh <= -180f) dh += 360f
-    return current + dh * factor
-}
 
 @Composable
 private fun FadingThumbWheel(
-    value: Float,
-    onValueChange: (Float) -> Unit,
-    modifier: Modifier = Modifier
+    value: Float, onValueChange: (Float) -> Unit, modifier: Modifier = Modifier
 ) {
     val currentValue by rememberUpdatedState(value)
     val currentOnValueChange by rememberUpdatedState(onValueChange)
@@ -771,29 +772,40 @@ private fun FadingThumbWheel(
                         while (wrapped <= -180f) wrapped += 360f
                         localValue = wrapped
                         currentOnValueChange(localValue)
-                    }
-                )
-            }
-    ) {
+                    })
+            }) {
         Row(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
             repeat(11) {
-                Box(modifier = Modifier.width(2.dp).height(12.dp).background(Color.White.copy(alpha = 0.4f)))
+                Box(
+                    modifier = Modifier
+                        .width(2.dp)
+                        .height(12.dp)
+                        .background(Color.White.copy(alpha = 0.4f))
+                )
             }
         }
-        
+
         Box(
-            modifier = Modifier.align(Alignment.Center).width(4.dp).height(24.dp).background(Color.Red, RoundedCornerShape(2.dp))
+            modifier = Modifier
+                .align(Alignment.Center)
+                .width(4.dp)
+                .height(24.dp)
+                .background(Color.Red, RoundedCornerShape(2.dp))
         )
-        
+
         Text(
             text = "${value.toInt()}°",
             color = Color.White,
             style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 2.dp)
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 2.dp)
         )
     }
 }
@@ -833,8 +845,7 @@ private fun FadingVerticalSlider(
                         sliderInteractionTime = System.currentTimeMillis()
                     }
                 }
-            }
-    ) {
+            }) {
         Slider(
             value = value,
             onValueChange = onValueChange,
@@ -846,9 +857,8 @@ private fun FadingVerticalSlider(
                     rotationZ = 270f
                     transformOrigin = TransformOrigin(0.5f, 0.5f)
                 }
-                .align(Alignment.Center)
-        )
-        
+                .align(Alignment.Center))
+
         if (drawCenterDeadZone) {
             Box(
                 modifier = Modifier
