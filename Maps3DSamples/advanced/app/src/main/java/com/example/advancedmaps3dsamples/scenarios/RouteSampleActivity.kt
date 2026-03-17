@@ -520,90 +520,26 @@ class RouteSampleActivity : ComponentActivity() {
                         // 3. We trap pointer events at the Initial routing pass using pointerInput so that tapping 
                         //    and dragging the slider automatically resets the interaction auto-fade timer.
                         if (uiState is RouteUiState.Success) {
-                            var sliderInteractionTime by remember { mutableStateOf(System.currentTimeMillis()) }
-                            var isSliderActive by remember { mutableStateOf(true) }
-
-                            LaunchedEffect(sliderInteractionTime) {
-                                isSliderActive = true
-                                delay(3000)
-                                isSliderActive = false
-                            }
-
-                            val sliderAlpha by animateFloatAsState(
-                                targetValue = if (isSliderActive) 0.9f else 0.3f,
-                                animationSpec = tween(durationMillis = 500),
-                                label = "sliderAlpha"
-                            )
-
                             // CAMERA RANGE SLIDER (RIGHT)
-                            Box(
+                            FadingVerticalSlider(
+                                value = cameraRange,
+                                onValueChange = { cameraRange = it },
+                                valueRange = 200f..10000f,
                                 modifier = Modifier
                                     .align(Alignment.CenterEnd)
                                     .padding(end = 16.dp)
-                                    .requiredWidth(48.dp)
-                                    .requiredHeight(300.dp)
-                                    .alpha(sliderAlpha)
-                                    .pointerInput(Unit) {
-                                        awaitPointerEventScope {
-                                            while (true) {
-                                                awaitPointerEvent(PointerEventPass.Initial)
-                                                sliderInteractionTime = System.currentTimeMillis()
-                                            }
-                                        }
-                                    }) {
-                                Slider(
-                                    value = cameraRange,
-                                    onValueChange = { cameraRange = it },
-                                    valueRange = 200f..10000f,
-                                    modifier = Modifier
-                                        .requiredWidth(300.dp)
-                                        .requiredHeight(48.dp)
-                                        .graphicsLayer {
-                                            rotationZ = 270f
-                                            transformOrigin = TransformOrigin(0.5f, 0.5f)
-                                        }
-                                        .align(Alignment.Center))
-                            }
+                            )
 
                             // FLIGHT SPEED SLIDER (LEFT)
-                            Box(
+                            FadingVerticalSlider(
+                                value = baseSpeedMps,
+                                onValueChange = { baseSpeedMps = if (kotlin.math.abs(it) < 150f) 0f else it },
+                                valueRange = -1500f..1500f,
+                                drawCenterDeadZone = true,
                                 modifier = Modifier
                                     .align(Alignment.CenterStart)
                                     .padding(start = 16.dp)
-                                    .requiredWidth(48.dp)
-                                    .requiredHeight(300.dp)
-                                    .alpha(sliderAlpha)
-                                    .pointerInput(Unit) {
-                                        awaitPointerEventScope {
-                                            while (true) {
-                                                awaitPointerEvent(PointerEventPass.Initial)
-                                                sliderInteractionTime = System.currentTimeMillis()
-                                            }
-                                        }
-                                    }) {
-                                Slider(
-                                    value = baseSpeedMps,
-                                    onValueChange = { 
-                                        baseSpeedMps = if (kotlin.math.abs(it) < 150f) 0f else it
-                                    },
-                                    valueRange = -1500f..1500f,
-                                    modifier = Modifier
-                                        .requiredWidth(300.dp)
-                                        .requiredHeight(48.dp)
-                                        .graphicsLayer {
-                                            rotationZ = 270f
-                                            transformOrigin = TransformOrigin(0.5f, 0.5f)
-                                        }
-                                        .align(Alignment.Center))
-                                        
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.Center)
-                                        .requiredWidth(16.dp)
-                                        .requiredHeight(4.dp)
-                                        .background(androidx.compose.ui.graphics.Color.White, shape = androidx.compose.foundation.shape.CircleShape)
-                                )
-                            }
+                            )
                         }
 
                         if (displayWarning) {
@@ -677,4 +613,67 @@ private fun slerpHeading(current: Float, target: Float, factor: Float): Float {
     while (dh > 180f) dh -= 360f
     while (dh <= -180f) dh += 360f
     return current + dh * factor
+}
+
+@androidx.compose.runtime.Composable
+private fun FadingVerticalSlider(
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    modifier: Modifier = Modifier,
+    drawCenterDeadZone: Boolean = false
+) {
+    var sliderInteractionTime by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(System.currentTimeMillis()) }
+    var isSliderActive by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(true) }
+
+    LaunchedEffect(sliderInteractionTime) {
+        isSliderActive = true
+        delay(3000)
+        isSliderActive = false
+    }
+
+    val sliderAlpha by animateFloatAsState(
+        targetValue = if (isSliderActive) 0.9f else 0.3f,
+        animationSpec = tween(durationMillis = 500),
+        label = "sliderAlpha"
+    )
+
+    Box(
+        modifier = modifier
+            .requiredWidth(48.dp)
+            .requiredHeight(300.dp)
+            .alpha(sliderAlpha)
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        awaitPointerEvent(androidx.compose.ui.input.pointer.PointerEventPass.Initial)
+                        sliderInteractionTime = System.currentTimeMillis()
+                    }
+                }
+            }
+    ) {
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = valueRange,
+            modifier = Modifier
+                .requiredWidth(300.dp)
+                .requiredHeight(48.dp)
+                .graphicsLayer {
+                    rotationZ = 270f
+                    transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.5f)
+                }
+                .align(Alignment.Center)
+        )
+        
+        if (drawCenterDeadZone) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .requiredWidth(16.dp)
+                    .requiredHeight(4.dp)
+                    .background(androidx.compose.ui.graphics.Color.White, shape = androidx.compose.foundation.shape.CircleShape)
+            )
+        }
+    }
 }
