@@ -268,7 +268,7 @@ class RouteSampleActivity : ComponentActivity() {
                                         center = latLngAltitude {
                                             latitude = currentLat
                                             longitude = currentLng
-                                            altitude = 250.0
+                                            altitude = 0.0
                                         }
                                         heading = currentHeading.toDouble().toHeading()
                                         tilt = 65.0
@@ -285,12 +285,15 @@ class RouteSampleActivity : ComponentActivity() {
 
                                             val m = safeMap.addModel(modelOptions {
                                                 if (activeId != null) id = activeId
+                                                // Custom positional parameters for different models
+                                                val customAltitude = if (isActiveRedCar) 1.0 else 0.0
+                                                
                                                 position = latLngAltitude {
                                                     latitude = targetPos.latitude
                                                     longitude = targetPos.longitude
-                                                    altitude = 0.0
+                                                    altitude = customAltitude
                                                 }
-                                                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                                                altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
                                                 url = activeUrl
                                                     // Custom orientation parameters for different models
                                                     val customScale = if (isActiveRedCar) 20.0 else 20.0
