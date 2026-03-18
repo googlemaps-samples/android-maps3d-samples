@@ -28,13 +28,11 @@ class PlaceSnippets(private val map: GoogleMap3D) {
      * Listens for clicks on 3D Places (buildings, POIs).
      */
     fun listenToPlaceClicks() {
-        map.setMap3DClickListener(object : OnMap3DClickListener {
-            override fun onMap3DClick(location: LatLngAltitude, placeId: String?) {
-                if (placeId != null) {
-                    // Handle place click
-                }
+        map.setMap3DClickListener { location, placeId ->
+            if (placeId != null) {
+                // Handle place click
             }
-        })
+        }
     }
     // [END maps_android_3d_place_click_kt]
 }
