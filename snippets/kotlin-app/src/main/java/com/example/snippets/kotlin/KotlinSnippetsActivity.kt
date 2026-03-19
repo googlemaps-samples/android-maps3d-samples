@@ -18,10 +18,9 @@ package com.example.snippets.kotlin
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,12 +53,12 @@ class KotlinSnippetsActivity : AppCompatActivity() {
                         modifier = Modifier.fillMaxSize(),
                         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
                     ) { innerPadding ->
-                        SnippetList(
-                            snippets = SnippetRegistry.snippets.values.toList(),
+                        SnippetGroupList(
+                            groups = SnippetRegistry.getSnippetGroups(),
                             contentPadding = innerPadding,
-                            onItemClick = { snippet ->
+                            onItemClick = { item ->
                                 val intent = Intent(this, MapActivity::class.java)
-                                intent.putExtra(MapActivity.EXTRA_SNIPPET_TITLE, snippet.title)
+                                intent.putExtra(MapActivity.EXTRA_SNIPPET_TITLE, item.title)
                                 startActivity(intent)
                             }
                         )
@@ -70,34 +69,52 @@ class KotlinSnippetsActivity : AppCompatActivity() {
 }
 
 @Composable
-fun SnippetList(
-    snippets: List<Snippet>,
+fun SnippetGroupList(
+    groups: List<SnippetGroupInfo>,
     modifier: Modifier = Modifier,
     contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp),
-    onItemClick: (Snippet) -> Unit
+    onItemClick: (SnippetItemInfo) -> Unit
 ) {
+    val expandedGroups = remember { androidx.compose.runtime.mutableStateMapOf<String, Boolean>() }
+
     LazyColumn(
         modifier = modifier,
         contentPadding = contentPadding
     ) {
-        items(snippets) { snippet ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onItemClick(snippet) }
-                    .padding(16.dp)
-            ) {
+        groups.forEach { group ->
+            val isExpanded = expandedGroups[group.title] ?: true // Default to expanded
+            item {
                 Text(
-                    text = snippet.title,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = snippet.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "${if (isExpanded) "▼ " else "▶ "}${group.title}",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { expandedGroups[group.title] = !isExpanded }
+                        .padding(16.dp),
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
-            HorizontalDivider()
+            if (isExpanded) {
+                items(group.items) { item ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onItemClick(item) }
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = item.title,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = item.description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    HorizontalDivider()
+                }
+            }
         }
     }
 }

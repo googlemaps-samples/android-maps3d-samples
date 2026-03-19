@@ -29,14 +29,19 @@ import com.google.android.gms.maps3d.model.LatLngAltitude;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
+import com.example.snippets.java.annotations.SnippetGroup;
+import com.example.snippets.java.annotations.SnippetItem;
 
+@SnippetGroup(title = "Map Initialization", description = "Snippets demonstrating map lifecycle, listeners and readiness states.")
 public class MapInitSnippets {
 
-    // [START maps_android_3d_init_basic_java]
-    /**
-     * Initializes a standard 3D Map View.
-     */
+    @SnippetItem(
+        title = "Basic Map3D Initialization",
+        description = "Initializes a standard 3D Map View and sets an initial camera angle."
+    )
+    @SuppressWarnings("unused")
     public void basicMap3D(Context context) {
+        // [START maps_android_3d_init_basic_java]
         Map3DView map3DView = new Map3DView(context);
 
         // Get the map asynchronously
@@ -54,14 +59,16 @@ public class MapInitSnippets {
                 // Handle initialization error
             }
         });
+        // [END maps_android_3d_init_basic_java]
     }
-    // [END maps_android_3d_init_basic_java]
 
-    // [START maps_android_3d_init_listeners_java]
     /**
      * Sets up listeners for map readiness and steady state.
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(title = "Listen Map Events", description = "Logs map events to the console, such as clicks or idle status.")
     public void setupMapListeners(Context context, GoogleMap3D map) {
+        // [START maps_android_3d_init_listeners_java]
         Handler mainHandler = new Handler(Looper.getMainLooper());
 
         map.setOnMapReadyListener(new OnMapReadyListener() {
@@ -85,6 +92,6 @@ public class MapInitSnippets {
                 }
             }
         });
+        // [END maps_android_3d_init_listeners_java]
     }
-    // [END maps_android_3d_init_listeners_java]
 }

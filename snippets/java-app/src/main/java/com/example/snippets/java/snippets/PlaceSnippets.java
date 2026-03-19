@@ -21,7 +21,13 @@ import androidx.annotation.Nullable;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.OnMap3DClickListener;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
+import com.example.snippets.java.annotations.SnippetGroup;
+import com.example.snippets.java.annotations.SnippetItem;
 
+@SnippetGroup(
+    title = "Places",
+    description = "Snippets demonstrating Place (POI/Building) interaction algorithms."
+)
 public class PlaceSnippets {
 
     private final GoogleMap3D map;
@@ -30,11 +36,16 @@ public class PlaceSnippets {
         this.map = map;
     }
 
-    // [START maps_android_3d_place_click_java]
     /**
      * Listens for clicks on 3D Places (buildings, POIs).
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Listen Clicks",
+        description = "Sets up a listener that logs the Place ID when a user clicks on a 3D building or POI."
+    )
     public void listenToPlaceClicks() {
+        // [START maps_android_3d_place_click_java]
         map.setMap3DClickListener(new OnMap3DClickListener() {
             @Override
             public void onMap3DClick(@NonNull LatLngAltitude location, @Nullable String placeId) {
@@ -43,6 +54,6 @@ public class PlaceSnippets {
                 }
             }
         });
+        // [END maps_android_3d_place_click_java]
     }
-    // [END maps_android_3d_place_click_java]
 }

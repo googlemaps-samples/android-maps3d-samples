@@ -46,11 +46,11 @@ public class JavaSnippetsActivity extends AppCompatActivity {
             return WindowInsetsCompat.CONSUMED;
         });
 
-        List<Snippet> snippets = new ArrayList<>(SnippetRegistry.snippets.values());
+        List<SnippetGroupInfo> groups = SnippetRegistry.getSnippetGroups();
 
-        SnippetAdapter adapter = new SnippetAdapter(snippets, snippet -> {
+        SnippetGroupAdapter adapter = new SnippetGroupAdapter(groups, item -> {
             Intent intent = new Intent(this, MapActivity.class);
-            intent.putExtra(MapActivity.EXTRA_SNIPPET_TITLE, snippet.title);
+            intent.putExtra(MapActivity.EXTRA_SNIPPET_TITLE, item.getTitle());
             startActivity(intent);
         });
         recyclerView.setAdapter(adapter);

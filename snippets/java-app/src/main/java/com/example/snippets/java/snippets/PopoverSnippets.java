@@ -27,7 +27,13 @@ import com.google.android.gms.maps3d.model.Marker;
 import com.google.android.gms.maps3d.model.MarkerOptions;
 import com.google.android.gms.maps3d.Popover;
 import com.google.android.gms.maps3d.model.PopoverOptions;
+import com.example.snippets.java.annotations.SnippetGroup;
+import com.example.snippets.java.annotations.SnippetItem;
 
+@SnippetGroup(
+    title = "Popovers",
+    description = "Snippets demonstrating anchored and configured 3D Popover views."
+)
 public class PopoverSnippets {
 
     private final Context context;
@@ -38,11 +44,16 @@ public class PopoverSnippets {
         this.map = map;
     }
 
-    // [START maps_android_3d_popover_add_java]
     /**
      * Adds a popover anchored to a marker.
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Marker Anchor",
+        description = "Adds a 'Hello Popover!' text bubble anchored to a marker at Lat: 37.422, Lng: -122.084."
+    )
     public void addPopoverToMarker() {
+        // [START maps_android_3d_popover_add_java]
         // Create a marker first
         Marker marker = map.addMarker(new MarkerOptions());
         if (marker == null)
@@ -66,14 +77,19 @@ public class PopoverSnippets {
         if (popover != null) {
             popover.show();
         }
+        // [END maps_android_3d_popover_add_java]
     }
-    // [END maps_android_3d_popover_add_java]
 
-    // [START maps_android_3d_popover_options_java]
     /**
      * Adds a configured popover (auto-close enabled, auto-pan disabled).
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Configured",
+        description = "Adds an 'Info' popover anchored to a marker at [0,0] with auto-close enabled and auto-pan disabled."
+    )
     public void addConfiguredPopover() {
+        // [START maps_android_3d_popover_options_java]
         TextView textView = new TextView(context);
         textView.setText(com.example.snippets.common.R.string.popover_info);
 
@@ -84,6 +100,6 @@ public class PopoverSnippets {
         options.setAutoPanEnabled(false); // Do not pan to popover
 
         map.addPopover(options);
+        // [END maps_android_3d_popover_options_java]
     }
-    // [END maps_android_3d_popover_options_java]
 }

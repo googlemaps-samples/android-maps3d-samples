@@ -19,20 +19,31 @@ package com.example.snippets.kotlin.snippets
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.OnMap3DClickListener
 import com.google.android.gms.maps3d.model.LatLngAltitude
+import com.example.snippets.kotlin.annotations.SnippetGroup
+import com.example.snippets.kotlin.annotations.SnippetItem
 
+@SnippetGroup(
+    title = "Places",
+    description = "Snippets demonstrating Place (POI/Building) interaction algorithms."
+)
 class PlaceSnippets(private val map: GoogleMap3D) {
 
 
-    // [START maps_android_3d_place_click_kt]
     /**
      * Listens for clicks on 3D Places (buildings, POIs).
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Listen Clicks",
+        description = "Sets up a listener that logs the Place ID when a user clicks on a 3D building or POI."
+    )
     fun listenToPlaceClicks() {
+        // [START maps_android_3d_place_click_kt]
         map.setMap3DClickListener { location, placeId ->
             if (placeId != null) {
                 // Handle place click
             }
         }
+        // [END maps_android_3d_place_click_kt]
     }
-    // [END maps_android_3d_place_click_kt]
 }

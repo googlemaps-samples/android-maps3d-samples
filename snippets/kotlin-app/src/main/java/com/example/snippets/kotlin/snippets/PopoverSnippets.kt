@@ -25,14 +25,25 @@ import com.google.android.gms.maps3d.model.markerOptions
 import com.example.snippets.common.R
 import android.graphics.Color
 import com.google.android.gms.maps3d.model.popoverOptions
+import com.example.snippets.kotlin.annotations.SnippetGroup
+import com.example.snippets.kotlin.annotations.SnippetItem
 
+@SnippetGroup(
+    title = "Popovers",
+    description = "Snippets demonstrating anchored and configured 3D Popover views."
+)
 class PopoverSnippets(private val context: Context, private val map: GoogleMap3D) {
 
-    // [START maps_android_3d_popover_add_kt]
     /**
      * Adds a popover anchored to a marker.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Marker Anchor",
+        description = "Adds a 'Hello Popover!' text bubble anchored to a marker at Lat: 37.422, Lng: -122.084."
+    )
     fun addPopoverToMarker() {
+        // [START maps_android_3d_popover_add_kt]
         // Create a marker first
         val markerOptions = markerOptions {
             position = latLngAltitude { latitude = 37.422; longitude = -122.084; altitude = 0.0 }
@@ -57,14 +68,19 @@ class PopoverSnippets(private val context: Context, private val map: GoogleMap3D
         
         // You can show/hide it
         popover.show()
+        // [END maps_android_3d_popover_add_kt]
     }
-    // [END maps_android_3d_popover_add_kt]
     
-    // [START maps_android_3d_popover_options_kt]
     /**
      * Adds a configured popover (auto-close enabled, auto-pan disabled).
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Configured",
+        description = "Adds an 'Info' popover anchored to a marker at [0,0] with auto-close enabled and auto-pan disabled."
+    )
     fun addConfiguredPopover() {
+        // [START maps_android_3d_popover_options_kt]
         val textView = TextView(context).apply {
             text = context.getString(com.example.snippets.common.R.string.popover_info)
         }
@@ -77,6 +93,6 @@ class PopoverSnippets(private val context: Context, private val map: GoogleMap3D
         }
 
         map.addPopover(options)
+        // [END maps_android_3d_popover_options_kt]
     }
-    // [END maps_android_3d_popover_options_kt]
 }

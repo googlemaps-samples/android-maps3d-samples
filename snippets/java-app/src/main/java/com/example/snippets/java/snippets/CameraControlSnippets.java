@@ -27,7 +27,13 @@ import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyAroundOptions;
 import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
+import com.example.snippets.java.annotations.SnippetGroup;
+import com.example.snippets.java.annotations.SnippetItem;
 
+@SnippetGroup(
+    title = "Camera",
+    description = "Snippets demonstrating dynamic camera orchestration and animations."
+)
 public class CameraControlSnippets {
 
     private final GoogleMap3D map;
@@ -41,15 +47,14 @@ public class CameraControlSnippets {
      * Animates the camera to a specific position (coordinates, heading, tilt) over
      * a duration.
      */
+    @SnippetItem(
+        title = "Fly To",
+        description = "Animates the camera to a specific position with a tilt and heading over 5 seconds."
+    )
     public void flyCameraToPosition() {
-        LatLngAltitude center = new LatLngAltitude(37.4220, -122.0841, 100.0);
+        LatLngAltitude center = new LatLngAltitude(38.743829, -109.499512, 1460.37);
         // Create a target camera:
-        // center: LatLngAltitude target
-        // heading: 90.0 (East)
-        // tilt: 45.0 degrees
-        // roll: 0.0 (level)
-        // range: 1000.0 meters
-        Camera targetCamera = new Camera(center, 90.0, 45.0, 0.0, 1000.0);
+        Camera targetCamera = new Camera(center, 338.52, 76.16, 0.0, 191.71);
 
         // FlyToOptions constructor: endCamera, durationInMillis
         FlyToOptions options = new FlyToOptions(targetCamera, 5000L);
@@ -58,57 +63,103 @@ public class CameraControlSnippets {
     }
     // [END maps_android_3d_camera_fly_to_java]
 
-    // [START maps_android_3d_camera_fly_around_java]
     /**
      * Orbits the camera around a specific location.
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Fly Around",
+        description = "Rotates the camera 360 degrees around a specific location over 10 seconds."
+    )
     public void flyCameraAroundLocation() {
-        LatLngAltitude center = new LatLngAltitude(37.4220, -122.0841, 0.0);
+        // [START maps_android_3d_camera_fly_around_java]
+        LatLngAltitude center = new LatLngAltitude(38.743502, -109.499374, 1467.0);
         // Create a target camera:
-        // center: LatLngAltitude target
-        // heading: 0.0 (North)
-        // tilt: 45.0 degrees
-        // roll: 0.0 (level)
-        // range: 500.0 meters
-        Camera targetCamera = new Camera(center, 0.0, 45.0, 0.0, 500.0);
+        Camera targetCamera = new Camera(center, 349.6, 58.1, 0.0, 138.2);
 
         // Orbit around the target
         // FlyAroundOptions constructor: center, durationInMillis, rounds
-        FlyAroundOptions options = new FlyAroundOptions(targetCamera, 10000L, 1.0);
+        FlyAroundOptions options = new FlyAroundOptions(targetCamera, 6000L, 2.0);
 
-        map.flyCameraAround(options);
+        // Although not completely necessary, the experience will be usually be better by
+        // waiting for the camera to steady before starting the flyCameraAround
+        map.setCamera(targetCamera);
+
+        map.setOnMapSteadyListener(isSteady -> {
+            if (isSteady) {
+                map.setOnMapSteadyListener(null); // Cleanup
+                map.flyCameraAround(options);
+            }
+        });
+        // [END maps_android_3d_camera_fly_around_java]
     }
-    // [END maps_android_3d_camera_fly_around_java]
 
-    // [START maps_android_3d_camera_stop_java]
     /**
      * Stops the current camera animation.
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Stop Animation",
+        description = "Stops any currently running camera animation immediately."
+    )
     public void stopAnimation() {
-        LatLngAltitude center = new LatLngAltitude(37.4220, -122.0841, 0.0);
-        Camera targetCamera = new Camera(center, 0.0, 45.0, 0.0, 500.0);
-        FlyAroundOptions options = new FlyAroundOptions(targetCamera, 30000L, 10.0);
+        // [START maps_android_3d_camera_stop_java]
+        LatLngAltitude center = new LatLngAltitude(38.743829, -109.499512, 1460.37);
+        Camera targetCamera = new Camera(center, 338.52, 76.16, 0.0, 191.71);
 
-        // 1. Start an animation so we have something to stop
-        map.flyCameraAround(options);
+        // 1. Start a slow flyTo animation so we have something to stop
+        map.flyCameraTo(new FlyToOptions(targetCamera, 10000L));
 
-        // 2. Schedule the stop command after 3000ms (3 seconds)
-        new Handler(Looper.getMainLooper()).postDelayed(map::stopCameraAnimation, 3000);
+        // 2. Schedule the stop command after 2 seconds
+        new Handler(Looper.getMainLooper()).postDelayed(map::stopCameraAnimation, 2000);
+        // [END maps_android_3d_camera_stop_java]
     }
-    // [END maps_android_3d_camera_stop_java]
 
-    // [START maps_android_3d_camera_events_java]
     // [START maps_android_3d_camera_events_java]
     /**
      * Listens to camera change events and logs the visible region.
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Listen Camera Events",
+        description = "Demonstrates camera change listening"
+    )
     public void listenToCameraEvents() {
-        map.setCameraChangedListener(camera -> Log.d("Maps3D", "Camera State: " +
-                "Center: " + camera.getCenter() +
-                ", Heading: " + camera.getHeading() +
-                ", Tilt: " + camera.getTilt() +
-                ", Roll: " + camera.getRoll() +
-                ", Range: " + camera.getRange()));
+        // [START maps_android_3d_camera_events_java]
+        final long[] lastLogTime = {0L};
+        map.setCameraChangedListener(camera -> {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastLogTime[0] > 500) { // Limit to 1 log per 500ms
+                lastLogTime[0] = currentTime;
+                Log.d("Maps3D", "Camera State: " +
+                        "Center: " + camera.getCenter() +
+                        ", Heading: " + camera.getHeading() +
+                        ", Tilt: " + camera.getTilt() +
+                        ", Roll: " + camera.getRoll() +
+                        ", Range: " + camera.getRange());
+            }
+        });
+
+        // Detach after 5 seconds to prevent log spam
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            map.setCameraChangedListener(null);
+        }, 5000);
+        // [END maps_android_3d_camera_events_java]
     }
-    // [END maps_android_3d_camera_events_java]
+
+    /**
+     * Listens to map steady state events.
+     */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Listen Steady State",
+        description = "Logs to the console when the map finishes rendering or enters a steady state."
+    )
+    public void listenToMapSteadyState() {
+        // [START maps_android_3d_camera_steady_java]
+        map.setOnMapSteadyListener(isSceneSteady -> {
+            Log.d("Maps3D", "Map Is Steady: " + isSceneSteady);
+        });
+        // [END maps_android_3d_camera_steady_java]
+    }
 }

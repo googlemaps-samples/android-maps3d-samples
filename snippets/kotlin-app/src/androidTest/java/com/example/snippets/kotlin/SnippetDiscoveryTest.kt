@@ -61,4 +61,22 @@ class SnippetDiscoveryTest {
             }
         }
     }
+
+    @Test
+    fun verifySnippetGroupsLoaded() {
+        val groups = SnippetRegistry.getSnippetGroups()
+        org.junit.Assert.assertNotNull("Snippet groups list should not be null", groups)
+        org.junit.Assert.assertFalse("Snippet groups list should not be empty", groups.isEmpty())
+
+        for (group in groups) {
+            org.junit.Assert.assertNotNull("Group title should not be null", group.title)
+            org.junit.Assert.assertFalse("Group title should not be empty", group.title.isEmpty())
+            org.junit.Assert.assertFalse("Group '${group.title}' must have items", group.items.isEmpty())
+
+            for (item in group.items) {
+                org.junit.Assert.assertNotNull("Snippet title should not be null", item.title)
+                org.junit.Assert.assertFalse("Snippet title should not be empty", item.title.isEmpty())
+            }
+        }
+    }
 }

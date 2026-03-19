@@ -24,7 +24,13 @@ import com.google.android.gms.maps3d.model.Polygon;
 import com.google.android.gms.maps3d.model.PolygonOptions;
 import java.util.Arrays;
 import java.util.List;
+import com.example.snippets.java.annotations.SnippetGroup;
+import com.example.snippets.java.annotations.SnippetItem;
 
+@SnippetGroup(
+    title = "Polygons",
+    description = "Snippets demonstrating 2D and 3D extruded polygon layers on the map."
+)
 public class PolygonSnippets {
 
     private final GoogleMap3D map;
@@ -33,11 +39,16 @@ public class PolygonSnippets {
         this.map = map;
     }
 
-    // [START maps_android_3d_polygon_add_java]
     /**
      * Adds a simple polygon to the map.
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Basic",
+        description = "Draws a red polygon with a blue stroke around a small area near Lat: 37.42, Lng: -122.08."
+    )
     public void addBasicPolygon() {
+        // [START maps_android_3d_polygon_add_java]
         List<LatLngAltitude> points = Arrays.asList(
             new LatLngAltitude(37.42, -122.08, 0.0),
             new LatLngAltitude(37.42, -122.09, 0.0),
@@ -54,14 +65,19 @@ public class PolygonSnippets {
         options.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
         
         Polygon polygon = map.addPolygon(options);
+        // [END maps_android_3d_polygon_add_java]
     }
-    // [END maps_android_3d_polygon_add_java]
 
-    // [START maps_android_3d_polygon_extruded_java]
     /**
      * Adds an extruded polygon with transparency.
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Extruded",
+        description = "Draws a semi-transparent red extruded polygon (height 50m) around a small area near Lat: 37.42, Lng: -122.08."
+    )
     public void addExtrudedPolygon() {
+        // [START maps_android_3d_polygon_extruded_java]
         List<LatLngAltitude> points = Arrays.asList(
             new LatLngAltitude(37.42, -122.08, 50.0),
             new LatLngAltitude(37.42, -122.09, 50.0),
@@ -78,6 +94,6 @@ public class PolygonSnippets {
         options.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
         
         Polygon polygon = map.addPolygon(options);
+        // [END maps_android_3d_polygon_extruded_java]
     }
-    // [END maps_android_3d_polygon_extruded_java]
 }

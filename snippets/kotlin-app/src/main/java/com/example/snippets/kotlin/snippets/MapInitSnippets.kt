@@ -29,8 +29,13 @@ import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
+import com.example.snippets.kotlin.annotations.SnippetGroup
+import com.example.snippets.kotlin.annotations.SnippetItem
 
-
+@SnippetGroup(
+    title = "Map Initialization",
+    description = "Snippets demonstrating map lifecycle, listeners and readiness states."
+)
 class MapInitSnippets {
 
     // [START maps_android_3d_init_basic_kt]
@@ -68,11 +73,16 @@ class MapInitSnippets {
     }
     // [END maps_android_3d_init_basic_kt]
 
-    // [START maps_android_3d_init_listeners_kt]
     /**
      * Sets up listeners for map readiness and steady state.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Listen Events",
+        description = "Initializes a 3D map and logs events when the scene is ready (100% loaded) and steady (camera stopped moving)."
+    )
     fun setupMapListeners(context: Context, map: GoogleMap3D) {
+        // [START maps_android_3d_init_listeners_kt]
         val mainHandler = Handler(Looper.getMainLooper())
         
         map.setOnMapReadyListener { sceneReadiness ->
@@ -92,6 +102,6 @@ class MapInitSnippets {
                 }
             }
         }
+        // [END maps_android_3d_init_listeners_kt]
     }
-    // [END maps_android_3d_init_listeners_kt]
 }

@@ -21,14 +21,25 @@ import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.polylineOptions
+import com.example.snippets.kotlin.annotations.SnippetGroup
+import com.example.snippets.kotlin.annotations.SnippetItem
 
+@SnippetGroup(
+    title = "Polylines",
+    description = "Snippets demonstrating 2D and 3D extruded polyline paths on the map."
+)
 class PolylineSnippets(private val map: GoogleMap3D) {
 
-    // [START maps_android_3d_polyline_add_kt]
     /**
      * Adds a basic polyline to the map.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Basic",
+        description = "Draws a thick red polyline connecting three points near Lat: 37.42, Lng: -122.08."
+    )
     fun addBasicPolyline() {
+        // [START maps_android_3d_polyline_add_kt]
         val points = listOf(
             latLngAltitude { latitude = 37.42; longitude = -122.08; altitude = 0.0 },
             latLngAltitude { latitude = 37.43; longitude = -122.09; altitude = 0.0 },
@@ -43,14 +54,19 @@ class PolylineSnippets(private val map: GoogleMap3D) {
         }
         
         val polyline = map.addPolyline(options)
+        // [END maps_android_3d_polyline_add_kt]
     }
-    // [END maps_android_3d_polyline_add_kt]
 
-    // [START maps_android_3d_polyline_options_kt]
     /**
      * Adds a styled polyline with complex configuration.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Styled",
+        description = "Draws a magenta polyline with a green outline, extruded and following the ground curvature (geodesic), connecting two points."
+    )
     fun addStyledPolyline() {
+        // [START maps_android_3d_polyline_options_kt]
         val points = listOf(
             latLngAltitude { latitude = 37.42; longitude = -122.08; altitude = 50.0 },
             latLngAltitude { latitude = 37.43; longitude = -122.09; altitude = 100.0 }
@@ -69,6 +85,6 @@ class PolylineSnippets(private val map: GoogleMap3D) {
         }
         
         val polyline = map.addPolyline(options)
+        // [END maps_android_3d_polyline_options_kt]
     }
-    // [END maps_android_3d_polyline_options_kt]
 }

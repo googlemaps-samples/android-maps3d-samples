@@ -22,14 +22,25 @@ import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.modelOptions
 import com.google.android.gms.maps3d.model.orientation
 import com.google.android.gms.maps3d.model.vector3D
+import com.example.snippets.kotlin.annotations.SnippetGroup
+import com.example.snippets.kotlin.annotations.SnippetItem
 
+@SnippetGroup(
+    title = "Models",
+    description = "Snippets demonstrating 3D Model (GLB) integration and configuration."
+)
 class ModelSnippets(private val map: GoogleMap3D) {
 
-    // [START maps_android_3d_model_add_kt]
     /**
      * Adds a basic 3D model (GLB) to the map from a URL.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Basic",
+        description = "Loads a GLB model from a URL and places it clamped to the ground."
+    )
     fun addBasicModel() {
+        // [START maps_android_3d_model_add_kt]
         val position = latLngAltitude {
             latitude = 37.4220
             longitude = -122.0841
@@ -43,14 +54,19 @@ class ModelSnippets(private val map: GoogleMap3D) {
         }
         
         val model = map.addModel(options)
+        // [END maps_android_3d_model_add_kt]
     }
-    // [END maps_android_3d_model_add_kt]
 
-    // [START maps_android_3d_model_options_kt]
     /**
      * Adds a 3D model with advanced configuration (scale, orientation).
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Advanced",
+        description = "Loads a GLB model with advanced configuration (scale, orientation) from assets."
+    )
     fun addAdvancedModel() {
+        // [START maps_android_3d_model_options_kt]
         val options = modelOptions {
             position = latLngAltitude {
                 latitude = 37.4220
@@ -68,6 +84,6 @@ class ModelSnippets(private val map: GoogleMap3D) {
         }
         
         val model = map.addModel(options)
+        // [END maps_android_3d_model_options_kt]
     }
-    // [END maps_android_3d_model_options_kt]
 }

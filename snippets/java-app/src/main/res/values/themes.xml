@@ -17,7 +17,11 @@
 
 <resources>
     <style name="Theme.Snippets" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/purple_500</item>
+        <item name="android:statusBarColor">@color/purple_700</item>
+    </style>
+
+    <!-- Theme for MapActivity that supports Material3 widgets like MaterialButton -->
+    <style name="Theme.Snippets.Map" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimaryDark">@color/purple_700</item>
         <item name="colorAccent">@color/teal_200</item>
         <item name="android:statusBarColor">@android:color/transparent</item>

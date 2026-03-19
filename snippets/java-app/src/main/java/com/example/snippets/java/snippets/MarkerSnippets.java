@@ -24,13 +24,21 @@ import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.Marker;
 import com.google.android.gms.maps3d.model.MarkerOptions;
 import com.google.android.gms.maps3d.model.PinConfiguration;
+import com.google.android.gms.maps3d.model.Camera;
+import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.Glyph;
 import com.example.snippets.java.R;
 import android.content.Context;
 import android.graphics.Color;
 import android.widget.ImageView;
 import com.google.android.gms.maps3d.OnMarkerClickListener;
+import com.example.snippets.java.annotations.SnippetGroup;
+import com.example.snippets.java.annotations.SnippetItem;
 
+@SnippetGroup(
+    title = "Markers",
+    description = "Snippets demonstrating standard, extruded, and custom styled markers."
+)
 public class MarkerSnippets {
 
     private final GoogleMap3D map;
@@ -39,11 +47,16 @@ public class MarkerSnippets {
         this.map = map;
     }
 
-    // [START maps_android_3d_marker_add_java]
     /**
      * Adds a basic marker to the map.
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Basic",
+        description = "Adds a standard marker at Lat: 37.422, Lng: -122.084, Alt: 10m."
+    )
     public void addBasicMarker() {
+        // [START maps_android_3d_marker_add_java]
         LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
 
         MarkerOptions options = new MarkerOptions();
@@ -52,38 +65,72 @@ public class MarkerSnippets {
         // MarkerOptions uses label, not title.
 
         Marker marker = map.addMarker(options);
+        // [START_EXCLUDE]
+        LatLngAltitude markerPos = options.getPosition();
+        if (markerPos != null) {
+            LatLngAltitude camCenter = new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
+            Camera targetCamera = new Camera(camCenter, 0.0, 45.0, 0.0, 500.0);
+            map.flyCameraTo(new FlyToOptions(targetCamera, 3000L));
+        }
+        // [END_EXCLUDE]
+        // [END maps_android_3d_marker_add_java]
     }
-    // [END maps_android_3d_marker_add_java]
 
-    // [START maps_android_3d_marker_options_java]
     /**
      * Adds an advanced marker with detailed configuration options.
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Advanced",
+        description = "Adds a 'Priority Marker' at Lat: 37.422, Lng: -122.084, Alt: 10m (Relative to Ground) that is extruded and collides with other markers."
+    )
     public void addAdvancedMarker() {
+        // [START maps_android_3d_marker_options_java]
         LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
 
         MarkerOptions options = new MarkerOptions();
         options.setPosition(position);
         options.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
         options.setLabel("Priority Marker");
-        options.setCollisionBehavior(CollisionBehavior.REQUIRED);
+        options.setCollisionBehavior(CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY);
         options.setExtruded(true);
         options.setDrawnWhenOccluded(true);
 
         Marker marker = map.addMarker(options);
+        // [START_EXCLUDE]
+        LatLngAltitude markerPos = options.getPosition();
+        if (markerPos != null) {
+            LatLngAltitude camCenter = new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
+            Camera targetCamera = new Camera(camCenter, 0.0, 45.0, 0.0, 500.0);
+            map.flyCameraTo(new FlyToOptions(targetCamera, 3000L));
+        }
+        // [END_EXCLUDE]
+        // [END maps_android_3d_marker_options_java]
     }
-    // [END maps_android_3d_marker_options_java]
 
-    // [START maps_android_3d_marker_click_java]
     /**
      * Adds a marker with a click listener.
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Click",
+        description = "Adds a marker at Lat: 37.42, Lng: -122.08 that logs a message when clicked."
+    )
     public void handleMarkerClick() {
+        // [START maps_android_3d_marker_click_java]
         LatLngAltitude position = new LatLngAltitude(37.42, -122.08, 0.0);
         MarkerOptions options = new MarkerOptions();
         options.setPosition(position);
 
         Marker marker = map.addMarker(options);
+        // [START_EXCLUDE]
+        LatLngAltitude markerPos = options.getPosition();
+        if (markerPos != null) {
+            LatLngAltitude camCenter = new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
+            Camera targetCamera = new Camera(camCenter, 0.0, 45.0, 0.0, 500.0);
+            map.flyCameraTo(new FlyToOptions(targetCamera, 3000L));
+        }
+        // [END_EXCLUDE]
 
         // [START_EXCLUDE]
         if (marker != null) {
@@ -95,14 +142,19 @@ public class MarkerSnippets {
             });
         }
         // [END_EXCLUDE]
+        // [END maps_android_3d_marker_click_java]
     }
-    // [END maps_android_3d_marker_click_java]
 
-    // [START maps_android_3d_marker_custom_icon_java]
     /**
      * Adds a marker with a custom icon using PinConfiguration.
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Custom Icon",
+        description = "Adds a marker with a custom icon using PinConfiguration and Glyph styling."
+    )
     public void addCustomMarker(Context context) {
+        // [START maps_android_3d_marker_custom_icon_java]
         LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
 
         // Create a Glyph with a custom image
@@ -145,6 +197,14 @@ public class MarkerSnippets {
                 .build());
 
         Marker marker = map.addMarker(options);
+        // [START_EXCLUDE]
+        LatLngAltitude markerPos = options.getPosition();
+        if (markerPos != null) {
+            LatLngAltitude camCenter = new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
+            Camera targetCamera = new Camera(camCenter, 0.0, 45.0, 0.0, 500.0);
+            map.flyCameraTo(new FlyToOptions(targetCamera, 3000L));
+        }
+        // [END_EXCLUDE]
+        // [END maps_android_3d_marker_custom_icon_java]
     }
-    // [END maps_android_3d_marker_custom_icon_java]
 }

@@ -16,28 +16,49 @@
 
 package com.example.snippets.kotlin.snippets
 
+import android.util.Log
+import com.example.snippets.kotlin.annotations.SnippetGroup
+import com.example.snippets.kotlin.annotations.SnippetItem
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.camera
-import android.util.Log
 import com.google.android.gms.maps3d.model.flyAroundOptions
 import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
+import com.example.snippets.kotlin.utils.awaitAnimation
+import com.example.snippets.kotlin.utils.awaitCameraSteady
 
-class CameraControlSnippets(private val map: GoogleMap3D) {
+@SnippetGroup(
+    title = "Camera",
+    description = "Snippets demonstrating dynamic camera orchestration and animations."
+)
+class CameraControlSnippets(
+    private val map: GoogleMap3D,
+    private val lifecycleScope: kotlinx.coroutines.CoroutineScope
+) {
 
-    // [START maps_android_3d_camera_fly_to_kt]
     /**
      * Animates the camera to a specific position (coordinates, heading, tilt) over a duration.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Fly To",
+        description = "Animates the camera to a specific position with a tilt and heading over 5 seconds."
+    )
     fun flyCameraToPosition() {
+        // [START maps_android_3d_camera_fly_to_kt]
         val targetCamera = camera {
             center = latLngAltitude {
-                latitude = 37.4220
-                longitude = -122.0841
-                altitude = 100.0
+                latitude = 38.743829
+                longitude = -109.499512
+                altitude = 1460.37
             }
-            tilt = 45.0
-            heading = 90.0
+            tilt = 76.16
+            heading = 338.52
+            range = 191.71
+            roll = 0.0
         }
         
         val options = flyToOptions {
@@ -46,56 +67,147 @@ class CameraControlSnippets(private val map: GoogleMap3D) {
         }
 
         map.flyCameraTo(options)
+        // [END maps_android_3d_camera_fly_to_kt]
     }
-    // [END maps_android_3d_camera_fly_to_kt]
 
-    // [START maps_android_3d_camera_fly_around_kt]
     /**
      * Orbits the camera around a specific location.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Fly Around",
+        description = "Rotates the camera 360 degrees around a specific location over 10 seconds."
+    )
     fun flyCameraAroundLocation() {
-        val targetCamera = camera {
-             center = latLngAltitude {
-                latitude = 37.4220
-                longitude = -122.0841
-                altitude = 0.0
-             }
-        }
-        
-        // Orbit around the target using DSL
-        val options = flyAroundOptions {
-            center = targetCamera
-            rounds = 1.0 // 1 full rotation
-            durationInMillis = 10000
-        }
+        // [START maps_android_3d_camera_fly_around_kt]
+        lifecycleScope.launch {
+            val targetCamera = camera {
+                center = latLngAltitude {
+                    latitude = 38.743502
+                    longitude = -109.499374
+                    altitude = 1467.0
+                }
+                tilt = 58.1
+                heading = 349.6
+                range = 138.2
+                roll = 0.0
+            }
 
-        map.flyCameraAround(options)
+            // Although not completely necessary, the experience will be usually be better by
+            // waiting for the camera to steady before starting the flyCameraAround
+            map.setCamera(targetCamera)
+
+            // Orbit around the target using DSL
+            val options = flyAroundOptions {
+                center = targetCamera
+                rounds = 2.0 // 2 full rotations
+                durationInMillis = 6_000
+            }
+
+            map.setOnMapSteadyListener { isSceneSteady ->
+                if (isSceneSteady) {
+                    map.setOnMapSteadyListener(null) // Cleanup
+                    map.flyCameraAround(options)
+                }
+            }
+        }
+        // [END maps_android_3d_camera_fly_around_kt]
     }
-    // [END maps_android_3d_camera_fly_around_kt]
 
-    // [START maps_android_3d_camera_stop_kt]
     /**
      * Stops the current camera animation.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Stop Animation",
+        description = "Stops any currently running camera animation immediately."
+    )
     fun stopAnimation() {
-        map.stopCameraAnimation()
-    }
-    // [END maps_android_3d_camera_stop_kt]
+        // [START maps_android_3d_camera_stop_kt]
+        lifecycleScope.launch {
+            val targetCamera = camera {
+                center = latLngAltitude {
+                    latitude = 38.743829
+                    longitude = -109.499512
+                    altitude = 1460.37
+                }
+                tilt = 76.16
+                heading = 338.52
+                range = 191.71
+                roll = 0.0
+            }
 
-    // [START maps_android_3d_camera_events_kt]
-    // [START maps_android_3d_camera_events_kt]
+            // [START_EXCLUDE]
+            val options = flyToOptions {
+                endCamera = targetCamera
+                durationInMillis = 3000
+            }
+
+            map.awaitAnimation {
+                map.flyCameraTo(options)
+            }
+
+            // [END_EXCLUDE]
+            
+            // 1. Start a slow flyTo animation so we have something to stop
+            map.flyCameraTo(flyToOptions {
+                endCamera = targetCamera
+                durationInMillis = 10_000 // Slow flight so we can stop it
+            })
+
+            lifecycleScope.launch {
+                delay(2.seconds) // Let it fly for 2 seconds
+                map.stopCameraAnimation() // 2. Stop it immediately
+                Log.d("Maps3D", "Camera stopped")
+            }
+        }
+        // [END maps_android_3d_camera_stop_kt]
+    }
+
     /**
      * Listens to camera change events and logs the visible region.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Listen Events",
+        description = "Logs camera change events to the console, printing the center coordinates as the camera moves."
+    )
     fun listenToCameraEvents() {
+        // [START maps_android_3d_camera_events_kt]
+        var lastLogTime = 0L
         map.setCameraChangedListener { camera ->
-            Log.d("Maps3D", "Camera State: " +
-                    "Center: ${camera.center}, " +
-                    "Heading: ${camera.heading}, " +
-                    "Tilt: ${camera.tilt}, " +
-                    "Roll: ${camera.roll}, " +
-                    "Range: ${camera.range}")
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastLogTime > 500) { // Limit to 1 log per 500ms
+                lastLogTime = currentTime
+                Log.d("Maps3D", "Camera State: " +
+                        "Center: ${camera.center}, " +
+                        "Heading: ${camera.heading}, " +
+                        "Tilt: ${camera.tilt}, " +
+                        "Roll: ${camera.roll}, " +
+                        "Range: ${camera.range}")
+            }
+        }
+        // [END maps_android_3d_camera_events_kt]
+
+        lifecycleScope.launch {
+            delay(5.seconds)
+            map.setCameraChangedListener(null)
         }
     }
-    // [END maps_android_3d_camera_events_kt]
+
+    /**
+     * Listens to map steady state events.
+     */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Listen Steady State",
+        description = "Logs to the console when the map finishes rendering or enters a steady state."
+    )
+    fun listenToMapSteadyState() {
+        // [START maps_android_3d_camera_steady_kt]
+        map.setOnMapSteadyListener { isSceneSteady ->
+            Log.d("Maps3D", "Map Is Steady: $isSceneSteady")
+        }
+        // [END maps_android_3d_camera_steady_kt]
+    }
 }

@@ -21,20 +21,33 @@ import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.CollisionBehavior
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.markerOptions
+import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.PinConfiguration
 import com.google.android.gms.maps3d.model.Glyph
 import com.example.snippets.kotlin.R
 import android.content.Context
 import android.graphics.Color
 import android.widget.ImageView
+import com.example.snippets.kotlin.annotations.SnippetGroup
+import com.example.snippets.kotlin.annotations.SnippetItem
 
+@SnippetGroup(
+    title = "Markers",
+    description = "Snippets demonstrating standard, extruded, and custom styled markers."
+)
 class MarkerSnippets(private val map: GoogleMap3D) {
 
-    // [START maps_android_3d_marker_add_kt]
     /**
      * Adds a basic marker to the map.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Basic",
+        description = "Adds a standard marker at Lat: 37.422, Lng: -122.084, Alt: 10m."
+    )
     fun addBasicMarker() {
+        // [START maps_android_3d_marker_add_kt]
         val position = latLngAltitude {
             latitude = 37.4220
             longitude = -122.0841
@@ -48,14 +61,34 @@ class MarkerSnippets(private val map: GoogleMap3D) {
         }
         
         val marker = map.addMarker(options)
+        // [START_EXCLUDE]
+        map.flyCameraTo(flyToOptions {
+            endCamera = camera {
+                center = latLngAltitude {
+                    latitude = position.latitude
+                    longitude = position.longitude
+                    altitude = 0.0
+                }
+                tilt = 45.0
+                heading = 0.0
+                range = 500.0
+            }
+            durationInMillis = 3000 // Slightly longer
+        })
+        // [END_EXCLUDE]
+        // [END maps_android_3d_marker_add_kt]
     }
-    // [END maps_android_3d_marker_add_kt]
 
-    // [START maps_android_3d_marker_options_kt]
     /**
      * Adds an advanced marker with detailed configuration options.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Advanced",
+        description = "Adds a 'Priority Marker' at Lat: 37.422, Lng: -122.084, Alt: 10m (Relative to Ground) that is extruded and collides with other markers."
+    )
     fun addAdvancedMarker() {
+        // [START maps_android_3d_marker_options_kt]
         val options = markerOptions {
             position = latLngAltitude {
                 latitude = 37.4220
@@ -64,22 +97,52 @@ class MarkerSnippets(private val map: GoogleMap3D) {
             }
             altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
             label = "Priority Marker"
-            collisionBehavior = CollisionBehavior.REQUIRED
+            collisionBehavior = CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY
             isExtruded = true
             isDrawnWhenOccluded = true
         }
         
         val marker = map.addMarker(options)
+        // [START_EXCLUDE]
+        map.flyCameraTo(flyToOptions {
+            endCamera = camera {
+                center = latLngAltitude {
+                    latitude = options.position!!.latitude
+                    longitude = options.position!!.longitude
+                    altitude = 0.0
+                }
+                tilt = 45.0
+                heading = 0.0
+                range = 500.0
+            }
+            durationInMillis = 3000
+        })
+        // [END_EXCLUDE]
+        // [END maps_android_3d_marker_options_kt]
     }
-    // [END maps_android_3d_marker_options_kt]
 
-    // [START maps_android_3d_marker_click_kt]
     /**
      * Adds a marker with a click listener.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Click",
+        description = "Adds a marker at Lat: 37.42, Lng: -122.08 that logs a message when clicked."
+    )
     fun handleMarkerClick() {
+        // [START maps_android_3d_marker_click_kt]
         val marker = map.addMarker(markerOptions {
             position = latLngAltitude { latitude = 37.42; longitude = -122.08; altitude = 0.0 }
+        })
+        // [START_EXCLUDE]
+        map.flyCameraTo(flyToOptions {
+            endCamera = camera {
+                center = latLngAltitude { latitude = 37.42; longitude = -122.08; altitude = 0.0 }
+                tilt = 45.0
+                heading = 0.0
+                range = 500.0
+            }
+            durationInMillis = 3000
         })
 
         // [START_EXCLUDE]
@@ -87,14 +150,19 @@ class MarkerSnippets(private val map: GoogleMap3D) {
             // Handle click
         }
         // [END_EXCLUDE]
+        // [END maps_android_3d_marker_click_kt]
     }
-    // [END maps_android_3d_marker_click_kt]
 
-    // [START maps_android_3d_marker_custom_icon_kt]
     /**
      * Adds a marker with a custom icon using PinConfiguration.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "Custom Icon",
+        description = "Adds a marker with a custom icon using PinConfiguration and Glyph styling."
+    )
     fun addCustomMarker(context: Context) {
+        // [START maps_android_3d_marker_custom_icon_kt]
         // Create a Glyph with a custom image
         val glyphImage = Glyph.fromColor(Color.YELLOW)
         // Use the Maps SDK's ImageView, not the Android widget
@@ -117,6 +185,21 @@ class MarkerSnippets(private val map: GoogleMap3D) {
         }
 
         val marker = map.addMarker(options)
+        // [START_EXCLUDE]
+        map.flyCameraTo(flyToOptions {
+            endCamera = camera {
+                center = latLngAltitude {
+                    latitude = options.position!!.latitude
+                    longitude = options.position!!.longitude
+                    altitude = 0.0
+                }
+                tilt = 45.0
+                heading = 0.0
+                range = 500.0
+            }
+            durationInMillis = 3000
+        })
+        // [END_EXCLUDE]
+        // [END maps_android_3d_marker_custom_icon_kt]
     }
-    // [END maps_android_3d_marker_custom_icon_kt]
 }

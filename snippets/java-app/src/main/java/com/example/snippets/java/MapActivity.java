@@ -48,22 +48,39 @@ public class MapActivity extends AppCompatActivity {
     map3DView = findViewById(R.id.map);
     map3DView.onCreate(savedInstanceState);
 
+    findViewById(R.id.snapshot_button).setOnClickListener(v -> {
+        if (map != null) {
+            com.google.android.gms.maps3d.model.Camera cam = map.getCamera();
+            if (cam != null && cam.getCenter() != null) {
+                com.google.android.gms.maps3d.model.LatLngAltitude center = cam.getCenter();
+                double rawHeading = cam.getHeading() != null ? cam.getHeading() : 0.0;
+                double heading = (rawHeading % 360.0 + 360.0) % 360.0;
+
+                double rawRoll = cam.getRoll() != null ? cam.getRoll() : 0.0;
+                double roll = rawRoll == -0.0 ? 0.0 : rawRoll;
+
+                Log.d("MapActivity", String.format(
+                    "Camera Pose:\ncenter = latLngAltitude {\n    latitude = %.6f\n    longitude = %.6f\n    altitude = %.2f\n}\ntilt = %.2f\nheading = %.2f\nrange = %.2f\nroll = %.2f",
+                    center.getLatitude(), center.getLongitude(), center.getAltitude(),
+                    cam.getTilt() != null ? cam.getTilt() : 0.0, heading, cam.getRange() != null ? cam.getRange() : 0.0, roll
+                ));
+            }
+        } else {
+            Log.d("MapActivity", "Map NOT initialized yet");
+        }
+    });
+
+    findViewById(R.id.reset_view_button).setOnClickListener(v -> runSnippet());
+
     snippetTitle = getIntent().getStringExtra(EXTRA_SNIPPET_TITLE);
     map3DView.getMap3DViewAsync(new OnMap3DViewReadyCallback() {
       @Override
       public void onMap3DViewReady(@NonNull GoogleMap3D map) {
         MapActivity.this.map = map;
-        Log.w("MapActivity", "onMap3DViewReady" + map);
+        Log.w("MapActivity", "onMap3DViewReady " + map);
 
-        runSnippet();  // <-- This will fail if the map is not ready
-
-        map.setOnMapReadyListener(sceneReadiness -> {
-          if (!triggered && sceneReadiness >= 99.9) {
-            Log.w("MapActivity", "onMapReady sceneReadiness: " + sceneReadiness);
-            triggered = true;
-            runSnippet();  // <-- This will only be called the first time the map is ready
-          }
-        });
+        // Simple 3-second delay to bypass readiness bugs as requested
+        runSnippet(); 
       }
 
       @Override
@@ -74,17 +91,20 @@ public class MapActivity extends AppCompatActivity {
   }
 
   protected void runSnippet() {
-    // Map is ready
     if (snippetTitle != null) {
-      Snippet snippet = SnippetRegistry.snippets.get(snippetTitle);
+      // Use SnippetItemInfo from updated Registry
+      SnippetItemInfo snippet = SnippetRegistry.snippets.get(snippetTitle);
       if (snippet != null) {
-        try {
-          snippet.action.execute(MapActivity.this, map);
-          runOnUiThread(() -> Toast.makeText(MapActivity.this, "Running: " + snippetTitle, Toast.LENGTH_SHORT).show());
-        } catch (Exception e) {
-          runOnUiThread(() -> Toast.makeText(MapActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
-          e.printStackTrace();
-        }
+        // 3 second delay
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            try {
+              snippet.getAction().execute(MapActivity.this, map);
+              runOnUiThread(() -> Toast.makeText(MapActivity.this, "Running: " + snippetTitle, Toast.LENGTH_SHORT).show());
+            } catch (Exception e) {
+              runOnUiThread(() -> Toast.makeText(MapActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
+              e.printStackTrace();
+            }
+        }, 3000);
       } else {
         runOnUiThread(() -> Toast.makeText(MapActivity.this, "Snippet not found: " + snippetTitle, Toast.LENGTH_LONG).show());
       }

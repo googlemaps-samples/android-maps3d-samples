@@ -23,7 +23,13 @@ import com.google.android.gms.maps3d.model.Model;
 import com.google.android.gms.maps3d.model.ModelOptions;
 import com.google.android.gms.maps3d.model.Orientation;
 import com.google.android.gms.maps3d.model.Vector3D;
+import com.example.snippets.java.annotations.SnippetGroup;
+import com.example.snippets.java.annotations.SnippetItem;
 
+@SnippetGroup(
+    title = "Models",
+    description = "Snippets demonstrating 3D Model (GLB) integration and configuration."
+)
 public class ModelSnippets {
 
     private final GoogleMap3D map;
@@ -32,11 +38,16 @@ public class ModelSnippets {
         this.map = map;
     }
 
-    // [START maps_android_3d_model_add_java]
     /**
      * Adds a basic 3D model (GLB) to the map from a URL.
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Basic",
+        description = "Loads a GLB model from a URL and places it clamped to the ground."
+    )
     public void addBasicModel() {
+        // [START maps_android_3d_model_add_java]
         LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 0.0);
         
         ModelOptions options = new ModelOptions();
@@ -45,14 +56,19 @@ public class ModelSnippets {
         options.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
         
         Model model = map.addModel(options);
+        // [END maps_android_3d_model_add_java]
     }
-    // [END maps_android_3d_model_add_java]
 
-    // [START maps_android_3d_model_options_java]
     /**
      * Adds a 3D model with advanced configuration (scale, orientation).
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Advanced",
+        description = "Loads a GLB model with advanced configuration (scale, orientation) from assets."
+    )
     public void addAdvancedModel() {
+        // [START maps_android_3d_model_options_java]
         LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
 
         ModelOptions options = new ModelOptions();
@@ -63,6 +79,6 @@ public class ModelSnippets {
         options.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
         
         Model model = map.addModel(options);
+        // [END maps_android_3d_model_options_java]
     }
-    // [END maps_android_3d_model_options_java]
 }

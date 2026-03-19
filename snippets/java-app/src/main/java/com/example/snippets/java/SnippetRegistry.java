@@ -18,83 +18,95 @@ package com.example.snippets.java;
 
 import com.example.snippets.java.snippets.*;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import com.example.snippets.java.annotations.SnippetGroup;
+import com.example.snippets.java.annotations.SnippetItem;
+import android.content.Context;
+import com.google.android.gms.maps3d.GoogleMap3D;
 
 public class SnippetRegistry {
-    public static final Map<String, Snippet> snippets = new LinkedHashMap<>();
 
-    static {
-        registerSnippet("Map Initialization - Listeners",
-                "Initializes a 3D map and logs events when the scene is ready (100% loaded) and steady (camera stopped moving).",
-                (context, map) -> new MapInitSnippets().setupMapListeners(context, map));
+    private static final List<Class<?>> snippetClasses = Arrays.asList(
+        MapInitSnippets.class,
+        CameraControlSnippets.class,
+        MarkerSnippets.class,
+        PolygonSnippets.class,
+        PolylineSnippets.class,
+        ModelSnippets.class,
+        PopoverSnippets.class,
+        PlaceSnippets.class
+    );
 
-        registerSnippet("Camera - Fly To",
-                "Animates the camera to a specific position (Lat: 37.422, Lng: -122.084, Alt: 100m) with a 45-degree tilt and 90-degree heading over 5 seconds.",
-                (context, map) -> new CameraControlSnippets(map).flyCameraToPosition());
+    /**
+     * Scans annotated classes to build the hierarchical snippet model.
+     */
+    public static List<SnippetGroupInfo> getSnippetGroups() {
+        List<SnippetGroupInfo> groups = new ArrayList<>();
 
-        registerSnippet("Camera - Fly Around",
-                "Rotates the camera 360 degrees around a specific location (Lat: 37.422, Lng: -122.084) over 10 seconds.",
-                (context, map) -> new CameraControlSnippets(map).flyCameraAroundLocation());
+        for (Class<?> clazz : snippetClasses) {
+            SnippetGroup groupAnnotation = clazz.getAnnotation(SnippetGroup.class);
+            if (groupAnnotation == null) continue;
 
-        registerSnippet("Camera - Stop Animation",
-                "Stops any currently running camera animation immediately.",
-                (context, map) -> new CameraControlSnippets(map).stopAnimation());
+            List<SnippetItemInfo> items = new ArrayList<>();
 
-        registerSnippet("Camera - Listen Events",
-                "Logs camera change events to the console, printing the center coordinates as the camera moves.",
-                (context, map) -> new CameraControlSnippets(map).listenToCameraEvents());
+            for (Method method : clazz.getDeclaredMethods()) {
+                SnippetItem itemAnnotation = method.getAnnotation(SnippetItem.class);
+                if (itemAnnotation == null) continue;
 
-        registerSnippet("Markers - Basic",
-                "Adds a standard marker at Lat: 37.422, Lng: -122.084, Alt: 10m.",
-                (context, map) -> new MarkerSnippets(map).addBasicMarker());
+                items.add(new SnippetItemInfo(
+                    itemAnnotation.title(),
+                    itemAnnotation.description(),
+                    (context, map) -> {
+                        try {
+                            Object instance = createInstance(clazz, context, map);
+                            if (method.getParameterCount() == 0) {
+                                method.invoke(instance);
+                            } else if (method.getParameterCount() == 1 && method.getParameterTypes()[0] == Context.class) {
+                                method.invoke(instance, context);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                ));
+            }
 
-        registerSnippet("Markers - Advanced",
-                "Adds a 'Priority Marker' at Lat: 37.422, Lng: -122.084, Alt: 10m (Relative to Ground) that is extruded and collides with other markers.",
-                (context, map) -> new MarkerSnippets(map).addAdvancedMarker());
-
-        registerSnippet("Markers - Click",
-                "Adds a marker at Lat: 37.42, Lng: -122.08 that logs a message when clicked.",
-                (context, map) -> new MarkerSnippets(map).handleMarkerClick());
-
-        registerSnippet("Polygons - Basic",
-                "Draws a red polygon with a blue stroke around a small area near Lat: 37.42, Lng: -122.08.",
-                (context, map) -> new PolygonSnippets(map).addBasicPolygon());
-
-        registerSnippet("Polygons - Extruded",
-                "Draws a semi-transparent red extruded polygon (height 50m) around a small area near Lat: 37.42, Lng: -122.08.",
-                (context, map) -> new PolygonSnippets(map).addExtrudedPolygon());
-
-        registerSnippet("Polylines - Basic",
-                "Draws a thick red polyline connecting three points near Lat: 37.42, Lng: -122.08.",
-                (context, map) -> new PolylineSnippets(map).addBasicPolyline());
-
-        registerSnippet("Polylines - Styled",
-                "Draws a magenta polyline with a green outline, extruded and following the ground curvature (geodesic), connecting two points.",
-                (context, map) -> new PolylineSnippets(map).addStyledPolyline());
-
-        registerSnippet("Models - Basic",
-                "Loads a GLB model from a URL (https://example.com/model.glb) and places it clamped to the ground at Lat: 37.422, Lng: -122.084.",
-                (context, map) -> new ModelSnippets(map).addBasicModel());
-
-        registerSnippet("Models - Advanced",
-                "Loads a GLB model from assets (my_model.glb), scales it by 2x, rotates it, and places it at 10m relative altitude.",
-                (context, map) -> new ModelSnippets(map).addAdvancedModel());
-
-        registerSnippet("Popovers - Marker",
-                "Adds a 'Hello Popover!' text bubble anchored to a marker at Lat: 37.422, Lng: -122.084.",
-                (context, map) -> new PopoverSnippets(context, map).addPopoverToMarker());
-
-        registerSnippet("Popovers - Configured",
-                "Adds an 'Info' popover anchored to a marker at [0,0] with auto-close enabled and auto-pan disabled.",
-                (context, map) -> new PopoverSnippets(context, map).addConfiguredPopover());
-
-        registerSnippet("Places - Listen Clicks",
-                "Sets up a listener that logs the Place ID when a user clicks on a 3D building or POI.",
-                (context, map) -> new PlaceSnippets(map).listenToPlaceClicks());
+            if (!items.isEmpty()) {
+                groups.add(new SnippetGroupInfo(
+                    groupAnnotation.title(),
+                    groupAnnotation.description(),
+                    items
+                ));
+            }
+        }
+        return groups;
     }
 
-    private static void registerSnippet(String title, String description, SnippetAction action) {
-        snippets.put(title, new Snippet(title, description, action));
+    private static Object createInstance(Class<?> clazz, Context context, GoogleMap3D map) throws Exception {
+        try {
+            return clazz.getConstructor(Context.class, GoogleMap3D.class).newInstance(context, map);
+        } catch (NoSuchMethodException e1) {
+            try {
+                return clazz.getConstructor(GoogleMap3D.class).newInstance(map);
+            } catch (NoSuchMethodException e2) {
+                return clazz.getConstructor().newInstance();
+            }
+        }
+    }
+
+    // Legacy support for Activities during refactoring
+    public static final Map<String, SnippetItemInfo> snippets = new LinkedHashMap<>();
+
+    static {
+        for (SnippetGroupInfo group : getSnippetGroups()) {
+            for (SnippetItemInfo item : group.getItems()) {
+                snippets.put(item.getTitle(), item);
+            }
+        }
     }
 }

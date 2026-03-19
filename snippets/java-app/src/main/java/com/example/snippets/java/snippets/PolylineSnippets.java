@@ -24,7 +24,13 @@ import com.google.android.gms.maps3d.model.Polyline;
 import com.google.android.gms.maps3d.model.PolylineOptions;
 import java.util.Arrays;
 import java.util.List;
+import com.example.snippets.java.annotations.SnippetGroup;
+import com.example.snippets.java.annotations.SnippetItem;
 
+@SnippetGroup(
+    title = "Polylines",
+    description = "Snippets demonstrating 2D and 3D extruded polyline paths on the map."
+)
 public class PolylineSnippets {
 
     private final GoogleMap3D map;
@@ -33,11 +39,16 @@ public class PolylineSnippets {
         this.map = map;
     }
 
-    // [START maps_android_3d_polyline_add_java]
     /**
      * Adds a basic polyline to the map.
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Basic",
+        description = "Draws a thick red polyline connecting three points near Lat: 37.42, Lng: -122.08."
+    )
     public void addBasicPolyline() {
+        // [START maps_android_3d_polyline_add_java]
         List<LatLngAltitude> points = Arrays.asList(
             new LatLngAltitude(37.42, -122.08, 0.0),
             new LatLngAltitude(37.43, -122.09, 0.0),
@@ -51,14 +62,19 @@ public class PolylineSnippets {
         options.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
         
         Polyline polyline = map.addPolyline(options);
+        // [END maps_android_3d_polyline_add_java]
     }
-    // [END maps_android_3d_polyline_add_java]
 
-    // [START maps_android_3d_polyline_options_java]
     /**
      * Adds a styled polyline with complex configuration.
      */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "Styled",
+        description = "Draws a magenta polyline with a green outline, extruded and following the ground curvature (geodesic), connecting two points."
+    )
     public void addStyledPolyline() {
+        // [START maps_android_3d_polyline_options_java]
         List<LatLngAltitude> points = Arrays.asList(
             new LatLngAltitude(37.42, -122.08, 50.0),
             new LatLngAltitude(37.43, -122.09, 100.0)
@@ -76,6 +92,6 @@ public class PolylineSnippets {
         options.setDrawsOccludedSegments(true);
         
         Polyline polyline = map.addPolyline(options);
+        // [END maps_android_3d_polyline_options_java]
     }
-    // [END maps_android_3d_polyline_options_java]
 }
