@@ -77,6 +77,7 @@ public class SnippetRegistry {
             }
 
             if (!items.isEmpty()) {
+                items.sort((a, b) -> a.getTitle().compareTo(b.getTitle()));
                 groups.add(new SnippetGroupInfo(
                     groupAnnotation.title(),
                     groupAnnotation.description(),

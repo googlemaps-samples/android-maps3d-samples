@@ -92,6 +92,7 @@ object SnippetRegistry {
             }
 
             if (items.isNotEmpty()) {
+                items.sortBy { it.title }
                 groups.add(SnippetGroupInfo(
                     title = groupAnnotation.title,
                     description = groupAnnotation.description,
