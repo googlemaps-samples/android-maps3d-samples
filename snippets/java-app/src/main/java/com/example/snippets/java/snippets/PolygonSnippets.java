@@ -19,6 +19,8 @@ package com.example.snippets.java.snippets;
 import android.graphics.Color;
 import com.example.snippets.java.TrackedMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
+import com.google.android.gms.maps3d.model.Camera;
+import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.Polygon;
 import com.google.android.gms.maps3d.model.PolygonOptions;
@@ -67,8 +69,8 @@ public class PolygonSnippets {
         Polygon polygon = map.addPolygon(options);
         // [END maps_android_3d_polygon_add_java]
 
-        com.google.android.gms.maps3d.model.Camera cam = new com.google.android.gms.maps3d.model.Camera(new LatLngAltitude(37.425, -122.085, 0.0), 0.0, 45.0, 0.0, 1000.0);
-        com.google.android.gms.maps3d.model.FlyToOptions flyTo = new com.google.android.gms.maps3d.model.FlyToOptions(cam, 3000L);
+        Camera cam = new Camera(new LatLngAltitude(37.424968, -122.084874, 19.90), 0.0, 45.02, 0.0, 4643.0);
+        FlyToOptions flyTo = new FlyToOptions(cam, 1000L);
         map.flyCameraTo(flyTo);
     }
 
@@ -100,8 +102,8 @@ public class PolygonSnippets {
         Polygon polygon = map.addPolygon(options);
         // [END maps_android_3d_polygon_extruded_java]
 
-        com.google.android.gms.maps3d.model.Camera cam = new com.google.android.gms.maps3d.model.Camera(new LatLngAltitude(37.425, -122.085, 0.0), 0.0, 45.0, 0.0, 1000.0);
-        com.google.android.gms.maps3d.model.FlyToOptions flyTo = new com.google.android.gms.maps3d.model.FlyToOptions(cam, 3000L);
+        Camera cam = new Camera(new LatLngAltitude(37.424968, -122.084874, 19.90), 0.0, 45.02, 0.0, 4643.0);
+        FlyToOptions flyTo = new FlyToOptions(cam, 1000L);
         map.flyCameraTo(flyTo);
     }
 }
