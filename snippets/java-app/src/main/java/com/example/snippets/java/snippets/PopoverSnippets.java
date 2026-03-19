@@ -27,6 +27,8 @@ import com.google.android.gms.maps3d.model.Marker;
 import com.google.android.gms.maps3d.model.MarkerOptions;
 import com.google.android.gms.maps3d.Popover;
 import com.google.android.gms.maps3d.model.PopoverOptions;
+import com.google.android.gms.maps3d.model.Camera;
+import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.example.snippets.java.annotations.SnippetGroup;
 import com.example.snippets.java.annotations.SnippetItem;
 
@@ -90,16 +92,34 @@ public class PopoverSnippets {
     )
     public void addConfiguredPopover() {
         // [START maps_android_3d_popover_options_java]
+        // Create a marker at an interesting location (e.g., Golden Gate Bridge)
+        MarkerOptions markerOptions = new MarkerOptions();
+        LatLngAltitude position = new LatLngAltitude(37.8199, -122.4783, 0.0);
+        markerOptions.setPosition(position);
+        markerOptions.setLabel("Golden Gate Bridge");
+        Marker marker = map.addMarker(markerOptions);
+        if (marker == null) return;
+
         TextView textView = new TextView(context);
         textView.setText(com.example.snippets.common.R.string.popover_info);
+        textView.setPadding(16, 16, 16, 16);
+        textView.setBackgroundColor(Color.WHITE);
 
         PopoverOptions options = new PopoverOptions();
         options.setContent(textView);
-        options.setPositionAnchor(new LatLngAltitude(0, 0, 0));
+        options.setPositionAnchor(marker);
         options.setAutoCloseEnabled(true); // Close when clicking elsewhere
         options.setAutoPanEnabled(false); // Do not pan to popover
 
-        map.addPopover(options);
+        Popover popover = map.addPopover(options);
+        if (popover != null) {
+            popover.show();
+        }
         // [END maps_android_3d_popover_options_java]
+
+        // Position the camera to show the marker/popover
+        Camera targetCamera = new Camera(position, 0.0, 45.0, 0.0, 1000.0);
+        FlyToOptions flyToOptions = new FlyToOptions(targetCamera, 2000L);
+        map.flyCameraTo(flyToOptions);
     }
 }

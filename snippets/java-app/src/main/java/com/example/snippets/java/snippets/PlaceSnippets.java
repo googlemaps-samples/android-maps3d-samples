@@ -18,9 +18,15 @@ package com.example.snippets.java.snippets;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.Toast;
 import com.example.snippets.java.TrackedMap3D;
 import com.google.android.gms.maps3d.OnMap3DClickListener;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
+import com.google.android.gms.maps3d.model.Camera;
+import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.example.snippets.java.annotations.SnippetGroup;
 import com.example.snippets.java.annotations.SnippetItem;
 
@@ -30,9 +36,11 @@ import com.example.snippets.java.annotations.SnippetItem;
 )
 public class PlaceSnippets {
 
+    private final Context context;
     private final TrackedMap3D map;
 
-    public PlaceSnippets(TrackedMap3D map) {
+    public PlaceSnippets(Context context, TrackedMap3D map) {
+        this.context = context;
         this.map = map;
     }
 
@@ -50,10 +58,19 @@ public class PlaceSnippets {
             @Override
             public void onMap3DClick(@NonNull LatLngAltitude location, @Nullable String placeId) {
                 if (placeId != null) {
-                    // Handle place click
+                    // Handle place click - Show a Toast on the UI thread
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        Toast.makeText(context, "Clicked Place ID: " + placeId, Toast.LENGTH_SHORT).show();
+                    });
                 }
             }
         });
         // [END maps_android_3d_place_click_java]
+
+        // Position the camera to show the buildings (Empire State Building area)
+        LatLngAltitude position = new LatLngAltitude(40.7484, -73.9857, 0.0);
+        Camera targetCamera = new Camera(position, 0.0, 45.0, 0.0, 500.0);
+        FlyToOptions options = new FlyToOptions(targetCamera, 2000L);
+        map.flyCameraTo(options);
     }
 }
