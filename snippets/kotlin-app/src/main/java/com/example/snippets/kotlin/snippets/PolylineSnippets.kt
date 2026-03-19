@@ -21,6 +21,8 @@ import com.example.snippets.kotlin.TrackedMap3D
 import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
 import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.polylineOptions
 
@@ -55,6 +57,20 @@ class PolylineSnippets(private val map: TrackedMap3D) {
         
         val polyline = map.addPolyline(options)
         // [END maps_android_3d_polyline_add_kt]
+
+        map.flyCameraTo(flyToOptions {
+            endCamera = camera {
+                center = latLngAltitude {
+                    latitude = 37.43
+                    longitude = -122.085
+                    altitude = 0.0
+                }
+                tilt = 45.0
+                heading = 0.0
+                range = 5000.0
+            }
+            durationInMillis = 1000
+        })
     }
 
     /**
@@ -75,9 +91,9 @@ class PolylineSnippets(private val map: TrackedMap3D) {
         val options = polylineOptions {
             path = points
             strokeColor = 0xFFFF00FF.toInt() // Magenta
-            strokeWidth = 20.0
+            strokeWidth = 2.0
             outerColor = 0xFF00FF00.toInt() // Green
-            outerWidth = 2.0
+            outerWidth = 1.0
             altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
             extruded = true
             geodesic = true
@@ -86,5 +102,19 @@ class PolylineSnippets(private val map: TrackedMap3D) {
         
         val polyline = map.addPolyline(options)
         // [END maps_android_3d_polyline_options_kt]
+
+        map.flyCameraTo(flyToOptions {
+            endCamera = camera {
+                center = latLngAltitude {
+                    latitude = 37.425
+                    longitude = -122.085
+                    altitude = 0.0
+                }
+                tilt = 45.0
+                heading = 0.0
+                range = 4000.0
+            }
+            durationInMillis = 1000
+        })
     }
 }

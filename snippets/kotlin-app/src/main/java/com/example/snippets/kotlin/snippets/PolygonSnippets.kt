@@ -21,6 +21,8 @@ import com.example.snippets.kotlin.TrackedMap3D
 import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
 import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.polygonOptions
 
@@ -59,12 +61,18 @@ class PolygonSnippets(private val map: TrackedMap3D) {
         val polygon = map.addPolygon(options)
         // [END maps_android_3d_polygon_add_kt]
 
-        map.flyCameraTo(com.google.android.gms.maps3d.model.flyToOptions {
-            endCamera = com.google.android.gms.maps3d.model.camera {
-                center = latLngAltitude { latitude = 37.425; longitude = -122.085; altitude = 0.0 }
-                tilt = 45.0
-                range = 1000.0
+        map.flyCameraTo(flyToOptions {
+            endCamera = camera {
+                center = latLngAltitude {
+                    latitude = 37.424968
+                    longitude = -122.084874
+                    altitude = 19.90
+                }
+                tilt = 45.02
+                heading = 0.0
+                range = 4643.0
             }
+            durationInMillis = 1000
         })
     }
 
@@ -97,12 +105,18 @@ class PolygonSnippets(private val map: TrackedMap3D) {
         val polygon = map.addPolygon(options)
         // [END maps_android_3d_polygon_extruded_kt]
 
-        map.flyCameraTo(com.google.android.gms.maps3d.model.flyToOptions {
-            endCamera = com.google.android.gms.maps3d.model.camera {
-                center = latLngAltitude { latitude = 37.425; longitude = -122.085; altitude = 0.0 }
-                tilt = 45.0
-                range = 1000.0
+        map.flyCameraTo(flyToOptions {
+            endCamera = camera {
+                center = latLngAltitude {
+                    latitude = 37.424968
+                    longitude = -122.084874
+                    altitude = 19.90
+                }
+                tilt = 45.02
+                heading = 0.0
+                range = 4643.0
             }
+            durationInMillis = 1000
         })
     }
 }

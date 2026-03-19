@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.List;
 import com.example.snippets.java.annotations.SnippetGroup;
 import com.example.snippets.java.annotations.SnippetItem;
+import com.google.android.gms.maps3d.model.Camera;
+import com.google.android.gms.maps3d.model.FlyToOptions;
 
 @SnippetGroup(
     title = "Polylines",
@@ -63,6 +65,10 @@ public class PolylineSnippets {
         
         Polyline polyline = map.addPolyline(options);
         // [END maps_android_3d_polyline_add_java]
+
+        Camera camera = new Camera(new LatLngAltitude(37.43, -122.085, 0.0), 0.0, 45.0, 0.0, 5000.0);
+        FlyToOptions flyToOptions = new FlyToOptions(camera, 1000L);
+        map.flyCameraTo(flyToOptions);
     }
 
     /**
@@ -93,5 +99,9 @@ public class PolylineSnippets {
         
         Polyline polyline = map.addPolyline(options);
         // [END maps_android_3d_polyline_options_java]
+
+        Camera camera = new Camera(new LatLngAltitude(37.425, -122.085, 0.0), 0.0, 45.0, 0.0, 4000.0);
+        FlyToOptions flyToOptions = new FlyToOptions(camera, 1000L);
+        map.flyCameraTo(flyToOptions);
     }
 }
