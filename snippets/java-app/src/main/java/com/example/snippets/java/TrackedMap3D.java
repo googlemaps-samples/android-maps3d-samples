@@ -6,6 +6,8 @@ import com.google.android.gms.maps3d.OnMap3DClickListener;
 import com.google.android.gms.maps3d.OnMapReadyListener;
 import com.google.android.gms.maps3d.OnMapSteadyListener;
 import com.google.android.gms.maps3d.Popover;
+import com.google.android.gms.maps3d.model.Camera;
+import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.Marker;
 import com.google.android.gms.maps3d.model.MarkerOptions;
 import com.google.android.gms.maps3d.model.Polyline;
@@ -61,15 +63,15 @@ public class TrackedMap3D {
         return popover;
     }
 
-    public void setCamera(com.google.android.gms.maps3d.model.Camera camera) { delegate.setCamera(camera); }
+    public void setCamera(Camera camera) { delegate.setCamera(camera); }
     public void setCameraChangedListener(OnCameraChangedListener listener) { delegate.setCameraChangedListener(listener); }
     public void setMap3DClickListener(OnMap3DClickListener listener) { delegate.setMap3DClickListener(listener); }
     public void flyCameraAround(com.google.android.gms.maps3d.model.FlyAroundOptions options) { delegate.flyCameraAround(options); }
 
     // Pass-through standard map calls if any are invoked inside snippets
-    public com.google.android.gms.maps3d.model.Camera getCamera() { return delegate.getCamera(); }
+    public Camera getCamera() { return delegate.getCamera(); }
     public void stopCameraAnimation() { delegate.stopCameraAnimation(); }
-    public void flyCameraTo(com.google.android.gms.maps3d.model.FlyToOptions options) { delegate.flyCameraTo(options); }
+    public void flyCameraTo(FlyToOptions options) { delegate.flyCameraTo(options); }
     public void setOnMapReadyListener(OnMapReadyListener listener) { delegate.setOnMapReadyListener(listener); }
     public void setOnMapSteadyListener(OnMapSteadyListener listener) { delegate.setOnMapSteadyListener(listener); }
 }

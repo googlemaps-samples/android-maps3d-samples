@@ -23,6 +23,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -35,6 +36,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -73,10 +75,10 @@ class KotlinSnippetsActivity : AppCompatActivity() {
 fun SnippetGroupList(
     groups: List<SnippetGroupInfo>,
     modifier: Modifier = Modifier,
-    contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp),
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     onItemClick: (SnippetItemInfo) -> Unit
 ) {
-    val expandedGroups = remember { androidx.compose.runtime.mutableStateMapOf<String, Boolean>() }
+    val expandedGroups = remember { mutableStateMapOf<String, Boolean>() }
 
     LazyColumn(
         modifier = modifier,

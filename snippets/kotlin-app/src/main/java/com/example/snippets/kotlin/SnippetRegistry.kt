@@ -30,6 +30,12 @@ import com.google.android.gms.maps3d.GoogleMap3D
 
 import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
+import com.google.android.gms.maps3d.Popover
+import com.google.android.gms.maps3d.model.Marker
+import com.google.android.gms.maps3d.model.Model
+import com.google.android.gms.maps3d.model.Polygon
+import com.google.android.gms.maps3d.model.Polyline
+import kotlinx.coroutines.CoroutineScope
 
 data class SnippetGroupInfo(
     val title: String,
@@ -41,7 +47,7 @@ data class SnippetItemInfo(
     val title: String,
     val description: String,
     val groupTitle: String,
-    val action: (Context, GoogleMap3D, kotlinx.coroutines.CoroutineScope) -> Unit
+    val action: (Context, GoogleMap3D, CoroutineScope) -> Unit
 )
 
 object SnippetRegistry {
@@ -51,11 +57,11 @@ object SnippetRegistry {
         addedElements.forEach { item ->
             try {
                 when (item) {
-                     is com.google.android.gms.maps3d.model.Marker -> item.remove()
-                     is com.google.android.gms.maps3d.model.Polyline -> item.remove()
-                     is com.google.android.gms.maps3d.model.Polygon -> item.remove()
-                     is com.google.android.gms.maps3d.model.Model -> item.remove()
-                     is com.google.android.gms.maps3d.Popover -> item.remove()
+                     is Marker -> item.remove()
+                     is Polyline -> item.remove()
+                     is Polygon -> item.remove()
+                     is Model -> item.remove()
+                     is Popover -> item.remove()
                 }
             } catch (e: Exception) {
                 // Ignore failures to avoid crashing if already cleanup or invalid
@@ -124,12 +130,12 @@ object SnippetRegistry {
         return groups
     }
 
-    private fun createInstance(clazz: Class<*>, context: Context, map: TrackedMap3D, scope: kotlinx.coroutines.CoroutineScope): Any {
+    private fun createInstance(clazz: Class<*>, context: Context, map: TrackedMap3D, scope: CoroutineScope): Any {
         return try {
-            clazz.getConstructor(Context::class.java, TrackedMap3D::class.java, kotlinx.coroutines.CoroutineScope::class.java).newInstance(context, map, scope)
+            clazz.getConstructor(Context::class.java, TrackedMap3D::class.java, CoroutineScope::class.java).newInstance(context, map, scope)
         } catch (e: Exception) {
             try {
-                clazz.getConstructor(TrackedMap3D::class.java, kotlinx.coroutines.CoroutineScope::class.java).newInstance(map, scope)
+                clazz.getConstructor(TrackedMap3D::class.java, CoroutineScope::class.java).newInstance(map, scope)
             } catch (e: Exception) {
                 try {
                     clazz.getConstructor(Context::class.java, TrackedMap3D::class.java).newInstance(context, map)
