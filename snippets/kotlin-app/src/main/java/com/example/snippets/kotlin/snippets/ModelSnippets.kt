@@ -16,20 +16,20 @@
 
 package com.example.snippets.kotlin.snippets
 
-import com.google.android.gms.maps3d.GoogleMap3D
+import com.example.snippets.kotlin.TrackedMap3D
+import com.example.snippets.kotlin.annotations.SnippetGroup
+import com.example.snippets.kotlin.annotations.SnippetItem
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.modelOptions
 import com.google.android.gms.maps3d.model.orientation
 import com.google.android.gms.maps3d.model.vector3D
-import com.example.snippets.kotlin.annotations.SnippetGroup
-import com.example.snippets.kotlin.annotations.SnippetItem
 
 @SnippetGroup(
     title = "Models",
     description = "Snippets demonstrating 3D Model (GLB) integration and configuration."
 )
-class ModelSnippets(private val map: GoogleMap3D) {
+class ModelSnippets(private val map: TrackedMap3D) {
 
     /**
      * Adds a basic 3D model (GLB) to the map from a URL.

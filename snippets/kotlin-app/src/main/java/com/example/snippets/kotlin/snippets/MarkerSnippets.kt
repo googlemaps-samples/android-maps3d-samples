@@ -16,27 +16,30 @@
 
 package com.example.snippets.kotlin.snippets
 
-import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.model.AltitudeMode
-import com.google.android.gms.maps3d.model.CollisionBehavior
-import com.google.android.gms.maps3d.model.latLngAltitude
-import com.google.android.gms.maps3d.model.markerOptions
-import com.google.android.gms.maps3d.model.camera
-import com.google.android.gms.maps3d.model.flyToOptions
-import com.google.android.gms.maps3d.model.PinConfiguration
-import com.google.android.gms.maps3d.model.Glyph
-import com.example.snippets.kotlin.R
 import android.content.Context
 import android.graphics.Color
-import android.widget.ImageView
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
+import com.example.snippets.kotlin.R
+import com.example.snippets.kotlin.TrackedMap3D
 import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
+import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.CollisionBehavior
+import com.google.android.gms.maps3d.model.Glyph
+import com.google.android.gms.maps3d.model.ImageView
+import com.google.android.gms.maps3d.model.PinConfiguration
+import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
+import com.google.android.gms.maps3d.model.latLngAltitude
+import com.google.android.gms.maps3d.model.markerOptions
 
 @SnippetGroup(
     title = "Markers",
     description = "Snippets demonstrating standard, extruded, and custom styled markers."
 )
-class MarkerSnippets(private val map: GoogleMap3D) {
+class MarkerSnippets(private val context: Context, private val map: TrackedMap3D) {
 
     /**
      * Adds a basic marker to the map.
@@ -44,7 +47,7 @@ class MarkerSnippets(private val map: GoogleMap3D) {
     @Suppress("unused")
     @SnippetItem(
         title = "1. Basic",
-        description = "Adds a standard marker at Lat: 37.422, Lng: -122.084, Alt: 10m."
+        description = "Adds a standard marker."
     )
     fun addBasicMarker() {
         // [START maps_android_3d_marker_add_kt]
@@ -85,7 +88,7 @@ class MarkerSnippets(private val map: GoogleMap3D) {
     @Suppress("unused")
     @SnippetItem(
         title = "2. Advanced",
-        description = "Adds a 'Priority Marker' at Lat: 37.422, Lng: -122.084, Alt: 10m (Relative to Ground) that is extruded and collides with other markers."
+        description = "Adds a 'Priority Marker' that is extruded and collides with other markers."
     )
     fun addAdvancedMarker() {
         // [START maps_android_3d_marker_options_kt]
@@ -107,8 +110,8 @@ class MarkerSnippets(private val map: GoogleMap3D) {
         map.flyCameraTo(flyToOptions {
             endCamera = camera {
                 center = latLngAltitude {
-                    latitude = options.position!!.latitude
-                    longitude = options.position!!.longitude
+                    latitude = options.position.latitude
+                    longitude = options.position.longitude
                     altitude = 0.0
                 }
                 tilt = 45.0
@@ -127,7 +130,7 @@ class MarkerSnippets(private val map: GoogleMap3D) {
     @Suppress("unused")
     @SnippetItem(
         title = "3. Click",
-        description = "Adds a marker at Lat: 37.42, Lng: -122.08 that logs a message when clicked."
+        description = "Adds a marker that logs a message when clicked."
     )
     fun handleMarkerClick() {
         // [START maps_android_3d_marker_click_kt]
@@ -147,7 +150,9 @@ class MarkerSnippets(private val map: GoogleMap3D) {
 
         // [START_EXCLUDE]
         marker?.setClickListener {
-            // Handle click
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, "Marker Clicked!", Toast.LENGTH_SHORT).show()
+            }
         }
         // [END_EXCLUDE]
         // [END maps_android_3d_marker_click_kt]
@@ -166,7 +171,7 @@ class MarkerSnippets(private val map: GoogleMap3D) {
         // Create a Glyph with a custom image
         val glyphImage = Glyph.fromColor(Color.YELLOW)
         // Use the Maps SDK's ImageView, not the Android widget
-        glyphImage.setImage(com.google.android.gms.maps3d.model.ImageView(R.mipmap.ic_launcher))
+        glyphImage.setImage(ImageView(R.mipmap.ic_launcher))
 
         val options = markerOptions {
             position = latLngAltitude {
@@ -189,8 +194,8 @@ class MarkerSnippets(private val map: GoogleMap3D) {
         map.flyCameraTo(flyToOptions {
             endCamera = camera {
                 center = latLngAltitude {
-                    latitude = options.position!!.latitude
-                    longitude = options.position!!.longitude
+                    latitude = options.position.latitude
+                    longitude = options.position.longitude
                     altitude = 0.0
                 }
                 tilt = 45.0

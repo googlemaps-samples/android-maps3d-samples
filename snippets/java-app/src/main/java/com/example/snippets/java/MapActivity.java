@@ -38,6 +38,7 @@ public class MapActivity extends AppCompatActivity {
   private boolean triggered = false;
 
   private String snippetTitle;
+  private String groupTitle;
   private GoogleMap3D map;
   private int currentIndex = -1;
 
@@ -73,10 +74,15 @@ public class MapActivity extends AppCompatActivity {
 
     findViewById(R.id.reset_view_button).setOnClickListener(v -> runSnippet());
 
+    groupTitle = getIntent().getStringExtra("group_title");
     snippetTitle = getIntent().getStringExtra(EXTRA_SNIPPET_TITLE);
-    final java.util.List<SnippetItemInfo> snippetList = new java.util.ArrayList<>(SnippetRegistry.snippets.values());
+    final java.util.List<SnippetItemInfo> snippetList = new java.util.ArrayList<>();
+    for (SnippetGroupInfo group : SnippetRegistry.getSnippetGroups()) {
+        snippetList.addAll(group.getItems());
+    }
     for (int i = 0; i < snippetList.size(); i++) {
-        if (snippetList.get(i).getTitle().equals(snippetTitle)) {
+        SnippetItemInfo item = snippetList.get(i);
+        if (item.getTitle().equals(snippetTitle) && (groupTitle == null || item.getGroupTitle().equals(groupTitle))) {
             currentIndex = i;
             break;
         }
@@ -89,7 +95,9 @@ public class MapActivity extends AppCompatActivity {
         } else {
             currentIndex = snippetList.size() - 1;
         }
-        snippetTitle = snippetList.get(currentIndex).getTitle();
+        SnippetItemInfo item = snippetList.get(currentIndex);
+        groupTitle = item.getGroupTitle();
+        snippetTitle = item.getTitle();
         runSnippet();
     });
 
@@ -100,7 +108,9 @@ public class MapActivity extends AppCompatActivity {
         } else {
             currentIndex = 0;
         }
-        snippetTitle = snippetList.get(currentIndex).getTitle();
+        SnippetItemInfo item = snippetList.get(currentIndex);
+        groupTitle = item.getGroupTitle();
+        snippetTitle = item.getTitle();
         runSnippet();
     });
 
@@ -123,25 +133,38 @@ public class MapActivity extends AppCompatActivity {
 
   protected void runSnippet() {
     if (snippetTitle != null) {
-      // Use SnippetItemInfo from updated Registry
-      SnippetItemInfo snippet = SnippetRegistry.snippets.get(snippetTitle);
-      if (snippet != null) {
-        // 3 second delay
-        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-            try {
-              snippet.getAction().execute(MapActivity.this, map);
-              runOnUiThread(() -> Toast.makeText(
-                  MapActivity.this,
-                  snippet.getGroupTitle() + ": " + snippet.getTitle() + ".\n" + snippet.getDescription(),
-                  Toast.LENGTH_LONG
-              ).show());
-            } catch (Exception e) {
-              runOnUiThread(() -> Toast.makeText(MapActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
-              e.printStackTrace();
-            }
-        }, 3000);
-      } else {
-        runOnUiThread(() -> Toast.makeText(MapActivity.this, "Snippet not found: " + snippetTitle, Toast.LENGTH_LONG).show());
+      String key = groupTitle != null ? groupTitle + " - " + snippetTitle : snippetTitle;
+      SnippetItemInfo snippet = SnippetRegistry.snippets.get(key);
+      if (snippet == null) {
+           // Fallback linear scan
+           for (SnippetGroupInfo g : SnippetRegistry.getSnippetGroups()) {
+               for (SnippetItemInfo item : g.getItems()) {
+                    if (item.getTitle().equals(snippetTitle)) {
+                        snippet = item;
+                        break;
+                    }
+               }
+           }
+       }
+       final SnippetItemInfo finalSnippet = snippet;
+       if (finalSnippet != null) {
+         SnippetRegistry.clearTrackedItems();
+         // 3 second delay
+         new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+             try {
+               finalSnippet.getAction().execute(MapActivity.this, map);
+               runOnUiThread(() -> Toast.makeText(
+                   MapActivity.this,
+                   finalSnippet.getGroupTitle() + ": " + finalSnippet.getTitle() + ".\n" + finalSnippet.getDescription(),
+                   Toast.LENGTH_LONG
+               ).show());
+             } catch (Exception e) {
+               runOnUiThread(() -> Toast.makeText(MapActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
+               e.printStackTrace();
+             }
+         }, 3000);
+       } else {
+         runOnUiThread(() -> Toast.makeText(MapActivity.this, "Snippet not found: " + snippetTitle, Toast.LENGTH_LONG).show());
       }
     }
   }

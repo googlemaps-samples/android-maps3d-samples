@@ -18,6 +18,7 @@ package com.example.snippets.java.snippets;
 
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
+import com.example.snippets.java.TrackedMap3D;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.Model;
 import com.google.android.gms.maps3d.model.ModelOptions;
@@ -32,9 +33,9 @@ import com.example.snippets.java.annotations.SnippetItem;
 )
 public class ModelSnippets {
 
-    private final GoogleMap3D map;
+    private final TrackedMap3D map;
 
-    public ModelSnippets(GoogleMap3D map) {
+    public ModelSnippets(TrackedMap3D map) {
         this.map = map;
     }
 

@@ -17,18 +17,18 @@
 package com.example.snippets.kotlin.snippets
 
 import android.graphics.Color
-import com.google.android.gms.maps3d.GoogleMap3D
+import com.example.snippets.kotlin.TrackedMap3D
+import com.example.snippets.kotlin.annotations.SnippetGroup
+import com.example.snippets.kotlin.annotations.SnippetItem
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.polygonOptions
-import com.example.snippets.kotlin.annotations.SnippetGroup
-import com.example.snippets.kotlin.annotations.SnippetItem
 
 @SnippetGroup(
     title = "Polygons",
     description = "Snippets demonstrating 2D and 3D extruded polygon layers on the map."
 )
-class PolygonSnippets(private val map: GoogleMap3D) {
+class PolygonSnippets(private val map: TrackedMap3D) {
 
     /**
      * Adds a simple polygon to the map.
@@ -36,7 +36,7 @@ class PolygonSnippets(private val map: GoogleMap3D) {
     @Suppress("unused")
     @SnippetItem(
         title = "1. Basic",
-        description = "Draws a red polygon with a blue stroke around a small area near Lat: 37.42, Lng: -122.08."
+        description = "Draws a red polygon with a blue stroke around a small area"
     )
     fun addBasicPolygon() {
         // [START maps_android_3d_polygon_add_kt]
@@ -66,7 +66,7 @@ class PolygonSnippets(private val map: GoogleMap3D) {
     @Suppress("unused")
     @SnippetItem(
         title = "2. Extruded",
-        description = "Draws a semi-transparent red extruded polygon (height 50m) around a small area near Lat: 37.42, Lng: -122.08."
+        description = "Draws a semi-transparent red extruded polygon (height 50m) around a small area"
     )
     fun addExtrudedPolygon() {
         // [START maps_android_3d_polygon_extruded_kt]

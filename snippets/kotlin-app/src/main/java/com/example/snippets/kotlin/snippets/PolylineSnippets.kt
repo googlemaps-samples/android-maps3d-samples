@@ -17,18 +17,18 @@
 package com.example.snippets.kotlin.snippets
 
 import android.graphics.Color
-import com.google.android.gms.maps3d.GoogleMap3D
+import com.example.snippets.kotlin.TrackedMap3D
+import com.example.snippets.kotlin.annotations.SnippetGroup
+import com.example.snippets.kotlin.annotations.SnippetItem
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.polylineOptions
-import com.example.snippets.kotlin.annotations.SnippetGroup
-import com.example.snippets.kotlin.annotations.SnippetItem
 
 @SnippetGroup(
     title = "Polylines",
     description = "Snippets demonstrating 2D and 3D extruded polyline paths on the map."
 )
-class PolylineSnippets(private val map: GoogleMap3D) {
+class PolylineSnippets(private val map: TrackedMap3D) {
 
     /**
      * Adds a basic polyline to the map.
@@ -36,7 +36,7 @@ class PolylineSnippets(private val map: GoogleMap3D) {
     @Suppress("unused")
     @SnippetItem(
         title = "1. Basic",
-        description = "Draws a thick red polyline connecting three points near Lat: 37.42, Lng: -122.08."
+        description = "Draws a thick red polyline connecting three points"
     )
     fun addBasicPolyline() {
         // [START maps_android_3d_polyline_add_kt]

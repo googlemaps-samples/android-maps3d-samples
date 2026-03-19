@@ -17,22 +17,22 @@
 package com.example.snippets.kotlin.snippets
 
 import android.content.Context
+import android.graphics.Color
 import android.widget.TextView
-import com.google.android.gms.maps3d.GoogleMap3D
+import com.example.snippets.common.R
+import com.example.snippets.kotlin.TrackedMap3D
+import com.example.snippets.kotlin.annotations.SnippetGroup
+import com.example.snippets.kotlin.annotations.SnippetItem
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.markerOptions
-import com.example.snippets.common.R
-import android.graphics.Color
 import com.google.android.gms.maps3d.model.popoverOptions
-import com.example.snippets.kotlin.annotations.SnippetGroup
-import com.example.snippets.kotlin.annotations.SnippetItem
 
 @SnippetGroup(
     title = "Popovers",
     description = "Snippets demonstrating anchored and configured 3D Popover views."
 )
-class PopoverSnippets(private val context: Context, private val map: GoogleMap3D) {
+class PopoverSnippets(private val context: Context, private val map: TrackedMap3D) {
 
     /**
      * Adds a popover anchored to a marker.
@@ -40,7 +40,7 @@ class PopoverSnippets(private val context: Context, private val map: GoogleMap3D
     @Suppress("unused")
     @SnippetItem(
         title = "1. Marker Anchor",
-        description = "Adds a 'Hello Popover!' text bubble anchored to a marker at Lat: 37.422, Lng: -122.084."
+        description = "Adds a 'Hello Popover!' text bubble anchored to a marker"
     )
     fun addPopoverToMarker() {
         // [START maps_android_3d_popover_add_kt]
@@ -67,7 +67,7 @@ class PopoverSnippets(private val context: Context, private val map: GoogleMap3D
         val popover = map.addPopover(options)
         
         // You can show/hide it
-        popover.show()
+        popover?.show()
         // [END maps_android_3d_popover_add_kt]
     }
     
@@ -77,7 +77,7 @@ class PopoverSnippets(private val context: Context, private val map: GoogleMap3D
     @Suppress("unused")
     @SnippetItem(
         title = "2. Configured",
-        description = "Adds an 'Info' popover anchored to a marker at [0,0] with auto-close enabled and auto-pan disabled."
+        description = "Adds an 'Info' popover anchored to a marker with auto-close enabled and auto-pan disabled."
     )
     fun addConfiguredPopover() {
         // [START maps_android_3d_popover_options_kt]

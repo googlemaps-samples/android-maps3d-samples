@@ -18,6 +18,7 @@ package com.example.snippets.java.snippets;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.example.snippets.java.TrackedMap3D;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.OnMap3DClickListener;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
@@ -30,9 +31,9 @@ import com.example.snippets.java.annotations.SnippetItem;
 )
 public class PlaceSnippets {
 
-    private final GoogleMap3D map;
+    private final TrackedMap3D map;
 
-    public PlaceSnippets(GoogleMap3D map) {
+    public PlaceSnippets(TrackedMap3D map) {
         this.map = map;
     }
 

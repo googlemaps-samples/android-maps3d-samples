@@ -58,6 +58,7 @@ class KotlinSnippetsActivity : AppCompatActivity() {
                             contentPadding = innerPadding,
                             onItemClick = { item ->
                                 val intent = Intent(this, MapActivity::class.java)
+                                intent.putExtra("group_title", item.groupTitle)
                                 intent.putExtra(MapActivity.EXTRA_SNIPPET_TITLE, item.title)
                                 startActivity(intent)
                             }

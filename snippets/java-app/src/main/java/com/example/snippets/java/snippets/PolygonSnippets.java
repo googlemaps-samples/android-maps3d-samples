@@ -18,6 +18,7 @@ package com.example.snippets.java.snippets;
 
 import android.graphics.Color;
 import com.google.android.gms.maps3d.GoogleMap3D;
+import com.example.snippets.java.TrackedMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.Polygon;
@@ -33,9 +34,9 @@ import com.example.snippets.java.annotations.SnippetItem;
 )
 public class PolygonSnippets {
 
-    private final GoogleMap3D map;
+    private final TrackedMap3D map;
 
-    public PolygonSnippets(GoogleMap3D map) {
+    public PolygonSnippets(TrackedMap3D map) {
         this.map = map;
     }
 
@@ -45,7 +46,7 @@ public class PolygonSnippets {
     @SuppressWarnings("unused")
     @SnippetItem(
         title = "1. Basic",
-        description = "Draws a red polygon with a blue stroke around a small area near Lat: 37.42, Lng: -122.08."
+        description = "Draws a red polygon with a blue stroke around a small area"
     )
     public void addBasicPolygon() {
         // [START maps_android_3d_polygon_add_java]
@@ -74,7 +75,7 @@ public class PolygonSnippets {
     @SuppressWarnings("unused")
     @SnippetItem(
         title = "2. Extruded",
-        description = "Draws a semi-transparent red extruded polygon (height 50m) around a small area near Lat: 37.42, Lng: -122.08."
+        description = "Draws a semi-transparent red extruded polygon (height 50m) around a small area"
     )
     public void addExtrudedPolygon() {
         // [START maps_android_3d_polygon_extruded_java]

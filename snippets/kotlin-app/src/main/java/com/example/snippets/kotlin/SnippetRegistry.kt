@@ -45,6 +45,24 @@ data class SnippetItemInfo(
 )
 
 object SnippetRegistry {
+    private val addedElements = mutableListOf<Any>()
+
+    fun clearTrackedItems() {
+        addedElements.forEach { item ->
+            try {
+                when (item) {
+                     is com.google.android.gms.maps3d.model.Marker -> item.remove()
+                     is com.google.android.gms.maps3d.model.Polyline -> item.remove()
+                     is com.google.android.gms.maps3d.model.Polygon -> item.remove()
+                     is com.google.android.gms.maps3d.model.Model -> item.remove()
+                     is com.google.android.gms.maps3d.Popover -> item.remove()
+                }
+            } catch (e: Exception) {
+                // Ignore failures to avoid crashing if already cleanup or invalid
+            }
+        }
+        addedElements.clear()
+    }
 
     private val snippetClasses = listOf(
         MapInitSnippets::class.java,
@@ -76,7 +94,8 @@ object SnippetRegistry {
                     groupTitle = groupAnnotation.title,
                     action = { context, map, scope ->
                         try {
-                            val instance = createInstance(clazz, context, map, scope)
+                            val trackedMap = TrackedMap3D(map, addedElements)
+                            val instance = createInstance(clazz, context, trackedMap, scope)
                             // Invoke method, passing parameters if needed, or assuming no-arg
                             // Most snippet methods take no args because they use initialized class fields
                             if (method.parameterCount == 0) {
@@ -105,18 +124,18 @@ object SnippetRegistry {
         return groups
     }
 
-    private fun createInstance(clazz: Class<*>, context: Context, map: GoogleMap3D, scope: kotlinx.coroutines.CoroutineScope): Any {
+    private fun createInstance(clazz: Class<*>, context: Context, map: TrackedMap3D, scope: kotlinx.coroutines.CoroutineScope): Any {
         return try {
-            clazz.getConstructor(Context::class.java, GoogleMap3D::class.java, kotlinx.coroutines.CoroutineScope::class.java).newInstance(context, map, scope)
+            clazz.getConstructor(Context::class.java, TrackedMap3D::class.java, kotlinx.coroutines.CoroutineScope::class.java).newInstance(context, map, scope)
         } catch (e: Exception) {
             try {
-                clazz.getConstructor(GoogleMap3D::class.java, kotlinx.coroutines.CoroutineScope::class.java).newInstance(map, scope)
+                clazz.getConstructor(TrackedMap3D::class.java, kotlinx.coroutines.CoroutineScope::class.java).newInstance(map, scope)
             } catch (e: Exception) {
                 try {
-                    clazz.getConstructor(Context::class.java, GoogleMap3D::class.java).newInstance(context, map)
+                    clazz.getConstructor(Context::class.java, TrackedMap3D::class.java).newInstance(context, map)
                 } catch (e: Exception) {
                     try {
-                        clazz.getConstructor(GoogleMap3D::class.java).newInstance(map)
+                        clazz.getConstructor(TrackedMap3D::class.java).newInstance(map)
                     } catch (e: Exception) {
                         clazz.getConstructor().newInstance()
                     }
@@ -128,7 +147,7 @@ object SnippetRegistry {
     // Legacy support for Activities during refactoring
     val snippets: Map<String, SnippetItemInfo> by lazy {
         getSnippetGroups().flatMap { group -> 
-            group.items.map { item -> item.title to item }
+            group.items.map { item -> "${item.groupTitle} - ${item.title}" to item }
         }.toMap()
     }
 }

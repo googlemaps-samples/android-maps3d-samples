@@ -16,8 +16,13 @@
 
 package com.example.snippets.java.snippets;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import com.google.android.gms.maps3d.GoogleMap3D;
+import com.example.snippets.java.TrackedMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.CollisionBehavior;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
@@ -41,9 +46,11 @@ import com.example.snippets.java.annotations.SnippetItem;
 )
 public class MarkerSnippets {
 
-    private final GoogleMap3D map;
+    private final Context context;
+    private final TrackedMap3D map;
 
-    public MarkerSnippets(GoogleMap3D map) {
+    public MarkerSnippets(Context context, TrackedMap3D map) {
+        this.context = context;
         this.map = map;
     }
 
@@ -53,7 +60,7 @@ public class MarkerSnippets {
     @SuppressWarnings("unused")
     @SnippetItem(
         title = "1. Basic",
-        description = "Adds a standard marker at Lat: 37.422, Lng: -122.084, Alt: 10m."
+        description = "Adds a standard marker."
     )
     public void addBasicMarker() {
         // [START maps_android_3d_marker_add_java]
@@ -82,7 +89,7 @@ public class MarkerSnippets {
     @SuppressWarnings("unused")
     @SnippetItem(
         title = "2. Advanced",
-        description = "Adds a 'Priority Marker' at Lat: 37.422, Lng: -122.084, Alt: 10m (Relative to Ground) that is extruded and collides with other markers."
+        description = "Adds a 'Priority Marker' that is extruded and collides with other markers."
     )
     public void addAdvancedMarker() {
         // [START maps_android_3d_marker_options_java]
@@ -114,7 +121,7 @@ public class MarkerSnippets {
     @SuppressWarnings("unused")
     @SnippetItem(
         title = "3. Click",
-        description = "Adds a marker at Lat: 37.42, Lng: -122.08 that logs a message when clicked."
+        description = "Adds a marker that logs a message when clicked."
     )
     public void handleMarkerClick() {
         // [START maps_android_3d_marker_click_java]
@@ -137,7 +144,9 @@ public class MarkerSnippets {
             marker.setClickListener(new OnMarkerClickListener() {
                 @Override
                 public void onMarkerClick() {
-                    // Handle click
+                    new Handler(Looper.getMainLooper()).post(() -> 
+                        Toast.makeText(context, "Marker Clicked!", Toast.LENGTH_SHORT).show()
+                    );
                 }
             });
         }

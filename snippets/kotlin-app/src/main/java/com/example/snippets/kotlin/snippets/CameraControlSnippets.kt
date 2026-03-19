@@ -17,9 +17,10 @@
 package com.example.snippets.kotlin.snippets
 
 import android.util.Log
+import com.example.snippets.kotlin.TrackedMap3D
 import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
-import com.google.android.gms.maps3d.GoogleMap3D
+import com.example.snippets.kotlin.utils.awaitAnimation
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyAroundOptions
 import com.google.android.gms.maps3d.model.flyToOptions
@@ -27,15 +28,13 @@ import com.google.android.gms.maps3d.model.latLngAltitude
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
-import com.example.snippets.kotlin.utils.awaitAnimation
-import com.example.snippets.kotlin.utils.awaitCameraSteady
 
 @SnippetGroup(
     title = "Camera",
     description = "Snippets demonstrating dynamic camera orchestration and animations."
 )
 class CameraControlSnippets(
-    private val map: GoogleMap3D,
+    private val map: TrackedMap3D,
     private val lifecycleScope: kotlinx.coroutines.CoroutineScope
 ) {
 
@@ -104,7 +103,7 @@ class CameraControlSnippets(
                 durationInMillis = 6_000
             }
 
-            map.setOnMapSteadyListener { isSceneSteady ->
+            map.setOnMapSteadyListener { isSceneSteady: Boolean ->
                 if (isSceneSteady) {
                     map.setOnMapSteadyListener(null) // Cleanup
                     map.flyCameraAround(options)
@@ -206,7 +205,7 @@ class CameraControlSnippets(
     )
     fun listenToMapSteadyState() {
         // [START maps_android_3d_camera_steady_kt]
-        map.setOnMapSteadyListener { isSceneSteady ->
+        map.setOnMapSteadyListener { isSceneSteady: Boolean ->
             Log.d("Maps3D", "Map Is Steady: $isSceneSteady")
         }
         // [END maps_android_3d_camera_steady_kt]

@@ -18,6 +18,7 @@ package com.example.snippets.java.snippets;
 
 import com.example.snippets.common.R;
 import android.content.Context;
+import com.example.snippets.java.TrackedMap3D;
 import android.graphics.Color;
 import android.widget.TextView;
 import com.google.android.gms.maps3d.GoogleMap3D;
@@ -37,9 +38,9 @@ import com.example.snippets.java.annotations.SnippetItem;
 public class PopoverSnippets {
 
     private final Context context;
-    private final GoogleMap3D map;
+    private final TrackedMap3D map;
 
-    public PopoverSnippets(Context context, GoogleMap3D map) {
+    public PopoverSnippets(Context context, TrackedMap3D map) {
         this.context = context;
         this.map = map;
     }
@@ -50,7 +51,7 @@ public class PopoverSnippets {
     @SuppressWarnings("unused")
     @SnippetItem(
         title = "1. Marker Anchor",
-        description = "Adds a 'Hello Popover!' text bubble anchored to a marker at Lat: 37.422, Lng: -122.084."
+        description = "Adds a 'Hello Popover!' text bubble anchored to a marker"
     )
     public void addPopoverToMarker() {
         // [START maps_android_3d_popover_add_java]
@@ -86,7 +87,7 @@ public class PopoverSnippets {
     @SuppressWarnings("unused")
     @SnippetItem(
         title = "2. Configured",
-        description = "Adds an 'Info' popover anchored to a marker at [0,0] with auto-close enabled and auto-pan disabled."
+        description = "Adds an 'Info' popover anchored to a marker with auto-close enabled and auto-pan disabled."
     )
     public void addConfiguredPopover() {
         // [START maps_android_3d_popover_options_java]

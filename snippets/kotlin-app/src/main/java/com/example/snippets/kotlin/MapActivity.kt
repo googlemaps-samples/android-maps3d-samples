@@ -46,9 +46,10 @@ class MapActivity : AppCompatActivity() {
         map3DView = findViewById(R.id.map)
         map3DView.onCreate(savedInstanceState)
 
+        val groupTitle = intent.getStringExtra("group_title")
         val snippetTitle = intent.getStringExtra(EXTRA_SNIPPET_TITLE)
         val snippetList = SnippetRegistry.getSnippetGroups().flatMap { it.items }
-        var currentIndex = snippetList.indexOfFirst { it.title == snippetTitle }
+        var currentIndex = snippetList.indexOfFirst { it.title == snippetTitle && (groupTitle == null || it.groupTitle == groupTitle) }
 
         val printPoseBtn = findViewById<com.google.android.material.button.MaterialButton>(R.id.snapshot_button).apply {
             setOnClickListener {
@@ -85,7 +86,8 @@ class MapActivity : AppCompatActivity() {
         val replayBtn = findViewById<com.google.android.material.button.MaterialButton>(R.id.reset_view_button).apply {
             setOnClickListener {
                 if (currentIndex >= 0) {
-                    runSnippet(snippetList[currentIndex].title)
+                    val item = snippetList[currentIndex]
+                    runSnippet(item.groupTitle, item.title)
                 }
             }
         }
@@ -99,7 +101,8 @@ class MapActivity : AppCompatActivity() {
                 } else {
                     currentIndex = snippetList.size - 1
                 }
-                runSnippet(snippetList[currentIndex].title)
+                val item = snippetList[currentIndex]
+                runSnippet(item.groupTitle, item.title)
             }
         }
 
@@ -111,7 +114,8 @@ class MapActivity : AppCompatActivity() {
                 } else {
                     currentIndex = 0
                 }
-                runSnippet(snippetList[currentIndex].title)
+                val item = snippetList[currentIndex]
+                runSnippet(item.groupTitle, item.title)
             }
         }
 
@@ -121,12 +125,12 @@ class MapActivity : AppCompatActivity() {
 
                 // For simplicity, we run immediately, but add a listener for logs
                 googleMap3D.setOnMapReadyListener { sceneReadiness ->
-                    Log.d("MapActivity", "setOnMapReadyListener called")
                 }
 
                 // Run snippet after initializing, resetting to global view first
                 if (currentIndex >= 0) {
-                    runSnippet(snippetList[currentIndex].title)
+                    val item = snippetList[currentIndex]
+                    runSnippet(item.groupTitle, item.title)
                 }
             }
 
@@ -171,10 +175,15 @@ class MapActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
         map3DView.onSaveInstanceState(outState)
     }
-    private fun runSnippet(snippetTitle: String?) {
+    private fun runSnippet(groupTitle: String?, snippetTitle: String?) {
         if (snippetTitle == null) return
-        val snippet = SnippetRegistry.snippets[snippetTitle] ?: return
+        val key = if (groupTitle != null) "$groupTitle - $snippetTitle" else snippetTitle
+        val snippet = SnippetRegistry.snippets[key] 
+            ?: SnippetRegistry.getSnippetGroups().flatMap { it.items }.find { it.title == snippetTitle } 
+            ?: return
         if (!::googleMap3D.isInitialized) return
+
+        SnippetRegistry.clearTrackedItems()
 
         lifecycleScope.launch {
             // 1. Set camera to far global view
@@ -198,7 +207,7 @@ class MapActivity : AppCompatActivity() {
 
             // 3. Play snippet
             try {
-                snippet.action(this@MapActivity, googleMap3D, lifecycleScope)
+                snippet.action(this@MapActivity, googleMap3D, lifecycleScope) 
                 Toast.makeText(
                     this@MapActivity,
                     "${snippet.groupTitle}: ${snippet.title}.\n${snippet.description}",

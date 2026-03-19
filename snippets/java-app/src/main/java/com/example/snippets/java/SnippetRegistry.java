@@ -31,6 +31,21 @@ import com.google.android.gms.maps3d.GoogleMap3D;
 
 public class SnippetRegistry {
 
+    private static final java.util.List<Object> addedElements = new java.util.ArrayList<>();
+
+    public static void clearTrackedItems() {
+        for (Object item : addedElements) {
+            try {
+                if (item instanceof com.google.android.gms.maps3d.model.Marker) ((com.google.android.gms.maps3d.model.Marker) item).remove();
+                else if (item instanceof com.google.android.gms.maps3d.model.Polyline) ((com.google.android.gms.maps3d.model.Polyline) item).remove();
+                else if (item instanceof com.google.android.gms.maps3d.model.Polygon) ((com.google.android.gms.maps3d.model.Polygon) item).remove();
+                else if (item instanceof com.google.android.gms.maps3d.model.Model) ((com.google.android.gms.maps3d.model.Model) item).remove();
+                else if (item instanceof com.google.android.gms.maps3d.Popover) ((com.google.android.gms.maps3d.Popover) item).remove();
+            } catch (Exception e) { /* ignore */ }
+        }
+        addedElements.clear();
+    }
+
     private static final List<Class<?>> snippetClasses = Arrays.asList(
         MapInitSnippets.class,
         CameraControlSnippets.class,
@@ -64,7 +79,8 @@ public class SnippetRegistry {
                     groupAnnotation.title(),
                     (context, map) -> {
                         try {
-                            Object instance = createInstance(clazz, context, map);
+                            TrackedMap3D trackedMap = new TrackedMap3D(map, addedElements);
+                            Object instance = createInstance(clazz, context, trackedMap);
                             if (method.getParameterCount() == 0) {
                                 method.invoke(instance);
                             } else if (method.getParameterCount() == 1 && method.getParameterTypes()[0] == Context.class) {
@@ -89,12 +105,12 @@ public class SnippetRegistry {
         return groups;
     }
 
-    private static Object createInstance(Class<?> clazz, Context context, GoogleMap3D map) throws Exception {
+    private static Object createInstance(Class<?> clazz, Context context, TrackedMap3D map) throws Exception {
         try {
-            return clazz.getConstructor(Context.class, GoogleMap3D.class).newInstance(context, map);
+            return clazz.getConstructor(Context.class, TrackedMap3D.class).newInstance(context, map);
         } catch (NoSuchMethodException e1) {
             try {
-                return clazz.getConstructor(GoogleMap3D.class).newInstance(map);
+                return clazz.getConstructor(TrackedMap3D.class).newInstance(map);
             } catch (NoSuchMethodException e2) {
                 return clazz.getConstructor().newInstance();
             }
@@ -107,7 +123,7 @@ public class SnippetRegistry {
     static {
         for (SnippetGroupInfo group : getSnippetGroups()) {
             for (SnippetItemInfo item : group.getItems()) {
-                snippets.put(item.getTitle(), item);
+                snippets.put(group.getTitle() + " - " + item.getTitle(), item);
             }
         }
     }

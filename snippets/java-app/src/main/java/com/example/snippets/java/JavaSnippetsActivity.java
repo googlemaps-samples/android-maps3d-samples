@@ -50,6 +50,7 @@ public class JavaSnippetsActivity extends AppCompatActivity {
 
         SnippetGroupAdapter adapter = new SnippetGroupAdapter(groups, item -> {
             Intent intent = new Intent(this, MapActivity.class);
+            intent.putExtra("group_title", item.getGroupTitle());
             intent.putExtra(MapActivity.EXTRA_SNIPPET_TITLE, item.getTitle());
             startActivity(intent);
         });

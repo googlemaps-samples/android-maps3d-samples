@@ -16,9 +16,7 @@
 
 package com.example.snippets.kotlin.snippets
 
-import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.OnMap3DClickListener
-import com.google.android.gms.maps3d.model.LatLngAltitude
+import com.example.snippets.kotlin.TrackedMap3D
 import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
 
@@ -26,9 +24,7 @@ import com.example.snippets.kotlin.annotations.SnippetItem
     title = "Places",
     description = "Snippets demonstrating Place (POI/Building) interaction algorithms."
 )
-class PlaceSnippets(private val map: GoogleMap3D) {
-
-
+class PlaceSnippets(private val map: TrackedMap3D) {
     /**
      * Listens for clicks on 3D Places (buildings, POIs).
      */

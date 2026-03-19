@@ -18,6 +18,7 @@ package com.example.snippets.java.snippets;
 
 import android.graphics.Color;
 import com.google.android.gms.maps3d.GoogleMap3D;
+import com.example.snippets.java.TrackedMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.Polyline;
@@ -33,9 +34,9 @@ import com.example.snippets.java.annotations.SnippetItem;
 )
 public class PolylineSnippets {
 
-    private final GoogleMap3D map;
+    private final TrackedMap3D map;
 
-    public PolylineSnippets(GoogleMap3D map) {
+    public PolylineSnippets(TrackedMap3D map) {
         this.map = map;
     }
 
@@ -45,7 +46,7 @@ public class PolylineSnippets {
     @SuppressWarnings("unused")
     @SnippetItem(
         title = "1. Basic",
-        description = "Draws a thick red polyline connecting three points near Lat: 37.42, Lng: -122.08."
+        description = "Draws a thick red polyline connecting three points"
     )
     public void addBasicPolyline() {
         // [START maps_android_3d_polyline_add_java]

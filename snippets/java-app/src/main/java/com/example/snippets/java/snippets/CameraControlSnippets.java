@@ -18,6 +18,7 @@ package com.example.snippets.java.snippets;
 
 import androidx.annotation.NonNull;
 
+import com.example.snippets.java.TrackedMap3D;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -36,9 +37,9 @@ import com.example.snippets.java.annotations.SnippetItem;
 )
 public class CameraControlSnippets {
 
-    private final GoogleMap3D map;
+    private final TrackedMap3D map;
 
-    public CameraControlSnippets(GoogleMap3D map) {
+    public CameraControlSnippets(TrackedMap3D map) {
         this.map = map;
     }
 

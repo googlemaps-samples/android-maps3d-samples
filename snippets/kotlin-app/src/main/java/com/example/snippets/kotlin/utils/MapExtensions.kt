@@ -3,6 +3,7 @@ package com.example.snippets.kotlin.utils
 import com.google.android.gms.maps3d.GoogleMap3D
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import com.example.snippets.kotlin.TrackedMap3D
 
 /**
  * **Coroutine Helper**: Awaiting Camera Animation.
@@ -10,6 +11,10 @@ import kotlin.coroutines.resume
  * 
  * @param action The block that triggers the animation, executed AFTER the listener is attached.
  */
+suspend fun TrackedMap3D.awaitAnimation(action: () -> Unit) {
+    this.delegate.awaitAnimation(action)
+}
+
 suspend fun GoogleMap3D.awaitAnimation(action: () -> Unit) = suspendCancellableCoroutine { continuation ->
     setCameraAnimationEndListener {
         setCameraAnimationEndListener(null) // Cleanup
