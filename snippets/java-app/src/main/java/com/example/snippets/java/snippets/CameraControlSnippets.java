@@ -16,14 +16,11 @@
 
 package com.example.snippets.java.snippets;
 
-import androidx.annotation.NonNull;
-
 import com.example.snippets.java.TrackedMap3D;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import com.google.android.gms.maps3d.GoogleMap3D;
-import com.google.android.gms.maps3d.OnCameraChangedListener;
+
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyAroundOptions;
 import com.google.android.gms.maps3d.model.FlyToOptions;

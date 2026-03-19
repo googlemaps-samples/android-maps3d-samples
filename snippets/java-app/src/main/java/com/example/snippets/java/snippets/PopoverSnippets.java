@@ -21,7 +21,6 @@ import android.content.Context;
 import com.example.snippets.java.TrackedMap3D;
 import android.graphics.Color;
 import android.widget.TextView;
-import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.Marker;

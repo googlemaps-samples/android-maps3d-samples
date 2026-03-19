@@ -16,7 +16,6 @@
 
 package com.example.snippets.java.snippets;
 
-import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.example.snippets.java.TrackedMap3D;
 import com.google.android.gms.maps3d.model.LatLngAltitude;

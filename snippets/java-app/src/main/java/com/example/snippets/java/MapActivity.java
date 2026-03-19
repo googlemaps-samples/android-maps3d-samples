@@ -35,8 +35,6 @@ public class MapActivity extends AppCompatActivity {
 
   private com.google.android.gms.maps3d.Map3DView map3DView;
 
-  private boolean triggered = false;
-
   private String snippetTitle;
   private String groupTitle;
   private GoogleMap3D map;
@@ -53,7 +51,7 @@ public class MapActivity extends AppCompatActivity {
     findViewById(R.id.snapshot_button).setOnClickListener(v -> {
         if (map != null) {
             com.google.android.gms.maps3d.model.Camera cam = map.getCamera();
-            if (cam != null && cam.getCenter() != null) {
+            if (cam != null) {
                 com.google.android.gms.maps3d.model.LatLngAltitude center = cam.getCenter();
                 double rawHeading = cam.getHeading() != null ? cam.getHeading() : 0.0;
                 double heading = (rawHeading % 360.0 + 360.0) % 360.0;

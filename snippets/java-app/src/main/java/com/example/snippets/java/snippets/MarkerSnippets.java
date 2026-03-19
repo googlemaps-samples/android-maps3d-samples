@@ -20,8 +20,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import com.google.android.gms.maps3d.GoogleMap3D;
 import com.example.snippets.java.TrackedMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.CollisionBehavior;
@@ -32,10 +30,10 @@ import com.google.android.gms.maps3d.model.PinConfiguration;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.Glyph;
+import com.google.android.gms.maps3d.model.ImageView;
 import com.example.snippets.java.R;
 import android.content.Context;
 import android.graphics.Color;
-import android.widget.ImageView;
 import com.google.android.gms.maps3d.OnMarkerClickListener;
 import com.example.snippets.java.annotations.SnippetGroup;
 import com.example.snippets.java.annotations.SnippetItem;
@@ -168,29 +166,8 @@ public class MarkerSnippets {
 
         // Create a Glyph with a custom image
         Glyph glyphImage = Glyph.fromColor(Color.YELLOW);
-        ImageView imageView = new ImageView(context);
-        imageView.setImageResource(R.mipmap.ic_launcher);
-        
-        // Glyph.setImage expects a com.google.android.gms.maps3d.model.ImageView? No, wait.
-        // It likely expects an android.view.View or specialized type. 
-        // Checking the Kotlin sample: glyphImage.setImage(ImageView(context)...)
-        // If the error says "incompatible types: android.widget.ImageView cannot be converted to com.google.android.gms.maps3d.model.ImageView",
-        // then the SDK has its own ImageView wrapper or I am importing the wrong one.
-        // Actually, looking at the hierarchy, Glyph.setImage might take a View, but if there is a name collision...
-        // Let's assume the SDK expects the Android ImageView but maybe the signature is weird?
-        // Wait, the error `com.google.android.gms.maps3d.model.ImageView` suggests there IS a model class named ImageView.
-        // I should check if I need to wrap it or use that class.
-        // But the Kotlin sample used `android.widget.ImageView`. 
-        // Let's look at the error again: "actual type is 'android.widget.ImageView', but 'com.google.android.gms.maps3d.model.ImageView' was expected."
-        // This implies `Glyph` has a method `setImage(com.google.android.gms.maps3d.model.ImageView)`?
-        // Or maybe I am shadowing it?
-        
-        // Let's try to use the SDK's ImageView if it exists, or check imports.
-        // Actually, looking at the user provided code: `glyphImage.setImage(ImageView(R.drawable.ook))` 
-        // The user code seems to use a constructor `ImageView(Int)`. Android's ImageView takes Context.
-        // So `com.google.android.gms.maps3d.model.ImageView` must be a thing!
-        
-        com.google.android.gms.maps3d.model.ImageView mapImageView = new com.google.android.gms.maps3d.model.ImageView(R.mipmap.ic_launcher);
+
+        ImageView mapImageView = new ImageView(R.mipmap.ic_launcher);
         glyphImage.setImage(mapImageView);
 
         MarkerOptions options = new MarkerOptions();

@@ -27,7 +27,6 @@ import java.util.Map;
 import com.example.snippets.java.annotations.SnippetGroup;
 import com.example.snippets.java.annotations.SnippetItem;
 import android.content.Context;
-import com.google.android.gms.maps3d.GoogleMap3D;
 
 public class SnippetRegistry {
 

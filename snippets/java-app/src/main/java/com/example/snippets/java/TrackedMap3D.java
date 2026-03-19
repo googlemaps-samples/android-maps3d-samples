@@ -5,7 +5,6 @@ import com.google.android.gms.maps3d.OnCameraChangedListener;
 import com.google.android.gms.maps3d.OnMap3DClickListener;
 import com.google.android.gms.maps3d.OnMapReadyListener;
 import com.google.android.gms.maps3d.OnMapSteadyListener;
-import com.google.android.gms.maps3d.OnCameraAnimationEndListener;
 import com.google.android.gms.maps3d.Popover;
 import com.google.android.gms.maps3d.model.Marker;
 import com.google.android.gms.maps3d.model.MarkerOptions;
