@@ -39,6 +39,7 @@ public class MapActivity extends AppCompatActivity {
 
   private String snippetTitle;
   private GoogleMap3D map;
+  private int currentIndex = -1;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +74,36 @@ public class MapActivity extends AppCompatActivity {
     findViewById(R.id.reset_view_button).setOnClickListener(v -> runSnippet());
 
     snippetTitle = getIntent().getStringExtra(EXTRA_SNIPPET_TITLE);
+    final java.util.List<SnippetItemInfo> snippetList = new java.util.ArrayList<>(SnippetRegistry.snippets.values());
+    for (int i = 0; i < snippetList.size(); i++) {
+        if (snippetList.get(i).getTitle().equals(snippetTitle)) {
+            currentIndex = i;
+            break;
+        }
+    }
+
+    findViewById(R.id.previous_button).setOnClickListener(v -> {
+        if (snippetList.isEmpty()) return;
+        if (currentIndex > 0) {
+            currentIndex--;
+        } else {
+            currentIndex = snippetList.size() - 1;
+        }
+        snippetTitle = snippetList.get(currentIndex).getTitle();
+        runSnippet();
+    });
+
+    findViewById(R.id.next_button).setOnClickListener(v -> {
+        if (snippetList.isEmpty()) return;
+        if (currentIndex < snippetList.size() - 1) {
+            currentIndex++;
+        } else {
+            currentIndex = 0;
+        }
+        snippetTitle = snippetList.get(currentIndex).getTitle();
+        runSnippet();
+    });
+
     map3DView.getMap3DViewAsync(new OnMap3DViewReadyCallback() {
       @Override
       public void onMap3DViewReady(@NonNull GoogleMap3D map) {
@@ -99,7 +130,11 @@ public class MapActivity extends AppCompatActivity {
         new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
             try {
               snippet.getAction().execute(MapActivity.this, map);
-              runOnUiThread(() -> Toast.makeText(MapActivity.this, "Running: " + snippetTitle, Toast.LENGTH_SHORT).show());
+              runOnUiThread(() -> Toast.makeText(
+                  MapActivity.this,
+                  snippet.getGroupTitle() + ": " + snippet.getTitle() + ".\n" + snippet.getDescription(),
+                  Toast.LENGTH_LONG
+              ).show());
             } catch (Exception e) {
               runOnUiThread(() -> Toast.makeText(MapActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
               e.printStackTrace();

@@ -47,6 +47,8 @@ class MapActivity : AppCompatActivity() {
         map3DView.onCreate(savedInstanceState)
 
         val snippetTitle = intent.getStringExtra(EXTRA_SNIPPET_TITLE)
+        val snippetList = SnippetRegistry.getSnippetGroups().flatMap { it.items }
+        var currentIndex = snippetList.indexOfFirst { it.title == snippetTitle }
 
         val printPoseBtn = findViewById<com.google.android.material.button.MaterialButton>(R.id.snapshot_button).apply {
             setOnClickListener {
@@ -82,7 +84,34 @@ class MapActivity : AppCompatActivity() {
 
         val replayBtn = findViewById<com.google.android.material.button.MaterialButton>(R.id.reset_view_button).apply {
             setOnClickListener {
-                runSnippet(snippetTitle)
+                if (currentIndex >= 0) {
+                    runSnippet(snippetList[currentIndex].title)
+                }
+            }
+        }
+
+        // Previous and Next Nav buttons
+        findViewById<com.google.android.material.button.MaterialButton>(R.id.previous_button).apply {
+            setOnClickListener {
+                if (snippetList.isEmpty()) return@setOnClickListener
+                if (currentIndex > 0) {
+                    currentIndex--
+                } else {
+                    currentIndex = snippetList.size - 1
+                }
+                runSnippet(snippetList[currentIndex].title)
+            }
+        }
+
+        findViewById<com.google.android.material.button.MaterialButton>(R.id.next_button).apply {
+            setOnClickListener {
+                if (snippetList.isEmpty()) return@setOnClickListener
+                if (currentIndex < snippetList.size - 1) {
+                    currentIndex++
+                } else {
+                    currentIndex = 0
+                }
+                runSnippet(snippetList[currentIndex].title)
             }
         }
 
@@ -96,7 +125,9 @@ class MapActivity : AppCompatActivity() {
                 }
 
                 // Run snippet after initializing, resetting to global view first
-                runSnippet(snippetTitle)
+                if (currentIndex >= 0) {
+                    runSnippet(snippetList[currentIndex].title)
+                }
             }
 
             override fun onError(error: java.lang.Exception) {
@@ -168,7 +199,11 @@ class MapActivity : AppCompatActivity() {
             // 3. Play snippet
             try {
                 snippet.action(this@MapActivity, googleMap3D, lifecycleScope)
-                Toast.makeText(this@MapActivity, "Running: $snippetTitle", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@MapActivity,
+                    "${snippet.groupTitle}: ${snippet.title}.\n${snippet.description}",
+                    Toast.LENGTH_LONG
+                ).show()
             } catch (e: Exception) {
                 Log.e("MapActivity", "Error running snippet: ${e.message}")
             }

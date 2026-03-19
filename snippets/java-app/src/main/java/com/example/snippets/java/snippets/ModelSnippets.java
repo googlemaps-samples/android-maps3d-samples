@@ -43,7 +43,7 @@ public class ModelSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Basic",
+        title = "1. Basic",
         description = "Loads a GLB model from a URL and places it clamped to the ground."
     )
     public void addBasicModel() {
@@ -64,7 +64,7 @@ public class ModelSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Advanced",
+        title = "2. Advanced",
         description = "Loads a GLB model with advanced configuration (scale, orientation) from assets."
     )
     public void addAdvancedModel() {

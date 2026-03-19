@@ -36,7 +36,7 @@ import com.example.snippets.java.annotations.SnippetItem;
 public class MapInitSnippets {
 
     @SnippetItem(
-        title = "Basic Map3D Initialization",
+        title = "1. Basic Map3D Initialization",
         description = "Initializes a standard 3D Map View and sets an initial camera angle."
     )
     @SuppressWarnings("unused")
@@ -66,7 +66,7 @@ public class MapInitSnippets {
      * Sets up listeners for map readiness and steady state.
      */
     @SuppressWarnings("unused")
-    @SnippetItem(title = "Listen Map Events", description = "Logs map events to the console, such as clicks or idle status.")
+    @SnippetItem(title = "2. Listen Map Events", description = "Logs map events to the console, such as clicks or idle status.")
     public void setupMapListeners(Context context, GoogleMap3D map) {
         // [START maps_android_3d_init_listeners_java]
         Handler mainHandler = new Handler(Looper.getMainLooper());

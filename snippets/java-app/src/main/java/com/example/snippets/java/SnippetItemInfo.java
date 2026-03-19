@@ -6,11 +6,13 @@ package com.example.snippets.java;
 public class SnippetItemInfo {
     private final String title;
     private final String description;
+    private final String groupTitle;
     private final SnippetAction action;
 
-    public SnippetItemInfo(String title, String description, SnippetAction action) {
+    public SnippetItemInfo(String title, String description, String groupTitle, SnippetAction action) {
         this.title = title;
         this.description = description;
+        this.groupTitle = groupTitle;
         this.action = action;
     }
 
@@ -20,6 +22,10 @@ public class SnippetItemInfo {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getGroupTitle() {
+        return groupTitle;
     }
 
     public SnippetAction getAction() {

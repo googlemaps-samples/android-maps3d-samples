@@ -40,6 +40,7 @@ data class SnippetGroupInfo(
 data class SnippetItemInfo(
     val title: String,
     val description: String,
+    val groupTitle: String,
     val action: (Context, GoogleMap3D, kotlinx.coroutines.CoroutineScope) -> Unit
 )
 
@@ -72,6 +73,7 @@ object SnippetRegistry {
                 items.add(SnippetItemInfo(
                     title = itemAnnotation.title,
                     description = itemAnnotation.description,
+                    groupTitle = groupAnnotation.title,
                     action = { context, map, scope ->
                         try {
                             val instance = createInstance(clazz, context, map, scope)

@@ -48,7 +48,7 @@ public class CameraControlSnippets {
      * a duration.
      */
     @SnippetItem(
-        title = "Fly To",
+        title = "1. Fly To",
         description = "Animates the camera to a specific position with a tilt and heading over 5 seconds."
     )
     public void flyCameraToPosition() {
@@ -68,7 +68,7 @@ public class CameraControlSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Fly Around",
+        title = "2. Fly Around",
         description = "Rotates the camera 360 degrees around a specific location over 10 seconds."
     )
     public void flyCameraAroundLocation() {
@@ -99,16 +99,16 @@ public class CameraControlSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Stop Animation",
+        title = "3. Stop Animation",
         description = "Stops any currently running camera animation immediately."
     )
     public void stopAnimation() {
         // [START maps_android_3d_camera_stop_java]
-        LatLngAltitude center = new LatLngAltitude(38.743829, -109.499512, 1460.37);
-        Camera targetCamera = new Camera(center, 338.52, 76.16, 0.0, 191.71);
+        LatLngAltitude center = new LatLngAltitude(38.743502, -109.499374, 1467.0);
+        Camera targetCamera = new Camera(center, 349.6, 58.1, 0.0, 138.2);
 
-        // 1. Start a slow flyTo animation so we have something to stop
-        map.flyCameraTo(new FlyToOptions(targetCamera, 10000L));
+        // 1. Start a perpetual flyAround animation so we have something to stop
+        map.flyCameraAround(new FlyAroundOptions(targetCamera, 30000L, 10.0));
 
         // 2. Schedule the stop command after 2 seconds
         new Handler(Looper.getMainLooper()).postDelayed(map::stopCameraAnimation, 2000);
@@ -121,7 +121,7 @@ public class CameraControlSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Listen Camera Events",
+        title = "4. Listen Camera Events",
         description = "Demonstrates camera change listening"
     )
     public void listenToCameraEvents() {
@@ -152,7 +152,7 @@ public class CameraControlSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Listen Steady State",
+        title = "5. Listen Steady State",
         description = "Logs to the console when the map finishes rendering or enters a steady state."
     )
     public void listenToMapSteadyState() {

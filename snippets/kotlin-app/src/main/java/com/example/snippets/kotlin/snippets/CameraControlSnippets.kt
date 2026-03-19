@@ -44,7 +44,7 @@ class CameraControlSnippets(
      */
     @Suppress("unused")
     @SnippetItem(
-        title = "Fly To",
+        title = "1. Fly To",
         description = "Animates the camera to a specific position with a tilt and heading over 5 seconds."
     )
     fun flyCameraToPosition() {
@@ -75,7 +75,7 @@ class CameraControlSnippets(
      */
     @Suppress("unused")
     @SnippetItem(
-        title = "Fly Around",
+        title = "2. Fly Around",
         description = "Rotates the camera 360 degrees around a specific location over 10 seconds."
     )
     fun flyCameraAroundLocation() {
@@ -119,7 +119,7 @@ class CameraControlSnippets(
      */
     @Suppress("unused")
     @SnippetItem(
-        title = "Stop Animation",
+        title = "3. Stop Animation",
         description = "Stops any currently running camera animation immediately."
     )
     fun stopAnimation() {
@@ -127,13 +127,13 @@ class CameraControlSnippets(
         lifecycleScope.launch {
             val targetCamera = camera {
                 center = latLngAltitude {
-                    latitude = 38.743829
-                    longitude = -109.499512
-                    altitude = 1460.37
+                    latitude = 38.743502
+                    longitude = -109.499374
+                    altitude = 1467.0
                 }
-                tilt = 76.16
-                heading = 338.52
-                range = 191.71
+                tilt = 58.1
+                heading = 349.6
+                range = 138.2
                 roll = 0.0
             }
 
@@ -149,10 +149,11 @@ class CameraControlSnippets(
 
             // [END_EXCLUDE]
             
-            // 1. Start a slow flyTo animation so we have something to stop
-            map.flyCameraTo(flyToOptions {
-                endCamera = targetCamera
-                durationInMillis = 10_000 // Slow flight so we can stop it
+            // 1. Start a perpetual flyAround animation so we have something to stop
+            map.flyCameraAround(flyAroundOptions {
+                center = targetCamera
+                rounds = 10.0
+                durationInMillis = 30_000
             })
 
             lifecycleScope.launch {
@@ -169,7 +170,7 @@ class CameraControlSnippets(
      */
     @Suppress("unused")
     @SnippetItem(
-        title = "Listen Events",
+        title = "4. Listen Camera Events",
         description = "Logs camera change events to the console, printing the center coordinates as the camera moves."
     )
     fun listenToCameraEvents() {
@@ -200,7 +201,7 @@ class CameraControlSnippets(
      */
     @Suppress("unused")
     @SnippetItem(
-        title = "Listen Steady State",
+        title = "5. Listen Steady State",
         description = "Logs to the console when the map finishes rendering or enters a steady state."
     )
     fun listenToMapSteadyState() {

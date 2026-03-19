@@ -44,7 +44,7 @@ public class PolygonSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Basic",
+        title = "1. Basic",
         description = "Draws a red polygon with a blue stroke around a small area near Lat: 37.42, Lng: -122.08."
     )
     public void addBasicPolygon() {
@@ -73,7 +73,7 @@ public class PolygonSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Extruded",
+        title = "2. Extruded",
         description = "Draws a semi-transparent red extruded polygon (height 50m) around a small area near Lat: 37.42, Lng: -122.08."
     )
     public void addExtrudedPolygon() {

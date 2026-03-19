@@ -35,7 +35,7 @@ class PolylineSnippets(private val map: GoogleMap3D) {
      */
     @Suppress("unused")
     @SnippetItem(
-        title = "Basic",
+        title = "1. Basic",
         description = "Draws a thick red polyline connecting three points near Lat: 37.42, Lng: -122.08."
     )
     fun addBasicPolyline() {
@@ -62,7 +62,7 @@ class PolylineSnippets(private val map: GoogleMap3D) {
      */
     @Suppress("unused")
     @SnippetItem(
-        title = "Styled",
+        title = "2. Styled",
         description = "Draws a magenta polyline with a green outline, extruded and following the ground curvature (geodesic), connecting two points."
     )
     fun addStyledPolyline() {

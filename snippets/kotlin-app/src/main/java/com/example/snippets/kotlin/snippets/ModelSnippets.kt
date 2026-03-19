@@ -36,7 +36,7 @@ class ModelSnippets(private val map: GoogleMap3D) {
      */
     @Suppress("unused")
     @SnippetItem(
-        title = "Basic",
+        title = "1. Basic",
         description = "Loads a GLB model from a URL and places it clamped to the ground."
     )
     fun addBasicModel() {
@@ -62,7 +62,7 @@ class ModelSnippets(private val map: GoogleMap3D) {
      */
     @Suppress("unused")
     @SnippetItem(
-        title = "Advanced",
+        title = "2. Advanced",
         description = "Loads a GLB model with advanced configuration (scale, orientation) from assets."
     )
     fun addAdvancedModel() {

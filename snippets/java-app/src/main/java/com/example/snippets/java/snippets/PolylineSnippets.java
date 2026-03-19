@@ -44,7 +44,7 @@ public class PolylineSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Basic",
+        title = "1. Basic",
         description = "Draws a thick red polyline connecting three points near Lat: 37.42, Lng: -122.08."
     )
     public void addBasicPolyline() {
@@ -70,7 +70,7 @@ public class PolylineSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Styled",
+        title = "2. Styled",
         description = "Draws a magenta polyline with a green outline, extruded and following the ground curvature (geodesic), connecting two points."
     )
     public void addStyledPolyline() {

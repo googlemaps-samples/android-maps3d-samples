@@ -34,7 +34,7 @@ class PlaceSnippets(private val map: GoogleMap3D) {
      */
     @Suppress("unused")
     @SnippetItem(
-        title = "Listen Clicks",
+        title = "1. Listen Clicks",
         description = "Sets up a listener that logs the Place ID when a user clicks on a 3D building or POI."
     )
     fun listenToPlaceClicks() {

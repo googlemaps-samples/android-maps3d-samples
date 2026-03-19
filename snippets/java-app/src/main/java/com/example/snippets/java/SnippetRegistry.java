@@ -61,6 +61,7 @@ public class SnippetRegistry {
                 items.add(new SnippetItemInfo(
                     itemAnnotation.title(),
                     itemAnnotation.description(),
+                    groupAnnotation.title(),
                     (context, map) -> {
                         try {
                             Object instance = createInstance(clazz, context, map);

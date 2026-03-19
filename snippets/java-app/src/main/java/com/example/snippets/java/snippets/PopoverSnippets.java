@@ -49,7 +49,7 @@ public class PopoverSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Marker Anchor",
+        title = "1. Marker Anchor",
         description = "Adds a 'Hello Popover!' text bubble anchored to a marker at Lat: 37.422, Lng: -122.084."
     )
     public void addPopoverToMarker() {
@@ -85,7 +85,7 @@ public class PopoverSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Configured",
+        title = "2. Configured",
         description = "Adds an 'Info' popover anchored to a marker at [0,0] with auto-close enabled and auto-pan disabled."
     )
     public void addConfiguredPopover() {

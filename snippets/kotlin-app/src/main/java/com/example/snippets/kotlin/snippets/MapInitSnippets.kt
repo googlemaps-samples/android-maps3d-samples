@@ -78,7 +78,7 @@ class MapInitSnippets {
      */
     @Suppress("unused")
     @SnippetItem(
-        title = "Listen Events",
+        title = "1. Listen Events",
         description = "Initializes a 3D map and logs events when the scene is ready (100% loaded) and steady (camera stopped moving)."
     )
     fun setupMapListeners(context: Context, map: GoogleMap3D) {

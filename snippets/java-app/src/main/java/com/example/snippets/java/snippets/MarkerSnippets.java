@@ -52,7 +52,7 @@ public class MarkerSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Basic",
+        title = "1. Basic",
         description = "Adds a standard marker at Lat: 37.422, Lng: -122.084, Alt: 10m."
     )
     public void addBasicMarker() {
@@ -81,7 +81,7 @@ public class MarkerSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Advanced",
+        title = "2. Advanced",
         description = "Adds a 'Priority Marker' at Lat: 37.422, Lng: -122.084, Alt: 10m (Relative to Ground) that is extruded and collides with other markers."
     )
     public void addAdvancedMarker() {
@@ -113,7 +113,7 @@ public class MarkerSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Click",
+        title = "3. Click",
         description = "Adds a marker at Lat: 37.42, Lng: -122.08 that logs a message when clicked."
     )
     public void handleMarkerClick() {
@@ -150,7 +150,7 @@ public class MarkerSnippets {
      */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "Custom Icon",
+        title = "4. Custom Icon",
         description = "Adds a marker with a custom icon using PinConfiguration and Glyph styling."
     )
     public void addCustomMarker(Context context) {
