@@ -66,6 +66,10 @@ public class PolygonSnippets {
         
         Polygon polygon = map.addPolygon(options);
         // [END maps_android_3d_polygon_add_java]
+
+        com.google.android.gms.maps3d.model.Camera cam = new com.google.android.gms.maps3d.model.Camera(new LatLngAltitude(37.425, -122.085, 0.0), 0.0, 45.0, 0.0, 1000.0);
+        com.google.android.gms.maps3d.model.FlyToOptions flyTo = new com.google.android.gms.maps3d.model.FlyToOptions(cam, 3000L);
+        map.flyCameraTo(flyTo);
     }
 
     /**
@@ -95,5 +99,9 @@ public class PolygonSnippets {
         
         Polygon polygon = map.addPolygon(options);
         // [END maps_android_3d_polygon_extruded_java]
+
+        com.google.android.gms.maps3d.model.Camera cam = new com.google.android.gms.maps3d.model.Camera(new LatLngAltitude(37.425, -122.085, 0.0), 0.0, 45.0, 0.0, 1000.0);
+        com.google.android.gms.maps3d.model.FlyToOptions flyTo = new com.google.android.gms.maps3d.model.FlyToOptions(cam, 3000L);
+        map.flyCameraTo(flyTo);
     }
 }

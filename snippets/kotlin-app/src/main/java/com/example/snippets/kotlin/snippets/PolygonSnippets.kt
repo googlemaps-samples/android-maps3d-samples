@@ -58,6 +58,14 @@ class PolygonSnippets(private val map: TrackedMap3D) {
         
         val polygon = map.addPolygon(options)
         // [END maps_android_3d_polygon_add_kt]
+
+        map.flyCameraTo(com.google.android.gms.maps3d.model.flyToOptions {
+            endCamera = com.google.android.gms.maps3d.model.camera {
+                center = latLngAltitude { latitude = 37.425; longitude = -122.085; altitude = 0.0 }
+                tilt = 45.0
+                range = 1000.0
+            }
+        })
     }
 
     /**
@@ -88,5 +96,13 @@ class PolygonSnippets(private val map: TrackedMap3D) {
         
         val polygon = map.addPolygon(options)
         // [END maps_android_3d_polygon_extruded_kt]
+
+        map.flyCameraTo(com.google.android.gms.maps3d.model.flyToOptions {
+            endCamera = com.google.android.gms.maps3d.model.camera {
+                center = latLngAltitude { latitude = 37.425; longitude = -122.085; altitude = 0.0 }
+                tilt = 45.0
+                range = 1000.0
+            }
+        })
     }
 }
