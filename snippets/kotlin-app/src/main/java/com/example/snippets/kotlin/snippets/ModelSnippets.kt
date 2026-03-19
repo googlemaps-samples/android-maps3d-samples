@@ -20,6 +20,8 @@ import com.example.snippets.kotlin.TrackedMap3D
 import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
 import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.modelOptions
 import com.google.android.gms.maps3d.model.orientation
@@ -30,6 +32,9 @@ import com.google.android.gms.maps3d.model.vector3D
     description = "Snippets demonstrating 3D Model (GLB) integration and configuration."
 )
 class ModelSnippets(private val map: TrackedMap3D) {
+    companion object {
+        const val SAUCER_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/UFO.glb"
+    }
 
     /**
      * Adds a basic 3D model (GLB) to the map from a URL.
@@ -44,46 +49,33 @@ class ModelSnippets(private val map: TrackedMap3D) {
         val position = latLngAltitude {
             latitude = 37.4220
             longitude = -122.0841
-            altitude = 0.0
+            altitude = 100.0
         }
-        
+
         val options = modelOptions {
             this.position = position
-            url = "https://example.com/model.glb"
-            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-        }
-        
-        val model = map.addModel(options)
-        // [END maps_android_3d_model_add_kt]
-    }
-
-    /**
-     * Adds a 3D model with advanced configuration (scale, orientation).
-     */
-    @Suppress("unused")
-    @SnippetItem(
-        title = "2. Advanced",
-        description = "Loads a GLB model with advanced configuration (scale, orientation) from assets."
-    )
-    fun addAdvancedModel() {
-        // [START maps_android_3d_model_options_kt]
-        val options = modelOptions {
-            position = latLngAltitude {
-                latitude = 37.4220
-                longitude = -122.0841
-                altitude = 10.0
-            }
-            url = "file:///android_asset/my_model.glb"
-            scale = vector3D { x = 2.0; y = 2.0; z = 2.0 }
+            url = SAUCER_URL
+            altitudeMode = AltitudeMode.RELATIVE_TO_MESH
             orientation = orientation {
-                tilt = 45.0
+                tilt = 90.0
                 heading = 0.0
                 roll = 0.0
             }
-            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+            scale = vector3D { x = 10.0; y = 10.0; z = 10.0 }
         }
-        
+
         val model = map.addModel(options)
-        // [END maps_android_3d_model_options_kt]
+        // [END maps_android_3d_model_add_kt]
+
+        // Position the camera to show the model
+        map.flyCameraTo(flyToOptions {
+            endCamera = camera {
+                center = position
+                tilt = 45.0
+                heading = 0.0
+                range = 300.0
+            }
+            durationInMillis = 2000
+        })
     }
 }

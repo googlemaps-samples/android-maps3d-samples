@@ -23,6 +23,8 @@ import com.google.android.gms.maps3d.model.Model;
 import com.google.android.gms.maps3d.model.ModelOptions;
 import com.google.android.gms.maps3d.model.Orientation;
 import com.google.android.gms.maps3d.model.Vector3D;
+import com.google.android.gms.maps3d.model.Camera;
+import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.example.snippets.java.annotations.SnippetGroup;
 import com.example.snippets.java.annotations.SnippetItem;
 
@@ -31,6 +33,8 @@ import com.example.snippets.java.annotations.SnippetItem;
     description = "Snippets demonstrating 3D Model (GLB) integration and configuration."
 )
 public class ModelSnippets {
+
+    public static final String SAUCER_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/UFO.glb";
 
     private final TrackedMap3D map;
 
@@ -48,37 +52,21 @@ public class ModelSnippets {
     )
     public void addBasicModel() {
         // [START maps_android_3d_model_add_java]
-        LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 0.0);
+        LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 100.0);
         
         ModelOptions options = new ModelOptions();
         options.setPosition(position);
-        options.setUrl("https://example.com/model.glb");
-        options.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
+        options.setUrl(SAUCER_URL);
+        options.setAltitudeMode(AltitudeMode.RELATIVE_TO_MESH);
+        options.setOrientation(new Orientation(0.0, 90.0, 0.0)); // heading, tilt, roll
+        options.setScale(new Vector3D(10.0, 10.0, 10.0));
         
         Model model = map.addModel(options);
         // [END maps_android_3d_model_add_java]
-    }
 
-    /**
-     * Adds a 3D model with advanced configuration (scale, orientation).
-     */
-    @SuppressWarnings("unused")
-    @SnippetItem(
-        title = "2. Advanced",
-        description = "Loads a GLB model with advanced configuration (scale, orientation) from assets."
-    )
-    public void addAdvancedModel() {
-        // [START maps_android_3d_model_options_java]
-        LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
-
-        ModelOptions options = new ModelOptions();
-        options.setPosition(position);
-        options.setUrl("file:///android_asset/my_model.glb");
-        options.setScale(new Vector3D(2.0, 2.0, 2.0));
-        options.setOrientation(new Orientation(0.0, 45.0, 0.0)); // heading, tilt, roll
-        options.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
-        
-        Model model = map.addModel(options);
-        // [END maps_android_3d_model_options_java]
+        // Position camera to see the model
+        Camera targetCamera = new Camera(position, 0.0, 45.0, 0.0, 300.0);
+        FlyToOptions flyToOptions = new FlyToOptions(targetCamera, 2000L);
+        map.flyCameraTo(flyToOptions);
     }
 }
