@@ -206,9 +206,13 @@ def generate_snippet_index(snippets_dir, file_map):
                   lines.append(f"  - *Description*: {item['description']}\n")
              
              if item['kotlin']:
-                  lines.append(f"  - **Kotlin**: {item['kotlin']['link']} (Tag: `{item['kotlin']['tag']}`)\n")
+                  lines.append(f"  - **Kotlin**\n")
+                  lines.append(f"    - {item['kotlin']['link']}\n")
+                  lines.append(f"    - Tag: `{item['kotlin']['tag']}`\n")
              if item['java']:
-                  lines.append(f"  - **Java**: {item['java']['link']} (Tag: `{item['java']['tag']}`)\n")
+                  lines.append(f"  - **Java**\n")
+                  lines.append(f"    - {item['java']['link']}\n")
+                  lines.append(f"    - Tag: `{item['java']['tag']}`\n")
                   
         lines.append("\n")
 
