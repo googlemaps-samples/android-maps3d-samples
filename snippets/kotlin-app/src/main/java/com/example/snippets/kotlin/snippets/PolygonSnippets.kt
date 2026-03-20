@@ -20,6 +20,7 @@ import android.graphics.Color
 import com.example.snippets.kotlin.TrackedMap3D
 import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
+import com.google.android.gms.maps3d.model.Hole
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyToOptions
@@ -115,6 +116,52 @@ class PolygonSnippets(private val map: TrackedMap3D) {
                 tilt = 45.02
                 heading = 0.0
                 range = 4643.0
+            }
+            durationInMillis = 1000
+        })
+    }
+
+    /**
+     * Adds a polygon with a hole cutout.
+     */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "3. Polygon with Hole",
+        description = "Draws a polygon with an interior hole cutout."
+    )
+    fun addPolygonWithHole() {
+        // [START maps_android_3d_polygon_hole_kt]
+        val outerPoints = listOf(
+            latLngAltitude { latitude = 37.422; longitude = -122.084; altitude = 0.0 },
+            latLngAltitude { latitude = 37.422; longitude = -122.086; altitude = 0.0 },
+            latLngAltitude { latitude = 37.424; longitude = -122.086; altitude = 0.0 },
+            latLngAltitude { latitude = 37.424; longitude = -122.084; altitude = 0.0 },
+            latLngAltitude { latitude = 37.422; longitude = -122.084; altitude = 0.0 }
+        )
+
+        val innerPoints = listOf(
+            latLngAltitude { latitude = 37.4225; longitude = -122.0845; altitude = 0.0 },
+            latLngAltitude { latitude = 37.4225; longitude = -122.0855; altitude = 0.0 },
+            latLngAltitude { latitude = 37.4235; longitude = -122.0855; altitude = 0.0 },
+            latLngAltitude { latitude = 37.4235; longitude = -122.0845; altitude = 0.0 },
+            latLngAltitude { latitude = 37.4225; longitude = -122.0845; altitude = 0.0 }
+        )
+
+        val options = polygonOptions {
+            path = outerPoints
+            fillColor = Color.GREEN
+            // Inner paths is optional, wrap inner vertices with Hole
+            innerPaths = listOf(Hole(innerPoints))
+            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+        }
+
+        val polygon = map.addPolygon(options)
+        // [END maps_android_3d_polygon_hole_kt]
+
+        map.flyCameraTo(flyToOptions {
+            endCamera = camera {
+                center = latLngAltitude { latitude = 37.423600; longitude = -122.085098; altitude = 4.31 }
+                tilt = 45.00; heading = 0.00; range = 1085.51; roll = 0.00
             }
             durationInMillis = 1000
         })

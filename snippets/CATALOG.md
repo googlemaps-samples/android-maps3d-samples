@@ -114,7 +114,7 @@ This section maps high-level concepts (groups) to specific demonstration files a
     - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:173](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L173)
     - Tag: `maps_android_3d_marker_custom_icon_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:159](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L159)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:154](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L154)
     - Tag: `maps_android_3d_marker_custom_icon_java`
 - **5. Color Glyph**:
   - *Description*: Adds a marker with a customized glyph color.
@@ -122,7 +122,7 @@ This section maps high-level concepts (groups) to specific demonstration files a
     - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:222](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L222)
     - Tag: `maps_android_3d_marker_glyph_color_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:201](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L201)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:196](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L196)
     - Tag: `maps_android_3d_marker_glyph_color_java`
 - **6. Text Glyph**:
   - *Description*: Adds a marker with text inside the glyph.
@@ -130,7 +130,7 @@ This section maps high-level concepts (groups) to specific demonstration files a
     - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:262](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L262)
     - Tag: `maps_android_3d_marker_glyph_text_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:232](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L232)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:227](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L227)
     - Tag: `maps_android_3d_marker_glyph_text_java`
 - **7. Circle Glyph**:
   - *Description*: Adds a marker with a default circle glyph.
@@ -138,7 +138,7 @@ This section maps high-level concepts (groups) to specific demonstration files a
     - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:302](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L302)
     - Tag: `maps_android_3d_marker_glyph_circle_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:263](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L263)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:258](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L258)
     - Tag: `maps_android_3d_marker_glyph_circle_java`
 
 ### Models
@@ -167,18 +167,26 @@ This section maps high-level concepts (groups) to specific demonstration files a
 - **1. Basic**:
   - *Description*: Draws a red polygon with a blue stroke around a small area
   - **Kotlin**
-    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:39](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L39)
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:40](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L40)
     - Tag: `maps_android_3d_polygon_add_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:48](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L48)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:49](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L49)
     - Tag: `maps_android_3d_polygon_add_java`
 - **2. Extruded**:
   - **Kotlin**
-    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:83](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L83)
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:84](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L84)
     - Tag: `maps_android_3d_polygon_extruded_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:81](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L81)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:82](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L82)
     - Tag: `maps_android_3d_polygon_extruded_java`
+- **3. Polygon with Hole**:
+  - *Description*: Draws a polygon with an interior hole cutout.
+  - **Kotlin**
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:128](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L128)
+    - Tag: `maps_android_3d_polygon_hole_kt`
+  - **Java**
+    - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:115](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L115)
+    - Tag: `maps_android_3d_polygon_hole_java`
 
 ### Polylines
 > Snippets demonstrating 2D and 3D extruded polyline paths on the map.
@@ -247,8 +255,9 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:70](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L70) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:73](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L73) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:58](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L58) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:110](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L110) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:66](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L66) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:111](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L111) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:163](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L163) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:67](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L67) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:108](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L108) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:63](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L63) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:122](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L122) (Tag: `No Tag`)
@@ -268,8 +277,9 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:76](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L76) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:75](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L75) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:60](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L60) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:116](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L116) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:72](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L72) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:117](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L117) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:164](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L164) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:73](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L73) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:114](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L114) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:69](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L69) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:124](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L124) (Tag: `No Tag`)
@@ -289,8 +299,9 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:77](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L77) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:76](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L76) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:61](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L61) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:117](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L117) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:73](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L73) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:118](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L118) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:164](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L164) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:74](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L74) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:115](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L115) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:70](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L70) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:125](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L125) (Tag: `No Tag`)
@@ -300,6 +311,7 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:62](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L62) (Tag: `maps_android_3d_camera_fly_to_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:94](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L94) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:68](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L68) (Tag: `maps_android_3d_init_basic_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:164](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L164) (Tag: `No Tag`)
 - `setTilt`:
   - [MapActivity.kt:196](MapActivity.kt#L196) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:135](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L135) (Tag: `maps_android_3d_camera_stop_kt`)
@@ -315,8 +327,9 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:75](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L75) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:74](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L74) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:59](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L59) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:115](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L115) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:71](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L71) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:116](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L116) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:164](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L164) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:72](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L72) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:113](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L113) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:68](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L68) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:123](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L123) (Tag: `No Tag`)
@@ -367,8 +380,9 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:79](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L79) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:78](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L78) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:63](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L63) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:119](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L119) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:75](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L75) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:120](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L120) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:166](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L166) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:76](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L76) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:117](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L117) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:72](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L72) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:127](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L127) (Tag: `No Tag`)
@@ -386,8 +400,9 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:69](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L69) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:72](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L72) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:57](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L57) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:109](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L109) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:65](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L65) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:110](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L110) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:162](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L162) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:66](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L66) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:107](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L107) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:62](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L62) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:121](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L121) (Tag: `No Tag`)
@@ -431,8 +446,9 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:67](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L67) (Tag: `maps_android_3d_model_add_kt`)
 - `addPolygon`:
   - [TrackedMap3D.kt:43](TrackedMap3D.kt#L43) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:105](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L105) (Tag: `maps_android_3d_polygon_extruded_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:61](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L61) (Tag: `maps_android_3d_polygon_add_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:106](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L106) (Tag: `maps_android_3d_polygon_extruded_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:158](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L158) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:62](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L62) (Tag: `maps_android_3d_polygon_add_kt`)
 - `addPolyline`:
   - [TrackedMap3D.kt:37](TrackedMap3D.kt#L37) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:103](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L103) (Tag: `maps_android_3d_polyline_options_kt`)
@@ -459,8 +475,9 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:68](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L68) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:71](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L71) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:56](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L56) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:108](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L108) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:64](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L64) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:109](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L109) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:161](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L161) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:65](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L65) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:106](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L106) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:61](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L61) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:120](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L120) (Tag: `No Tag`)
@@ -563,18 +580,29 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:99](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L99) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:52](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L52) (Tag: `maps_android_3d_model_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:58](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L58) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:113](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L113) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:46](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L46) (Tag: `maps_android_3d_polygon_add_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:114](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L114) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:135](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L135) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:136](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L136) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:137](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L137) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:138](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L138) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:139](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L139) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:143](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L143) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:144](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L144) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:145](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L145) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:146](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L146) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:147](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L147) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:163](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L163) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:47](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L47) (Tag: `maps_android_3d_polygon_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:48](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L48) (Tag: `maps_android_3d_polygon_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:49](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L49) (Tag: `maps_android_3d_polygon_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:50](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L50) (Tag: `maps_android_3d_polygon_add_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:69](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L69) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:90](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L90) (Tag: `maps_android_3d_polygon_extruded_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:51](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L51) (Tag: `maps_android_3d_polygon_add_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:70](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L70) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:91](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L91) (Tag: `maps_android_3d_polygon_extruded_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:92](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L92) (Tag: `maps_android_3d_polygon_extruded_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:93](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L93) (Tag: `maps_android_3d_polygon_extruded_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:94](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L94) (Tag: `maps_android_3d_polygon_extruded_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:95](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L95) (Tag: `maps_android_3d_polygon_extruded_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:111](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L111) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:46](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L46) (Tag: `maps_android_3d_polyline_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:47](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L47) (Tag: `maps_android_3d_polyline_add_kt`)
@@ -609,18 +637,29 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:97](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L97) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:50](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L50) (Tag: `maps_android_3d_model_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:58](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L58) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:111](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L111) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:46](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L46) (Tag: `maps_android_3d_polygon_add_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:112](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L112) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:135](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L135) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:136](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L136) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:137](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L137) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:138](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L138) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:139](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L139) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:143](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L143) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:144](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L144) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:145](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L145) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:146](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L146) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:147](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L147) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:163](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L163) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:47](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L47) (Tag: `maps_android_3d_polygon_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:48](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L48) (Tag: `maps_android_3d_polygon_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:49](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L49) (Tag: `maps_android_3d_polygon_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:50](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L50) (Tag: `maps_android_3d_polygon_add_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:67](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L67) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:90](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L90) (Tag: `maps_android_3d_polygon_extruded_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:51](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L51) (Tag: `maps_android_3d_polygon_add_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:68](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L68) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:91](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L91) (Tag: `maps_android_3d_polygon_extruded_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:92](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L92) (Tag: `maps_android_3d_polygon_extruded_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:93](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L93) (Tag: `maps_android_3d_polygon_extruded_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:94](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L94) (Tag: `maps_android_3d_polygon_extruded_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:95](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L95) (Tag: `maps_android_3d_polygon_extruded_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:109](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L109) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:46](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L46) (Tag: `maps_android_3d_polyline_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:47](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L47) (Tag: `maps_android_3d_polyline_add_kt`)
@@ -655,18 +694,29 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:98](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L98) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:51](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L51) (Tag: `maps_android_3d_model_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:58](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L58) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:112](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L112) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:46](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L46) (Tag: `maps_android_3d_polygon_add_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:113](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L113) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:135](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L135) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:136](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L136) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:137](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L137) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:138](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L138) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:139](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L139) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:143](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L143) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:144](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L144) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:145](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L145) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:146](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L146) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:147](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L147) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:163](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L163) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:47](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L47) (Tag: `maps_android_3d_polygon_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:48](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L48) (Tag: `maps_android_3d_polygon_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:49](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L49) (Tag: `maps_android_3d_polygon_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:50](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L50) (Tag: `maps_android_3d_polygon_add_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:68](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L68) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:90](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L90) (Tag: `maps_android_3d_polygon_extruded_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:51](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L51) (Tag: `maps_android_3d_polygon_add_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:69](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L69) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:91](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L91) (Tag: `maps_android_3d_polygon_extruded_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:92](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L92) (Tag: `maps_android_3d_polygon_extruded_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:93](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L93) (Tag: `maps_android_3d_polygon_extruded_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:94](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L94) (Tag: `maps_android_3d_polygon_extruded_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:95](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L95) (Tag: `maps_android_3d_polygon_extruded_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:110](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L110) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:46](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L46) (Tag: `maps_android_3d_polyline_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:47](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L47) (Tag: `maps_android_3d_polyline_add_kt`)
@@ -963,25 +1013,29 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 - `getStrokeWidth`: ❌ No coverage
 - `getZIndex`: ❌ No coverage
 - `setAltitudeMode`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:102](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L102) (Tag: `maps_android_3d_polygon_extruded_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:58](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L58) (Tag: `maps_android_3d_polygon_add_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:103](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L103) (Tag: `maps_android_3d_polygon_extruded_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:155](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L155) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:59](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L59) (Tag: `maps_android_3d_polygon_add_kt`)
 - `setDrawsOccludedSegments`: ❌ No coverage
 - `setExtruded`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:100](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L100) (Tag: `maps_android_3d_polygon_extruded_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:101](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L101) (Tag: `maps_android_3d_polygon_extruded_kt`)
 - `setFillColor`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:100](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L100) (Tag: `maps_android_3d_polygon_extruded_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:152](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L152) (Tag: `maps_android_3d_polygon_hole_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:56](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L56) (Tag: `maps_android_3d_polygon_add_kt`)
+- `setGeodesic`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:102](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L102) (Tag: `maps_android_3d_polygon_extruded_kt`)
+- `setId`: ❌ No coverage
+- `setInnerPaths`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:154](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L154) (Tag: `maps_android_3d_polygon_hole_kt`)
+- `setPath`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:151](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L151) (Tag: `maps_android_3d_polygon_hole_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:55](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L55) (Tag: `maps_android_3d_polygon_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:99](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L99) (Tag: `maps_android_3d_polygon_extruded_kt`)
-- `setGeodesic`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:101](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L101) (Tag: `maps_android_3d_polygon_extruded_kt`)
-- `setId`: ❌ No coverage
-- `setInnerPaths`: ❌ No coverage
-- `setPath`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:54](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L54) (Tag: `maps_android_3d_polygon_add_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:98](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L98) (Tag: `maps_android_3d_polygon_extruded_kt`)
 - `setStrokeColor`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:56](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L56) (Tag: `maps_android_3d_polygon_add_kt`)
-- `setStrokeWidth`:
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:57](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L57) (Tag: `maps_android_3d_polygon_add_kt`)
+- `setStrokeWidth`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:58](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L58) (Tag: `maps_android_3d_polygon_add_kt`)
 - `setZIndex`: ❌ No coverage
 - `writeToParcel`: ❌ No coverage
 
@@ -1298,20 +1352,20 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
 ### `Glyph`
 - `equals`: ❌ No coverage
 - `fromCircle`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:271](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L271) (Tag: `maps_android_3d_marker_glyph_circle_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:266](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L266) (Tag: `maps_android_3d_marker_glyph_circle_java`)
 - `fromColor`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:168](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L168) (Tag: `maps_android_3d_marker_custom_icon_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:213](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L213) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:163](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L163) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:208](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L208) (Tag: `maps_android_3d_marker_glyph_color_java`)
 - `fromText`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:244](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L244) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:239](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L239) (Tag: `maps_android_3d_marker_glyph_text_java`)
 - `getColor`: ❌ No coverage
 - `getImage`: ❌ No coverage
 - `getText`: ❌ No coverage
 - `hashCode`: ❌ No coverage
 - `setColor`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:272](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L272) (Tag: `maps_android_3d_marker_glyph_circle_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:267](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L267) (Tag: `maps_android_3d_marker_glyph_circle_java`)
 - `setImage`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:171](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L171) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:166](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L166) (Tag: `maps_android_3d_marker_custom_icon_java`)
 - `setText`: ❌ No coverage
 - `writeToParcel`: ❌ No coverage
 
@@ -1320,10 +1374,10 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
   - [TrackedMap3D.java:54](TrackedMap3D.java#L54) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:104](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L104) (Tag: `maps_android_3d_marker_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:130](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L130) (Tag: `maps_android_3d_marker_click_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:185](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L185) (Tag: `maps_android_3d_marker_custom_icon_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:216](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L216) (Tag: `maps_android_3d_marker_glyph_color_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:247](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L247) (Tag: `maps_android_3d_marker_glyph_text_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:281](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L281) (Tag: `maps_android_3d_marker_glyph_circle_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:180](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L180) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:211](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L211) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:242](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L242) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:276](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L276) (Tag: `maps_android_3d_marker_glyph_circle_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:72](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L72) (Tag: `maps_android_3d_marker_add_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java:100](java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java#L100) (Tag: `maps_android_3d_popover_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java:60](java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java#L60) (Tag: `maps_android_3d_popover_add_java`)
@@ -1332,8 +1386,9 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
   - [java-app/src/main/java/com/example/snippets/java/snippets/ModelSnippets.java:64](java-app/src/main/java/com/example/snippets/java/snippets/ModelSnippets.java#L64) (Tag: `maps_android_3d_model_add_java`)
 - `addPolygon`:
   - [TrackedMap3D.java:66](TrackedMap3D.java#L66) (Tag: `No Tag`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:102](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L102) (Tag: `maps_android_3d_polygon_extruded_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:69](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L69) (Tag: `maps_android_3d_polygon_add_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:103](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L103) (Tag: `maps_android_3d_polygon_extruded_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:146](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L146) (Tag: `maps_android_3d_polygon_hole_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:70](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L70) (Tag: `maps_android_3d_polygon_add_java`)
 - `addPolyline`:
   - [TrackedMap3D.java:60](TrackedMap3D.java#L60) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PolylineSnippets.java:100](java-app/src/main/java/com/example/snippets/java/snippets/PolylineSnippets.java#L100) (Tag: `maps_android_3d_polyline_options_java`)
@@ -1351,15 +1406,16 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
   - [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:62](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L62) (Tag: `maps_android_3d_camera_fly_to_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:110](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L110) (Tag: `maps_android_3d_marker_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:136](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L136) (Tag: `maps_android_3d_marker_click_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:191](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L191) (Tag: `maps_android_3d_marker_custom_icon_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:222](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L222) (Tag: `maps_android_3d_marker_glyph_color_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:253](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L253) (Tag: `maps_android_3d_marker_glyph_text_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:287](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L287) (Tag: `maps_android_3d_marker_glyph_circle_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:186](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L186) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:217](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L217) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:248](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L248) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:282](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L282) (Tag: `maps_android_3d_marker_glyph_circle_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:78](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L78) (Tag: `maps_android_3d_marker_add_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/ModelSnippets.java:70](java-app/src/main/java/com/example/snippets/java/snippets/ModelSnippets.java#L70) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PlaceSnippets.java:74](java-app/src/main/java/com/example/snippets/java/snippets/PlaceSnippets.java#L74) (Tag: `No Tag`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:107](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L107) (Tag: `No Tag`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:74](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L74) (Tag: `No Tag`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:108](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L108) (Tag: `No Tag`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:151](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L151) (Tag: `No Tag`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:75](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L75) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PolylineSnippets.java:105](java-app/src/main/java/com/example/snippets/java/snippets/PolylineSnippets.java#L105) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PolylineSnippets.java:71](java-app/src/main/java/com/example/snippets/java/snippets/PolylineSnippets.java#L71) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java:123](java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java#L123) (Tag: `No Tag`)
@@ -1417,19 +1473,19 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
   - [MapActivity.java:64](MapActivity.java#L64) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:108](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L108) (Tag: `maps_android_3d_marker_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:134](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L134) (Tag: `maps_android_3d_marker_click_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:189](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L189) (Tag: `maps_android_3d_marker_custom_icon_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:220](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L220) (Tag: `maps_android_3d_marker_glyph_color_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:251](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L251) (Tag: `maps_android_3d_marker_glyph_text_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:285](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L285) (Tag: `maps_android_3d_marker_glyph_circle_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:184](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L184) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:215](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L215) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:246](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L246) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:280](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L280) (Tag: `maps_android_3d_marker_glyph_circle_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:76](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L76) (Tag: `maps_android_3d_marker_add_java`)
 - `getLongitude`:
   - [MapActivity.java:64](MapActivity.java#L64) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:108](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L108) (Tag: `maps_android_3d_marker_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:134](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L134) (Tag: `maps_android_3d_marker_click_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:189](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L189) (Tag: `maps_android_3d_marker_custom_icon_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:220](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L220) (Tag: `maps_android_3d_marker_glyph_color_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:251](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L251) (Tag: `maps_android_3d_marker_glyph_text_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:285](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L285) (Tag: `maps_android_3d_marker_glyph_circle_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:184](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L184) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:215](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L215) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:246](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L246) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:280](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L280) (Tag: `maps_android_3d_marker_glyph_circle_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:76](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L76) (Tag: `maps_android_3d_marker_add_java`)
 - `getPosition`: ❌ No coverage
 - `setAltitude`: ❌ No coverage
@@ -1533,10 +1589,10 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
 - `getPosition`:
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:106](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L106) (Tag: `maps_android_3d_marker_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:132](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L132) (Tag: `maps_android_3d_marker_click_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:187](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L187) (Tag: `maps_android_3d_marker_custom_icon_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:218](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L218) (Tag: `maps_android_3d_marker_glyph_color_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:249](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L249) (Tag: `maps_android_3d_marker_glyph_text_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:283](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L283) (Tag: `maps_android_3d_marker_glyph_circle_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:182](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L182) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:213](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L213) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:244](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L244) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:278](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L278) (Tag: `maps_android_3d_marker_glyph_circle_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:74](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L74) (Tag: `maps_android_3d_marker_add_java`)
 - `getZIndex`: ❌ No coverage
 - `isDrawnWhenOccluded`: ❌ No coverage
@@ -1552,19 +1608,19 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:101](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L101) (Tag: `maps_android_3d_marker_options_java`)
 - `setId`: ❌ No coverage
 - `setLabel`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:175](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L175) (Tag: `maps_android_3d_marker_custom_icon_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:211](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L211) (Tag: `maps_android_3d_marker_glyph_color_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:242](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L242) (Tag: `maps_android_3d_marker_glyph_text_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:276](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L276) (Tag: `maps_android_3d_marker_glyph_circle_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:170](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L170) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:206](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L206) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:237](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L237) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:271](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L271) (Tag: `maps_android_3d_marker_glyph_circle_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:69](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L69) (Tag: `maps_android_3d_marker_add_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:99](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L99) (Tag: `maps_android_3d_marker_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java:99](java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java#L99) (Tag: `maps_android_3d_popover_options_java`)
 - `setPosition`:
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:128](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L128) (Tag: `maps_android_3d_marker_click_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:174](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L174) (Tag: `maps_android_3d_marker_custom_icon_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:210](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L210) (Tag: `maps_android_3d_marker_glyph_color_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:241](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L241) (Tag: `maps_android_3d_marker_glyph_text_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:275](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L275) (Tag: `maps_android_3d_marker_glyph_circle_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:169](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L169) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:205](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L205) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:236](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L236) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:270](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L270) (Tag: `maps_android_3d_marker_glyph_circle_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:68](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L68) (Tag: `maps_android_3d_marker_add_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:97](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L97) (Tag: `maps_android_3d_marker_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java:98](java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java#L98) (Tag: `maps_android_3d_popover_options_java`)
@@ -1631,10 +1687,10 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
 
 ### `PinConfiguration`
 - `builder`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:178](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L178) (Tag: `maps_android_3d_marker_custom_icon_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:212](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L212) (Tag: `maps_android_3d_marker_glyph_color_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:243](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L243) (Tag: `maps_android_3d_marker_glyph_text_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:277](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L277) (Tag: `maps_android_3d_marker_glyph_circle_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:173](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L173) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:207](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L207) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:238](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L238) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:272](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L272) (Tag: `maps_android_3d_marker_glyph_circle_java`)
 - `equals`: ❌ No coverage
 - `getBackgroundColor`: ❌ No coverage
 - `getBorderColor`: ❌ No coverage
@@ -1649,21 +1705,21 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
 
 ### `PinConfiguration.Builder`
 - `build`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:183](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L183) (Tag: `maps_android_3d_marker_custom_icon_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:214](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L214) (Tag: `maps_android_3d_marker_glyph_color_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:245](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L245) (Tag: `maps_android_3d_marker_glyph_text_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:279](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L279) (Tag: `maps_android_3d_marker_glyph_circle_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:178](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L178) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:209](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L209) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:240](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L240) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:274](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L274) (Tag: `maps_android_3d_marker_glyph_circle_java`)
 - `setBackgroundColor`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:181](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L181) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:176](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L176) (Tag: `maps_android_3d_marker_custom_icon_java`)
 - `setBorderColor`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:182](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L182) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:177](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L177) (Tag: `maps_android_3d_marker_custom_icon_java`)
 - `setGlyph`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:180](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L180) (Tag: `maps_android_3d_marker_custom_icon_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:213](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L213) (Tag: `maps_android_3d_marker_glyph_color_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:244](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L244) (Tag: `maps_android_3d_marker_glyph_text_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:278](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L278) (Tag: `maps_android_3d_marker_glyph_circle_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:175](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L175) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:208](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L208) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:239](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L239) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:273](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L273) (Tag: `maps_android_3d_marker_glyph_circle_java`)
 - `setScale`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:179](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L179) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:174](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L174) (Tag: `maps_android_3d_marker_custom_icon_java`)
 
 ### `Polygon`
 - `getAltitudeMode`: ❌ No coverage
@@ -1709,25 +1765,29 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
 - `getStrokeWidth`: ❌ No coverage
 - `getZIndex`: ❌ No coverage
 - `setAltitudeMode`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:100](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L100) (Tag: `maps_android_3d_polygon_extruded_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:67](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L67) (Tag: `maps_android_3d_polygon_add_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:101](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L101) (Tag: `maps_android_3d_polygon_extruded_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:140](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L140) (Tag: `maps_android_3d_polygon_hole_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:68](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L68) (Tag: `maps_android_3d_polygon_add_java`)
 - `setDrawsOccludedSegments`: ❌ No coverage
 - `setExtruded`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:98](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L98) (Tag: `maps_android_3d_polygon_extruded_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:99](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L99) (Tag: `maps_android_3d_polygon_extruded_java`)
 - `setFillColor`:
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:139](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L139) (Tag: `maps_android_3d_polygon_hole_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:65](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L65) (Tag: `maps_android_3d_polygon_add_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:98](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L98) (Tag: `maps_android_3d_polygon_extruded_java`)
+- `setGeodesic`:
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:100](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L100) (Tag: `maps_android_3d_polygon_extruded_java`)
+- `setId`: ❌ No coverage
+- `setInnerPaths`:
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:144](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L144) (Tag: `maps_android_3d_polygon_hole_java`)
+- `setPath`:
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:138](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L138) (Tag: `maps_android_3d_polygon_hole_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:64](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L64) (Tag: `maps_android_3d_polygon_add_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:97](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L97) (Tag: `maps_android_3d_polygon_extruded_java`)
-- `setGeodesic`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:99](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L99) (Tag: `maps_android_3d_polygon_extruded_java`)
-- `setId`: ❌ No coverage
-- `setInnerPaths`: ❌ No coverage
-- `setPath`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:63](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L63) (Tag: `maps_android_3d_polygon_add_java`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:96](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L96) (Tag: `maps_android_3d_polygon_extruded_java`)
 - `setStrokeColor`:
-  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:65](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L65) (Tag: `maps_android_3d_polygon_add_java`)
-- `setStrokeWidth`:
   - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:66](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L66) (Tag: `maps_android_3d_polygon_add_java`)
+- `setStrokeWidth`:
+  - [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:67](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L67) (Tag: `maps_android_3d_polygon_add_java`)
 - `setZIndex`: ❌ No coverage
 - `writeToParcel`: ❌ No coverage
 

@@ -22,6 +22,7 @@ import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
+import com.google.android.gms.maps3d.model.Hole;
 import com.google.android.gms.maps3d.model.Polygon;
 import com.google.android.gms.maps3d.model.PolygonOptions;
 import java.util.Arrays;
@@ -103,6 +104,49 @@ public class PolygonSnippets {
         // [END maps_android_3d_polygon_extruded_java]
 
         Camera cam = new Camera(new LatLngAltitude(37.424968, -122.084874, 19.90), 0.0, 45.02, 0.0, 4643.0);
+        FlyToOptions flyTo = new FlyToOptions(cam, 1000L);
+        map.flyCameraTo(flyTo);
+    }
+
+    /**
+     * Adds a polygon with a hole cutout.
+     */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "3. Polygon with Hole",
+        description = "Draws a polygon with an interior hole cutout."
+    )
+    public void addPolygonWithHole() {
+        // [START maps_android_3d_polygon_hole_java]
+        List<LatLngAltitude> outerPoints = Arrays.asList(
+            new LatLngAltitude(37.422, -122.084, 0.0),
+            new LatLngAltitude(37.422, -122.086, 0.0),
+            new LatLngAltitude(37.424, -122.086, 0.0),
+            new LatLngAltitude(37.424, -122.084, 0.0),
+            new LatLngAltitude(37.422, -122.084, 0.0)
+        );
+
+        List<LatLngAltitude> innerPoints = Arrays.asList(
+            new LatLngAltitude(37.4225, -122.0845, 0.0),
+            new LatLngAltitude(37.4225, -122.0855, 0.0),
+            new LatLngAltitude(37.4235, -122.0855, 0.0),
+            new LatLngAltitude(37.4235, -122.0845, 0.0),
+            new LatLngAltitude(37.4225, -122.0845, 0.0)
+        );
+
+        PolygonOptions options = new PolygonOptions();
+        options.setPath(outerPoints);
+        options.setFillColor(Color.GREEN);
+        options.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
+
+        // Core logic: create a Hole object and set InnerPaths (Optional)
+        Hole innerHole = new Hole(innerPoints);
+        options.setInnerPaths(Arrays.asList(innerHole));
+
+        Polygon polygon = map.addPolygon(options);
+        // [END maps_android_3d_polygon_hole_java]
+
+        Camera cam = new Camera(new LatLngAltitude(37.423600, -122.085098, 4.31), 0.00, 45.00, 0.00, 1085.51);
         FlyToOptions flyTo = new FlyToOptions(cam, 1000L);
         map.flyCameraTo(flyTo);
     }
