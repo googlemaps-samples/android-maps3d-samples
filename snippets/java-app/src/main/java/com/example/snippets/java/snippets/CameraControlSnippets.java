@@ -172,6 +172,15 @@ public class CameraControlSnippets {
         description = "Restricts the camera to a specific altitude range and bounding box."
     )
     public void setCameraRestrictions() {
+        com.google.android.gms.maps3d.model.Camera camera = new com.google.android.gms.maps3d.model.Camera(
+             new com.google.android.gms.maps3d.model.LatLngAltitude(40.748233, -73.985663, 1500.0), // center
+             0.0, // heading
+             45.0, // tilt
+             0.0, // roll
+             1000.0 // range
+        );
+        map.setCamera(camera);
+
         // [START maps_android_3d_camera_restriction_java]
         LatLngBounds nycBounds = new LatLngBounds(
             40.856492, -73.802409, 40.685630, -74.050304
@@ -183,14 +192,5 @@ public class CameraControlSnippets {
 
         map.setCameraRestriction(restriction);
         // [END maps_android_3d_camera_restriction_java]
-
-        com.google.android.gms.maps3d.model.Camera camera = new com.google.android.gms.maps3d.model.Camera(
-             new com.google.android.gms.maps3d.model.LatLngAltitude(40.748233, -73.985663, 1500.0), // center
-             0.0, // heading
-             45.0, // tilt
-             0.0, // roll
-             1000.0 // range
-        );
-        map.setCamera(camera);
     }
 }
