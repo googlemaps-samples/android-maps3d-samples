@@ -90,4 +90,19 @@
     <string name="polygon_zoo_clicked">Zoo time</string>
     <string name="polyline_trail_clicked">Hiking time!</string>
     <string name="model_plane_clicked">Model clicked</string>
+
+    <!-- Monster Blurbs -->
+    <string name="monster_alien_blurb">They didn\'t just come to sculpt mashed potatoes. 👽</string>
+    <string name="monster_bigfoot_blurb">Leaves some pretty big footprints, very camera shy. 👣</string>
+    <string name="monster_frank_blurb">It\'s alive! Quite misunderstood, honestly. ⚡</string>
+    <string name="monster_godzilla_blurb">King of the Monsters. Loves a quick swim in the bay. 🦖</string>
+    <string name="monster_mothra_blurb">Like a butterfly, but much, much bigger. Attracted to bright lights. 🦋</string>
+    <string name="monster_mummy_blurb">Woke up on the wrong side of the sarcophagus. ⚰️</string>
+    <string name="monster_nessie_blurb">The original cryptid. Probably just a log, but we want to believe. 🦕</string>
+    <string name="monster_yeti_blurb">Abominable? More like adorable if you get to know him. 🏔️</string>
+    <string name="monster_ape_blurb">I am a Giant Ape! 🦍</string>
+    <string name="tour_monsters">Tour Monsters</string>
+    <string name="content_description_fly_random">Fly to Random Monster</string>
+    <string name="content_description_fly_berlin">Fly to Berlin</string>
+    <string name="content_description_fly_nyc">Fly to NYC</string>
 </resources>
