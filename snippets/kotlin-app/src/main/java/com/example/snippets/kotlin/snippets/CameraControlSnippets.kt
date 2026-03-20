@@ -222,6 +222,7 @@ class CameraControlSnippets(
         description = "Restricts the camera to a specific altitude range and bounding box."
     )
     fun setCameraRestrictions() {
+        // [START maps_android_3d_camera_restriction_kt]
         // Move the camera inside the restricted bounds so we focus on NYC
         map.setCamera(camera {
             center = latLngAltitude {
@@ -231,7 +232,6 @@ class CameraControlSnippets(
             }
         })
 
-        // [START maps_android_3d_camera_restriction_kt]
         val nycBounds = latLngBounds {
             northEastLat = 40.856492
             northEastLng = -73.802409

@@ -139,14 +139,9 @@ public class MarkerSnippets {
 
         // [START_EXCLUDE]
         if (marker != null) {
-            marker.setClickListener(new OnMarkerClickListener() {
-                @Override
-                public void onMarkerClick() {
-                    new Handler(Looper.getMainLooper()).post(() -> 
-                        Toast.makeText(context, "Marker Clicked!", Toast.LENGTH_SHORT).show()
-                    );
-                }
-            });
+            marker.setClickListener(() -> new Handler(Looper.getMainLooper()).post(() ->
+                Toast.makeText(context, "Marker Clicked!", Toast.LENGTH_SHORT).show()
+            ));
         }
         // [END_EXCLUDE]
         // [END maps_android_3d_marker_click_java]
@@ -192,5 +187,101 @@ public class MarkerSnippets {
         }
         // [END_EXCLUDE]
         // [END maps_android_3d_marker_custom_icon_java]
+    }
+
+    /**
+     * Adds a marker with a colored Glyph.
+     */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "5. Color Glyph",
+        description = "Adds a marker with a customized glyph color."
+    )
+    public void addMarkerWithColorGlyph() {
+        // [START maps_android_3d_marker_glyph_color_java]
+        LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
+
+        MarkerOptions options = new MarkerOptions();
+        options.setPosition(position);
+        options.setLabel("Color Glyph");
+        options.setStyle(PinConfiguration.builder()
+                .setGlyph(Glyph.fromColor(Color.CYAN))
+                .build());
+
+        map.addMarker(options);
+        // [START_EXCLUDE]
+        LatLngAltitude markerPos = options.getPosition();
+        if (markerPos != null) {
+            LatLngAltitude camCenter = new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
+            Camera targetCamera = new Camera(camCenter, 0.0, 45.0, 0.0, 500.0);
+            map.flyCameraTo(new FlyToOptions(targetCamera, 3000L));
+        }
+        // [END_EXCLUDE]
+        // [END maps_android_3d_marker_glyph_color_java]
+    }
+
+    /**
+     * Adds a marker with a text Glyph.
+     */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "6. Text Glyph",
+        description = "Adds a marker with text inside the glyph."
+    )
+    public void addMarkerWithTextGlyph() {
+        // [START maps_android_3d_marker_glyph_text_java]
+        LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
+
+        MarkerOptions options = new MarkerOptions();
+        options.setPosition(position);
+        options.setLabel("Text Glyph");
+        options.setStyle(PinConfiguration.builder()
+                .setGlyph(Glyph.fromText("NYC"))
+                .build());
+
+        map.addMarker(options);
+        // [START_EXCLUDE]
+        LatLngAltitude markerPos = options.getPosition();
+        if (markerPos != null) {
+            LatLngAltitude camCenter = new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
+            Camera targetCamera = new Camera(camCenter, 0.0, 45.0, 0.0, 500.0);
+            map.flyCameraTo(new FlyToOptions(targetCamera, 3000L));
+        }
+        // [END_EXCLUDE]
+        // [END maps_android_3d_marker_glyph_text_java]
+    }
+
+    /**
+     * Adds a marker with a circle Glyph.
+     */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "7. Circle Glyph",
+        description = "Adds a marker with a default circle glyph."
+    )
+    public void addMarkerWithCircleGlyph() {
+        // [START maps_android_3d_marker_glyph_circle_java]
+        LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
+
+        Glyph glyph = Glyph.fromCircle();
+        glyph.setColor(Color.MAGENTA);
+
+        MarkerOptions options = new MarkerOptions();
+        options.setPosition(position);
+        options.setLabel("Circle Glyph");
+        options.setStyle(PinConfiguration.builder()
+                .setGlyph(glyph)
+                .build());
+
+        map.addMarker(options);
+        // [START_EXCLUDE]
+        LatLngAltitude markerPos = options.getPosition();
+        if (markerPos != null) {
+            LatLngAltitude camCenter = new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
+            Camera targetCamera = new Camera(camCenter, 0.0, 45.0, 0.0, 500.0);
+            map.flyCameraTo(new FlyToOptions(targetCamera, 3000L));
+        }
+        // [END_EXCLUDE]
+        // [END maps_android_3d_marker_glyph_circle_java]
     }
 }

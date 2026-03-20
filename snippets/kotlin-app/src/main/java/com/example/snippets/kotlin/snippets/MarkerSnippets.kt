@@ -135,12 +135,20 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
     fun handleMarkerClick() {
         // [START maps_android_3d_marker_click_kt]
         val marker = map.addMarker(markerOptions {
-            position = latLngAltitude { latitude = 37.42; longitude = -122.08; altitude = 0.0 }
+            position = latLngAltitude {
+                latitude = 37.42
+                longitude = -122.08
+                altitude = 0.0
+            }
         })
         // [START_EXCLUDE]
         map.flyCameraTo(flyToOptions {
             endCamera = camera {
-                center = latLngAltitude { latitude = 37.42; longitude = -122.08; altitude = 0.0 }
+                center = latLngAltitude {
+                    latitude = 37.42
+                    longitude = -122.08
+                    altitude = 0.0
+                }
                 tilt = 45.0
                 heading = 0.0
                 range = 500.0
@@ -205,6 +213,129 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
             durationInMillis = 3000
         })
         // [END_EXCLUDE]
-        // [END maps_android_3d_marker_custom_icon_kt]
+    }
+
+    /**
+     * Adds a marker with a colored Glyph.
+     */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "5. Color Glyph",
+        description = "Adds a marker with a customized glyph color."
+    )
+    fun addMarkerWithColorGlyph() {
+        // [START maps_android_3d_marker_glyph_color_kt]
+        val options = markerOptions {
+            position = latLngAltitude {
+                latitude = 37.4220
+                longitude = -122.0841
+                altitude = 10.0
+            }
+            label = "Color Glyph"
+            setStyle(PinConfiguration.builder()
+                .setGlyph(Glyph.fromColor(Color.CYAN))
+                .build())
+        }
+        map.addMarker(options)
+        // [START_EXCLUDE]
+        map.flyCameraTo(flyToOptions {
+            endCamera = camera {
+                center = latLngAltitude {
+                    latitude = options.position.latitude
+                    longitude = options.position.longitude
+                    altitude = 0.0
+                }
+                tilt = 45.0
+                heading = 0.0
+                range = 500.0
+            }
+            durationInMillis = 3000
+        })
+        // [END_EXCLUDE]
+        // [END maps_android_3d_marker_glyph_color_kt]
+    }
+
+    /**
+     * Adds a marker with a text Glyph.
+     */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "6. Text Glyph",
+        description = "Adds a marker with text inside the glyph."
+    )
+    fun addMarkerWithTextGlyph() {
+        // [START maps_android_3d_marker_glyph_text_kt]
+        val options = markerOptions {
+            position = latLngAltitude {
+                latitude = 37.4220
+                longitude = -122.0841
+                altitude = 10.0
+            }
+            label = "Text Glyph"
+            setStyle(PinConfiguration.builder()
+                .setGlyph(Glyph.fromText("NYC"))
+                .build())
+        }
+        map.addMarker(options)
+        // [START_EXCLUDE]
+        map.flyCameraTo(flyToOptions {
+            endCamera = camera {
+                center = latLngAltitude {
+                    latitude = options.position.latitude
+                    longitude = options.position.longitude
+                    altitude = 0.0
+                }
+                tilt = 45.0
+                heading = 0.0
+                range = 500.0
+            }
+            durationInMillis = 3000
+        })
+        // [END_EXCLUDE]
+        // [END maps_android_3d_marker_glyph_text_kt]
+    }
+
+    /**
+     * Adds a marker with a circle Glyph.
+     */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "7. Circle Glyph",
+        description = "Adds a marker with a default circle glyph."
+    )
+    fun addMarkerWithCircleGlyph() {
+        // [START maps_android_3d_marker_glyph_circle_kt]
+        val glyph = Glyph.fromCircle()
+        glyph.color = Color.MAGENTA
+
+        val options = markerOptions {
+            position = latLngAltitude {
+                latitude = 37.4220
+                longitude = -122.0841
+                altitude = 10.0
+            }
+            label = "Circle Glyph"
+            setStyle(PinConfiguration.builder()
+                .setGlyph(glyph)
+                .build())
+        }
+        map.addMarker(options)
+        // [START_EXCLUDE]
+        map.flyCameraTo(flyToOptions {
+            endCamera = camera {
+                center = latLngAltitude {
+                    latitude = options.position.latitude
+                    longitude = options.position.longitude
+                    altitude = 0.0
+                }
+                tilt = 45.0
+                heading = 0.0
+                range = 500.0
+            }
+            durationInMillis = 3000
+        })
+        // [END_EXCLUDE]
+        // [END maps_android_3d_marker_glyph_circle_kt]
     }
 }
+

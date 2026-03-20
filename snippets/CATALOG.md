@@ -111,11 +111,35 @@ This section maps high-level concepts (groups) to specific demonstration files a
 - **4. Custom Icon**:
   - *Description*: Adds a marker with a custom icon using PinConfiguration and Glyph styling.
   - **Kotlin**
-    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:165](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L165)
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:173](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L173)
     - Tag: `maps_android_3d_marker_custom_icon_kt`
   - **Java**
     - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:159](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L159)
     - Tag: `maps_android_3d_marker_custom_icon_java`
+- **5. Color Glyph**:
+  - *Description*: Adds a marker with a customized glyph color.
+  - **Kotlin**
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:222](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L222)
+    - Tag: `maps_android_3d_marker_glyph_color_kt`
+  - **Java**
+    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:201](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L201)
+    - Tag: `maps_android_3d_marker_glyph_color_java`
+- **6. Text Glyph**:
+  - *Description*: Adds a marker with text inside the glyph.
+  - **Kotlin**
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:262](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L262)
+    - Tag: `maps_android_3d_marker_glyph_text_kt`
+  - **Java**
+    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:232](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L232)
+    - Tag: `maps_android_3d_marker_glyph_text_java`
+- **7. Circle Glyph**:
+  - *Description*: Adds a marker with a default circle glyph.
+  - **Kotlin**
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:302](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L302)
+    - Tag: `maps_android_3d_marker_glyph_circle_kt`
+  - **Java**
+    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:263](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L263)
+    - Tag: `maps_android_3d_marker_glyph_circle_java`
 
 ### Models
 - **1. Basic**:
@@ -215,8 +239,11 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:86](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L86) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:61](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L61) (Tag: `maps_android_3d_init_basic_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:112](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L112) (Tag: `maps_android_3d_marker_options_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:143](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L143) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:196](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L196) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:147](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L147) (Tag: `maps_android_3d_marker_click_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:204](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L204) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:243](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L243) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:283](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L283) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:326](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L326) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:70](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L70) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:73](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L73) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:58](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L58) (Tag: `No Tag`)
@@ -233,8 +260,11 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:92](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L92) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:66](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L66) (Tag: `maps_android_3d_init_basic_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:118](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L118) (Tag: `maps_android_3d_marker_options_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:145](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L145) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:202](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L202) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:153](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L153) (Tag: `maps_android_3d_marker_click_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:210](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L210) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:249](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L249) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:289](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L289) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:332](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L332) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:76](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L76) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:75](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L75) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:60](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L60) (Tag: `No Tag`)
@@ -251,8 +281,11 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:93](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L93) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:69](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L69) (Tag: `maps_android_3d_init_basic_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:119](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L119) (Tag: `maps_android_3d_marker_options_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:146](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L146) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:203](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L203) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:154](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L154) (Tag: `maps_android_3d_marker_click_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:211](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L211) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:250](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L250) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:290](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L290) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:333](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L333) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:77](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L77) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:76](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L76) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:61](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L61) (Tag: `No Tag`)
@@ -274,8 +307,11 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:91](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L91) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:67](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L67) (Tag: `maps_android_3d_init_basic_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:117](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L117) (Tag: `maps_android_3d_marker_options_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:144](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L144) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:201](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L201) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:152](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L152) (Tag: `maps_android_3d_marker_click_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:209](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L209) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:248](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L248) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:288](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L288) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:331](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L331) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:75](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L75) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:74](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L74) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:59](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L59) (Tag: `No Tag`)
@@ -323,8 +359,11 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:144](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L144) (Tag: `maps_android_3d_camera_stop_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:67](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L67) (Tag: `maps_android_3d_camera_fly_to_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:121](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L121) (Tag: `maps_android_3d_marker_options_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:148](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L148) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:205](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L205) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:156](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L156) (Tag: `maps_android_3d_marker_click_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:213](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L213) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:252](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L252) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:292](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L292) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:335](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L335) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:79](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L79) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:78](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L78) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:63](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L63) (Tag: `No Tag`)
@@ -339,8 +378,11 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:143](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L143) (Tag: `maps_android_3d_camera_stop_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:66](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L66) (Tag: `maps_android_3d_camera_fly_to_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:111](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L111) (Tag: `maps_android_3d_marker_options_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:142](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L142) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:195](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L195) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:146](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L146) (Tag: `maps_android_3d_marker_click_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:203](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L203) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:242](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L242) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:282](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L282) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:325](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L325) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:69](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L69) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:72](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L72) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:57](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L57) (Tag: `No Tag`)
@@ -354,17 +396,21 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 
 ### `Glyph`
 - `equals`: ❌ No coverage
-- `fromCircle`: ❌ No coverage
+- `fromCircle`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:308](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L308) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
 - `fromColor`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:172](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L172) (Tag: `maps_android_3d_marker_custom_icon_kt`)
-- `fromText`: ❌ No coverage
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:180](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L180) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:236](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L236) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+- `fromText`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:276](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L276) (Tag: `maps_android_3d_marker_glyph_text_kt`)
 - `getColor`: ❌ No coverage
 - `getImage`: ❌ No coverage
 - `getText`: ❌ No coverage
 - `hashCode`: ❌ No coverage
-- `setColor`: ❌ No coverage
+- `setColor`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:309](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L309) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
 - `setImage`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:174](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L174) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:182](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L182) (Tag: `No Tag`)
 - `setText`: ❌ No coverage
 - `writeToParcel`: ❌ No coverage
 
@@ -373,7 +419,10 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [TrackedMap3D.kt:31](TrackedMap3D.kt#L31) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:108](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L108) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:137](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L137) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:192](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L192) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:200](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L200) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:239](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L239) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:279](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L279) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:322](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L322) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:66](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L66) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:101](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L101) (Tag: `maps_android_3d_popover_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:53](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L53) (Tag: `maps_android_3d_popover_add_kt`)
@@ -402,8 +451,11 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:148](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L148) (Tag: `maps_android_3d_camera_stop_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:70](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L70) (Tag: `maps_android_3d_camera_fly_to_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:110](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L110) (Tag: `maps_android_3d_marker_options_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:141](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L141) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:194](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L194) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:145](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L145) (Tag: `maps_android_3d_marker_click_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:202](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L202) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:241](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L241) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:281](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L281) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:324](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L324) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:68](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L68) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:71](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L71) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:56](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L56) (Tag: `No Tag`)
@@ -474,12 +526,18 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 - `getLatitude`:
   - [MapActivity.kt:71](MapActivity.kt#L71) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:113](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L113) (Tag: `maps_android_3d_marker_options_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:197](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L197) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:205](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L205) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:244](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L244) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:284](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L284) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:327](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L327) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:71](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L71) (Tag: `maps_android_3d_marker_add_kt`)
 - `getLongitude`:
   - [MapActivity.kt:72](MapActivity.kt#L72) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:114](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L114) (Tag: `maps_android_3d_marker_options_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:198](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L198) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:206](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L206) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:245](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L245) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:285](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L285) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:328](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L328) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:72](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L72) (Tag: `maps_android_3d_marker_add_kt`)
 - `getPosition`: ❌ No coverage
 - `setAltitude`:
@@ -490,10 +548,16 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:89](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L89) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:64](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L64) (Tag: `maps_android_3d_init_basic_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:115](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L115) (Tag: `maps_android_3d_marker_options_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:138](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L138) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:143](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L143) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:180](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L180) (Tag: `maps_android_3d_marker_custom_icon_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:199](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L199) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:141](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L141) (Tag: `maps_android_3d_marker_click_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:150](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L150) (Tag: `maps_android_3d_marker_click_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:188](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L188) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:207](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L207) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:232](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L232) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:246](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L246) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:272](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L272) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:286](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L286) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:315](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L315) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:329](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L329) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:57](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L57) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:73](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L73) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:99](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L99) (Tag: `maps_android_3d_marker_options_kt`)
@@ -530,10 +594,16 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:87](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L87) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:62](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L62) (Tag: `maps_android_3d_init_basic_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:113](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L113) (Tag: `maps_android_3d_marker_options_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:138](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L138) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:143](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L143) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:178](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L178) (Tag: `maps_android_3d_marker_custom_icon_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:197](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L197) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:139](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L139) (Tag: `maps_android_3d_marker_click_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:148](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L148) (Tag: `maps_android_3d_marker_click_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:186](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L186) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:205](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L205) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:230](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L230) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:244](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L244) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:270](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L270) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:284](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L284) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:313](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L313) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:327](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L327) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:55](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L55) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:71](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L71) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:97](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L97) (Tag: `maps_android_3d_marker_options_kt`)
@@ -570,10 +640,16 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:88](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L88) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:63](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L63) (Tag: `maps_android_3d_init_basic_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:114](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L114) (Tag: `maps_android_3d_marker_options_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:138](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L138) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:143](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L143) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:179](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L179) (Tag: `maps_android_3d_marker_custom_icon_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:198](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L198) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:140](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L140) (Tag: `maps_android_3d_marker_click_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:149](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L149) (Tag: `maps_android_3d_marker_click_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:187](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L187) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:206](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L206) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:231](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L231) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:245](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L245) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:271](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L271) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:285](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L285) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:314](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L314) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:328](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L328) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:56](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L56) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:72](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L72) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:98](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L98) (Tag: `maps_android_3d_marker_options_kt`)
@@ -686,7 +762,7 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [SnippetRegistry.kt:60](SnippetRegistry.kt#L60) (Tag: `No Tag`)
 - `setAltitudeMode`: ❌ No coverage
 - `setClickListener`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:152](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L152) (Tag: `maps_android_3d_marker_click_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:160](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L160) (Tag: `maps_android_3d_marker_click_kt`)
 - `setCollisionBehavior`: ❌ No coverage
 - `setDrawsWhenOccluded`: ❌ No coverage
 - `setExtruded`: ❌ No coverage
@@ -704,8 +780,14 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 - `getPosition`:
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:113](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L113) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:114](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L114) (Tag: `maps_android_3d_marker_options_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:197](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L197) (Tag: `maps_android_3d_marker_custom_icon_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:198](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L198) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:205](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L205) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:206](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L206) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:244](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L244) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:245](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L245) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:284](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L284) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:285](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L285) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:327](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L327) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:328](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L328) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
 - `getZIndex`: ❌ No coverage
 - `isDrawnWhenOccluded`: ❌ No coverage
 - `isExtruded`: ❌ No coverage
@@ -721,12 +803,18 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 - `setId`: ❌ No coverage
 - `setLabel`:
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:102](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L102) (Tag: `maps_android_3d_marker_options_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:182](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L182) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:190](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L190) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:234](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L234) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:274](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L274) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:317](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L317) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:62](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L62) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:99](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L99) (Tag: `maps_android_3d_popover_options_kt`)
 - `setPosition`:
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:138](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L138) (Tag: `maps_android_3d_marker_click_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:177](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L177) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:185](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L185) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:229](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L229) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:269](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L269) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:312](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L312) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:61](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L61) (Tag: `maps_android_3d_marker_add_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:96](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L96) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:51](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L51) (Tag: `maps_android_3d_popover_add_kt`)
@@ -797,7 +885,10 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 
 ### `PinConfiguration`
 - `builder`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:184](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L184) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:192](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L192) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:235](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L235) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:275](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L275) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:318](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L318) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
 - `equals`: ❌ No coverage
 - `getBackgroundColor`: ❌ No coverage
 - `getBorderColor`: ❌ No coverage
@@ -812,15 +903,21 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 
 ### `PinConfiguration.Builder`
 - `build`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:189](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L189) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:197](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L197) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:237](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L237) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:277](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L277) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:320](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L320) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
 - `setBackgroundColor`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:187](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L187) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:195](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L195) (Tag: `No Tag`)
 - `setBorderColor`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:188](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L188) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:196](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L196) (Tag: `No Tag`)
 - `setGlyph`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:186](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L186) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:194](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L194) (Tag: `No Tag`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:236](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L236) (Tag: `maps_android_3d_marker_glyph_color_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:276](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L276) (Tag: `maps_android_3d_marker_glyph_text_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:319](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L319) (Tag: `maps_android_3d_marker_glyph_circle_kt`)
 - `setScale`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:185](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L185) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:193](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L193) (Tag: `No Tag`)
 
 ### `Polygon`
 - `getAltitudeMode`: ❌ No coverage
@@ -1072,8 +1169,6 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
 - `FlyAroundOptions.writeToParcel`
 - `FlyToOptions.writeToParcel`
 - `Glyph.equals`
-- `Glyph.fromCircle`
-- `Glyph.fromText`
 - `Glyph.hashCode`
 - `Glyph.writeToParcel`
 - `Hole.writeToParcel`
@@ -1202,15 +1297,19 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
 
 ### `Glyph`
 - `equals`: ❌ No coverage
-- `fromCircle`: ❌ No coverage
+- `fromCircle`:
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:271](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L271) (Tag: `maps_android_3d_marker_glyph_circle_java`)
 - `fromColor`:
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:168](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L168) (Tag: `maps_android_3d_marker_custom_icon_java`)
-- `fromText`: ❌ No coverage
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:213](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L213) (Tag: `maps_android_3d_marker_glyph_color_java`)
+- `fromText`:
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:244](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L244) (Tag: `maps_android_3d_marker_glyph_text_java`)
 - `getColor`: ❌ No coverage
 - `getImage`: ❌ No coverage
 - `getText`: ❌ No coverage
 - `hashCode`: ❌ No coverage
-- `setColor`: ❌ No coverage
+- `setColor`:
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:272](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L272) (Tag: `maps_android_3d_marker_glyph_circle_java`)
 - `setImage`:
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:171](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L171) (Tag: `maps_android_3d_marker_custom_icon_java`)
 - `setText`: ❌ No coverage
@@ -1222,6 +1321,9 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:104](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L104) (Tag: `maps_android_3d_marker_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:130](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L130) (Tag: `maps_android_3d_marker_click_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:185](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L185) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:216](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L216) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:247](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L247) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:281](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L281) (Tag: `maps_android_3d_marker_glyph_circle_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:72](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L72) (Tag: `maps_android_3d_marker_add_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java:100](java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java#L100) (Tag: `maps_android_3d_popover_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java:60](java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java#L60) (Tag: `maps_android_3d_popover_add_java`)
@@ -1250,6 +1352,9 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:110](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L110) (Tag: `maps_android_3d_marker_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:136](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L136) (Tag: `maps_android_3d_marker_click_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:191](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L191) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:222](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L222) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:253](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L253) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:287](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L287) (Tag: `maps_android_3d_marker_glyph_circle_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:78](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L78) (Tag: `maps_android_3d_marker_add_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/ModelSnippets.java:70](java-app/src/main/java/com/example/snippets/java/snippets/ModelSnippets.java#L70) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PlaceSnippets.java:74](java-app/src/main/java/com/example/snippets/java/snippets/PlaceSnippets.java#L74) (Tag: `No Tag`)
@@ -1313,12 +1418,18 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:108](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L108) (Tag: `maps_android_3d_marker_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:134](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L134) (Tag: `maps_android_3d_marker_click_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:189](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L189) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:220](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L220) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:251](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L251) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:285](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L285) (Tag: `maps_android_3d_marker_glyph_circle_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:76](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L76) (Tag: `maps_android_3d_marker_add_java`)
 - `getLongitude`:
   - [MapActivity.java:64](MapActivity.java#L64) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:108](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L108) (Tag: `maps_android_3d_marker_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:134](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L134) (Tag: `maps_android_3d_marker_click_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:189](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L189) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:220](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L220) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:251](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L251) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:285](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L285) (Tag: `maps_android_3d_marker_glyph_circle_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:76](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L76) (Tag: `maps_android_3d_marker_add_java`)
 - `getPosition`: ❌ No coverage
 - `setAltitude`: ❌ No coverage
@@ -1423,6 +1534,9 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:106](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L106) (Tag: `maps_android_3d_marker_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:132](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L132) (Tag: `maps_android_3d_marker_click_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:187](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L187) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:218](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L218) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:249](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L249) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:283](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L283) (Tag: `maps_android_3d_marker_glyph_circle_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:74](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L74) (Tag: `maps_android_3d_marker_add_java`)
 - `getZIndex`: ❌ No coverage
 - `isDrawnWhenOccluded`: ❌ No coverage
@@ -1439,12 +1553,18 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
 - `setId`: ❌ No coverage
 - `setLabel`:
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:175](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L175) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:211](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L211) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:242](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L242) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:276](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L276) (Tag: `maps_android_3d_marker_glyph_circle_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:69](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L69) (Tag: `maps_android_3d_marker_add_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:99](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L99) (Tag: `maps_android_3d_marker_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java:99](java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java#L99) (Tag: `maps_android_3d_popover_options_java`)
 - `setPosition`:
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:128](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L128) (Tag: `maps_android_3d_marker_click_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:174](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L174) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:210](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L210) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:241](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L241) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:275](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L275) (Tag: `maps_android_3d_marker_glyph_circle_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:68](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L68) (Tag: `maps_android_3d_marker_add_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:97](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L97) (Tag: `maps_android_3d_marker_options_java`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java:98](java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java#L98) (Tag: `maps_android_3d_popover_options_java`)
@@ -1512,6 +1632,9 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
 ### `PinConfiguration`
 - `builder`:
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:178](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L178) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:212](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L212) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:243](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L243) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:277](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L277) (Tag: `maps_android_3d_marker_glyph_circle_java`)
 - `equals`: ❌ No coverage
 - `getBackgroundColor`: ❌ No coverage
 - `getBorderColor`: ❌ No coverage
@@ -1527,12 +1650,18 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
 ### `PinConfiguration.Builder`
 - `build`:
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:183](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L183) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:214](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L214) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:245](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L245) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:279](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L279) (Tag: `maps_android_3d_marker_glyph_circle_java`)
 - `setBackgroundColor`:
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:181](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L181) (Tag: `maps_android_3d_marker_custom_icon_java`)
 - `setBorderColor`:
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:182](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L182) (Tag: `maps_android_3d_marker_custom_icon_java`)
 - `setGlyph`:
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:180](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L180) (Tag: `maps_android_3d_marker_custom_icon_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:213](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L213) (Tag: `maps_android_3d_marker_glyph_color_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:244](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L244) (Tag: `maps_android_3d_marker_glyph_text_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:278](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L278) (Tag: `maps_android_3d_marker_glyph_circle_java`)
 - `setScale`:
   - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:179](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L179) (Tag: `maps_android_3d_marker_custom_icon_java`)
 
@@ -1783,8 +1912,6 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
 - `FlyAroundOptions.writeToParcel`
 - `FlyToOptions.writeToParcel`
 - `Glyph.equals`
-- `Glyph.fromCircle`
-- `Glyph.fromText`
 - `Glyph.hashCode`
 - `Glyph.writeToParcel`
 - `Hole.writeToParcel`
