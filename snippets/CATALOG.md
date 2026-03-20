@@ -11,92 +11,105 @@ This section maps high-level concepts (groups) to specific demonstration files a
 
 - **1. Fly To**:
   - *Description*: Animates the camera to a specific position with a tilt and heading over 5 seconds.
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:45](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L45) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:48](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L48)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:45](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L45) (Tag: `maps_android_3d_camera_fly_to_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:48](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L48) (Tag: `No Tag`)
 - **2. Fly Around**:
   - *Description*: Rotates the camera 360 degrees around a specific location over 10 seconds.
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:76](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L76) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:68](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L68)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:76](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L76) (Tag: `maps_android_3d_camera_fly_around_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:68](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L68) (Tag: `maps_android_3d_camera_fly_around_java`)
 - **3. Stop Animation**:
   - *Description*: Stops any currently running camera animation immediately.
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:120](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L120) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:99](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L99)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:120](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L120) (Tag: `maps_android_3d_camera_stop_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:99](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L99) (Tag: `maps_android_3d_camera_stop_java`)
 - **4. Listen Camera Events**:
   - *Description*: Logs camera change events to the console, printing the center coordinates as the camera moves.
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:171](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L171) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:121](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L121)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:171](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L171) (Tag: `maps_android_3d_camera_events_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:121](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L121) (Tag: `maps_android_3d_camera_events_java`)
 - **5. Listen Steady State**:
   - *Description*: Logs to the console when the map finishes rendering or enters a steady state.
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:202](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L202) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:152](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L152)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:202](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L202) (Tag: `maps_android_3d_camera_steady_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:152](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L152) (Tag: `maps_android_3d_camera_steady_java`)
 
 ### Map Initialization
 > Snippets demonstrating map lifecycle, listeners and readiness states.
 
 - **1. Listen Events**:
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:87](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L87)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:87](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L87) (Tag: `maps_android_3d_init_listeners_kt`)
 - **1. Basic Map3D Initialization**:
   - *Description*: Initializes a standard 3D Map View and sets an initial camera angle.
-  - *Links*: Java: [java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java:38](java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java#L38)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java:38](java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java#L38) (Tag: `maps_android_3d_init_basic_java`)
 - **2. Add Map to AndroidView**:
   - *Description*: Shows how to add a Map3DView to an AndroidView which bridges to Jetpack Compose.
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:48](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L48)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:48](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L48) (Tag: `No Tag`)
 - **2. Listen Map Events**:
   - *Description*: Logs map events to the console, such as clicks or idle status.
-  - *Links*: Java: [java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java:69](java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java#L69)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java:69](java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java#L69) (Tag: `maps_android_3d_init_listeners_java`)
 
 ### Markers
 > Snippets demonstrating standard, extruded, and custom styled markers.
 
 - **1. Basic**:
   - *Description*: Adds a standard marker.
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:48](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L48) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:59](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L59)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:48](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L48) (Tag: `maps_android_3d_marker_add_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:59](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L59) (Tag: `maps_android_3d_marker_add_java`)
 - **2. Advanced**:
   - *Description*: Adds a 'Priority Marker' that is extruded and collides with other markers.
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:89](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L89) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:88](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L88)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:89](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L89) (Tag: `maps_android_3d_marker_options_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:88](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L88) (Tag: `maps_android_3d_marker_options_java`)
 - **3. Click**:
   - *Description*: Adds a marker that logs a message when clicked.
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:131](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L131) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:120](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L120)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:131](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L131) (Tag: `maps_android_3d_marker_click_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:120](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L120) (Tag: `maps_android_3d_marker_click_java`)
 - **4. Custom Icon**:
   - *Description*: Adds a marker with a custom icon using PinConfiguration and Glyph styling.
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:165](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L165) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:159](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L159)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:165](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L165) (Tag: `maps_android_3d_marker_custom_icon_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java:159](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L159) (Tag: `maps_android_3d_marker_custom_icon_java`)
 
 ### Models
-> 
-
 - **1. Basic**:
   - *Description*: Loads a GLB model from a URL and places it clamped to the ground.
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:43](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L43) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/ModelSnippets.java:49](java-app/src/main/java/com/example/snippets/java/snippets/ModelSnippets.java#L49)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt:43](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/ModelSnippets.kt#L43) (Tag: `maps_android_3d_model_add_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/ModelSnippets.java:49](java-app/src/main/java/com/example/snippets/java/snippets/ModelSnippets.java#L49) (Tag: `maps_android_3d_model_add_java`)
 
 ### Places
-> 
-
 - **1. Listen Clicks**:
   - *Description*: Sets up a listener that logs the Place ID when a user clicks on a 3D building or POI.
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:39](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L39) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/PlaceSnippets.java:51](java-app/src/main/java/com/example/snippets/java/snippets/PlaceSnippets.java#L51)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt:39](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PlaceSnippets.kt#L39) (Tag: `maps_android_3d_place_click_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/PlaceSnippets.java:51](java-app/src/main/java/com/example/snippets/java/snippets/PlaceSnippets.java#L51) (Tag: `maps_android_3d_place_click_java`)
 
 ### Polygons
 > Snippets demonstrating 2D and 3D extruded polygon layers on the map.
 
 - **1. Basic**:
   - *Description*: Draws a red polygon with a blue stroke around a small area
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:39](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L39) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:48](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L48)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:39](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L39) (Tag: `maps_android_3d_polygon_add_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:48](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L48) (Tag: `maps_android_3d_polygon_add_java`)
 - **2. Extruded**:
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:83](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L83) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:81](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L81)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt:83](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolygonSnippets.kt#L83) (Tag: `maps_android_3d_polygon_extruded_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java:81](java-app/src/main/java/com/example/snippets/java/snippets/PolygonSnippets.java#L81) (Tag: `maps_android_3d_polygon_extruded_java`)
 
 ### Polylines
 > Snippets demonstrating 2D and 3D extruded polyline paths on the map.
 
 - **1. Basic**:
   - *Description*: Draws a thick red polyline connecting three points
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:39](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L39) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/PolylineSnippets.java:48](java-app/src/main/java/com/example/snippets/java/snippets/PolylineSnippets.java#L48)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:39](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L39) (Tag: `maps_android_3d_polyline_add_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/PolylineSnippets.java:48](java-app/src/main/java/com/example/snippets/java/snippets/PolylineSnippets.java#L48) (Tag: `maps_android_3d_polyline_add_java`)
 - **2. Styled**:
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:80](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L80) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/PolylineSnippets.java:78](java-app/src/main/java/com/example/snippets/java/snippets/PolylineSnippets.java#L78)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt:80](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PolylineSnippets.kt#L80) (Tag: `maps_android_3d_polyline_options_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/PolylineSnippets.java:78](java-app/src/main/java/com/example/snippets/java/snippets/PolylineSnippets.java#L78) (Tag: `maps_android_3d_polyline_options_java`)
 
 ### Popovers
 > Snippets demonstrating anchored and configured 3D Popover views.
 
 - **1. Marker Anchor**:
   - *Description*: Adds a 'Hello Popover!' text bubble anchored to a marker
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:43](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L43) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java:53](java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java#L53)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:43](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L43) (Tag: `maps_android_3d_popover_add_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java:53](java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java#L53) (Tag: `maps_android_3d_popover_add_java`)
 - **2. Configured**:
   - *Description*: Adds an 'Info' popover anchored to a marker with auto-close enabled and auto-pan disabled.
-  - *Links*: Kotlin: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:90](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L90) | Java: [java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java:89](java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java#L89)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:90](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L90) (Tag: `maps_android_3d_popover_options_kt`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java:89](java-app/src/main/java/com/example/snippets/java/snippets/PopoverSnippets.java#L89) (Tag: `maps_android_3d_popover_options_java`)
 
 
 ---
@@ -1069,42 +1082,42 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
 
 ### `GoogleMap3D`
 - `addMarker`:
-  - [TrackedMap3D.java:37](TrackedMap3D.java#L37) (Tag: `No Tag`)
+  - [TrackedMap3D.java:53](TrackedMap3D.java#L53) (Tag: `No Tag`)
 - `addModel`:
-  - [TrackedMap3D.java:55](TrackedMap3D.java#L55) (Tag: `No Tag`)
+  - [TrackedMap3D.java:71](TrackedMap3D.java#L71) (Tag: `No Tag`)
 - `addPolygon`:
-  - [TrackedMap3D.java:49](TrackedMap3D.java#L49) (Tag: `No Tag`)
+  - [TrackedMap3D.java:65](TrackedMap3D.java#L65) (Tag: `No Tag`)
 - `addPolyline`:
-  - [TrackedMap3D.java:43](TrackedMap3D.java#L43) (Tag: `No Tag`)
+  - [TrackedMap3D.java:59](TrackedMap3D.java#L59) (Tag: `No Tag`)
 - `addPopover`:
-  - [TrackedMap3D.java:61](TrackedMap3D.java#L61) (Tag: `No Tag`)
+  - [TrackedMap3D.java:77](TrackedMap3D.java#L77) (Tag: `No Tag`)
 - `flyCameraAround`:
-  - [TrackedMap3D.java:69](TrackedMap3D.java#L69) (Tag: `No Tag`)
+  - [TrackedMap3D.java:85](TrackedMap3D.java#L85) (Tag: `No Tag`)
 - `flyCameraTo`:
-  - [TrackedMap3D.java:74](TrackedMap3D.java#L74) (Tag: `No Tag`)
+  - [TrackedMap3D.java:90](TrackedMap3D.java#L90) (Tag: `No Tag`)
 - `getCamera`:
   - [MapActivity.java:53](MapActivity.java#L53) (Tag: `No Tag`)
-  - [TrackedMap3D.java:72](TrackedMap3D.java#L72) (Tag: `No Tag`)
+  - [TrackedMap3D.java:88](TrackedMap3D.java#L88) (Tag: `No Tag`)
 - `getCameraRestriction`: ❌ No coverage
 - `getMapMode`: ❌ No coverage
 - `setCamera`:
-  - [TrackedMap3D.java:66](TrackedMap3D.java#L66) (Tag: `No Tag`)
+  - [TrackedMap3D.java:82](TrackedMap3D.java#L82) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java:54](java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java#L54) (Tag: `maps_android_3d_init_basic_java`)
 - `setCameraAnimationEndListener`: ❌ No coverage
 - `setCameraChangedListener`:
-  - [TrackedMap3D.java:67](TrackedMap3D.java#L67) (Tag: `No Tag`)
+  - [TrackedMap3D.java:83](TrackedMap3D.java#L83) (Tag: `No Tag`)
 - `setCameraRestriction`: ❌ No coverage
 - `setMap3DClickListener`:
-  - [TrackedMap3D.java:68](TrackedMap3D.java#L68) (Tag: `No Tag`)
+  - [TrackedMap3D.java:84](TrackedMap3D.java#L84) (Tag: `No Tag`)
 - `setMapMode`: ❌ No coverage
 - `setOnMapReadyListener`:
-  - [TrackedMap3D.java:75](TrackedMap3D.java#L75) (Tag: `No Tag`)
+  - [TrackedMap3D.java:91](TrackedMap3D.java#L91) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java:74](java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java#L74) (Tag: `maps_android_3d_init_listeners_java`)
 - `setOnMapSteadyListener`:
-  - [TrackedMap3D.java:76](TrackedMap3D.java#L76) (Tag: `No Tag`)
+  - [TrackedMap3D.java:92](TrackedMap3D.java#L92) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java:85](java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java#L85) (Tag: `maps_android_3d_init_listeners_java`)
 - `stopCameraAnimation`:
-  - [TrackedMap3D.java:73](TrackedMap3D.java#L73) (Tag: `No Tag`)
+  - [TrackedMap3D.java:89](TrackedMap3D.java#L89) (Tag: `No Tag`)
 
 ### `Hole`
 - `getVertices`: ❌ No coverage

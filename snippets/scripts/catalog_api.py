@@ -161,6 +161,14 @@ def generate_snippet_index(snippets_dir, file_map):
                                 item_title = item_title_match.group(1)
                                 item_desc = item_desc_match.group(1) if item_desc_match else ""
                                 
+                                # Read ahead for Region Tag
+                                tag = "No Tag"
+                                for j in range(i, min(i+15, len(lines))):
+                                     start_match = re.search(r'\[START\s+([a-zA-Z0-9_]+)\]', lines[j])
+                                     if start_match:
+                                          tag = start_match.group(1)
+                                          break
+                                          
                                 rel_path = file_map.get(name, os.path.relpath(filepath, snippets_dir))
                                 link = f"[{rel_path}:{i+1}]({rel_path}#L{i+1})"
 
@@ -169,9 +177,9 @@ def generate_snippet_index(snippets_dir, file_map):
                                     current_item['description'] = item_desc
                                 
                                 if is_kotlin:
-                                    current_item['kotlin'] = link
+                                    current_item['kotlin'] = {'link': link, 'tag': tag}
                                 else:
-                                    current_item['java'] = link
+                                    current_item['java'] = {'link': link, 'tag': tag}
 
     # Format Markdown
     lines = ["## 📑 Snippet Concepts Index\n\n"]
@@ -179,7 +187,9 @@ def generate_snippet_index(snippets_dir, file_map):
 
     for title, group in sorted(groups.items()):
         lines.append(f"### {title}\n")
-        lines.append(f"> {group['description']}\n\n")
+        
+        if group['description']:
+            lines.append(f"> {group['description']}\n\n")
         
         # Sort items: try numerical sort if prefixed with numbers (e.g. "1. Basic")
         sorted_items = sorted(group['items'].items(), key=lambda x: (re.search(r'^(\d+)', x[0]).group(1) if re.search(r'^(\d+)', x[0]) else x[0]))
@@ -188,14 +198,12 @@ def generate_snippet_index(snippets_dir, file_map):
              lines.append(f"- **{item_title}**:\n")
              if item['description']:
                   lines.append(f"  - *Description*: {item['description']}\n")
-             formatted_uses = []
+             
              if item['kotlin']:
-                  formatted_uses.append(f"Kotlin: {item['kotlin']}")
+                  lines.append(f"  - **Kotlin**: {item['kotlin']['link']} (Tag: `{item['kotlin']['tag']}`)\n")
              if item['java']:
-                  formatted_uses.append(f"Java: {item['java']}")
+                  lines.append(f"  - **Java**: {item['java']['link']} (Tag: `{item['java']['tag']}`)\n")
                   
-             if formatted_uses:
-                  lines.append(f"  - *Links*: {' | '.join(formatted_uses)}\n")
         lines.append("\n")
 
     return lines
