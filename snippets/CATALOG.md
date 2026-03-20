@@ -210,6 +210,7 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 - `setCenter`:
   - [MapActivity.kt:191](MapActivity.kt#L191) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:130](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L130) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:243](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L243) (Tag: `maps_android_3d_camera_restriction_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:54](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L54) (Tag: `maps_android_3d_camera_fly_to_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:86](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L86) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:61](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L61) (Tag: `maps_android_3d_init_basic_kt`)
@@ -445,6 +446,7 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 - `setAltitude`:
   - [MapActivity.kt:194](MapActivity.kt#L194) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:133](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L133) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:246](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L246) (Tag: `maps_android_3d_camera_restriction_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:57](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L57) (Tag: `maps_android_3d_camera_fly_to_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:89](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L89) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:64](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L64) (Tag: `maps_android_3d_init_basic_kt`)
@@ -484,6 +486,7 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 - `setLatitude`:
   - [MapActivity.kt:192](MapActivity.kt#L192) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:131](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L131) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:244](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L244) (Tag: `maps_android_3d_camera_restriction_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:55](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L55) (Tag: `maps_android_3d_camera_fly_to_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:87](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L87) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:62](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L62) (Tag: `maps_android_3d_init_basic_kt`)
@@ -523,6 +526,7 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 - `setLongitude`:
   - [MapActivity.kt:193](MapActivity.kt#L193) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:132](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L132) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:245](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L245) (Tag: `maps_android_3d_camera_restriction_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:56](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L56) (Tag: `maps_android_3d_camera_fly_to_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:88](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L88) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:63](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L63) (Tag: `maps_android_3d_init_basic_kt`)

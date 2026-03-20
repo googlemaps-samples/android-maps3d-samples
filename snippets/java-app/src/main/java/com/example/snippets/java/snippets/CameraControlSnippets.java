@@ -182,6 +182,15 @@ public class CameraControlSnippets {
         );
 
         map.setCameraRestriction(restriction);
+
+        com.google.android.gms.maps3d.model.Camera camera = new com.google.android.gms.maps3d.model.Camera(
+             new com.google.android.gms.maps3d.model.LatLngAltitude(40.748233, -73.985663, 1500.0), // center
+             0.0, // heading
+             45.0, // tilt
+             0.0, // roll
+             1000.0 // range
+        );
+        map.setCamera(camera);
         // [END maps_android_3d_camera_restriction_java]
     }
 }

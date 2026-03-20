@@ -237,6 +237,15 @@ class CameraControlSnippets(
         }
 
         map.setCameraRestriction(restriction)
+
+        // Move the camera inside the restricted bounds so we focus on NYC
+        map.setCamera(camera {
+            center = latLngAltitude {
+                latitude = 40.748233
+                longitude = -73.985663
+                altitude = 1500.0
+            }
+        })
         // [END maps_android_3d_camera_restriction_kt]
     }
 }
