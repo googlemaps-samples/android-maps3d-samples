@@ -16,6 +16,7 @@
 
 package com.example.snippets.java.snippets;
 
+import android.util.Log;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import com.google.android.gms.maps3d.GoogleMap3D;
@@ -56,7 +57,8 @@ public class MapInitSnippets {
 
             @Override
             public void onError(@NonNull Exception e) {
-                // Handle initialization error
+                // Log the exception to guide developers debugging layout mismatches
+                Log.e("MapInitSnippets", "Failed to initialize 3D Map: " + e.getMessage(), e);
             }
         });
         // [END maps_android_3d_init_basic_java]

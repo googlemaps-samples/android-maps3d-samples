@@ -35,6 +35,16 @@ import kotlin.time.Duration.Companion.seconds
     title = "Camera",
     description = "Snippets demonstrating dynamic camera orchestration and animations."
 )
+/**
+ * Snippets demonstrating dynamic camera orchestration and animations.
+ *
+ * @property map The tracked map delegate wrapper.
+ * @property lifecycleScope The scope managing asynchronous animations duration cycles.
+ * 
+ * NOTE: While passing a bare CoroutineScope is straightforward for snippets runner contexts,
+ * in production, bounding animation jobs to lifecycle-aware components (like Views, Fragments,
+ * or ViewModel `viewModelScope` triggers) prevents memory leaks and guarantees safe cancellation.
+ */
 class CameraControlSnippets(
     private val map: TrackedMap3D,
     private val lifecycleScope: kotlinx.coroutines.CoroutineScope

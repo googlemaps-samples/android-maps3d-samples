@@ -16,6 +16,7 @@
 
 package com.example.snippets.kotlin.snippets
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import android.content.Context
 import android.os.Handler
@@ -71,7 +72,8 @@ class MapInitSnippets {
                             googleMap3D.setCamera(camera)
                         }
                         override fun onError(error: Exception) {
-                            // Handle initialization error
+                            // Log exception trace guiding developers to key deficits or mismatches
+                            Log.e("MapInitSnippets", "Failed to initialize 3D Map: ${error.message}", error)
                         }
                     })
                 }
