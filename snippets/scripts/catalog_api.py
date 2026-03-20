@@ -112,7 +112,7 @@ def parse_javap_output(snippets_dir):
 
     return usages
 
-def generate_snippet_index(snippets_dir, file_map):
+def generate_snippet_index(snippets_dir, file_map, region_tags):
     groups = defaultdict(lambda: {
         'description': '',
         'items': defaultdict(lambda: {
@@ -128,7 +128,10 @@ def generate_snippet_index(snippets_dir, file_map):
             if name.endswith(('.kt', '.java')):
                 filepath = os.path.join(root, name)
                 with open(filepath, 'r', encoding='utf-8') as f:
-                    content = f.read()
+                    try:
+                        content = f.read()
+                    except UnicodeDecodeError:
+                        continue
 
                 # Find Group
                 group_match = re.search(r'@SnippetGroup\((.*?)\)', content, re.DOTALL)
@@ -163,31 +166,36 @@ def generate_snippet_index(snippets_dir, file_map):
                                 item_title = item_title_match.group(1)
                                 item_desc = item_desc_match.group(1) if item_desc_match else ""
                                 
-                                # Read back or ahead for closest Region Tag
-                                tag = "No Tag"
-                                min_dist = 999
-                                start_j = max(0, i - 15)
-                                end_j = min(len(lines), i + 15)
-                                for j in range(start_j, end_j):
-                                     start_match = re.search(r'\[START\s+([a-zA-Z0-9_]+)\]', lines[j])
-                                     if start_match:
-                                          current_tag = start_match.group(1)
-                                          dist = abs(j - i)
-                                          if dist < min_dist:
-                                              min_dist = dist
-                                              tag = current_tag
+                                # Find active region tag mapping
+                                active_tag = "No Tag"
+                                start_line = i + 1
+                                end_line = i + 1
+                                
+                                # Look up in region_tags
+                                if filepath in region_tags:
+                                    for region in region_tags[filepath]:
+                                        # Function index i is 0-based line index, region['start'] is 1-based
+                                        # Allow +- 10 lines buffer for comments/annotations preceding the START tag
+                                        if region['start'] <= (i + 15) and region['end'] >= i:
+                                            active_tag = region['tag']
+                                            start_line = region['start']
+                                            end_line = region['end']
+                                            break
                                           
                                 rel_path = file_map.get(name, os.path.relpath(filepath, snippets_dir))
-                                link = f"[{rel_path}:{i+1}]({rel_path}#L{i+1})"
+                                if active_tag != "No Tag":
+                                     link = f"[{rel_path}]({rel_path}#L{start_line}-L{end_line})"
+                                else:
+                                     link = f"[{rel_path}:{i+1}]({rel_path}#L{i+1})"
 
                                 current_item = groups[group_title]['items'][item_title]
                                 if not current_item['description']:
                                     current_item['description'] = item_desc
                                 
                                 if is_kotlin:
-                                    current_item['kotlin'] = {'link': link, 'tag': tag}
+                                    current_item['kotlin'] = {'link': link, 'tag': active_tag}
                                 else:
-                                    current_item['java'] = {'link': link, 'tag': tag}
+                                    current_item['java'] = {'link': link, 'tag': active_tag}
 
     # Format Markdown
     lines = ["## 📑 Snippet Concepts Index\n\n"]
@@ -263,7 +271,16 @@ def format_catalog_section(section_title, api_surface, usages, file_map, region_
                                 active_tag = region['tag']
                                 break
                     
-                    formatted_uses.append(f"[{rel_path}:{line_num}]({rel_path}#L{line_num}) (Tag: `{active_tag}`)")
+                    if active_tag != "No Tag":
+                        # We found a region, map the range
+                        for region in region_tags[full_path_for_tag]:
+                            if region['tag'] == active_tag:
+                                start_line = region['start']
+                                end_line = region['end']
+                                break
+                        formatted_uses.append(f"[{rel_path}]({rel_path}#L{start_line}-L{end_line}) (Tag: `{active_tag}`)")
+                    else:
+                        formatted_uses.append(f"[{rel_path}:{line_num}]({rel_path}#L{line_num}) (Tag: `{active_tag}`)")
                 
                 formatted_uses = sorted(list(set(formatted_uses)))
                 lines.append(f"- `{method}`:\n")
@@ -304,8 +321,8 @@ def main():
         
     print(f"Loaded {sum(len(v) for v in api_surface.values())} API endpoints from {manifest_path}.")
     
-    usages = parse_javap_output(SNIPPETS_DIR)
     region_tags = extract_region_tags(SNIPPETS_DIR)
+    usages = parse_javap_output(SNIPPETS_DIR)
     
     file_map = {}
     for filepath in region_tags.keys():
@@ -317,7 +334,7 @@ def main():
     catalog_lines.append("This document serves as a comprehensive developer reference and mapping matrix for the 3D Maps SDK features.\n\n")
     
     # Generate Snippet Index (Concepts to Code)
-    snippet_index_lines = generate_snippet_index(SNIPPETS_DIR, file_map)
+    snippet_index_lines = generate_snippet_index(SNIPPETS_DIR, file_map, region_tags)
     catalog_lines.extend(snippet_index_lines)
     catalog_lines.append("\n---\n\n")
     catalog_lines.append("## 📊 Maps3D API Coverage Matrix\n\n")
