@@ -206,12 +206,12 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 ### `Camera`
 - `getCenter`:
   - [MapActivity.kt:58](MapActivity.kt#L58) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:183](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L183) (Tag: `maps_android_3d_camera_events_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:185](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L185) (Tag: `maps_android_3d_camera_events_kt`)
 - `setCenter`:
   - [MapActivity.kt:191](MapActivity.kt#L191) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:128](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L128) (Tag: `maps_android_3d_camera_stop_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:52](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L52) (Tag: `maps_android_3d_camera_fly_to_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:84](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L84) (Tag: `maps_android_3d_camera_fly_around_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:130](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L130) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:54](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L54) (Tag: `maps_android_3d_camera_fly_to_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:86](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L86) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:61](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L61) (Tag: `maps_android_3d_init_basic_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:112](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L112) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:143](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L143) (Tag: `maps_android_3d_marker_click_kt`)
@@ -227,9 +227,9 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:77](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L77) (Tag: `No Tag`)
 - `setHeading`:
   - [MapActivity.kt:197](MapActivity.kt#L197) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:134](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L134) (Tag: `maps_android_3d_camera_stop_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:58](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L58) (Tag: `maps_android_3d_camera_fly_to_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:90](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L90) (Tag: `maps_android_3d_camera_fly_around_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:136](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L136) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:60](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L60) (Tag: `maps_android_3d_camera_fly_to_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:92](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L92) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:66](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L66) (Tag: `maps_android_3d_init_basic_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:118](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L118) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:145](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L145) (Tag: `maps_android_3d_marker_click_kt`)
@@ -245,9 +245,9 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:79](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L79) (Tag: `No Tag`)
 - `setRange`:
   - [MapActivity.kt:198](MapActivity.kt#L198) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:135](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L135) (Tag: `maps_android_3d_camera_stop_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:59](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L59) (Tag: `maps_android_3d_camera_fly_to_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:91](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L91) (Tag: `maps_android_3d_camera_fly_around_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:137](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L137) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:61](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L61) (Tag: `maps_android_3d_camera_fly_to_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:93](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L93) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:69](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L69) (Tag: `maps_android_3d_init_basic_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:119](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L119) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:146](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L146) (Tag: `maps_android_3d_marker_click_kt`)
@@ -262,15 +262,15 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:125](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L125) (Tag: `No Tag`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:80](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L80) (Tag: `No Tag`)
 - `setRoll`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:136](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L136) (Tag: `maps_android_3d_camera_stop_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:60](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L60) (Tag: `maps_android_3d_camera_fly_to_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:92](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L92) (Tag: `maps_android_3d_camera_fly_around_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:138](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L138) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:62](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L62) (Tag: `maps_android_3d_camera_fly_to_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:94](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L94) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:68](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L68) (Tag: `maps_android_3d_init_basic_kt`)
 - `setTilt`:
   - [MapActivity.kt:196](MapActivity.kt#L196) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:133](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L133) (Tag: `maps_android_3d_camera_stop_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:57](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L57) (Tag: `maps_android_3d_camera_fly_to_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:89](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L89) (Tag: `maps_android_3d_camera_fly_around_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:135](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L135) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:59](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L59) (Tag: `maps_android_3d_camera_fly_to_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:91](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L91) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:67](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L67) (Tag: `maps_android_3d_init_basic_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:117](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L117) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:144](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L144) (Tag: `maps_android_3d_marker_click_kt`)
@@ -287,11 +287,14 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 - `writeToParcel`: ❌ No coverage
 
 ### `CameraRestriction`
-- `setBounds`: ❌ No coverage
-- `setMaxAltitude`: ❌ No coverage
+- `setBounds`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:236](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L236) (Tag: `maps_android_3d_camera_restriction_kt`)
+- `setMaxAltitude`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:235](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L235) (Tag: `maps_android_3d_camera_restriction_kt`)
 - `setMaxHeading`: ❌ No coverage
 - `setMaxTilt`: ❌ No coverage
-- `setMinAltitude`: ❌ No coverage
+- `setMinAltitude`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:234](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L234) (Tag: `maps_android_3d_camera_restriction_kt`)
 - `setMinHeading`: ❌ No coverage
 - `setMinTilt`: ❌ No coverage
 - `writeToParcel`: ❌ No coverage
@@ -301,14 +304,14 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 - `getDurationInMillis`: ❌ No coverage
 - `getRounds`: ❌ No coverage
 - `setCenter`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:101](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L101) (Tag: `maps_android_3d_camera_fly_around_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:153](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L153) (Tag: `maps_android_3d_camera_stop_kt`)
-- `setDurationInMillis`:
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:103](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L103) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:155](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L155) (Tag: `maps_android_3d_camera_stop_kt`)
+- `setDurationInMillis`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:105](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L105) (Tag: `maps_android_3d_camera_fly_around_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:157](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L157) (Tag: `maps_android_3d_camera_stop_kt`)
 - `setRounds`:
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:102](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L102) (Tag: `maps_android_3d_camera_fly_around_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:154](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L154) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:104](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L104) (Tag: `maps_android_3d_camera_fly_around_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:156](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L156) (Tag: `maps_android_3d_camera_stop_kt`)
 - `writeToParcel`: ❌ No coverage
 
 ### `FlyToOptions`
@@ -316,8 +319,8 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 - `getEndCamera`: ❌ No coverage
 - `setDurationInMillis`:
   - [MapActivity.kt:202](MapActivity.kt#L202) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:142](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L142) (Tag: `maps_android_3d_camera_stop_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:65](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L65) (Tag: `maps_android_3d_camera_fly_to_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:144](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L144) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:67](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L67) (Tag: `maps_android_3d_camera_fly_to_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:121](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L121) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:148](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L148) (Tag: `maps_android_3d_marker_click_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:205](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L205) (Tag: `maps_android_3d_marker_custom_icon_kt`)
@@ -332,8 +335,8 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:82](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L82) (Tag: `No Tag`)
 - `setEndCamera`:
   - [MapActivity.kt:201](MapActivity.kt#L201) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:141](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L141) (Tag: `maps_android_3d_camera_stop_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:64](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L64) (Tag: `maps_android_3d_camera_fly_to_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:143](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L143) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:66](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L66) (Tag: `maps_android_3d_camera_fly_to_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:111](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L111) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:142](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L142) (Tag: `maps_android_3d_marker_click_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:195](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L195) (Tag: `maps_android_3d_marker_custom_icon_kt`)
@@ -383,7 +386,8 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 - `getCamera`:
   - [MapActivity.kt:57](MapActivity.kt#L57) (Tag: `No Tag`)
   - [TrackedMap3D.kt:65](TrackedMap3D.kt#L65) (Tag: `No Tag`)
-- `getCameraRestriction`: ❌ No coverage
+- `getCameraRestriction`:
+  - [TrackedMap3D.kt:72](TrackedMap3D.kt#L72) (Tag: `No Tag`)
 - `getMapMode`: ❌ No coverage
 - `setCamera`:
   - [TrackedMap3D.kt:60](TrackedMap3D.kt#L60) (Tag: `No Tag`)
@@ -394,7 +398,8 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [MapExtensions.kt:27](MapExtensions.kt#L27) (Tag: `No Tag`)
 - `setCameraChangedListener`:
   - [TrackedMap3D.kt:61](TrackedMap3D.kt#L61) (Tag: `No Tag`)
-- `setCameraRestriction`: ❌ No coverage
+- `setCameraRestriction`:
+  - [TrackedMap3D.kt:71](TrackedMap3D.kt#L71) (Tag: `No Tag`)
 - `setMap3DClickListener`:
   - [TrackedMap3D.kt:62](TrackedMap3D.kt#L62) (Tag: `No Tag`)
 - `setMapMode`: ❌ No coverage
@@ -439,9 +444,9 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 - `getPosition`: ❌ No coverage
 - `setAltitude`:
   - [MapActivity.kt:194](MapActivity.kt#L194) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:131](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L131) (Tag: `maps_android_3d_camera_stop_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:55](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L55) (Tag: `maps_android_3d_camera_fly_to_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:87](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L87) (Tag: `maps_android_3d_camera_fly_around_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:133](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L133) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:57](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L57) (Tag: `maps_android_3d_camera_fly_to_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:89](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L89) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:64](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L64) (Tag: `maps_android_3d_init_basic_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:115](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L115) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:138](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L138) (Tag: `maps_android_3d_marker_click_kt`)
@@ -478,9 +483,9 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:98](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L98) (Tag: `maps_android_3d_popover_options_kt`)
 - `setLatitude`:
   - [MapActivity.kt:192](MapActivity.kt#L192) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:129](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L129) (Tag: `maps_android_3d_camera_stop_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:53](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L53) (Tag: `maps_android_3d_camera_fly_to_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:85](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L85) (Tag: `maps_android_3d_camera_fly_around_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:131](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L131) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:55](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L55) (Tag: `maps_android_3d_camera_fly_to_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:87](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L87) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:62](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L62) (Tag: `maps_android_3d_init_basic_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:113](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L113) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:138](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L138) (Tag: `maps_android_3d_marker_click_kt`)
@@ -517,9 +522,9 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt:98](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/PopoverSnippets.kt#L98) (Tag: `maps_android_3d_popover_options_kt`)
 - `setLongitude`:
   - [MapActivity.kt:193](MapActivity.kt#L193) (Tag: `No Tag`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:130](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L130) (Tag: `maps_android_3d_camera_stop_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:54](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L54) (Tag: `maps_android_3d_camera_fly_to_kt`)
-  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:86](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L86) (Tag: `maps_android_3d_camera_fly_around_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:132](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L132) (Tag: `maps_android_3d_camera_stop_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:56](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L56) (Tag: `maps_android_3d_camera_fly_to_kt`)
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:88](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L88) (Tag: `maps_android_3d_camera_fly_around_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:63](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L63) (Tag: `maps_android_3d_init_basic_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:114](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L114) (Tag: `maps_android_3d_marker_options_kt`)
   - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:138](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L138) (Tag: `maps_android_3d_marker_click_kt`)
@@ -561,10 +566,14 @@ This matrix ensures that every critical feature in the 3D Maps SDK is actively d
 - `getNorthEastLng`: ❌ No coverage
 - `getSouthWestLat`: ❌ No coverage
 - `getSouthWestLng`: ❌ No coverage
-- `setNorthEastLat`: ❌ No coverage
-- `setNorthEastLng`: ❌ No coverage
-- `setSouthWestLat`: ❌ No coverage
-- `setSouthWestLng`: ❌ No coverage
+- `setNorthEastLat`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:227](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L227) (Tag: `maps_android_3d_camera_restriction_kt`)
+- `setNorthEastLng`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:228](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L228) (Tag: `maps_android_3d_camera_restriction_kt`)
+- `setSouthWestLat`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:229](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L229) (Tag: `maps_android_3d_camera_restriction_kt`)
+- `setSouthWestLng`:
+  - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:230](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L230) (Tag: `maps_android_3d_camera_restriction_kt`)
 - `writeToParcel`: ❌ No coverage
 
 ### `Map3DOptions`
@@ -1114,7 +1123,7 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
 ### `Camera`
 - `getCenter`:
   - [MapActivity.java:55](MapActivity.java#L55) (Tag: `No Tag`)
-  - [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:133](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L133) (Tag: `maps_android_3d_camera_events_java`)
+  - [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:135](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L135) (Tag: `maps_android_3d_camera_events_java`)
 - `setCenter`: ❌ No coverage
 - `setHeading`: ❌ No coverage
 - `setRange`: ❌ No coverage
@@ -1166,42 +1175,44 @@ The following non-getter/setter APIs currently have `0` occurrences within this 
 
 ### `GoogleMap3D`
 - `addMarker`:
-  - [TrackedMap3D.java:53](TrackedMap3D.java#L53) (Tag: `No Tag`)
+  - [TrackedMap3D.java:54](TrackedMap3D.java#L54) (Tag: `No Tag`)
 - `addModel`:
-  - [TrackedMap3D.java:71](TrackedMap3D.java#L71) (Tag: `No Tag`)
+  - [TrackedMap3D.java:72](TrackedMap3D.java#L72) (Tag: `No Tag`)
 - `addPolygon`:
-  - [TrackedMap3D.java:65](TrackedMap3D.java#L65) (Tag: `No Tag`)
+  - [TrackedMap3D.java:66](TrackedMap3D.java#L66) (Tag: `No Tag`)
 - `addPolyline`:
-  - [TrackedMap3D.java:59](TrackedMap3D.java#L59) (Tag: `No Tag`)
+  - [TrackedMap3D.java:60](TrackedMap3D.java#L60) (Tag: `No Tag`)
 - `addPopover`:
-  - [TrackedMap3D.java:77](TrackedMap3D.java#L77) (Tag: `No Tag`)
+  - [TrackedMap3D.java:78](TrackedMap3D.java#L78) (Tag: `No Tag`)
 - `flyCameraAround`:
-  - [TrackedMap3D.java:85](TrackedMap3D.java#L85) (Tag: `No Tag`)
+  - [TrackedMap3D.java:86](TrackedMap3D.java#L86) (Tag: `No Tag`)
 - `flyCameraTo`:
-  - [TrackedMap3D.java:90](TrackedMap3D.java#L90) (Tag: `No Tag`)
+  - [TrackedMap3D.java:91](TrackedMap3D.java#L91) (Tag: `No Tag`)
 - `getCamera`:
   - [MapActivity.java:53](MapActivity.java#L53) (Tag: `No Tag`)
-  - [TrackedMap3D.java:88](TrackedMap3D.java#L88) (Tag: `No Tag`)
-- `getCameraRestriction`: ❌ No coverage
+  - [TrackedMap3D.java:89](TrackedMap3D.java#L89) (Tag: `No Tag`)
+- `getCameraRestriction`:
+  - [TrackedMap3D.java:95](TrackedMap3D.java#L95) (Tag: `No Tag`)
 - `getMapMode`: ❌ No coverage
 - `setCamera`:
-  - [TrackedMap3D.java:82](TrackedMap3D.java#L82) (Tag: `No Tag`)
+  - [TrackedMap3D.java:83](TrackedMap3D.java#L83) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java:54](java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java#L54) (Tag: `maps_android_3d_init_basic_java`)
 - `setCameraAnimationEndListener`: ❌ No coverage
 - `setCameraChangedListener`:
-  - [TrackedMap3D.java:83](TrackedMap3D.java#L83) (Tag: `No Tag`)
-- `setCameraRestriction`: ❌ No coverage
-- `setMap3DClickListener`:
   - [TrackedMap3D.java:84](TrackedMap3D.java#L84) (Tag: `No Tag`)
+- `setCameraRestriction`:
+  - [TrackedMap3D.java:94](TrackedMap3D.java#L94) (Tag: `No Tag`)
+- `setMap3DClickListener`:
+  - [TrackedMap3D.java:85](TrackedMap3D.java#L85) (Tag: `No Tag`)
 - `setMapMode`: ❌ No coverage
 - `setOnMapReadyListener`:
-  - [TrackedMap3D.java:91](TrackedMap3D.java#L91) (Tag: `No Tag`)
+  - [TrackedMap3D.java:92](TrackedMap3D.java#L92) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java:74](java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java#L74) (Tag: `maps_android_3d_init_listeners_java`)
 - `setOnMapSteadyListener`:
-  - [TrackedMap3D.java:92](TrackedMap3D.java#L92) (Tag: `No Tag`)
+  - [TrackedMap3D.java:93](TrackedMap3D.java#L93) (Tag: `No Tag`)
   - [java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java:85](java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java#L85) (Tag: `maps_android_3d_init_listeners_java`)
 - `stopCameraAnimation`:
-  - [TrackedMap3D.java:89](TrackedMap3D.java#L89) (Tag: `No Tag`)
+  - [TrackedMap3D.java:90](TrackedMap3D.java#L90) (Tag: `No Tag`)
 
 ### `Hole`
 - `getVertices`: ❌ No coverage

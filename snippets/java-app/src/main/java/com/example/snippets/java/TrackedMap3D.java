@@ -33,6 +33,7 @@ import com.google.android.gms.maps3d.model.PolygonOptions;
 import com.google.android.gms.maps3d.model.Model;
 import com.google.android.gms.maps3d.model.ModelOptions;
 import com.google.android.gms.maps3d.model.PopoverOptions;
+import com.google.android.gms.maps3d.model.CameraRestriction;
 
 import java.util.List;
 
@@ -90,4 +91,6 @@ public class TrackedMap3D {
     public void flyCameraTo(FlyToOptions options) { delegate.flyCameraTo(options); }
     public void setOnMapReadyListener(OnMapReadyListener listener) { delegate.setOnMapReadyListener(listener); }
     public void setOnMapSteadyListener(OnMapSteadyListener listener) { delegate.setOnMapSteadyListener(listener); }
+    public void setCameraRestriction(CameraRestriction restriction) { delegate.setCameraRestriction(restriction); }
+    public CameraRestriction getCameraRestriction() { return delegate.getCameraRestriction(); }
 }

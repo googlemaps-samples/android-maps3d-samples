@@ -68,4 +68,6 @@ class TrackedMap3D(
     fun flyCameraAround(options: FlyAroundOptions) = delegate.flyCameraAround(options)
     fun setOnMapReadyListener(listener: OnMapReadyListener?) = delegate.setOnMapReadyListener(listener)
     fun setOnMapSteadyListener(listener: OnMapSteadyListener?) = delegate.setOnMapSteadyListener(listener)
+    fun setCameraRestriction(restriction: com.google.android.gms.maps3d.model.CameraRestriction?) = delegate.setCameraRestriction(restriction)
+    fun getCameraRestriction() = delegate.getCameraRestriction()
 }
