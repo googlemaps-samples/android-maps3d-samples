@@ -98,13 +98,13 @@ public abstract class SampleBaseActivity extends Activity implements OnMap3DView
             if (appBarLayout != null) {
                 appBarLayout.setPadding(0, statusBarInsets.top, 0, 0);
             }
-            androidx.constraintlayout.helper.widget.Flow buttonFlow = findViewById(R.id.button_flow);
-            if (buttonFlow != null) {
-                android.view.ViewGroup.MarginLayoutParams layoutParams = (android.view.ViewGroup.MarginLayoutParams) buttonFlow
+            View controlScrollView = findViewById(R.id.control_scroll_view);
+            if (controlScrollView != null) {
+                android.view.ViewGroup.MarginLayoutParams layoutParams = (android.view.ViewGroup.MarginLayoutParams) controlScrollView
                         .getLayoutParams();
-                int margin8dp = (int) (8 * getResources().getDisplayMetrics().density);
-                layoutParams.bottomMargin = navInsets.bottom + margin8dp;
-                buttonFlow.setLayoutParams(layoutParams);
+                int margin16dp = (int) (16 * getResources().getDisplayMetrics().density);
+                layoutParams.bottomMargin = navInsets.bottom + margin16dp;
+                controlScrollView.setLayoutParams(layoutParams);
             }
 
             return WindowInsetsCompat.CONSUMED;

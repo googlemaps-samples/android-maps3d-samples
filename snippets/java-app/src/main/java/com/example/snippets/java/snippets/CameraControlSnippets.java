@@ -45,10 +45,12 @@ public class CameraControlSnippets {
         LatLngAltitude center = new LatLngAltitude(37.4220, -122.0841, 100.0);
         // Create a target camera:
         // center: LatLngAltitude target
-        // heading: 90.0 (East)
-        // tilt: 45.0 degrees
-        // roll: 0.0 (level)
-        // range: 1000.0 meters
+        // heading: 90.0 (East) - Orient the user to look towards the sunrise/East.
+        // tilt: 45.0 degrees - An angled view reveals the 3D extrusion of models and
+        // terrain, unlike a flat top-down view (0.0).
+        // roll: 0.0 - Keep the horizon level for a standard perspective.
+        // range: 1000.0 meters - A moderate distance that provides a good view of a
+        // localized neighborhood or landmark cluster without losing context.
         Camera targetCamera = new Camera(center, 90.0, 45.0, 0.0, 1000.0);
 
         // FlyToOptions constructor: endCamera, durationInMillis
@@ -66,10 +68,12 @@ public class CameraControlSnippets {
         LatLngAltitude center = new LatLngAltitude(37.4220, -122.0841, 0.0);
         // Create a target camera:
         // center: LatLngAltitude target
-        // heading: 0.0 (North)
-        // tilt: 45.0 degrees
-        // roll: 0.0 (level)
-        // range: 500.0 meters
+        // heading: 0.0 (North) - Start the orbit facing North.
+        // tilt: 45.0 degrees - Maintain an angled view to appreciate the 3D subject
+        // during the orbit.
+        // roll: 0.0 - Keep the horizon level.
+        // range: 500.0 meters - A closer range (compared to flyTo) keeps the subject
+        // large and central during the cinematic rotation.
         Camera targetCamera = new Camera(center, 0.0, 45.0, 0.0, 500.0);
 
         // Orbit around the target
