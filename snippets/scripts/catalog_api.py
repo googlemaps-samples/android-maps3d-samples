@@ -71,22 +71,24 @@ def parse_javap_output(snippets_dir):
                 current_line_table = {}
                 method_calls = []
             
-            match_invoke = re.search(r'^(\d+):\s+invoke.*\s+//\s*(?:Field|Method|InterfaceMethod)\s+com/google/android/gms/maps3d/([^:]+)\.([^:("]+)', line)
+            match_invoke = re.search(r'^(\d+):\s+invoke.*\s+//\s*(?:Field|Method|InterfaceMethod)\s+(com/google/android/gms/maps3d/|com/example/snippets/(?:kotlin|java)/)([^:]+)\.([^:("]+)', line)
             if match_invoke:
                 offset = int(match_invoke.group(1))
-                class_path = match_invoke.group(2)
-                method_name = match_invoke.group(3)
+                package_path = match_invoke.group(2)
+                class_path = match_invoke.group(3)
+                method_name = match_invoke.group(4)
                 
-                class_parts = class_path.split('/')[-1].split('$')
-                # If there's an outer class and inner class, join them, else just class_name
-                # e.g. "PinConfiguration$Builder" -> "PinConfiguration.Builder"
-                if len(class_parts) > 1 and class_parts[-1] != "1":
-                    class_name = f"{class_parts[0]}.{class_parts[-1]}"
+                if "TrackedMap3D" in class_path:
+                    class_name = "GoogleMap3D"
                 else:
-                    class_name = class_parts[0]
+                    class_parts = class_path.split('/')[-1].split('$')
+                    if len(class_parts) > 1 and class_parts[-1] != "1":
+                        class_name = f"{class_parts[0]}.{class_parts[-1]}"
+                    else:
+                        class_name = class_parts[0]
                     
                 if method_name == "<init>":
-                    method_name = class_parts[-1]
+                    method_name = class_parts[-1] if 'class_parts' in locals() else method_name
                 method_calls.append((offset, class_name, method_name))
                 
             match_line = re.search(r'line\s+(\d+):\s+(\d+)', line)
