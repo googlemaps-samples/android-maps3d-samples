@@ -123,7 +123,7 @@
                 android:alpha="0.4"
                 android:text="🎲"
                 android:textSize="20sp"
-                android:contentDescription="Fly to Random Monster"
+                android:contentDescription="@string/content_description_fly_random"
                 android:visibility="gone"
                 />
 
@@ -134,7 +134,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 app:icon="@drawable/public_24px"
-                android:contentDescription="Fly to Berlin"
+                android:contentDescription="@string/content_description_fly_berlin"
                 android:visibility="gone"
                 />
 
@@ -145,7 +145,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 app:icon="@drawable/location_city_24px"
-                android:contentDescription="Fly to NYC"
+                android:contentDescription="@string/content_description_fly_nyc"
                 android:visibility="gone"
                 />
 

@@ -102,4 +102,7 @@
     <string name="monster_yeti_blurb">Abominable? More like adorable if you get to know him. 🏔️</string>
     <string name="monster_ape_blurb">I am a Giant Ape! 🦍</string>
     <string name="tour_monsters">Tour Monsters</string>
+    <string name="content_description_fly_random">Fly to Random Monster</string>
+    <string name="content_description_fly_berlin">Fly to Berlin</string>
+    <string name="content_description_fly_nyc">Fly to NYC</string>
 </resources>

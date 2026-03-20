@@ -42,6 +42,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import com.example.maps3dkotlin.common.awaitCameraAnimation
 import com.example.maps3dkotlin.common.awaitMapSteady
+import com.example.maps3dkotlin.markers.data.MonsterParser
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -406,7 +407,7 @@ class MarkersActivity : SampleBaseActivity() {
         // Monsters from JSON
         try {
             val jsonString = assets.open("monsters.json").bufferedReader().use { it.readText() }
-            val parsedMonsters = com.example.maps3dkotlin.markers.data.MonsterParser.parse(jsonString)
+            val parsedMonsters = MonsterParser.parse(jsonString)
             
             val cameras = mutableListOf<Camera>()
             val markers = mutableListOf<Marker>()
