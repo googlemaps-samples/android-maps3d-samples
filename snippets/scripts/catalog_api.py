@@ -161,13 +161,19 @@ def generate_snippet_index(snippets_dir, file_map):
                                 item_title = item_title_match.group(1)
                                 item_desc = item_desc_match.group(1) if item_desc_match else ""
                                 
-                                # Read ahead for Region Tag
+                                # Read back or ahead for closest Region Tag
                                 tag = "No Tag"
-                                for j in range(i, min(i+15, len(lines))):
+                                min_dist = 999
+                                start_j = max(0, i - 15)
+                                end_j = min(len(lines), i + 15)
+                                for j in range(start_j, end_j):
                                      start_match = re.search(r'\[START\s+([a-zA-Z0-9_]+)\]', lines[j])
                                      if start_match:
-                                          tag = start_match.group(1)
-                                          break
+                                          current_tag = start_match.group(1)
+                                          dist = abs(j - i)
+                                          if dist < min_dist:
+                                              min_dist = dist
+                                              tag = current_tag
                                           
                                 rel_path = file_map.get(name, os.path.relpath(filepath, snippets_dir))
                                 link = f"[{rel_path}:{i+1}]({rel_path}#L{i+1})"

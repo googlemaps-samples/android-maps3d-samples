@@ -12,7 +12,7 @@ This section maps high-level concepts (groups) to specific demonstration files a
 - **1. Fly To**:
   - *Description*: Animates the camera to a specific position with a tilt and heading over 5 seconds.
   - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:45](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L45) (Tag: `maps_android_3d_camera_fly_to_kt`)
-  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:48](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L48) (Tag: `No Tag`)
+  - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:48](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L48) (Tag: `maps_android_3d_camera_fly_to_java`)
 - **2. Fly Around**:
   - *Description*: Rotates the camera 360 degrees around a specific location over 10 seconds.
   - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:76](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L76) (Tag: `maps_android_3d_camera_fly_around_kt`)
@@ -40,7 +40,7 @@ This section maps high-level concepts (groups) to specific demonstration files a
   - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java:38](java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java#L38) (Tag: `maps_android_3d_init_basic_java`)
 - **2. Add Map to AndroidView**:
   - *Description*: Shows how to add a Map3DView to an AndroidView which bridges to Jetpack Compose.
-  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:48](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L48) (Tag: `No Tag`)
+  - **Kotlin**: [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt:48](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MapInitSnippets.kt#L48) (Tag: `maps_android_3d_init_basic_kt`)
 - **2. Listen Map Events**:
   - *Description*: Logs map events to the console, such as clicks or idle status.
   - **Java**: [java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java:69](java-app/src/main/java/com/example/snippets/java/snippets/MapInitSnippets.java#L69) (Tag: `maps_android_3d_init_listeners_java`)
