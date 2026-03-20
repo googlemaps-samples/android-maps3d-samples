@@ -29,7 +29,7 @@ Establish the runner harness structures to decouple snippet extracts from launch
 Before authoring focuses boilerplate directly, configure the accounting audit tracker script.
 1.  **Build Parser**: Write a Python script scanning `.java` and `.kt` source nodes finding sign matches.
 2.  **Separate output lists**: Generate **`CATALOG.md`** (Concept Feature indexes) and **`COVERAGE.md`** (API Coverage Matrix grids) separately down below details.
-3.  👉 *Refer to:* [**`tooling_blueprint.md`**](tooling_blueprint.md)
+3.  👉 *Refer to:* [**`tooling_blueprint.md`**](tooling_blueprint.md) for detailed descriptions of the **`javap` bytecode decompilation** and `LineNumberTable` offset mapping algorithms that drive this robustness.
 
 ---
 

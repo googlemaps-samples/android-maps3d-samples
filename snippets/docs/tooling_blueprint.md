@@ -41,17 +41,26 @@ The static analyzer reads a list of objects describing continuous function point
 
 The python parser processes `.java` and `.kt` source files iteratively index extracts.
 
-### **Algorithm Blueprint**
-1.  **Extract Tag Buffers**:
-    *   Find full comments containing `[START maps_...]` and `[END maps_...]`.
-    *   Isolate the raw text coordinate segments accurately.
-2.  **Signature Parsing**:
-    *   Read snippet files looking for calls (e.g., `model.setClickListener`).
-    *   Increment an **Occurrence Dictionary map** (`{"Model.setClickListener": 1}`).
-3.  **Generate Output Index & Matrix**:
-    *   Create **`CATALOG.md`**: Lists standalone concept items with their direct code range links.
-    *   Create **`COVERAGE.md`**: Counts exact API occurrences by class method mappings.
-    *   If any method is left at **`0`**, listed inside "Missing API Coverage" deficits down below.
+### **Algorithm Blueprint: How `catalog_api.py` Works**
+
+To guarantee accuracy without building fragile regex engines for syntax analyzers, the parser works directly with **compiled bytecode** and source Line Tables:
+
+1.  **Extract Region Boundaries (`extract_region_tags`)**:
+    *   Scans `.java` and `.kt` source nodes to find `// [START maps_...]` and `// [END maps_...]`.
+    *   Caches the 1-based start line and end line coordinate bounds for every `Tag`.
+
+2.  **Decompile and Analyze Bytecode (`parse_javap_output`)**:
+    *   The script runs **`javap -c -l`** over de-compiled snippets classfiles.
+    *   `-c` spits out the disassembled instruction stream (e.g. `invokevirtual Method setPosition`).
+    *   `-l` extracts the **`LineNumberTable`**: mapping bytecode instruction offsets back to absolute source lines.
+
+3.  **Map Executed Instruction Offsets**:
+    *   When an `invokevirtual` matches an endpoint listed in `api_manifest.json`, the script records the instruction **offset pointer**.
+    *   It falls back backwards through the `LineNumberTable` sorted offsets to find the closest source line row that correlates with that offset accurately.
+
+4.  **Correlate Tag Range Overlays & Generate Outputs**:
+    *   If the exact execution line falls inside a previously cached `[START]`/`[END]` Region Tag bound, it binds that tag’s row frame to the coordinate.
+    *   Dumps separately into **`CATALOG.md`** (Index) and **`COVERAGE.md`** (Matrix matrices).
 
 ### **Example `CATALOG.md` Layout**
 | Snippets Feature | Kotlin Location | Java Location |
