@@ -324,11 +324,15 @@ def main():
     region_tags = extract_region_tags(SNIPPETS_DIR)
     usages = parse_javap_output(SNIPPETS_DIR)
     
+    # Populate file_map for ALL source files to guarantee full relative paths
     file_map = {}
-    for filepath in region_tags.keys():
-        basename = os.path.basename(filepath)
-        rel_path = os.path.relpath(filepath, SNIPPETS_DIR)
-        file_map[basename] = rel_path
+    for root, _, filenames in os.walk(SNIPPETS_DIR):
+        if 'build' in root or '.gradle' in root or 'scripts' in root: continue
+        for name in filenames:
+            if name.endswith(('.kt', '.java', '.xml')):
+                filepath = os.path.join(root, name)
+                rel_path = os.path.relpath(filepath, SNIPPETS_DIR)
+                file_map[name] = rel_path
         
     catalog_lines = ["# 🗺️ Maps3D API Snippets Catalog\n\n"]
     catalog_lines.append("This document serves as a comprehensive developer reference and mapping matrix for the 3D Maps SDK features.\n\n")
