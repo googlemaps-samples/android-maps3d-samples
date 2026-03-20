@@ -16,7 +16,11 @@
 
 package com.example.snippets.java.snippets;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.Toast;
 import com.example.snippets.java.TrackedMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
@@ -35,9 +39,11 @@ import com.google.android.gms.maps3d.model.FlyToOptions;
 )
 public class PolylineSnippets {
 
+    private final Context context;
     private final TrackedMap3D map;
 
-    public PolylineSnippets(TrackedMap3D map) {
+    public PolylineSnippets(Context context, TrackedMap3D map) {
+        this.context = context;
         this.map = map;
     }
 
@@ -64,6 +70,13 @@ public class PolylineSnippets {
         options.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
         
         Polyline polyline = map.addPolyline(options);
+        // [START_EXCLUDE]
+        polyline.setClickListener(() -> {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                Toast.makeText(context, "Polyline Clicked!", Toast.LENGTH_SHORT).show();
+            });
+        });
+        // [END_EXCLUDE]
         // [END maps_android_3d_polyline_add_java]
 
         Camera camera = new Camera(new LatLngAltitude(37.43, -122.085, 0.0), 0.0, 45.0, 0.0, 5000.0);
@@ -98,6 +111,13 @@ public class PolylineSnippets {
         options.setDrawsOccludedSegments(true);
         
         Polyline polyline = map.addPolyline(options);
+        // [START_EXCLUDE]
+        polyline.setClickListener(() -> {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                Toast.makeText(context, "Polyline Clicked!", Toast.LENGTH_SHORT).show();
+            });
+        });
+        // [END_EXCLUDE]
         // [END maps_android_3d_polyline_options_java]
 
         Camera camera = new Camera(new LatLngAltitude(37.425, -122.085, 0.0), 0.0, 45.0, 0.0, 4000.0);

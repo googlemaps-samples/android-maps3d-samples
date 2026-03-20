@@ -16,7 +16,11 @@
 
 package com.example.snippets.java.snippets;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.Toast;
 import com.example.snippets.java.TrackedMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
@@ -36,9 +40,11 @@ import com.example.snippets.java.annotations.SnippetItem;
 )
 public class PolygonSnippets {
 
+    private final Context context;
     private final TrackedMap3D map;
 
-    public PolygonSnippets(TrackedMap3D map) {
+    public PolygonSnippets(Context context, TrackedMap3D map) {
+        this.context = context;
         this.map = map;
     }
 
@@ -68,6 +74,13 @@ public class PolygonSnippets {
         options.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
         
         Polygon polygon = map.addPolygon(options);
+        // [START_EXCLUDE]
+        polygon.setClickListener(() -> {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                Toast.makeText(context, "Polygon Clicked!", Toast.LENGTH_SHORT).show();
+            });
+        });
+        // [END_EXCLUDE]
         // [END maps_android_3d_polygon_add_java]
 
         Camera cam = new Camera(new LatLngAltitude(37.424968, -122.084874, 19.90), 0.0, 45.02, 0.0, 4643.0);
@@ -101,6 +114,13 @@ public class PolygonSnippets {
         options.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
         
         Polygon polygon = map.addPolygon(options);
+        // [START_EXCLUDE]
+        polygon.setClickListener(() -> {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                Toast.makeText(context, "Polygon Clicked!", Toast.LENGTH_SHORT).show();
+            });
+        });
+        // [END_EXCLUDE]
         // [END maps_android_3d_polygon_extruded_java]
 
         Camera cam = new Camera(new LatLngAltitude(37.424968, -122.084874, 19.90), 0.0, 45.02, 0.0, 4643.0);
@@ -144,6 +164,13 @@ public class PolygonSnippets {
         options.setInnerPaths(Arrays.asList(innerHole));
 
         Polygon polygon = map.addPolygon(options);
+        // [START_EXCLUDE]
+        polygon.setClickListener(() -> {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                Toast.makeText(context, "Polygon Clicked!", Toast.LENGTH_SHORT).show();
+            });
+        });
+        // [END_EXCLUDE]
         // [END maps_android_3d_polygon_hole_java]
 
         Camera cam = new Camera(new LatLngAltitude(37.423600, -122.085098, 4.31), 0.00, 45.00, 0.00, 1085.51);

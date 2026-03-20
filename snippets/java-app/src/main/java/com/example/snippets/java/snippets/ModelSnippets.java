@@ -16,15 +16,19 @@
 
 package com.example.snippets.java.snippets;
 
-import com.google.android.gms.maps3d.model.AltitudeMode;
+import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.Toast;
 import com.example.snippets.java.TrackedMap3D;
+import com.google.android.gms.maps3d.model.AltitudeMode;
+import com.google.android.gms.maps3d.model.Camera;
+import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.Model;
 import com.google.android.gms.maps3d.model.ModelOptions;
 import com.google.android.gms.maps3d.model.Orientation;
 import com.google.android.gms.maps3d.model.Vector3D;
-import com.google.android.gms.maps3d.model.Camera;
-import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.example.snippets.java.annotations.SnippetGroup;
 import com.example.snippets.java.annotations.SnippetItem;
 
@@ -36,9 +40,11 @@ public class ModelSnippets {
 
     public static final String SAUCER_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/UFO.glb";
 
+    private final Context context;
     private final TrackedMap3D map;
 
-    public ModelSnippets(TrackedMap3D map) {
+    public ModelSnippets(Context context, TrackedMap3D map) {
+        this.context = context;
         this.map = map;
     }
 
@@ -62,6 +68,13 @@ public class ModelSnippets {
         options.setScale(new Vector3D(10.0, 10.0, 10.0));
         
         Model model = map.addModel(options);
+        // [START_EXCLUDE]
+        model.setClickListener(() -> {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                Toast.makeText(context, "Model Clicked!", Toast.LENGTH_SHORT).show();
+            });
+        });
+        // [END_EXCLUDE]
         // [END maps_android_3d_model_add_java]
 
         // Position camera to see the model

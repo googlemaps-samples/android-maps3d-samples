@@ -16,6 +16,10 @@
 
 package com.example.snippets.kotlin.snippets
 
+import android.content.Context
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 import com.example.snippets.kotlin.TrackedMap3D
 import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
@@ -31,7 +35,7 @@ import com.google.android.gms.maps3d.model.vector3D
     title = "Models",
     description = "Snippets demonstrating 3D Model (GLB) integration and configuration."
 )
-class ModelSnippets(private val map: TrackedMap3D) {
+class ModelSnippets(private val context: Context, private val map: TrackedMap3D) {
     companion object {
         const val SAUCER_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/UFO.glb"
     }
@@ -65,6 +69,13 @@ class ModelSnippets(private val map: TrackedMap3D) {
         }
 
         val model = map.addModel(options)
+        // [START_EXCLUDE]
+        model?.setClickListener {
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, "Model Clicked!", Toast.LENGTH_SHORT).show()
+            }
+        }
+        // [END_EXCLUDE]
         // [END maps_android_3d_model_add_kt]
 
         // Position the camera to show the model

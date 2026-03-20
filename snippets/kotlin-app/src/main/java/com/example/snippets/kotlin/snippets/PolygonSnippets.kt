@@ -16,7 +16,11 @@
 
 package com.example.snippets.kotlin.snippets
 
+import android.content.Context
 import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 import com.example.snippets.kotlin.TrackedMap3D
 import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
@@ -31,7 +35,7 @@ import com.google.android.gms.maps3d.model.polygonOptions
     title = "Polygons",
     description = "Snippets demonstrating 2D and 3D extruded polygon layers on the map."
 )
-class PolygonSnippets(private val map: TrackedMap3D) {
+class PolygonSnippets(private val context: Context, private val map: TrackedMap3D) {
 
     /**
      * Adds a simple polygon to the map.
@@ -60,6 +64,13 @@ class PolygonSnippets(private val map: TrackedMap3D) {
         }
         
         val polygon = map.addPolygon(options)
+        // [START_EXCLUDE]
+        polygon?.setClickListener {
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, "Polygon Clicked!", Toast.LENGTH_SHORT).show()
+            }
+        }
+        // [END_EXCLUDE]
         // [END maps_android_3d_polygon_add_kt]
 
         map.flyCameraTo(flyToOptions {
@@ -104,6 +115,13 @@ class PolygonSnippets(private val map: TrackedMap3D) {
         }
         
         val polygon = map.addPolygon(options)
+        // [START_EXCLUDE]
+        polygon?.setClickListener {
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, "Polygon Clicked!", Toast.LENGTH_SHORT).show()
+            }
+        }
+        // [END_EXCLUDE]
         // [END maps_android_3d_polygon_extruded_kt]
 
         map.flyCameraTo(flyToOptions {
@@ -156,6 +174,13 @@ class PolygonSnippets(private val map: TrackedMap3D) {
         }
 
         val polygon = map.addPolygon(options)
+        // [START_EXCLUDE]
+        polygon?.setClickListener {
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, "Polygon Clicked!", Toast.LENGTH_SHORT).show()
+            }
+        }
+        // [END_EXCLUDE]
         // [END maps_android_3d_polygon_hole_kt]
 
         map.flyCameraTo(flyToOptions {

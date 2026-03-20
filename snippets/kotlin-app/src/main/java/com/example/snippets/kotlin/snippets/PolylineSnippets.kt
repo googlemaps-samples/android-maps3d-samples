@@ -16,7 +16,11 @@
 
 package com.example.snippets.kotlin.snippets
 
+import android.content.Context
 import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 import com.example.snippets.kotlin.TrackedMap3D
 import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
@@ -30,7 +34,7 @@ import com.google.android.gms.maps3d.model.polylineOptions
     title = "Polylines",
     description = "Snippets demonstrating 2D and 3D extruded polyline paths on the map."
 )
-class PolylineSnippets(private val map: TrackedMap3D) {
+class PolylineSnippets(private val context: Context, private val map: TrackedMap3D) {
 
     /**
      * Adds a basic polyline to the map.
@@ -56,6 +60,13 @@ class PolylineSnippets(private val map: TrackedMap3D) {
         }
         
         val polyline = map.addPolyline(options)
+        // [START_EXCLUDE]
+        polyline?.setClickListener {
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, "Polyline Clicked!", Toast.LENGTH_SHORT).show()
+            }
+        }
+        // [END_EXCLUDE]
         // [END maps_android_3d_polyline_add_kt]
 
         map.flyCameraTo(flyToOptions {
@@ -101,6 +112,13 @@ class PolylineSnippets(private val map: TrackedMap3D) {
         }
         
         val polyline = map.addPolyline(options)
+        // [START_EXCLUDE]
+        polyline?.setClickListener {
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, "Polyline Clicked!", Toast.LENGTH_SHORT).show()
+            }
+        }
+        // [END_EXCLUDE]
         // [END maps_android_3d_polyline_options_kt]
 
         map.flyCameraTo(flyToOptions {
