@@ -25,6 +25,8 @@ import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyAroundOptions;
 import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
+import com.google.android.gms.maps3d.model.CameraRestriction;
+import com.google.android.gms.maps3d.model.LatLngBounds;
 import com.example.snippets.java.annotations.SnippetGroup;
 import com.example.snippets.java.annotations.SnippetItem;
 
@@ -159,5 +161,27 @@ public class CameraControlSnippets {
             Log.d("Maps3D", "Map Is Steady: " + isSceneSteady);
         });
         // [END maps_android_3d_camera_steady_java]
+    }
+
+    /**
+     * Restricts the camera to a specific altitude range and geographic bounds.
+     */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+        title = "6. Camera Restriction",
+        description = "Restricts the camera to a specific altitude range and bounding box."
+    )
+    public void setCameraRestrictions() {
+        // [START maps_android_3d_camera_restriction_java]
+        LatLngBounds nycBounds = new LatLngBounds(
+            40.856492, -73.802409, 40.685630, -74.050304
+        );
+
+        CameraRestriction restriction = new CameraRestriction(
+            500.0, 10000.0, 0.0, 360.0, 0.0, 90.0, nycBounds
+        );
+
+        map.setCameraRestriction(restriction);
+        // [END maps_android_3d_camera_restriction_java]
     }
 }

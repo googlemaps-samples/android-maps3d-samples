@@ -12,43 +12,51 @@ This section maps high-level concepts (groups) to specific demonstration files a
 - **1. Fly To**:
   - *Description*: Animates the camera to a specific position with a tilt and heading over 5 seconds.
   - **Kotlin**
-    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:45](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L45)
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:47](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L47)
     - Tag: `maps_android_3d_camera_fly_to_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:48](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L48)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:50](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L50)
     - Tag: `maps_android_3d_camera_fly_to_java`
 - **2. Fly Around**:
   - *Description*: Rotates the camera 360 degrees around a specific location over 10 seconds.
   - **Kotlin**
-    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:76](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L76)
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:78](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L78)
     - Tag: `maps_android_3d_camera_fly_around_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:68](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L68)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:70](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L70)
     - Tag: `maps_android_3d_camera_fly_around_java`
 - **3. Stop Animation**:
   - *Description*: Stops any currently running camera animation immediately.
   - **Kotlin**
-    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:120](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L120)
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:122](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L122)
     - Tag: `maps_android_3d_camera_stop_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:99](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L99)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:101](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L101)
     - Tag: `maps_android_3d_camera_stop_java`
 - **4. Listen Camera Events**:
   - *Description*: Logs camera change events to the console, printing the center coordinates as the camera moves.
   - **Kotlin**
-    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:171](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L171)
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:173](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L173)
     - Tag: `maps_android_3d_camera_events_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:121](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L121)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:123](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L123)
     - Tag: `maps_android_3d_camera_events_java`
 - **5. Listen Steady State**:
   - *Description*: Logs to the console when the map finishes rendering or enters a steady state.
   - **Kotlin**
-    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:202](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L202)
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:204](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L204)
     - Tag: `maps_android_3d_camera_steady_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:152](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L152)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:154](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L154)
     - Tag: `maps_android_3d_camera_steady_java`
+- **6. Camera Restriction**:
+  - *Description*: Restricts the camera to a specific altitude range and bounding box.
+  - **Kotlin**
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt:220](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/CameraControlSnippets.kt#L220)
+    - Tag: `maps_android_3d_camera_restriction_kt`
+  - **Java**
+    - [java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java:170](java-app/src/main/java/com/example/snippets/java/snippets/CameraControlSnippets.java#L170)
+    - Tag: `maps_android_3d_camera_restriction_java`
 
 ### Map Initialization
 > Snippets demonstrating map lifecycle, listeners and readiness states.

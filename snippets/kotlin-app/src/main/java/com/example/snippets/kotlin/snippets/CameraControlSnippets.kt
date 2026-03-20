@@ -25,6 +25,8 @@ import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyAroundOptions
 import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
+import com.google.android.gms.maps3d.model.cameraRestriction
+import com.google.android.gms.maps3d.model.latLngBounds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
@@ -209,5 +211,32 @@ class CameraControlSnippets(
             Log.d("Maps3D", "Map Is Steady: $isSceneSteady")
         }
         // [END maps_android_3d_camera_steady_kt]
+    }
+
+    /**
+     * Restricts the camera to a specific altitude range and geographic bounds.
+     */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "6. Camera Restriction",
+        description = "Restricts the camera to a specific altitude range and bounding box."
+    )
+    fun setCameraRestrictions() {
+        // [START maps_android_3d_camera_restriction_kt]
+        val nycBounds = latLngBounds {
+            northEastLat = 40.856492
+            northEastLng = -73.802409
+            southWestLat = 40.685630
+            southWestLng = -74.050304
+        }
+
+        val restriction = cameraRestriction {
+            minAltitude = 500.0
+            maxAltitude = 10000.0
+            bounds = nycBounds
+        }
+
+        map.setCameraRestriction(restriction)
+        // [END maps_android_3d_camera_restriction_kt]
     }
 }
