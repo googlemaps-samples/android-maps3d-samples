@@ -35,7 +35,9 @@ When the layout detail launcher switches between snippets to preview live inside
 
 ---
 
-## 📜 Complete API Index Catalog
-For a detailed breakdown of EXACTLY which native class functions or parameters are covered inside these extracted instruction extracts, refer to the fully indexed checklist summary:
+## 📜 Full API Checklist Index
+For absolute breakdowns of exact class function parameters, refer to the fully indexed checklist and matrix:
 
-👉 **[`CATALOG.md`](CATALOG.md)**
+👉 **[`CATALOG.md`](CATALOG.md)**: Standard Sample Concept Index  
+👉 **[`COVERAGE.md`](COVERAGE.md)**: API Coverage Matrix and missing deficits checklist
+

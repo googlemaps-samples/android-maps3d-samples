@@ -48,21 +48,21 @@ The python parser processes `.java` and `.kt` source files iteratively index ext
 2.  **Signature Parsing**:
     *   Read snippet files looking for calls (e.g., `model.setClickListener`).
     *   Increment an **Occurrence Dictionary map** (`{"Model.setClickListener": 1}`).
-3.  **Generate `CATALOG.md`**:
-    *   Create Markdown Tables listing absolute counts.
-    *   If a method has **`0` counts**, listed securely below inside the "Missing API Coverage" deficits layout index to highlight gaps.
+3.  **Generate Output Index & Matrix**:
+    *   Create **`CATALOG.md`**: Lists standalone concept items with their direct code range links.
+    *   Create **`COVERAGE.md`**: Counts exact API occurrences by class method mappings.
+    *   If any method is left at **`0`**, listed inside "Missing API Coverage" deficits down below.
 
-### **Example Layout**
-| API Endpoint | Occurrences | Snippets Locations |
+### **Example `CATALOG.md` Layout**
+| Snippets Feature | Kotlin Location | Java Location |
 | :--- | :--- | :--- |
-| `Model.setClickListener` | 1 | `ModelSnippets.kt:74` |
-| `Polyline.setClickListener` | 2 | `PolylineSnippets.kt:50`, `PolylineSnippets.java:45` |
+| **1. Fly To** | `CameraControlSnippets.kt#L62-L81` | `CameraControlSnippets.java#L44-L64` |
 
 ---
 
 ## 🏃 3. Continuous Updates
 
-To maintain documentation accuracy, bind the parser execution to a convenient script that compiles the snippets before generating accurate Bytecode indexing:
+To maintain documentation accuracy, bind execution of the Python parser to a convenient script setup that compiles building layout:
 
 ```bash
 #!/bin/bash

@@ -335,28 +335,33 @@ def main():
                 file_map[name] = rel_path
         
     catalog_lines = ["# 🗺️ Maps3D API Snippets Catalog\n\n"]
-    catalog_lines.append("This document serves as a comprehensive developer reference and mapping matrix for the 3D Maps SDK features.\n\n")
+    catalog_lines.append("This document serves as a comprehensive developer reference mapping high-level concepts directly index extracts.\n\n")
     
     # Generate Snippet Index (Concepts to Code)
     snippet_index_lines = generate_snippet_index(SNIPPETS_DIR, file_map, region_tags)
     catalog_lines.extend(snippet_index_lines)
-    catalog_lines.append("\n---\n\n")
-    catalog_lines.append("## 📊 Maps3D API Coverage Matrix\n\n")
-    catalog_lines.append("This matrix ensures that every critical feature in the 3D Maps SDK is actively demonstrated inside a snippet boundary (`// [START ...]`).\n\n")
+    
+    coverage_lines = ["# 📊 Maps3D API Coverage Matrix\n\n"]
+    coverage_lines.append("This matrix ensures that every critical feature in the 3D Maps SDK is actively demonstrated inside a snippet boundary (`// [START ...]`).\n\n")
     
     # Generate Kotlin Section
     kt_lines, kt_missing = format_catalog_section("Kotlin Snippets", api_surface, usages, file_map, region_tags, ".kt")
-    catalog_lines.extend(kt_lines)
+    coverage_lines.extend(kt_lines)
     
     # Generate Java Section
     java_lines, java_missing = format_catalog_section("Java Snippets", api_surface, usages, file_map, region_tags, ".java")
-    catalog_lines.extend(java_lines)
+    coverage_lines.extend(java_lines)
         
     catalog_path = os.path.join(SNIPPETS_DIR, "CATALOG.md")
     with open(catalog_path, 'w', encoding='utf-8') as f:
         f.writelines(catalog_lines)
         
-    print(f"Catalog successfully generated at {catalog_path}.")
+    coverage_path = os.path.join(SNIPPETS_DIR, "COVERAGE.md")
+    with open(coverage_path, 'w', encoding='utf-8') as f:
+        f.writelines(coverage_lines)
+        
+    print(f"Index successfully generated at {catalog_path}.")
+    print(f"Matrix successfully generated at {coverage_path}.")
     print(f"Identified {len(kt_missing)} missing APIs in Kotlin, and {len(java_missing)} in Java.")
 
 if __name__ == '__main__':
