@@ -16,26 +16,25 @@
 
 package com.example.snippets.java.snippets;
 
-import com.example.snippets.common.R;
 import android.content.Context;
-import com.example.snippets.java.TrackedMap3D;
 import android.graphics.Color;
 import android.widget.TextView;
+import com.example.snippets.common.R;
+import com.example.snippets.java.TrackedMap3D;
+import com.example.snippets.java.annotations.SnippetGroup;
+import com.example.snippets.java.annotations.SnippetItem;
+import com.google.android.gms.maps3d.Popover;
 import com.google.android.gms.maps3d.model.AltitudeMode;
+import com.google.android.gms.maps3d.model.Camera;
+import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.Marker;
 import com.google.android.gms.maps3d.model.MarkerOptions;
-import com.google.android.gms.maps3d.Popover;
 import com.google.android.gms.maps3d.model.PopoverOptions;
-import com.google.android.gms.maps3d.model.Camera;
-import com.google.android.gms.maps3d.model.FlyToOptions;
-import com.example.snippets.java.annotations.SnippetGroup;
-import com.example.snippets.java.annotations.SnippetItem;
 
 @SnippetGroup(
-    title = "Popovers",
-    description = "Snippets demonstrating anchored and configured 3D Popover views."
-)
+        title = "Popovers",
+        description = "Snippets demonstrating anchored and configured 3D Popover views.")
 public class PopoverSnippets {
 
     private final Context context;
@@ -46,20 +45,16 @@ public class PopoverSnippets {
         this.map = map;
     }
 
-    /**
-     * Adds a popover anchored to a marker.
-     */
+    /** Adds a popover anchored to a marker. */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "1. Marker Anchor",
-        description = "Adds a 'Hello Popover!' text bubble anchored to a marker"
-    )
+            title = "1. Marker Anchor",
+            description = "Adds a 'Hello Popover!' text bubble anchored to a marker")
     public void addPopoverToMarker() {
         // [START maps_android_3d_popover_add_java]
         // Create a marker first
         Marker marker = map.addMarker(new MarkerOptions());
-        if (marker == null)
-            return;
+        if (marker == null) return;
 
         // Create a custom view for the popover
         TextView textView = new TextView(context);
@@ -82,14 +77,12 @@ public class PopoverSnippets {
         // [END maps_android_3d_popover_add_java]
     }
 
-    /**
-     * Adds a configured popover (auto-close enabled, auto-pan disabled).
-     */
+    /** Adds a configured popover (auto-close enabled, auto-pan disabled). */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "2. Configured",
-        description = "Adds an 'Info' popover anchored to a marker with auto-close enabled and auto-pan disabled."
-    )
+            title = "2. Configured",
+            description =
+                    "Adds an 'Info' popover anchored to a marker with auto-close enabled and auto-pan disabled.")
     public void addConfiguredPopover() {
         // [START maps_android_3d_popover_options_java]
         // Create a marker at an interesting location (e.g., Golden Gate Bridge)
@@ -101,7 +94,7 @@ public class PopoverSnippets {
         if (marker == null) return;
 
         TextView textView = new TextView(context);
-        textView.setText(com.example.snippets.common.R.string.popover_info);
+        textView.setText(R.string.popover_info);
         textView.setPadding(16, 16, 16, 16);
         textView.setBackgroundColor(Color.WHITE);
 

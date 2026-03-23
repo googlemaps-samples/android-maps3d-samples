@@ -20,11 +20,16 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.snippets.common.R
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
+import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
+import com.google.android.gms.maps3d.model.latLngAltitude
+import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
@@ -40,7 +45,7 @@ class MapActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_map)
 
         map3DView = findViewById(R.id.map)
@@ -51,21 +56,23 @@ class MapActivity : AppCompatActivity() {
         val snippetList = SnippetRegistry.getSnippetGroups().flatMap { it.items }
         var currentIndex = snippetList.indexOfFirst { it.title == snippetTitle && (groupTitle == null || it.groupTitle == groupTitle) }
 
-        val printPoseBtn = findViewById<com.google.android.material.button.MaterialButton>(R.id.snapshot_button).apply {
+        val printPoseBtn = findViewById<MaterialButton>(R.id.snapshot_button).apply {
             setOnClickListener {
                 if (::googleMap3D.isInitialized) {
                     val cam = googleMap3D.getCamera() ?: return@setOnClickListener
                     val center = cam.center ?: return@setOnClickListener
-                    
+
                     // Normalize heading to [0, 360)
                     val rawHeading = cam.heading ?: 0.0
                     val heading = (rawHeading % 360.0 + 360.0) % 360.0
-                    
+
                     // Normalize roll (-0.0 to 0.0)
                     val rawRoll = cam.roll ?: 0.0
                     val roll = if (rawRoll == -0.0) 0.0 else rawRoll
 
-                    Log.d("MapActivity", """
+                    Log.d(
+                        "MapActivity",
+                        """
                         Camera Pose:
                         center = latLngAltitude {
                             latitude = ${"%.6f".format(center.latitude)}
@@ -76,14 +83,15 @@ class MapActivity : AppCompatActivity() {
                         heading = ${"%.2f".format(heading)}
                         range = ${"%.2f".format(cam.range)}
                         roll = $roll
-                    """.trimIndent())
+                        """.trimIndent(),
+                    )
                 } else {
                     Log.d("MapActivity", "Map NOT initialized yet")
                 }
             }
         }
 
-        val replayBtn = findViewById<com.google.android.material.button.MaterialButton>(R.id.reset_view_button).apply {
+        val replayBtn = findViewById<MaterialButton>(R.id.reset_view_button).apply {
             setOnClickListener {
                 if (currentIndex >= 0) {
                     val item = snippetList[currentIndex]
@@ -93,7 +101,7 @@ class MapActivity : AppCompatActivity() {
         }
 
         // Previous and Next Nav buttons
-        findViewById<com.google.android.material.button.MaterialButton>(R.id.previous_button).apply {
+        findViewById<MaterialButton>(R.id.previous_button).apply {
             setOnClickListener {
                 if (snippetList.isEmpty()) return@setOnClickListener
                 if (currentIndex > 0) {
@@ -106,7 +114,7 @@ class MapActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<com.google.android.material.button.MaterialButton>(R.id.next_button).apply {
+        findViewById<MaterialButton>(R.id.next_button).apply {
             setOnClickListener {
                 if (snippetList.isEmpty()) return@setOnClickListener
                 if (currentIndex < snippetList.size - 1) {
@@ -134,7 +142,7 @@ class MapActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onError(error: java.lang.Exception) {
+            override fun onError(error: Exception) {
                 Toast.makeText(this@MapActivity, "Map Error: ${error.message}", Toast.LENGTH_LONG)
                     .show()
             }
@@ -178,8 +186,8 @@ class MapActivity : AppCompatActivity() {
     private fun runSnippet(groupTitle: String?, snippetTitle: String?) {
         if (snippetTitle == null) return
         val key = if (groupTitle != null) "$groupTitle - $snippetTitle" else snippetTitle
-        val snippet = SnippetRegistry.snippets[key] 
-            ?: SnippetRegistry.getSnippetGroups().flatMap { it.items }.find { it.title == snippetTitle } 
+        val snippet = SnippetRegistry.snippets[key]
+            ?: SnippetRegistry.getSnippetGroups().flatMap { it.items }.find { it.title == snippetTitle }
             ?: return
         if (!::googleMap3D.isInitialized) return
 
@@ -187,8 +195,8 @@ class MapActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             // 1. Set camera to far global view
-            val globalCamera = com.google.android.gms.maps3d.model.camera {
-                center = com.google.android.gms.maps3d.model.latLngAltitude {
+            val globalCamera = camera {
+                center = latLngAltitude {
                     latitude = 0.0
                     longitude = 0.0
                     altitude = 0.0
@@ -197,21 +205,23 @@ class MapActivity : AppCompatActivity() {
                 heading = 0.0
                 range = 30000000.0 // Far view
             }
-            googleMap3D.flyCameraTo(com.google.android.gms.maps3d.model.flyToOptions {
-                endCamera = globalCamera
-                durationInMillis = 2000
-            })
+            googleMap3D.flyCameraTo(
+                flyToOptions {
+                    endCamera = globalCamera
+                    durationInMillis = 2000
+                },
+            )
 
             // 2. Pause for a few seconds
             delay(4.seconds)
 
             // 3. Play snippet
             try {
-                snippet.action(this@MapActivity, googleMap3D, lifecycleScope) 
+                snippet.action(this@MapActivity, googleMap3D, lifecycleScope)
                 Toast.makeText(
                     this@MapActivity,
                     "${snippet.groupTitle}: ${snippet.title}.\n${snippet.description}",
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_LONG,
                 ).show()
             } catch (e: Exception) {
                 Log.e("MapActivity", "Error running snippet: ${e.message}")

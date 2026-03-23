@@ -32,7 +32,7 @@ import com.google.android.gms.maps3d.model.polylineOptions
 
 @SnippetGroup(
     title = "Polylines",
-    description = "Snippets demonstrating 2D and 3D extruded polyline paths on the map."
+    description = "Snippets demonstrating 2D and 3D extruded polyline paths on the map.",
 )
 class PolylineSnippets(private val context: Context, private val map: TrackedMap3D) {
 
@@ -42,14 +42,26 @@ class PolylineSnippets(private val context: Context, private val map: TrackedMap
     @Suppress("unused")
     @SnippetItem(
         title = "1. Basic",
-        description = "Draws a thick red polyline connecting three points"
+        description = "Draws a thick red polyline connecting three points",
     )
     fun addBasicPolyline() {
         // [START maps_android_3d_polyline_add_kt]
         val points = listOf(
-            latLngAltitude { latitude = 37.42; longitude = -122.08; altitude = 0.0 },
-            latLngAltitude { latitude = 37.43; longitude = -122.09; altitude = 0.0 },
-            latLngAltitude { latitude = 37.44; longitude = -122.08; altitude = 0.0 }
+            latLngAltitude {
+                latitude = 37.42
+                longitude = -122.08
+                altitude = 0.0
+            },
+            latLngAltitude {
+                latitude = 37.43
+                longitude = -122.09
+                altitude = 0.0
+            },
+            latLngAltitude {
+                latitude = 37.44
+                longitude = -122.08
+                altitude = 0.0
+            },
         )
 
         val options = polylineOptions {
@@ -58,7 +70,7 @@ class PolylineSnippets(private val context: Context, private val map: TrackedMap
             strokeWidth = 10.0
             altitudeMode = AltitudeMode.CLAMP_TO_GROUND
         }
-        
+
         val polyline = map.addPolyline(options)
         // [START_EXCLUDE]
         polyline?.setClickListener {
@@ -69,19 +81,21 @@ class PolylineSnippets(private val context: Context, private val map: TrackedMap
         // [END_EXCLUDE]
         // [END maps_android_3d_polyline_add_kt]
 
-        map.flyCameraTo(flyToOptions {
-            endCamera = camera {
-                center = latLngAltitude {
-                    latitude = 37.43
-                    longitude = -122.085
-                    altitude = 0.0
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = latLngAltitude {
+                        latitude = 37.43
+                        longitude = -122.085
+                        altitude = 0.0
+                    }
+                    tilt = 45.0
+                    heading = 0.0
+                    range = 5000.0
                 }
-                tilt = 45.0
-                heading = 0.0
-                range = 5000.0
-            }
-            durationInMillis = 1000
-        })
+                durationInMillis = 1000
+            },
+        )
     }
 
     /**
@@ -90,13 +104,21 @@ class PolylineSnippets(private val context: Context, private val map: TrackedMap
     @Suppress("unused")
     @SnippetItem(
         title = "2. Styled",
-        description = "Draws a magenta polyline with a green outline, extruded and following the ground curvature (geodesic), connecting two points."
+        description = "Draws a magenta polyline with a green outline, extruded and following the ground curvature (geodesic), connecting two points.",
     )
     fun addStyledPolyline() {
         // [START maps_android_3d_polyline_options_kt]
         val points = listOf(
-            latLngAltitude { latitude = 37.42; longitude = -122.08; altitude = 50.0 },
-            latLngAltitude { latitude = 37.43; longitude = -122.09; altitude = 100.0 }
+            latLngAltitude {
+                latitude = 37.42
+                longitude = -122.08
+                altitude = 50.0
+            },
+            latLngAltitude {
+                latitude = 37.43
+                longitude = -122.09
+                altitude = 100.0
+            },
         )
 
         val options = polylineOptions {
@@ -110,7 +132,7 @@ class PolylineSnippets(private val context: Context, private val map: TrackedMap
             geodesic = true
             drawsOccludedSegments = true
         }
-        
+
         val polyline = map.addPolyline(options)
         // [START_EXCLUDE]
         polyline?.setClickListener {
@@ -121,18 +143,20 @@ class PolylineSnippets(private val context: Context, private val map: TrackedMap
         // [END_EXCLUDE]
         // [END maps_android_3d_polyline_options_kt]
 
-        map.flyCameraTo(flyToOptions {
-            endCamera = camera {
-                center = latLngAltitude {
-                    latitude = 37.425
-                    longitude = -122.085
-                    altitude = 0.0
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = latLngAltitude {
+                        latitude = 37.425
+                        longitude = -122.085
+                        altitude = 0.0
+                    }
+                    tilt = 45.0
+                    heading = 0.0
+                    range = 4000.0
                 }
-                tilt = 45.0
-                heading = 0.0
-                range = 4000.0
-            }
-            durationInMillis = 1000
-        })
+                durationInMillis = 1000
+            },
+        )
     }
 }

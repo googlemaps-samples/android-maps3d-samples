@@ -50,22 +50,22 @@ class KotlinSnippetsActivity : AppCompatActivity() {
         setContent {
             SnippetsTheme {
                 val snackbarHostState = remember { SnackbarHostState() }
-                
-                    Scaffold(
-                        modifier = Modifier.fillMaxSize(),
-                        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-                    ) { innerPadding ->
-                        SnippetGroupList(
-                            groups = SnippetRegistry.getSnippetGroups(),
-                            contentPadding = innerPadding,
-                            onItemClick = { item ->
-                                val intent = Intent(this, MapActivity::class.java)
-                                intent.putExtra("group_title", item.groupTitle)
-                                intent.putExtra(MapActivity.EXTRA_SNIPPET_TITLE, item.title)
-                                startActivity(intent)
-                            }
-                        )
-                    }
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+                ) { innerPadding ->
+                    SnippetGroupList(
+                        groups = SnippetRegistry.getSnippetGroups(),
+                        contentPadding = innerPadding,
+                        onItemClick = { item ->
+                            val intent = Intent(this, MapActivity::class.java)
+                            intent.putExtra("group_title", item.groupTitle)
+                            intent.putExtra(MapActivity.EXTRA_SNIPPET_TITLE, item.title)
+                            startActivity(intent)
+                        },
+                    )
+                }
             }
         }
     }
@@ -76,13 +76,13 @@ fun SnippetGroupList(
     groups: List<SnippetGroupInfo>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    onItemClick: (SnippetItemInfo) -> Unit
+    onItemClick: (SnippetItemInfo) -> Unit,
 ) {
     val expandedGroups = remember { mutableStateMapOf<String, Boolean>() }
 
     LazyColumn(
         modifier = modifier,
-        contentPadding = contentPadding
+        contentPadding = contentPadding,
     ) {
         groups.forEach { group ->
             val isExpanded = expandedGroups[group.title] ?: true // Default to expanded
@@ -94,7 +94,7 @@ fun SnippetGroupList(
                         .fillMaxWidth()
                         .clickable { expandedGroups[group.title] = !isExpanded }
                         .padding(16.dp),
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
                 )
             }
             if (isExpanded) {
@@ -103,16 +103,16 @@ fun SnippetGroupList(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onItemClick(item) }
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                     ) {
                         Text(
                             text = item.title,
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
                         )
                         Text(
                             text = item.description,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     HorizontalDivider()

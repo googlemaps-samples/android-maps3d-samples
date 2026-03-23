@@ -16,49 +16,54 @@
 
 package com.example.snippets.java;
 
+import android.content.Context;
+import com.example.snippets.java.annotations.SnippetGroup;
+import com.example.snippets.java.annotations.SnippetItem;
 import com.example.snippets.java.snippets.*;
-
+import com.google.android.gms.maps3d.Popover;
+import com.google.android.gms.maps3d.model.Marker;
+import com.google.android.gms.maps3d.model.Model;
+import com.google.android.gms.maps3d.model.Polygon;
+import com.google.android.gms.maps3d.model.Polyline;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import com.example.snippets.java.annotations.SnippetGroup;
-import com.example.snippets.java.annotations.SnippetItem;
-import android.content.Context;
 
 public class SnippetRegistry {
 
-    private static final java.util.List<Object> addedElements = new java.util.ArrayList<>();
+    private static final List<Object> addedElements = new ArrayList<>();
 
     public static void clearTrackedItems() {
         for (Object item : addedElements) {
             try {
-                if (item instanceof com.google.android.gms.maps3d.model.Marker) ((com.google.android.gms.maps3d.model.Marker) item).remove();
-                else if (item instanceof com.google.android.gms.maps3d.model.Polyline) ((com.google.android.gms.maps3d.model.Polyline) item).remove();
-                else if (item instanceof com.google.android.gms.maps3d.model.Polygon) ((com.google.android.gms.maps3d.model.Polygon) item).remove();
-                else if (item instanceof com.google.android.gms.maps3d.model.Model) ((com.google.android.gms.maps3d.model.Model) item).remove();
-                else if (item instanceof com.google.android.gms.maps3d.Popover) ((com.google.android.gms.maps3d.Popover) item).remove();
-            } catch (Exception e) { /* ignore */ }
+                if (item instanceof Marker) ((Marker) item).remove();
+                else if (item instanceof Polyline) ((Polyline) item).remove();
+                else if (item instanceof Polygon) ((Polygon) item).remove();
+                else if (item instanceof Model) ((Model) item).remove();
+                else if (item instanceof Popover) ((Popover) item).remove();
+            } catch (Exception e) {
+                /* ignore */
+            }
         }
         addedElements.clear();
     }
 
-    private static final List<Class<?>> snippetClasses = Arrays.asList(
-        MapInitSnippets.class,
-        CameraControlSnippets.class,
-        MarkerSnippets.class,
-        PolygonSnippets.class,
-        PolylineSnippets.class,
-        ModelSnippets.class,
-        PopoverSnippets.class,
-        PlaceSnippets.class
-    );
+    private static final List<Class<?>> snippetClasses =
+            Arrays.asList(
+                    MapInitSnippets.class,
+                    CameraControlSnippets.class,
+                    MarkerSnippets.class,
+                    PolygonSnippets.class,
+                    PolylineSnippets.class,
+                    ModelSnippets.class,
+                    PopoverSnippets.class,
+                    PlaceSnippets.class);
 
-    /**
-     * Scans annotated classes to build the hierarchical snippet model.
-     */
+    /** Scans annotated classes to build the hierarchical snippet model. */
     public static List<SnippetGroupInfo> getSnippetGroups() {
         List<SnippetGroupInfo> groups = new ArrayList<>();
 
@@ -72,41 +77,44 @@ public class SnippetRegistry {
                 SnippetItem itemAnnotation = method.getAnnotation(SnippetItem.class);
                 if (itemAnnotation == null) continue;
 
-                items.add(new SnippetItemInfo(
-                    itemAnnotation.title(),
-                    itemAnnotation.description(),
-                    groupAnnotation.title(),
-                    (context, map) -> {
-                        try {
-                            TrackedMap3D trackedMap = new TrackedMap3D(map, addedElements);
-                            Object instance = createInstance(clazz, context, trackedMap);
-                            if (method.getParameterCount() == 0) {
-                                method.invoke(instance);
-                            } else if (method.getParameterCount() == 1 && method.getParameterTypes()[0] == Context.class) {
-                                method.invoke(instance, context);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                ));
+                items.add(
+                        new SnippetItemInfo(
+                                itemAnnotation.title(),
+                                itemAnnotation.description(),
+                                groupAnnotation.title(),
+                                (context, map) -> {
+                                    try {
+                                        TrackedMap3D trackedMap =
+                                                new TrackedMap3D(map, addedElements);
+                                        Object instance =
+                                                createInstance(clazz, context, trackedMap);
+                                        if (method.getParameterCount() == 0) {
+                                            method.invoke(instance);
+                                        } else if (method.getParameterCount() == 1
+                                                && method.getParameterTypes()[0] == Context.class) {
+                                            method.invoke(instance, context);
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }));
             }
 
             if (!items.isEmpty()) {
-                items.sort((a, b) -> a.getTitle().compareTo(b.getTitle()));
-                groups.add(new SnippetGroupInfo(
-                    groupAnnotation.title(),
-                    groupAnnotation.description(),
-                    items
-                ));
+                items.sort(Comparator.comparing(SnippetItemInfo::getTitle));
+                groups.add(
+                        new SnippetGroupInfo(
+                                groupAnnotation.title(), groupAnnotation.description(), items));
             }
         }
         return groups;
     }
 
-    private static Object createInstance(Class<?> clazz, Context context, TrackedMap3D map) throws Exception {
+    private static Object createInstance(Class<?> clazz, Context context, TrackedMap3D map)
+            throws Exception {
         try {
-            return clazz.getConstructor(Context.class, TrackedMap3D.class).newInstance(context, map);
+            return clazz.getConstructor(Context.class, TrackedMap3D.class)
+                    .newInstance(context, map);
         } catch (NoSuchMethodException e1) {
             try {
                 return clazz.getConstructor(TrackedMap3D.class).newInstance(map);

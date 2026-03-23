@@ -10,5 +10,5 @@ package com.example.snippets.kotlin.annotations
 @Retention(AnnotationRetention.RUNTIME)
 annotation class SnippetItem(
     val title: String,
-    val description: String = ""
+    val description: String = "",
 )

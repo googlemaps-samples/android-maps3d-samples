@@ -22,32 +22,32 @@ import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
 import com.example.snippets.kotlin.utils.awaitAnimation
 import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.cameraRestriction
 import com.google.android.gms.maps3d.model.flyAroundOptions
 import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
-import com.google.android.gms.maps3d.model.cameraRestriction
 import com.google.android.gms.maps3d.model.latLngBounds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-@SnippetGroup(
-    title = "Camera",
-    description = "Snippets demonstrating dynamic camera orchestration and animations."
-)
 /**
  * Snippets demonstrating dynamic camera orchestration and animations.
  *
  * @property map The tracked map delegate wrapper.
  * @property lifecycleScope The scope managing asynchronous animations duration cycles.
- * 
+ *
  * NOTE: While passing a bare CoroutineScope is straightforward for snippets runner contexts,
  * in production, bounding animation jobs to lifecycle-aware components (like Views, Fragments,
  * or ViewModel `viewModelScope` triggers) prevents memory leaks and guarantees safe cancellation.
  */
+@SnippetGroup(
+    title = "Camera",
+    description = "Snippets demonstrating dynamic camera orchestration and animations.",
+)
 class CameraControlSnippets(
     private val map: TrackedMap3D,
-    private val lifecycleScope: kotlinx.coroutines.CoroutineScope
+    private val lifecycleScope: kotlinx.coroutines.CoroutineScope,
 ) {
 
     /**
@@ -56,7 +56,7 @@ class CameraControlSnippets(
     @Suppress("unused")
     @SnippetItem(
         title = "1. Fly To",
-        description = "Animates the camera to a specific position with a tilt and heading over 5 seconds."
+        description = "Animates the camera to a specific position with a tilt and heading over 5 seconds.",
     )
     fun flyCameraToPosition() {
         // [START maps_android_3d_camera_fly_to_kt]
@@ -71,7 +71,7 @@ class CameraControlSnippets(
             range = 191.71
             roll = 0.0
         }
-        
+
         val options = flyToOptions {
             endCamera = targetCamera
             durationInMillis = 5000
@@ -87,7 +87,7 @@ class CameraControlSnippets(
     @Suppress("unused")
     @SnippetItem(
         title = "2. Fly Around",
-        description = "Rotates the camera 360 degrees around a specific location over 10 seconds."
+        description = "Rotates the camera 360 degrees around a specific location over 10 seconds.",
     )
     fun flyCameraAroundLocation() {
         // [START maps_android_3d_camera_fly_around_kt]
@@ -131,7 +131,7 @@ class CameraControlSnippets(
     @Suppress("unused")
     @SnippetItem(
         title = "3. Stop Animation",
-        description = "Stops any currently running camera animation immediately."
+        description = "Stops any currently running camera animation immediately.",
     )
     fun stopAnimation() {
         // [START maps_android_3d_camera_stop_kt]
@@ -159,13 +159,15 @@ class CameraControlSnippets(
             }
 
             // [END_EXCLUDE]
-            
+
             // 1. Start a perpetual flyAround animation so we have something to stop
-            map.flyCameraAround(flyAroundOptions {
-                center = targetCamera
-                rounds = 10.0
-                durationInMillis = 30_000
-            })
+            map.flyCameraAround(
+                flyAroundOptions {
+                    center = targetCamera
+                    rounds = 10.0
+                    durationInMillis = 30_000
+                },
+            )
 
             lifecycleScope.launch {
                 delay(2.seconds) // Let it fly for 2 seconds
@@ -182,7 +184,7 @@ class CameraControlSnippets(
     @Suppress("unused")
     @SnippetItem(
         title = "4. Listen Camera Events",
-        description = "Logs camera change events to the console, printing the center coordinates as the camera moves."
+        description = "Logs camera change events to the console, printing the center coordinates as the camera moves.",
     )
     fun listenToCameraEvents() {
         // [START maps_android_3d_camera_events_kt]
@@ -191,12 +193,15 @@ class CameraControlSnippets(
             val currentTime = System.currentTimeMillis()
             if (currentTime - lastLogTime > 500) { // Limit to 1 log per 500ms
                 lastLogTime = currentTime
-                Log.d("Maps3D", "Camera State: " +
+                Log.d(
+                    "Maps3D",
+                    "Camera State: " +
                         "Center: ${camera.center}, " +
                         "Heading: ${camera.heading}, " +
                         "Tilt: ${camera.tilt}, " +
                         "Roll: ${camera.roll}, " +
-                        "Range: ${camera.range}")
+                        "Range: ${camera.range}",
+                )
             }
         }
         // [END maps_android_3d_camera_events_kt]
@@ -213,7 +218,7 @@ class CameraControlSnippets(
     @Suppress("unused")
     @SnippetItem(
         title = "5. Listen Steady State",
-        description = "Logs to the console when the map finishes rendering or enters a steady state."
+        description = "Logs to the console when the map finishes rendering or enters a steady state.",
     )
     fun listenToMapSteadyState() {
         // [START maps_android_3d_camera_steady_kt]
@@ -229,18 +234,20 @@ class CameraControlSnippets(
     @Suppress("unused")
     @SnippetItem(
         title = "6. Camera Restriction",
-        description = "Restricts the camera to a specific altitude range and bounding box."
+        description = "Restricts the camera to a specific altitude range and bounding box.",
     )
     fun setCameraRestrictions() {
         // [START maps_android_3d_camera_restriction_kt]
         // Move the camera inside the restricted bounds so we focus on NYC
-        map.setCamera(camera {
-            center = latLngAltitude {
-                latitude = 40.748233
-                longitude = -73.985663
-                altitude = 1500.0
-            }
-        })
+        map.setCamera(
+            camera {
+                center = latLngAltitude {
+                    latitude = 40.748233
+                    longitude = -73.985663
+                    altitude = 1500.0
+                }
+            },
+        )
 
         val nycBounds = latLngBounds {
             northEastLat = 40.856492

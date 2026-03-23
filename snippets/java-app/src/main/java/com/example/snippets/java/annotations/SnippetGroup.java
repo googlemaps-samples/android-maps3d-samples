@@ -21,9 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Marks a class containing multiple snippet methods with category metadata.
- */
+/** Marks a class containing multiple snippet methods with category metadata. */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SnippetGroup {

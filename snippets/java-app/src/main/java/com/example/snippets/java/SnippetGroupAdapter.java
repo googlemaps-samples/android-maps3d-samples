@@ -23,11 +23,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-/**
- * Adapter supporting grouped category headers and snippet items representing the hierarchy.
- */
+/** Adapter supporting grouped category headers and snippet items representing the hierarchy. */
 public class SnippetGroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_HEADER = 0;
@@ -35,7 +35,7 @@ public class SnippetGroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private final List<Object> items = new ArrayList<>();
     private final List<SnippetGroupInfo> groups;
-    private final java.util.Set<String> expandedGroups = new java.util.HashSet<>();
+    private final Set<String> expandedGroups = new HashSet<>();
     private final OnItemClickListener listener;
 
     public interface OnItemClickListener {
@@ -75,12 +75,14 @@ public class SnippetGroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == TYPE_HEADER) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.list_item_group_header, parent, false);
+            View view =
+                    LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.list_item_group_header, parent, false);
             return new HeaderViewHolder(view);
         } else {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.list_item_snippet, parent, false);
+            View view =
+                    LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.list_item_snippet, parent, false);
             return new ItemViewHolder(view);
         }
     }
@@ -90,15 +92,19 @@ public class SnippetGroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         if (getItemViewType(position) == TYPE_HEADER) {
             SnippetGroupInfo group = (SnippetGroupInfo) items.get(position);
             boolean isExpanded = expandedGroups.contains(group.getTitle());
-            ((HeaderViewHolder) holder).bind(group, isExpanded, v -> {
-                if (isExpanded) {
-                    expandedGroups.remove(group.getTitle());
-                } else {
-                    expandedGroups.add(group.getTitle());
-                }
-                rebuildItems();
-                notifyDataSetChanged();
-            });
+            ((HeaderViewHolder) holder)
+                    .bind(
+                            group,
+                            isExpanded,
+                            v -> {
+                                if (isExpanded) {
+                                    expandedGroups.remove(group.getTitle());
+                                } else {
+                                    expandedGroups.add(group.getTitle());
+                                }
+                                rebuildItems();
+                                notifyDataSetChanged();
+                            });
         } else {
             ((ItemViewHolder) holder).bind((SnippetItemInfo) items.get(position), listener);
         }
@@ -117,7 +123,8 @@ public class SnippetGroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             headerTitle = itemView.findViewById(R.id.headerTitle);
         }
 
-        public void bind(SnippetGroupInfo group, boolean isExpanded, View.OnClickListener clickListener) {
+        public void bind(
+                SnippetGroupInfo group, boolean isExpanded, View.OnClickListener clickListener) {
             headerTitle.setText((isExpanded ? "▼ " : "▶ ") + group.getTitle());
             itemView.setOnClickListener(clickListener);
         }

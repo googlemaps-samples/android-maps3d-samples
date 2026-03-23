@@ -18,15 +18,14 @@ package com.example.snippets.java;
 
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import java.util.List;
-
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import java.util.List;
 
 public class JavaSnippetsActivity extends AppCompatActivity {
 
@@ -39,20 +38,25 @@ public class JavaSnippetsActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        ViewCompat.setOnApplyWindowInsetsListener(recyclerView, (v, windowInsets) -> {
-            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
-            return WindowInsetsCompat.CONSUMED;
-        });
+        ViewCompat.setOnApplyWindowInsetsListener(
+                recyclerView,
+                (v, windowInsets) -> {
+                    Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                    v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                    return WindowInsetsCompat.CONSUMED;
+                });
 
         List<SnippetGroupInfo> groups = SnippetRegistry.getSnippetGroups();
 
-        SnippetGroupAdapter adapter = new SnippetGroupAdapter(groups, item -> {
-            Intent intent = new Intent(this, MapActivity.class);
-            intent.putExtra("group_title", item.getGroupTitle());
-            intent.putExtra(MapActivity.EXTRA_SNIPPET_TITLE, item.getTitle());
-            startActivity(intent);
-        });
+        SnippetGroupAdapter adapter =
+                new SnippetGroupAdapter(
+                        groups,
+                        item -> {
+                            Intent intent = new Intent(this, MapActivity.class);
+                            intent.putExtra("group_title", item.getGroupTitle());
+                            intent.putExtra(MapActivity.EXTRA_SNIPPET_TITLE, item.getTitle());
+                            startActivity(intent);
+                        });
         recyclerView.setAdapter(adapter);
     }
 }

@@ -18,9 +18,7 @@ package com.example.snippets.java;
 
 import java.util.List;
 
-/**
- * Model class containing metadata and items for a grouped category of snippets.
- */
+/** Model class containing metadata and items for a grouped category of snippets. */
 public class SnippetGroupInfo {
     private final String title;
     private final String description;

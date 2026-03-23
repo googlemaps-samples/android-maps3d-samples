@@ -16,32 +16,29 @@
 
 package com.example.snippets.java.snippets;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
-
+import com.example.snippets.java.R;
 import com.example.snippets.java.TrackedMap3D;
+import com.example.snippets.java.annotations.SnippetGroup;
+import com.example.snippets.java.annotations.SnippetItem;
 import com.google.android.gms.maps3d.model.AltitudeMode;
+import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.CollisionBehavior;
+import com.google.android.gms.maps3d.model.FlyToOptions;
+import com.google.android.gms.maps3d.model.Glyph;
+import com.google.android.gms.maps3d.model.ImageView;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.Marker;
 import com.google.android.gms.maps3d.model.MarkerOptions;
 import com.google.android.gms.maps3d.model.PinConfiguration;
-import com.google.android.gms.maps3d.model.Camera;
-import com.google.android.gms.maps3d.model.FlyToOptions;
-import com.google.android.gms.maps3d.model.Glyph;
-import com.google.android.gms.maps3d.model.ImageView;
-import com.example.snippets.java.R;
-import android.content.Context;
-import android.graphics.Color;
-import com.google.android.gms.maps3d.OnMarkerClickListener;
-import com.example.snippets.java.annotations.SnippetGroup;
-import com.example.snippets.java.annotations.SnippetItem;
 
 @SnippetGroup(
-    title = "Markers",
-    description = "Snippets demonstrating standard, extruded, and custom styled markers."
-)
+        title = "Markers",
+        description = "Snippets demonstrating standard, extruded, and custom styled markers.")
 public class MarkerSnippets {
 
     private final Context context;
@@ -52,14 +49,9 @@ public class MarkerSnippets {
         this.map = map;
     }
 
-    /**
-     * Adds a basic marker to the map.
-     */
+    /** Adds a basic marker to the map. */
     @SuppressWarnings("unused")
-    @SnippetItem(
-        title = "1. Basic",
-        description = "Adds a standard marker."
-    )
+    @SnippetItem(title = "1. Basic", description = "Adds a standard marker.")
     public void addBasicMarker() {
         // [START maps_android_3d_marker_add_java]
         LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
@@ -73,7 +65,8 @@ public class MarkerSnippets {
         // [START_EXCLUDE]
         LatLngAltitude markerPos = options.getPosition();
         if (markerPos != null) {
-            LatLngAltitude camCenter = new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
+            LatLngAltitude camCenter =
+                    new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
             Camera targetCamera = new Camera(camCenter, 0.0, 45.0, 0.0, 500.0);
             map.flyCameraTo(new FlyToOptions(targetCamera, 3000L));
         }
@@ -81,14 +74,12 @@ public class MarkerSnippets {
         // [END maps_android_3d_marker_add_java]
     }
 
-    /**
-     * Adds an advanced marker with detailed configuration options.
-     */
+    /** Adds an advanced marker with detailed configuration options. */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "2. Advanced",
-        description = "Adds a 'Priority Marker' that is extruded and collides with other markers."
-    )
+            title = "2. Advanced",
+            description =
+                    "Adds a 'Priority Marker' that is extruded and collides with other markers.")
     public void addAdvancedMarker() {
         // [START maps_android_3d_marker_options_java]
         LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
@@ -105,7 +96,8 @@ public class MarkerSnippets {
         // [START_EXCLUDE]
         LatLngAltitude markerPos = options.getPosition();
         if (markerPos != null) {
-            LatLngAltitude camCenter = new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
+            LatLngAltitude camCenter =
+                    new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
             Camera targetCamera = new Camera(camCenter, 0.0, 45.0, 0.0, 500.0);
             map.flyCameraTo(new FlyToOptions(targetCamera, 3000L));
         }
@@ -113,14 +105,11 @@ public class MarkerSnippets {
         // [END maps_android_3d_marker_options_java]
     }
 
-    /**
-     * Adds a marker with a click listener.
-     */
+    /** Adds a marker with a click listener. */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "3. Click",
-        description = "Adds a marker that logs a message when clicked."
-    )
+            title = "3. Click",
+            description = "Adds a marker that logs a message when clicked.")
     public void handleMarkerClick() {
         // [START maps_android_3d_marker_click_java]
         LatLngAltitude position = new LatLngAltitude(37.42, -122.08, 0.0);
@@ -131,7 +120,8 @@ public class MarkerSnippets {
         // [START_EXCLUDE]
         LatLngAltitude markerPos = options.getPosition();
         if (markerPos != null) {
-            LatLngAltitude camCenter = new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
+            LatLngAltitude camCenter =
+                    new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
             Camera targetCamera = new Camera(camCenter, 0.0, 45.0, 0.0, 500.0);
             map.flyCameraTo(new FlyToOptions(targetCamera, 3000L));
         }
@@ -139,22 +129,27 @@ public class MarkerSnippets {
 
         // [START_EXCLUDE]
         if (marker != null) {
-            marker.setClickListener(() -> new Handler(Looper.getMainLooper()).post(() ->
-                Toast.makeText(context, "Marker Clicked!", Toast.LENGTH_SHORT).show()
-            ));
+            marker.setClickListener(
+                    () ->
+                            new Handler(Looper.getMainLooper())
+                                    .post(
+                                            () ->
+                                                    Toast.makeText(
+                                                                    context,
+                                                                    "Marker Clicked!",
+                                                                    Toast.LENGTH_SHORT)
+                                                            .show()));
         }
         // [END_EXCLUDE]
         // [END maps_android_3d_marker_click_java]
     }
 
-    /**
-     * Adds a marker with a custom icon using PinConfiguration.
-     */
+    /** Adds a marker with a custom icon using PinConfiguration. */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "4. Custom Icon",
-        description = "Adds a marker with a custom icon using PinConfiguration and Glyph styling."
-    )
+            title = "4. Custom Icon",
+            description =
+                    "Adds a marker with a custom icon using PinConfiguration and Glyph styling.")
     public void addCustomMarker(Context context) {
         // [START maps_android_3d_marker_custom_icon_java]
         LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
@@ -168,20 +163,22 @@ public class MarkerSnippets {
         MarkerOptions options = new MarkerOptions();
         options.setPosition(position);
         options.setLabel("Custom Icon Marker");
-        
+
         // Set the style using PinConfiguration
-        options.setStyle(PinConfiguration.builder()
-                .setScale(1.5f)
-                .setGlyph(glyphImage)
-                .setBackgroundColor(Color.BLUE)
-                .setBorderColor(Color.WHITE)
-                .build());
+        options.setStyle(
+                PinConfiguration.builder()
+                        .setScale(1.5f)
+                        .setGlyph(glyphImage)
+                        .setBackgroundColor(Color.BLUE)
+                        .setBorderColor(Color.WHITE)
+                        .build());
 
         Marker marker = map.addMarker(options);
         // [START_EXCLUDE]
         LatLngAltitude markerPos = options.getPosition();
         if (markerPos != null) {
-            LatLngAltitude camCenter = new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
+            LatLngAltitude camCenter =
+                    new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
             Camera targetCamera = new Camera(camCenter, 0.0, 45.0, 0.0, 500.0);
             map.flyCameraTo(new FlyToOptions(targetCamera, 3000L));
         }
@@ -189,14 +186,11 @@ public class MarkerSnippets {
         // [END maps_android_3d_marker_custom_icon_java]
     }
 
-    /**
-     * Adds a marker with a colored Glyph.
-     */
+    /** Adds a marker with a colored Glyph. */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "5. Color Glyph",
-        description = "Adds a marker with a customized glyph color."
-    )
+            title = "5. Color Glyph",
+            description = "Adds a marker with a customized glyph color.")
     public void addMarkerWithColorGlyph() {
         // [START maps_android_3d_marker_glyph_color_java]
         LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
@@ -204,15 +198,14 @@ public class MarkerSnippets {
         MarkerOptions options = new MarkerOptions();
         options.setPosition(position);
         options.setLabel("Color Glyph");
-        options.setStyle(PinConfiguration.builder()
-                .setGlyph(Glyph.fromColor(Color.CYAN))
-                .build());
+        options.setStyle(PinConfiguration.builder().setGlyph(Glyph.fromColor(Color.CYAN)).build());
 
         map.addMarker(options);
         // [START_EXCLUDE]
         LatLngAltitude markerPos = options.getPosition();
         if (markerPos != null) {
-            LatLngAltitude camCenter = new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
+            LatLngAltitude camCenter =
+                    new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
             Camera targetCamera = new Camera(camCenter, 0.0, 45.0, 0.0, 500.0);
             map.flyCameraTo(new FlyToOptions(targetCamera, 3000L));
         }
@@ -220,14 +213,9 @@ public class MarkerSnippets {
         // [END maps_android_3d_marker_glyph_color_java]
     }
 
-    /**
-     * Adds a marker with a text Glyph.
-     */
+    /** Adds a marker with a text Glyph. */
     @SuppressWarnings("unused")
-    @SnippetItem(
-        title = "6. Text Glyph",
-        description = "Adds a marker with text inside the glyph."
-    )
+    @SnippetItem(title = "6. Text Glyph", description = "Adds a marker with text inside the glyph.")
     public void addMarkerWithTextGlyph() {
         // [START maps_android_3d_marker_glyph_text_java]
         LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
@@ -235,15 +223,14 @@ public class MarkerSnippets {
         MarkerOptions options = new MarkerOptions();
         options.setPosition(position);
         options.setLabel("Text Glyph");
-        options.setStyle(PinConfiguration.builder()
-                .setGlyph(Glyph.fromText("NYC"))
-                .build());
+        options.setStyle(PinConfiguration.builder().setGlyph(Glyph.fromText("NYC")).build());
 
         map.addMarker(options);
         // [START_EXCLUDE]
         LatLngAltitude markerPos = options.getPosition();
         if (markerPos != null) {
-            LatLngAltitude camCenter = new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
+            LatLngAltitude camCenter =
+                    new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
             Camera targetCamera = new Camera(camCenter, 0.0, 45.0, 0.0, 500.0);
             map.flyCameraTo(new FlyToOptions(targetCamera, 3000L));
         }
@@ -251,14 +238,11 @@ public class MarkerSnippets {
         // [END maps_android_3d_marker_glyph_text_java]
     }
 
-    /**
-     * Adds a marker with a circle Glyph.
-     */
+    /** Adds a marker with a circle Glyph. */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "7. Circle Glyph",
-        description = "Adds a marker with a default circle glyph."
-    )
+            title = "7. Circle Glyph",
+            description = "Adds a marker with a default circle glyph.")
     public void addMarkerWithCircleGlyph() {
         // [START maps_android_3d_marker_glyph_circle_java]
         LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
@@ -269,15 +253,14 @@ public class MarkerSnippets {
         MarkerOptions options = new MarkerOptions();
         options.setPosition(position);
         options.setLabel("Circle Glyph");
-        options.setStyle(PinConfiguration.builder()
-                .setGlyph(glyph)
-                .build());
+        options.setStyle(PinConfiguration.builder().setGlyph(glyph).build());
 
         map.addMarker(options);
         // [START_EXCLUDE]
         LatLngAltitude markerPos = options.getPosition();
         if (markerPos != null) {
-            LatLngAltitude camCenter = new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
+            LatLngAltitude camCenter =
+                    new LatLngAltitude(markerPos.getLatitude(), markerPos.getLongitude(), 0.0);
             Camera targetCamera = new Camera(camCenter, 0.0, 45.0, 0.0, 500.0);
             map.flyCameraTo(new FlyToOptions(targetCamera, 3000L));
         }

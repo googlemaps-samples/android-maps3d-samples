@@ -16,12 +16,15 @@
 
 package com.example.snippets.kotlin
 
+import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
+import com.example.snippets.common.R
 import com.google.android.gms.maps3d.Map3DView
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,7 +37,7 @@ class SnippetDiscoveryTest {
     @Test
     fun verifyAllSnippetsLaunchWithoutCrash() {
         val snippets = SnippetRegistry.snippets.keys
-        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val context = ApplicationProvider.getApplicationContext<Context>()
 
         for (snippetTitle in snippets) {
             val intent = Intent(context, MapActivity::class.java).apply {
@@ -47,7 +50,7 @@ class SnippetDiscoveryTest {
                     val latch = CountDownLatch(1)
                     scenario.onActivity { activity ->
                         // Verify map view exists
-                        val map = activity.findViewById<Map3DView>(com.example.snippets.common.R.id.map)
+                        val map = activity.findViewById<Map3DView>(R.id.map)
                         if (map != null) {
                             latch.countDown()
                         }
@@ -65,17 +68,17 @@ class SnippetDiscoveryTest {
     @Test
     fun verifySnippetGroupsLoaded() {
         val groups = SnippetRegistry.getSnippetGroups()
-        org.junit.Assert.assertNotNull("Snippet groups list should not be null", groups)
-        org.junit.Assert.assertFalse("Snippet groups list should not be empty", groups.isEmpty())
+        assertNotNull("Snippet groups list should not be null", groups)
+        assertFalse("Snippet groups list should not be empty", groups.isEmpty())
 
         for (group in groups) {
-            org.junit.Assert.assertNotNull("Group title should not be null", group.title)
-            org.junit.Assert.assertFalse("Group title should not be empty", group.title.isEmpty())
-            org.junit.Assert.assertFalse("Group '${group.title}' must have items", group.items.isEmpty())
+            assertNotNull("Group title should not be null", group.title)
+            assertFalse("Group title should not be empty", group.title.isEmpty())
+            assertFalse("Group '\${group.title}' must have items", group.items.isEmpty())
 
             for (item in group.items) {
-                org.junit.Assert.assertNotNull("Snippet title should not be null", item.title)
-                org.junit.Assert.assertFalse("Snippet title should not be empty", item.title.isEmpty())
+                assertNotNull("Snippet title should not be null", item.title)
+                assertFalse("Snippet title should not be empty", item.title.isEmpty())
             }
         }
     }

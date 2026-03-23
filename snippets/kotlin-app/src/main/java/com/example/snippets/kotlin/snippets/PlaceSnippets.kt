@@ -29,7 +29,7 @@ import com.google.android.gms.maps3d.model.latLngAltitude
 
 @SnippetGroup(
     title = "Places",
-    description = "Snippets demonstrating Place (POI/Building) interaction algorithms."
+    description = "Snippets demonstrating Place (POI/Building) interaction algorithms.",
 )
 class PlaceSnippets(private val context: Context, private val map: TrackedMap3D) {
     /**
@@ -38,7 +38,7 @@ class PlaceSnippets(private val context: Context, private val map: TrackedMap3D)
     @Suppress("unused")
     @SnippetItem(
         title = "1. Listen Clicks",
-        description = "Sets up a listener that logs the Place ID when a user clicks on a 3D building or POI."
+        description = "Sets up a listener that logs the Place ID when a user clicks on a 3D building or POI.",
     )
     fun listenToPlaceClicks() {
         // [START maps_android_3d_place_click_kt]
@@ -53,14 +53,20 @@ class PlaceSnippets(private val context: Context, private val map: TrackedMap3D)
         // [END maps_android_3d_place_click_kt]
 
         // Position the camera to show the buildings (Empire State Building area)
-        map.flyCameraTo(flyToOptions {
-            endCamera = camera {
-                center = latLngAltitude { latitude = 40.7484; longitude = -73.9857; altitude = 0.0 }
-                tilt = 45.0
-                heading = 0.0
-                range = 500.0
-            }
-            durationInMillis = 2000
-        })
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = latLngAltitude {
+                        latitude = 40.7484
+                        longitude = -73.9857
+                        altitude = 0.0
+                    }
+                    tilt = 45.0
+                    heading = 0.0
+                    range = 500.0
+                }
+                durationInMillis = 2000
+            },
+        )
     }
 }

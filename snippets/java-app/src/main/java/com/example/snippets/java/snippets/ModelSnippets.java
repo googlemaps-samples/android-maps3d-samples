@@ -21,6 +21,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 import com.example.snippets.java.TrackedMap3D;
+import com.example.snippets.java.annotations.SnippetGroup;
+import com.example.snippets.java.annotations.SnippetItem;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyToOptions;
@@ -29,16 +31,14 @@ import com.google.android.gms.maps3d.model.Model;
 import com.google.android.gms.maps3d.model.ModelOptions;
 import com.google.android.gms.maps3d.model.Orientation;
 import com.google.android.gms.maps3d.model.Vector3D;
-import com.example.snippets.java.annotations.SnippetGroup;
-import com.example.snippets.java.annotations.SnippetItem;
 
 @SnippetGroup(
-    title = "Models",
-    description = "Snippets demonstrating 3D Model (GLB) integration and configuration."
-)
+        title = "Models",
+        description = "Snippets demonstrating 3D Model (GLB) integration and configuration.")
 public class ModelSnippets {
 
-    public static final String SAUCER_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/UFO.glb";
+    public static final String SAUCER_URL =
+            "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/UFO.glb";
 
     private final Context context;
     private final TrackedMap3D map;
@@ -48,32 +48,36 @@ public class ModelSnippets {
         this.map = map;
     }
 
-    /**
-     * Adds a basic 3D model (GLB) to the map from a URL.
-     */
+    /** Adds a basic 3D model (GLB) to the map from a URL. */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "1. Basic",
-        description = "Loads a GLB model from a URL and places it clamped to the ground."
-    )
+            title = "1. Basic",
+            description = "Loads a GLB model from a URL and places it clamped to the ground.")
     public void addBasicModel() {
         // [START maps_android_3d_model_add_java]
         LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 100.0);
-        
+
         ModelOptions options = new ModelOptions();
         options.setPosition(position);
         options.setUrl(SAUCER_URL);
         options.setAltitudeMode(AltitudeMode.RELATIVE_TO_MESH);
         options.setOrientation(new Orientation(0.0, 90.0, 0.0)); // heading, tilt, roll
         options.setScale(new Vector3D(10.0, 10.0, 10.0));
-        
+
         Model model = map.addModel(options);
         // [START_EXCLUDE]
-        model.setClickListener(() -> {
-            new Handler(Looper.getMainLooper()).post(() -> {
-                Toast.makeText(context, "Model Clicked!", Toast.LENGTH_SHORT).show();
-            });
-        });
+        model.setClickListener(
+                () -> {
+                    new Handler(Looper.getMainLooper())
+                            .post(
+                                    () -> {
+                                        Toast.makeText(
+                                                        context,
+                                                        "Model Clicked!",
+                                                        Toast.LENGTH_SHORT)
+                                                .show();
+                                    });
+                });
         // [END_EXCLUDE]
         // [END maps_android_3d_model_add_java]
 

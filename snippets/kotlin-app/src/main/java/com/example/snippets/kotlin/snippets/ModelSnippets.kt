@@ -33,7 +33,7 @@ import com.google.android.gms.maps3d.model.vector3D
 
 @SnippetGroup(
     title = "Models",
-    description = "Snippets demonstrating 3D Model (GLB) integration and configuration."
+    description = "Snippets demonstrating 3D Model (GLB) integration and configuration.",
 )
 class ModelSnippets(private val context: Context, private val map: TrackedMap3D) {
     companion object {
@@ -46,7 +46,7 @@ class ModelSnippets(private val context: Context, private val map: TrackedMap3D)
     @Suppress("unused")
     @SnippetItem(
         title = "1. Basic",
-        description = "Loads a GLB model from a URL and places it clamped to the ground."
+        description = "Loads a GLB model from a URL and places it clamped to the ground.",
     )
     fun addBasicModel() {
         // [START maps_android_3d_model_add_kt]
@@ -65,7 +65,11 @@ class ModelSnippets(private val context: Context, private val map: TrackedMap3D)
                 heading = 0.0
                 roll = 0.0
             }
-            scale = vector3D { x = 10.0; y = 10.0; z = 10.0 }
+            scale = vector3D {
+                x = 10.0
+                y = 10.0
+                z = 10.0
+            }
         }
 
         val model = map.addModel(options)
@@ -79,14 +83,16 @@ class ModelSnippets(private val context: Context, private val map: TrackedMap3D)
         // [END maps_android_3d_model_add_kt]
 
         // Position the camera to show the model
-        map.flyCameraTo(flyToOptions {
-            endCamera = camera {
-                center = position
-                tilt = 45.0
-                heading = 0.0
-                range = 300.0
-            }
-            durationInMillis = 2000
-        })
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = position
+                    tilt = 45.0
+                    heading = 0.0
+                    range = 300.0
+                }
+                durationInMillis = 2000
+            },
+        )
     }
 }

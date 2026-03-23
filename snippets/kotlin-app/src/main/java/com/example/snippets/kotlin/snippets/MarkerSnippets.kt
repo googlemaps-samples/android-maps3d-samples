@@ -37,7 +37,7 @@ import com.google.android.gms.maps3d.model.markerOptions
 
 @SnippetGroup(
     title = "Markers",
-    description = "Snippets demonstrating standard, extruded, and custom styled markers."
+    description = "Snippets demonstrating standard, extruded, and custom styled markers.",
 )
 class MarkerSnippets(private val context: Context, private val map: TrackedMap3D) {
 
@@ -47,7 +47,7 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
     @Suppress("unused")
     @SnippetItem(
         title = "1. Basic",
-        description = "Adds a standard marker."
+        description = "Adds a standard marker.",
     )
     fun addBasicMarker() {
         // [START maps_android_3d_marker_add_kt]
@@ -56,28 +56,30 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
             longitude = -122.0841
             altitude = 10.0
         }
-        
+
         val options = markerOptions {
             this.position = position
             label = "Basic Marker"
             // MarkerOptions uses label, not title.
         }
-        
+
         val marker = map.addMarker(options)
         // [START_EXCLUDE]
-        map.flyCameraTo(flyToOptions {
-            endCamera = camera {
-                center = latLngAltitude {
-                    latitude = position.latitude
-                    longitude = position.longitude
-                    altitude = 0.0
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = latLngAltitude {
+                        latitude = position.latitude
+                        longitude = position.longitude
+                        altitude = 0.0
+                    }
+                    tilt = 45.0
+                    heading = 0.0
+                    range = 500.0
                 }
-                tilt = 45.0
-                heading = 0.0
-                range = 500.0
-            }
-            durationInMillis = 3000 // Slightly longer
-        })
+                durationInMillis = 3000 // Slightly longer
+            },
+        )
         // [END_EXCLUDE]
         // [END maps_android_3d_marker_add_kt]
     }
@@ -88,7 +90,7 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
     @Suppress("unused")
     @SnippetItem(
         title = "2. Advanced",
-        description = "Adds a 'Priority Marker' that is extruded and collides with other markers."
+        description = "Adds a 'Priority Marker' that is extruded and collides with other markers.",
     )
     fun addAdvancedMarker() {
         // [START maps_android_3d_marker_options_kt]
@@ -104,22 +106,24 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
             isExtruded = true
             isDrawnWhenOccluded = true
         }
-        
+
         val marker = map.addMarker(options)
         // [START_EXCLUDE]
-        map.flyCameraTo(flyToOptions {
-            endCamera = camera {
-                center = latLngAltitude {
-                    latitude = options.position.latitude
-                    longitude = options.position.longitude
-                    altitude = 0.0
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = latLngAltitude {
+                        latitude = options.position.latitude
+                        longitude = options.position.longitude
+                        altitude = 0.0
+                    }
+                    tilt = 45.0
+                    heading = 0.0
+                    range = 500.0
                 }
-                tilt = 45.0
-                heading = 0.0
-                range = 500.0
-            }
-            durationInMillis = 3000
-        })
+                durationInMillis = 3000
+            },
+        )
         // [END_EXCLUDE]
         // [END maps_android_3d_marker_options_kt]
     }
@@ -130,31 +134,35 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
     @Suppress("unused")
     @SnippetItem(
         title = "3. Click",
-        description = "Adds a marker that logs a message when clicked."
+        description = "Adds a marker that logs a message when clicked.",
     )
     fun handleMarkerClick() {
         // [START maps_android_3d_marker_click_kt]
-        val marker = map.addMarker(markerOptions {
-            position = latLngAltitude {
-                latitude = 37.42
-                longitude = -122.08
-                altitude = 0.0
-            }
-        })
-        // [START_EXCLUDE]
-        map.flyCameraTo(flyToOptions {
-            endCamera = camera {
-                center = latLngAltitude {
+        val marker = map.addMarker(
+            markerOptions {
+                position = latLngAltitude {
                     latitude = 37.42
                     longitude = -122.08
                     altitude = 0.0
                 }
-                tilt = 45.0
-                heading = 0.0
-                range = 500.0
-            }
-            durationInMillis = 3000
-        })
+            },
+        )
+        // [START_EXCLUDE]
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = latLngAltitude {
+                        latitude = 37.42
+                        longitude = -122.08
+                        altitude = 0.0
+                    }
+                    tilt = 45.0
+                    heading = 0.0
+                    range = 500.0
+                }
+                durationInMillis = 3000
+            },
+        )
 
         // [START_EXCLUDE]
         marker?.setClickListener {
@@ -172,7 +180,7 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
     @Suppress("unused")
     @SnippetItem(
         title = "4. Custom Icon",
-        description = "Adds a marker with a custom icon using PinConfiguration and Glyph styling."
+        description = "Adds a marker with a custom icon using PinConfiguration and Glyph styling.",
     )
     fun addCustomMarker(context: Context) {
         // [START maps_android_3d_marker_custom_icon_kt]
@@ -189,29 +197,33 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
             }
             label = "Custom Icon Marker"
             // Set the style using PinConfiguration
-            setStyle(PinConfiguration.builder()
-                .setScale(1.5f)
-                .setGlyph(glyphImage)
-                .setBackgroundColor(Color.BLUE)
-                .setBorderColor(Color.WHITE)
-                .build())
+            setStyle(
+                PinConfiguration.builder()
+                    .setScale(1.5f)
+                    .setGlyph(glyphImage)
+                    .setBackgroundColor(Color.BLUE)
+                    .setBorderColor(Color.WHITE)
+                    .build(),
+            )
         }
 
         val marker = map.addMarker(options)
         // [START_EXCLUDE]
-        map.flyCameraTo(flyToOptions {
-            endCamera = camera {
-                center = latLngAltitude {
-                    latitude = options.position.latitude
-                    longitude = options.position.longitude
-                    altitude = 0.0
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = latLngAltitude {
+                        latitude = options.position.latitude
+                        longitude = options.position.longitude
+                        altitude = 0.0
+                    }
+                    tilt = 45.0
+                    heading = 0.0
+                    range = 500.0
                 }
-                tilt = 45.0
-                heading = 0.0
-                range = 500.0
-            }
-            durationInMillis = 3000
-        })
+                durationInMillis = 3000
+            },
+        )
         // [END_EXCLUDE]
     }
 
@@ -221,7 +233,7 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
     @Suppress("unused")
     @SnippetItem(
         title = "5. Color Glyph",
-        description = "Adds a marker with a customized glyph color."
+        description = "Adds a marker with a customized glyph color.",
     )
     fun addMarkerWithColorGlyph() {
         // [START maps_android_3d_marker_glyph_color_kt]
@@ -232,25 +244,29 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
                 altitude = 10.0
             }
             label = "Color Glyph"
-            setStyle(PinConfiguration.builder()
-                .setGlyph(Glyph.fromColor(Color.CYAN))
-                .build())
+            setStyle(
+                PinConfiguration.builder()
+                    .setGlyph(Glyph.fromColor(Color.CYAN))
+                    .build(),
+            )
         }
         map.addMarker(options)
         // [START_EXCLUDE]
-        map.flyCameraTo(flyToOptions {
-            endCamera = camera {
-                center = latLngAltitude {
-                    latitude = options.position.latitude
-                    longitude = options.position.longitude
-                    altitude = 0.0
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = latLngAltitude {
+                        latitude = options.position.latitude
+                        longitude = options.position.longitude
+                        altitude = 0.0
+                    }
+                    tilt = 45.0
+                    heading = 0.0
+                    range = 500.0
                 }
-                tilt = 45.0
-                heading = 0.0
-                range = 500.0
-            }
-            durationInMillis = 3000
-        })
+                durationInMillis = 3000
+            },
+        )
         // [END_EXCLUDE]
         // [END maps_android_3d_marker_glyph_color_kt]
     }
@@ -261,7 +277,7 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
     @Suppress("unused")
     @SnippetItem(
         title = "6. Text Glyph",
-        description = "Adds a marker with text inside the glyph."
+        description = "Adds a marker with text inside the glyph.",
     )
     fun addMarkerWithTextGlyph() {
         // [START maps_android_3d_marker_glyph_text_kt]
@@ -272,25 +288,29 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
                 altitude = 10.0
             }
             label = "Text Glyph"
-            setStyle(PinConfiguration.builder()
-                .setGlyph(Glyph.fromText("NYC"))
-                .build())
+            setStyle(
+                PinConfiguration.builder()
+                    .setGlyph(Glyph.fromText("NYC"))
+                    .build(),
+            )
         }
         map.addMarker(options)
         // [START_EXCLUDE]
-        map.flyCameraTo(flyToOptions {
-            endCamera = camera {
-                center = latLngAltitude {
-                    latitude = options.position.latitude
-                    longitude = options.position.longitude
-                    altitude = 0.0
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = latLngAltitude {
+                        latitude = options.position.latitude
+                        longitude = options.position.longitude
+                        altitude = 0.0
+                    }
+                    tilt = 45.0
+                    heading = 0.0
+                    range = 500.0
                 }
-                tilt = 45.0
-                heading = 0.0
-                range = 500.0
-            }
-            durationInMillis = 3000
-        })
+                durationInMillis = 3000
+            },
+        )
         // [END_EXCLUDE]
         // [END maps_android_3d_marker_glyph_text_kt]
     }
@@ -301,7 +321,7 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
     @Suppress("unused")
     @SnippetItem(
         title = "7. Circle Glyph",
-        description = "Adds a marker with a default circle glyph."
+        description = "Adds a marker with a default circle glyph.",
     )
     fun addMarkerWithCircleGlyph() {
         // [START maps_android_3d_marker_glyph_circle_kt]
@@ -315,27 +335,30 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
                 altitude = 10.0
             }
             label = "Circle Glyph"
-            setStyle(PinConfiguration.builder()
-                .setGlyph(glyph)
-                .build())
+            setStyle(
+                PinConfiguration.builder()
+                    .setGlyph(glyph)
+                    .build(),
+            )
         }
         map.addMarker(options)
         // [START_EXCLUDE]
-        map.flyCameraTo(flyToOptions {
-            endCamera = camera {
-                center = latLngAltitude {
-                    latitude = options.position.latitude
-                    longitude = options.position.longitude
-                    altitude = 0.0
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = latLngAltitude {
+                        latitude = options.position.latitude
+                        longitude = options.position.longitude
+                        altitude = 0.0
+                    }
+                    tilt = 45.0
+                    heading = 0.0
+                    range = 500.0
                 }
-                tilt = 45.0
-                heading = 0.0
-                range = 500.0
-            }
-            durationInMillis = 3000
-        })
+                durationInMillis = 3000
+            },
+        )
         // [END_EXCLUDE]
         // [END maps_android_3d_marker_glyph_circle_kt]
     }
 }
-

@@ -16,21 +16,20 @@
 
 package com.example.snippets.java;
 
+import static org.junit.Assert.fail;
+
 import android.content.Context;
 import android.content.Intent;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.platform.app.InstrumentationRegistry;
+import com.example.snippets.common.R;
 import com.google.android.gms.maps3d.Map3DView;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.Set;
-
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class SnippetRunTest {
@@ -47,13 +46,14 @@ public class SnippetRunTest {
 
             try (ActivityScenario<MapActivity> scenario = ActivityScenario.launch(intent)) {
                 CountDownLatch latch = new CountDownLatch(1);
-                scenario.onActivity(activity -> {
-                    // Verify map view exists
-                    Map3DView map = activity.findViewById(com.example.snippets.common.R.id.map);
-                    if (map != null) {
-                        latch.countDown();
-                    }
-                });
+                scenario.onActivity(
+                        activity -> {
+                            // Verify map view exists
+                            Map3DView map = activity.findViewById(R.id.map);
+                            if (map != null) {
+                                latch.countDown();
+                            }
+                        });
                 if (!latch.await(5, TimeUnit.SECONDS)) {
                     fail("Map3DView not found or activity timeout for snippet: " + snippetTitle);
                 }

@@ -16,24 +16,23 @@
 
 package com.example.snippets.java.snippets;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.example.snippets.java.TrackedMap3D;
-import com.google.android.gms.maps3d.OnMap3DClickListener;
-import com.google.android.gms.maps3d.model.LatLngAltitude;
-import com.google.android.gms.maps3d.model.Camera;
-import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.example.snippets.java.annotations.SnippetGroup;
 import com.example.snippets.java.annotations.SnippetItem;
+import com.google.android.gms.maps3d.OnMap3DClickListener;
+import com.google.android.gms.maps3d.model.Camera;
+import com.google.android.gms.maps3d.model.FlyToOptions;
+import com.google.android.gms.maps3d.model.LatLngAltitude;
 
 @SnippetGroup(
-    title = "Places",
-    description = "Snippets demonstrating Place (POI/Building) interaction algorithms."
-)
+        title = "Places",
+        description = "Snippets demonstrating Place (POI/Building) interaction algorithms.")
 public class PlaceSnippets {
 
     private final Context context;
@@ -44,27 +43,33 @@ public class PlaceSnippets {
         this.map = map;
     }
 
-    /**
-     * Listens for clicks on 3D Places (buildings, POIs).
-     */
+    /** Listens for clicks on 3D Places (buildings, POIs). */
     @SuppressWarnings("unused")
     @SnippetItem(
-        title = "1. Listen Clicks",
-        description = "Sets up a listener that logs the Place ID when a user clicks on a 3D building or POI."
-    )
+            title = "1. Listen Clicks",
+            description =
+                    "Sets up a listener that logs the Place ID when a user clicks on a 3D building or POI.")
     public void listenToPlaceClicks() {
         // [START maps_android_3d_place_click_java]
-        map.setMap3DClickListener(new OnMap3DClickListener() {
-            @Override
-            public void onMap3DClick(@NonNull LatLngAltitude location, @Nullable String placeId) {
-                if (placeId != null) {
-                    // Handle place click - Show a Toast on the UI thread
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        Toast.makeText(context, "Clicked Place ID: " + placeId, Toast.LENGTH_SHORT).show();
-                    });
-                }
-            }
-        });
+        map.setMap3DClickListener(
+                new OnMap3DClickListener() {
+                    @Override
+                    public void onMap3DClick(
+                            @NonNull LatLngAltitude location, @Nullable String placeId) {
+                        if (placeId != null) {
+                            // Handle place click - Show a Toast on the UI thread
+                            new Handler(Looper.getMainLooper())
+                                    .post(
+                                            () -> {
+                                                Toast.makeText(
+                                                                context,
+                                                                "Clicked Place ID: " + placeId,
+                                                                Toast.LENGTH_SHORT)
+                                                        .show();
+                                            });
+                        }
+                    }
+                });
         // [END maps_android_3d_place_click_java]
 
         // Position the camera to show the buildings (Empire State Building area)

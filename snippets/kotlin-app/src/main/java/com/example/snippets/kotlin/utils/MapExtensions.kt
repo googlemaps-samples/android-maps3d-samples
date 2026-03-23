@@ -1,14 +1,14 @@
 package com.example.snippets.kotlin.utils
 
+import com.example.snippets.kotlin.TrackedMap3D
 import com.google.android.gms.maps3d.GoogleMap3D
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
-import com.example.snippets.kotlin.TrackedMap3D
 
 /**
  * **Coroutine Helper**: Awaiting Camera Animation.
  * Pauses execution until the camera stops moving (flyTo or flyAround).
- * 
+ *
  * @param action The block that triggers the animation, executed AFTER the listener is attached.
  */
 suspend fun TrackedMap3D.awaitAnimation(action: () -> Unit) {

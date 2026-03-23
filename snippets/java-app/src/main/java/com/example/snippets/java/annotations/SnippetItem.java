@@ -21,9 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Marks a method inside a [SnippetGroup] with execution metadata.
- */
+/** Marks a method inside a [SnippetGroup] with execution metadata. */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SnippetItem {

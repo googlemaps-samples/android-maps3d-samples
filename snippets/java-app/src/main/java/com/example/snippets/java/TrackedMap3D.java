@@ -23,23 +23,21 @@ import com.google.android.gms.maps3d.OnMapReadyListener;
 import com.google.android.gms.maps3d.OnMapSteadyListener;
 import com.google.android.gms.maps3d.Popover;
 import com.google.android.gms.maps3d.model.Camera;
+import com.google.android.gms.maps3d.model.CameraRestriction;
+import com.google.android.gms.maps3d.model.FlyAroundOptions;
 import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.Marker;
 import com.google.android.gms.maps3d.model.MarkerOptions;
-import com.google.android.gms.maps3d.model.Polyline;
-import com.google.android.gms.maps3d.model.PolylineOptions;
-import com.google.android.gms.maps3d.model.Polygon;
-import com.google.android.gms.maps3d.model.PolygonOptions;
 import com.google.android.gms.maps3d.model.Model;
 import com.google.android.gms.maps3d.model.ModelOptions;
+import com.google.android.gms.maps3d.model.Polygon;
+import com.google.android.gms.maps3d.model.PolygonOptions;
+import com.google.android.gms.maps3d.model.Polyline;
+import com.google.android.gms.maps3d.model.PolylineOptions;
 import com.google.android.gms.maps3d.model.PopoverOptions;
-import com.google.android.gms.maps3d.model.CameraRestriction;
-
 import java.util.List;
 
-/**
- * Decorator wrapper around GoogleMap3D to track elements added during a snippet session.
- */
+/** Decorator wrapper around GoogleMap3D to track elements added during a snippet session. */
 public class TrackedMap3D {
 
     private final GoogleMap3D delegate;
@@ -80,17 +78,48 @@ public class TrackedMap3D {
         return popover;
     }
 
-    public void setCamera(Camera camera) { delegate.setCamera(camera); }
-    public void setCameraChangedListener(OnCameraChangedListener listener) { delegate.setCameraChangedListener(listener); }
-    public void setMap3DClickListener(OnMap3DClickListener listener) { delegate.setMap3DClickListener(listener); }
-    public void flyCameraAround(com.google.android.gms.maps3d.model.FlyAroundOptions options) { delegate.flyCameraAround(options); }
+    public void setCamera(Camera camera) {
+        delegate.setCamera(camera);
+    }
+
+    public void setCameraChangedListener(OnCameraChangedListener listener) {
+        delegate.setCameraChangedListener(listener);
+    }
+
+    public void setMap3DClickListener(OnMap3DClickListener listener) {
+        delegate.setMap3DClickListener(listener);
+    }
+
+    public void flyCameraAround(FlyAroundOptions options) {
+        delegate.flyCameraAround(options);
+    }
 
     // Pass-through standard map calls if any are invoked inside snippets
-    public Camera getCamera() { return delegate.getCamera(); }
-    public void stopCameraAnimation() { delegate.stopCameraAnimation(); }
-    public void flyCameraTo(FlyToOptions options) { delegate.flyCameraTo(options); }
-    public void setOnMapReadyListener(OnMapReadyListener listener) { delegate.setOnMapReadyListener(listener); }
-    public void setOnMapSteadyListener(OnMapSteadyListener listener) { delegate.setOnMapSteadyListener(listener); }
-    public void setCameraRestriction(CameraRestriction restriction) { delegate.setCameraRestriction(restriction); }
-    public CameraRestriction getCameraRestriction() { return delegate.getCameraRestriction(); }
+    public Camera getCamera() {
+        return delegate.getCamera();
+    }
+
+    public void stopCameraAnimation() {
+        delegate.stopCameraAnimation();
+    }
+
+    public void flyCameraTo(FlyToOptions options) {
+        delegate.flyCameraTo(options);
+    }
+
+    public void setOnMapReadyListener(OnMapReadyListener listener) {
+        delegate.setOnMapReadyListener(listener);
+    }
+
+    public void setOnMapSteadyListener(OnMapSteadyListener listener) {
+        delegate.setOnMapSteadyListener(listener);
+    }
+
+    public void setCameraRestriction(CameraRestriction restriction) {
+        delegate.setCameraRestriction(restriction);
+    }
+
+    public CameraRestriction getCameraRestriction() {
+        return delegate.getCameraRestriction();
+    }
 }
