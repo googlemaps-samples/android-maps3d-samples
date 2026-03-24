@@ -34,6 +34,8 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Fix: Ensure the bundle can deserialize the Maps 3D SDK's Camera Parcelable on rotation
+        savedInstanceState?.classLoader = javaClass.classLoader
         super.onCreate(savedInstanceState)
         // Enables "Edge-to-Edge" mode, allowing the map to draw behind the system bars
         enableEdgeToEdge()

@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     // clicks buttons multiple times.  We do this in the activity for simplicity, but recommend
     // tracking state in a view model.
 
-    // TODO: handle rotation bug... :/
+    // tracking state in a view model.
     private val activeMarkers = mutableListOf<Marker>()
     private val activePolygons = mutableListOf<Polygon>()
     private val activePolylines = mutableListOf<Polyline>()
@@ -77,6 +77,8 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private val activePopovers = mutableListOf<Popover>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Fix: Ensure the bundle can deserialize the Maps 3D SDK's Camera Parcelable on rotation
+        savedInstanceState?.classLoader = javaClass.classLoader
         super.onCreate(savedInstanceState)
 
         // Enables "Edge-to-Edge" mode, allowing the map to draw behind the system bars
