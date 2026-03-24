@@ -48,12 +48,6 @@ val MOUNT_KAALA = latLngAltitude {
     altitude = 0.0
 }
 
-val HANAUMA_BAY = latLngAltitude {
-    latitude = 21.27139
-    longitude = -157.69444
-    altitude = 0.0
-}
-
 val LANIKAI_BEACH = latLngAltitude {
     latitude = 21.39309
     longitude = -157.71546

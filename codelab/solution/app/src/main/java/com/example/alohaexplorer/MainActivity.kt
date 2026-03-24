@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
+import com.google.android.gms.maps3d.Popover
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Glyph
@@ -32,6 +34,9 @@ import com.google.android.gms.maps3d.model.orientation
 import com.google.android.gms.maps3d.model.pinConfiguration
 import com.google.android.gms.maps3d.model.polygonOptions
 import com.google.android.gms.maps3d.model.polylineOptions
+import com.google.android.gms.maps3d.model.popoverOptions
+import com.google.android.gms.maps3d.model.popoverShadow
+import com.google.android.gms.maps3d.model.popoverStyle
 import com.google.android.gms.maps3d.model.vector3D
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -69,6 +74,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private val activePolygons = mutableListOf<Polygon>()
     private val activePolylines = mutableListOf<Polyline>()
     private val activeModels = mutableListOf<Model>()
+    private val activePopovers = mutableListOf<Popover>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -157,6 +163,14 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             }
         }
 
+        findViewById<Button>(R.id.btn_show_popovers).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                setupPopover(map)
+                flyCameraToAndWait(map, MARKER_CAMERA)
+            }
+        }
+
         findViewById<Button>(R.id.btn_tour).setOnClickListener {
             currentAnimationJob?.cancel()
             currentAnimationJob = lifecycleScope.launch { 
@@ -188,7 +202,6 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val locations = listOf(
             HONOLULU to "Honolulu",
             DIAMOND_HEAD to "Diamond Head",
-            HANAUMA_BAY to "Hanauma Bay",
             KOKO_HEAD to "Koko Head",
             LANIKAI_BEACH to "Lanikai Beach",
             MOUNT_KAALA to "Mount Ka'ala",
@@ -210,15 +223,29 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
         // Fly to each location
         for ((location, _) in locations) {
+            val camera = camera {
+                center = location
+                tilt = 45.0
+                range = 2500.0
+                heading = 0.0
+            }
+
             flyCameraToAndWait(
                 map,
-                camera {
-                    center = location
-                    tilt = 45.0
-                    range = 2500.0
-                    heading = 0.0
-                },
+                camera,
                 duration = 3.seconds)
+
+            // Wait for the scene to load
+            awaitMapSteady(map)
+
+            map.flyCameraAround(
+                flyAroundOptions {
+                    center = camera
+                    rounds = 1.0
+                    durationInMillis = 3.seconds.inWholeMilliseconds
+                }
+            )
+
             // Pause at each location
             delay(1.5.seconds)
         }
@@ -294,6 +321,9 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
         activeModels.forEach { it.remove() }
         activeModels.clear()
+
+        activePopovers.forEach { it.remove() }
+        activePopovers.clear()
     }
 
     private fun addPolygon(map: GoogleMap3D) {
@@ -383,6 +413,47 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
         // Track it so we can remove it later
         activeModels.add(balloon)
+    }
+
+    private fun setupPopover(map: GoogleMap3D) {
+        clearMap()
+
+        // 2. Create a simple text view for the popover content
+        val textView = TextView(this@MainActivity).apply {
+            text = getString(R.string.toast_palace)
+            setPadding(32, 16, 32, 16)
+            setTextColor(Color.BLACK)
+            setBackgroundColor(Color.WHITE)
+        }
+
+        // 3. Add a Popover attached to the same location
+        val popover = map.addPopover(popoverOptions {
+            positionAnchor = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude
+                longitude = IOLANI_PALACE.longitude
+                altitude = 10.0
+            }
+            altitudeMode = AltitudeMode.RELATIVE_TO_MESH
+            content = textView
+            autoCloseEnabled = true // Close when user clicks elsewhere
+            autoPanEnabled = true   // Move camera to ensure popover is visible
+            popoverStyle = popoverStyle {
+                backgroundColor = Color.WHITE
+                borderRadius = 16f
+                shadow = popoverShadow {
+                    color = Color.DKGRAY
+                    radius = 8f
+                    offsetX = 4f
+                    offsetY = 4f
+                }
+            }
+        })
+
+        // Track it
+        activePopovers.add(popover)
+
+        // Show immediately for demo purposes
+        popover.show()
     }
 
     /**
