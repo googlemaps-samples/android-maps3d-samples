@@ -356,7 +356,6 @@ private suspend fun flyToHonolulu(map: GoogleMap3D) {
     // Duration using Kotlin Duration extension
     val flyDuration = 5.seconds
     
-    println("Flying to Honolulu...")
     map.flyCameraTo(
         flyToOptions {
             endCamera = camera {
@@ -435,74 +434,73 @@ Objects in a 3D world need to know where they sit on the vertical "Z-axis".
 3.  **CLAMP_TO_GROUND**: Snaps to the terrain. Good for POIs.
 4.  **RELATIVE_TO_MESH**: Relative to the actual 3D objects (buildings/trees). Good for placing things on rooftops.
 
-### Helper: `resetMap()`
+### Helper: `resetMap()` and `addMarker()`
+
 You noticed we call `resetMap()` at the start. This prevents "ghost objects"—markers from previous clicks staying on the map. We iterate through our tracking lists (`activeMarkers`, etc.), call `.remove()` on each object to clear it from the 3D engine, and then clear the list.
+
+We also use a custom `addMarker(options: MarkerOptions)` helper method. Instead of duplicating the `Toast` listener and the list-tracking logic for every single marker, this helper centralizes it:
+```kotlin
+private fun addMarker(markerOptions: MarkerOptions) {
+    googleMap3D?.addMarker(markerOptions)?.also { marker ->
+        marker.setClickListener {
+            lifecycleScope.launch(Dispatchers.Main) {
+                Toast.makeText(this@MainActivity, getString(R.string.toast_clicked, marker.label), Toast.LENGTH_SHORT).show()
+            }
+        }
+        activeMarkers.add(marker)
+    }
+}
+```
+
 
 ```kotlin
 private fun addMarkers(map: GoogleMap3D) {
     resetMap()
 
-    buildList {
-        // 1. ABSOLUTE: Altitude is relative to the WGS84 ellipsoid (rough sea level).
-        add(map.addMarker(
-            markerOptions {
-                position = latLngAltitude {
-                    latitude = IOLANI_PALACE.latitude
-                    longitude = IOLANI_PALACE.longitude
-                    altitude = 100.0 // 100 meters above sea level
-                }
-                altitudeMode = AltitudeMode.ABSOLUTE
-                label = "Absolute (100m)"
-                isDrawnWhenOccluded = true
+    // 1. ABSOLUTE: Altitude is relative to the WGS84 ellipsoid (rough sea level).
+    addMarker(
+        markerOptions {
+            position = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude + 0.001
+                longitude = IOLANI_PALACE.longitude
+                altitude = 100.0 // 100 meters above sea level
             }
-        )?.apply {
-            setClickListener {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, "Clicked Absolute Marker", Toast.LENGTH_SHORT).show()
-                }
-            }
-        })
+            altitudeMode = AltitudeMode.ABSOLUTE
+            label = getString(R.string.label_absolute)
+            isDrawnWhenOccluded = true
+            isExtruded = true // Draws a line to the ground
+        }
+    )
 
-        // 2. RELATIVE_TO_GROUND: Altitude is added to the terrain height at that point.
-        add(map.addMarker(
-            markerOptions {
-                position = latLngAltitude {
-                    latitude = IOLANI_PALACE.latitude + 0.001 // Offset slightly
-                    longitude = IOLANI_PALACE.longitude
-                    altitude = 50.0 // 50m above ground
-                }
-                altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-                label = "Relative (50m)"
-                isDrawnWhenOccluded = true
+    // 2. RELATIVE_TO_GROUND: Altitude is added to the terrain height at that point.
+    addMarker(
+        markerOptions {
+            position = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude
+                longitude = IOLANI_PALACE.longitude
+                altitude = 50.0 // 50m above ground
             }
-        )?.apply {
-            setClickListener {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, "Clicked Relative Marker", Toast.LENGTH_SHORT).show()
-                }
-            }
-        })
+            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+            label = getString(R.string.label_relative)
+            isDrawnWhenOccluded = true
+            isExtruded = true
+        }
+    )
 
-        // 3. CLAMP_TO_GROUND: Snaps to the terrain.
-        add(map.addMarker(
-            markerOptions {
-                position = latLngAltitude {
-                    latitude = IOLANI_PALACE.latitude - 0.001 // Offset slightly
-                    longitude = IOLANI_PALACE.longitude
-                    altitude = 0.0 // Ignored
-                }
-                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                label = "Clamped"
-                isDrawnWhenOccluded = true
+    // 3. CLAMP_TO_GROUND: Snaps to the terrain.
+    addMarker(
+        markerOptions {
+            position = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude - 0.001
+                longitude = IOLANI_PALACE.longitude
+                altitude = 0.0 // Ignored
             }
-        )?.apply {
-            setClickListener {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, "Clicked Clamped Marker", Toast.LENGTH_SHORT).show()
-                }
-            }
-        })
-    }.filterNotNull().forEach { activeMarkers.add(it) }
+            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+            label = getString(R.string.label_clamped)
+            isDrawnWhenOccluded = true
+            isExtruded = true
+        }
+    )
 }
 
 <!-- TODO: Add screenshot here.

@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">Aloha Explorer</string>
+
+    <string name="toast_clicked">Clicked %1$s</string>
+    <string name="label_absolute">Absolute (100m)</string>
+    <string name="label_relative">Relative (50m)</string>
+    <string name="label_clamped">Clamped</string>
+    <string name="label_styled_pin">Styled Pin</string>
+    <string name="label_text_glyph">Text Glyph</string>
+    <string name="label_hibiscus">Hibiscus Marker</string>
+    <string name="label_polygon">Iolani Palace Polygon</string>
+
+    <string name="label_image_glyph">Image Glyph</string>
+    <string name="toast_palace">The Royal Palace: A symbol of Hawaiian sovereignty.</string>
+    <string name="toast_balloon">Clicked the Balloon!</string>
+    <string name="clicked_the_balloon">Clicked the Balloon!</string>
+    <string name="the_royal_palace">The Royal Palace: A symbol of Hawaiian sovereignty.</string>
+    <string name="fly_to_honolulu">Fly to Honolulu</string>
 </resources>

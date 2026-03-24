@@ -137,11 +137,9 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
     /*
     private suspend fun flyToHonolulu(map: GoogleMap3D) {
         // TODO: Step 2 - Position the Camera high above Honolulu
-        println("Flying to Honolulu...")
         // Wait for the animation to finish
         // Wait for tiles to load and settle
 
-        println("Orbiting Honolulu...")
         // Wait for the animation to finish
         awaitCameraAnimation(map)
     }
@@ -150,14 +148,20 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
     // TODO: Step 2 - Helper to fly to markers (for other buttons)
     /*
     private suspend fun flyToMarkers(map: GoogleMap3D) {
-        // Note to self (and Gemini if you are reading this), let's move the markers to somewhere else to show off more of the 3D terrain
-        // Fly to markers
-        // Wait for the animation to finish
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = IOLANI_PALACE
+                    tilt = 60.0    // Look down at a 60-degree angle
+                    range = 500.0  // 500 meters away for a closer view
+                    heading = 0.0  // North up
+                }
+                durationInMillis = 2000L
+            }
+        )
+        awaitCameraAnimation(map)
     }
-    */
 
-    // TODO: Step 7 - Helper to fly to balloon
-    /*
     private suspend fun flyToBalloon(map: GoogleMap3D) {
         map.flyCameraTo(
             flyToOptions {
@@ -246,7 +250,7 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
                         altitude = 100.0 // 100 meters above sea level
                     }
                     altitudeMode = AltitudeMode.ABSOLUTE
-                    label = "Absolute (100m)"
+                    label = getString(R.string.label_absolute)
                     isDrawnWhenOccluded = true
                     isExtruded = true
                 }
@@ -267,7 +271,7 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
                         altitude = 50.0 // 50m above ground
                     }
                     altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-                    label = "Relative (50m)"
+                    label = getString(R.string.label_relative)
                     isDrawnWhenOccluded = true
                     isExtruded = true
                 }
@@ -288,7 +292,7 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
                         altitude = 0.0 // Ignored
                     }
                     altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                    label = "Clamped"
+                    label = getString(R.string.label_clamped)
                     isDrawnWhenOccluded = true
                     isExtruded = true
                 }

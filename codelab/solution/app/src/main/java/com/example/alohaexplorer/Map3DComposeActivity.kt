@@ -18,9 +18,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.example.alohaexplorer.MainActivity.Companion.HONOLULU
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DOptions
 import com.google.android.gms.maps3d.Map3DView
@@ -30,10 +30,7 @@ import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyAroundOptions
 import com.google.android.gms.maps3d.model.flyToOptions
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
 
 /**
  * Configure the initial state of the 3D Map.
@@ -149,56 +146,42 @@ fun Map3DContainer(
             onClick = {
                 animationJob?.cancel()
 
-                // Launch a coroutine to run our cinematic sequence
-                animationJob = coroutineScope.launch {
+                googleMap?.let { googleMap ->
+                    // Launch a coroutine to run our cinematic sequence
+                    animationJob = coroutineScope.launch {
+                        googleMap.flyCameraTo(flyToOptions {
+                            endCamera = camera {
+                                center = HONOLULU
+                                tilt = 45.0
+                                range = 20000.0
+                            }
+                            durationInMillis = 2000L
+                        })
 
-                    googleMap?.flyCameraTo(flyToOptions {
-                        endCamera = camera {
-                            center = HONOLULU
-                            tilt = 45.0
-                            range = 20000.0
-                        }
-                        durationInMillis = 2000L
-                    })
+                        // Wait for the fly-to to finish
+                        awaitCameraAnimation(googleMap)
 
-                    // Wait for the fly-to to finish
-                    googleMap?.let { map -> awaitCameraAnimation(map) }
+                        googleMap.flyCameraAround(flyAroundOptions {
+                            center = camera {
+                                center = HONOLULU
+                                tilt = 45.0
+                                range = 20000.0
+                            }
+                            rounds = 1.0
+                            durationInMillis = 5000L
+                        })
 
-                    googleMap?.flyCameraAround(flyAroundOptions {
-                        center = camera {
-                            center = HONOLULU
-                            tilt = 45.0
-                            range = 20000.0
-                        }
-                        rounds = 1.0
-                        durationInMillis = 5000L
-                    })
-
-                    // Wait for the fly-around to finish
-                    googleMap?.let { map -> awaitCameraAnimation(map) }
-
-                    animationJob = null
+                        // Wait for the fly-around to finish
+                        awaitCameraAnimation(googleMap)
+                        animationJob = null
+                    }
                 }
             },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 32.dp)
         ) {
-            Text("Fly to Honolulu")
+            Text(stringResource(R.string.fly_to_honolulu))
         }
-    }
-}
-
-private suspend fun awaitCameraAnimation(map: GoogleMap3D) = suspendCancellableCoroutine { continuation ->
-    map.setCameraAnimationEndListener {
-        map.setCameraAnimationEndListener(null) // Cleanup
-        if (continuation.isActive) {
-            continuation.resume(Unit)
-        }
-    }
-
-    // Remove listener if coroutine is cancelled
-    continuation.invokeOnCancellation {
-        map.setCameraAnimationEndListener(null)
     }
 }
