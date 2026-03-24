@@ -288,9 +288,9 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
     */
     
     // See Utilities.kt for extrudePolygon Algorithm
-    // TODO: Step 7 - Setup Balloon Model
+    // TODO: Step 7 - Setup Polylines
     /*
-    private fun setupBalloon(map: GoogleMap3D) {
+    private fun setupPolylines(map: GoogleMap3D) {
         resetMap()
 
         // Draw path to Waikiki
@@ -302,6 +302,25 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
             }
         ))
         
+        // Jump the camera to the Polyline to see it
+        map.setCamera(camera {
+            center = latLngAltitude {
+                latitude = 21.2893
+                longitude = -157.8441
+                altitude = 0.0
+            }
+            heading = 0.0
+            tilt = 0.0
+            range = 8000.0
+        })
+    }
+    */
+
+    // TODO: Step 8 - Setup Balloon Model
+    /*
+    private fun setupBalloon(map: GoogleMap3D) {
+        resetMap()
+
         // Add "Balloon" Model (glTF)
         val balloon = map.addModel(
             modelOptions {
@@ -331,7 +350,7 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
     }
     */
     
-    // TODO: Step 8 - Setup Popover
+    // TODO: Step 9 - Setup Popover
     /*
     private fun setupPopover(map: GoogleMap3D) {
         resetMap()

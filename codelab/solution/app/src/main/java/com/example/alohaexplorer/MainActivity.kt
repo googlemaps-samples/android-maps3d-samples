@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     // clicks buttons multiple times.  We do this in the activity for simplicity, but recommend
     // tracking state in a view model.
 
-    // tracking state in a view model.
+    // TODO: handle rotation bug... :/
     private val activeMarkers = mutableListOf<Marker>()
     private val activePolygons = mutableListOf<Polygon>()
     private val activePolylines = mutableListOf<Polyline>()
@@ -154,6 +154,14 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             currentAnimationJob = lifecycleScope.launch {
                 addPolygon(map)
                 flyCameraToAndWait(map, POLYGON_CAMERA)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_show_polylines).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                setupPolylines(map)
+                flyCameraToAndWait(map, BALLOON_CAMERA)
             }
         }
 
@@ -365,10 +373,10 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         }
     }
 
-    private fun setupBalloon(map: GoogleMap3D) {
+    private fun setupPolylines(map: GoogleMap3D) {
         clearMap()
 
-        // Extra: Beach Bound
+        // 7. Polylines
         // Draw path to Waikiki
         activePolylines.add(map.addPolyline(
             polylineOptions {
@@ -377,7 +385,11 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 strokeColor = Color.BLUE
             }
         ))
-        
+    }
+
+    private fun setupBalloon(map: GoogleMap3D) {
+        clearMap()
+
         // Add "Balloon" Model (glTF)
         // Models are external 3D assets.
         val balloon = map.addModel(

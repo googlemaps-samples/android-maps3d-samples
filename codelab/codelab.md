@@ -582,11 +582,38 @@ palacePolygons.forEach { polygon ->
 }
 ```
 
-We can do the same for our 3D Models!
+## 7. Connecting the Dots (Polylines)
+
+While markers show discrete locations, polylines show paths. Let's draw a path from Iolani Palace to Waikiki Beach.
+
+Just like Polygons, Polylines are drawn point-by-point. 
+
+```kotlin
+// Draw path to Waikiki
+activePolylines.add(map.addPolyline(
+    polylineOptions {
+        path = listOf(IOLANI_PALACE, WAIKIKI)
+        strokeWidth = 10.0
+        strokeColor = Color.BLUE
+    }
+))
+
+// Jump the camera to see the full path
+map.setCamera(camera {
+    center = latLngAltitude {
+        latitude = 21.2893
+        longitude = -157.8441
+        altitude = 0.0
+    }
+    heading = 0.0
+    tilt = 0.0
+    range = 8000.0
+})
+```
 
 ---
 
-## 7. Up, Up, and Away (The Balloon)
+## 8. Up, Up, and Away (The Balloon)
 
 Finally, let's have some fun. We'll load a 3D asset (a glTF file) of a Hot Air Balloon and place it over Waikiki.
 
@@ -619,13 +646,11 @@ balloon.setClickListener {
 <!-- TODO: Add screenshot here.
      Subject: "The Balloon"
      Description: Show the 3D Balloon model floating over Waikiki.
-     Include the blue polyline path visible in the background if possible.
 -->
-```
 
 ---
 
-## 8. The Scenic Tour (Animating Between Markers)
+## 9. The Scenic Tour (Animating Between Markers)
 
 Let's spread our wings and explore the whole island! In this step, we'll scatter markers across Oahu's most famous landmarks and animate the camera flying point-to-point. 
 
@@ -700,7 +725,7 @@ Wire up the new buttons in `setupButtons`:
 
 ---
 
-## 9. Popovers (Info Windows)
+## 10. Popovers (Info Windows)
 
 Markers are great, but sometimes you need to show more information. **Popovers** are 2D views that "stick" to a 3D location. Unlike Markers, they always face the camera and can contain any Android View (button, text, image, etc.).
 
@@ -765,7 +790,7 @@ Popovers bridge the gap between the 3D world and 2D information. They are perfec
 
 ---
 
-## 9. Bonus: Jetpack Compose
+## 11. Bonus: Jetpack Compose
 
 Prefer **Jetpack Compose** over XML? The Maps 3D SDK is View-based, but is a perfect candidate for `AndroidView`.
 
