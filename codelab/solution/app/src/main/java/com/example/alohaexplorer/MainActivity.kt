@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
         setUpInsets()
 
-        // Step 1: Initialize Map3DView
+        // 1.3. Initialize Map3DView
         // The Map3DView is not a standard View; it requires explicit lifecycle management
         // (onCreate, onResume, etc.) to function correctly.
         map3DView = findViewById(R.id.map3dView)
@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         this@MainActivity.googleMap3D = googleMap3D
 
         lifecycleScope.launch {
-            // Step 0: Start from Global View
+            // 1.3. Start from Global View
             startFromGlobalView(googleMap3D)
             
             // Setup UI Buttons
@@ -181,11 +181,6 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         findViewById<Button>(R.id.btn_clear).setOnClickListener {
             currentAnimationJob?.cancel()
             clearMap()
-        }
-
-        googleMap3D?.setMap3DClickListener { altitude, string ->
-            val camera = googleMap3D?.getCamera()
-            Log.w("Gollum", "camera: ${camera?.toCameraString()}")
         }
     }
 
@@ -353,7 +348,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 // Remember the polygon for clean up
                 activePolygons.add(face)
 
-                // Step 6: Tapping the Turf
+                // 6.1. Tapping the Turf
                 // Add click listener to each face
                 face.setClickListener {
                     lifecycleScope.launch(Dispatchers.Main) {
@@ -371,7 +366,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private fun setupBalloon(map: GoogleMap3D) {
         clearMap()
 
-        // Step 6: Beach Bound
+        // Extra: Beach Bound
         // Draw path to Waikiki
         activePolylines.add(map.addPolyline(
             polylineOptions {
@@ -418,7 +413,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private fun setupPopover(map: GoogleMap3D) {
         clearMap()
 
-        // 2. Create a simple text view for the popover content
+        // 9.1. Create a simple text view for the popover content
         val textView = TextView(this@MainActivity).apply {
             text = getString(R.string.toast_palace)
             setPadding(32, 16, 32, 16)
@@ -426,7 +421,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             setBackgroundColor(Color.WHITE)
         }
 
-        // 3. Add a Popover attached to the same location
+        // 9.2. Add a Popover attached to the same location
         val popover = map.addPopover(popoverOptions {
             positionAnchor = latLngAltitude {
                 latitude = IOLANI_PALACE.latitude
@@ -481,7 +476,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private fun addMarkers(map: GoogleMap3D) {
         clearMap()
 
-        // 1. ABSOLUTE: Altitude is relative to the WGS84 ellipsoid (rough sea level).
+        // 4.1. ABSOLUTE: Altitude is relative to the WGS84 ellipsoid (rough sea level).
         //    Good for aircraft, satellites, or data visualizations that ignore terrain.
         addClickableMarker(map, markerOptions {
             position = latLngAltitude {
@@ -495,7 +490,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             isExtruded = true // Draws a line to the ground
         })
 
-        // 2. RELATIVE_TO_GROUND: Altitude is added to the terrain height at that point.
+        // 4.2. RELATIVE_TO_GROUND: Altitude is added to the terrain height at that point.
         //    Perfect for placing things "floating 50m above the ground".
         addClickableMarker(map, markerOptions {
             position = latLngAltitude {
@@ -509,7 +504,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             isExtruded = true
         })
 
-        // 3. CLAMP_TO_GROUND: Altitude is ignored; object snaps to the terrain/mesh.
+        // 4.3. CLAMP_TO_GROUND: Altitude is ignored; object snaps to the terrain/mesh.
         //    Best for map pins, POIs, or anything on the surface.
         addClickableMarker(map, markerOptions {
             position = latLngAltitude {
@@ -527,7 +522,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private fun addCustomMarkers(map: GoogleMap3D) {
         clearMap()
 
-        // 4. Styled Pin
+        // 4.4. Styled Pin
         addClickableMarker(map, markerOptions {
             position = latLngAltitude {
                 latitude = IOLANI_PALACE.latitude
@@ -543,7 +538,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             })
         })
 
-        // 5. Image Glyph (Hibiscus)
+        // 4.5. Image Glyph (Hibiscus)
         addClickableMarker(map, markerOptions {
             position = latLngAltitude {
                 latitude = IOLANI_PALACE.latitude
@@ -557,7 +552,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             setStyle(ImageView(R.drawable.hibiscus))
         })
 
-        // 6. Text Glyph
+        // 4.6. Text Glyph
         val glyphText = Glyph.fromColor(Color.YELLOW).apply {
             setText("🌸")
         }
@@ -615,14 +610,14 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         // **Window Insets Handling**:
         // Because we are in Edge-to-Edge mode, we must manually ensure our UI elements
         // don't get covered by system bars.
-        // 1. Map: Needs padding at the TOP so the Google Logo/Compass don't overlap the status bar.
+        // 1.2.1. Map: Needs padding at the TOP so the Google Logo/Compass don't overlap the status bar.
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.map3dView)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
             insets
         }
 
-        // 2. Controls: Need padding at the BOTTOM so buttons aren't covered by the gesture/nav bar.
+        // 1.2.2. Controls: Need padding at the BOTTOM so buttons aren't covered by the gesture/nav bar.
         //    We add an extra 16dp base padding for aesthetics.
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.controls_scroll_view)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())

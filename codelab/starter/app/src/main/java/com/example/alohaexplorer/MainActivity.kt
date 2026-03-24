@@ -30,38 +30,7 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
     // private val activePopovers = mutableListOf<Popover>()
 
     companion object {
-        // TODO: Step 1.2 - Constants (Locations)
-        /*
-        val HONOLULU = latLngAltitude {
-            latitude = 21.3069
-            longitude = -157.8583
-            altitude = 0.0
-        }
-
-        val IOLANI_PALACE = latLngAltitude {
-            latitude = 21.306740
-            longitude = -157.858803
-            altitude = 0.0
-        }
-
-        val WAIKIKI = latLngAltitude {
-            latitude = 21.2766
-            longitude = -157.8286
-            altitude = 0.0
-        }
-        */
-
-        // Models must be loaded from the internet. Here we use Cloud Storage.
-        const val BALLOON_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/balloon-pin-BlXF32yD.glb"
-        const val BALLOON_SCALE = 5.0
-
-        // Step 5: Iolani Palace Geometry (Lat, Lng pairs)
-        val IOLANI_PALACE_GEO = listOf(
-            21.307180365, -157.858769898,
-            21.306765552, -157.858390366,
-            21.306476932, -157.858755146,
-            21.306892995, -157.859134679,
-        )
+        // Constants are now located in HonoluluData.kt
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -178,40 +147,7 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
     }
     */
 
-    // TODO: Step 3 - Robustness (awaitMapSteady)
-    /*
-    private suspend fun awaitMapSteady(map: GoogleMap3D) = suspendCancellableCoroutine { continuation ->
-        map.setOnMapSteadyListener { isSteady ->
-            if (isSteady) {
-                map.setOnMapSteadyListener(null) // Cleanup the listener
-                if (continuation.isActive) {
-                    continuation.resume(Unit) // Resume the suspended coroutine
-                }
-            }
-        }
-
-        // Safety: If the coroutine is cancelled (e.g., user exits app), remove the listener.
-        continuation.invokeOnCancellation {
-            map.setOnMapSteadyListener(null)
-        }
-    }
-    */
-
-    // TODO: Step 3 - Robustness (awaitCameraAnimation)
-    /*
-    private suspend fun awaitCameraAnimation(map: GoogleMap3D) = suspendCancellableCoroutine { continuation ->
-        map.setCameraAnimationEndListener {
-            map.setCameraAnimationEndListener(null) // Cleanup
-            if (continuation.isActive) {
-                continuation.resume(Unit)
-            }
-        }
-
-        continuation.invokeOnCancellation {
-            map.setCameraAnimationEndListener(null)
-        }
-    }
-    */
+    // See Utilities.kt for Robustness helpers (awaitMapSteady, awaitCameraAnimation)
     
     // TODO: Step 4 (and others) - Reset Map Helper
     /*
@@ -349,51 +285,7 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
     }
     */
     
-    // TODO: Step 5 - Extrude Polygon Algorithm
-    /*
-    private fun extrudePolygon(
-        basePoints: List<LatLngAltitude>,
-        extrusionHeight: Double
-    ): List<List<LatLngAltitude>> {
-        if (basePoints.size < 3) return emptyList()
-        if (extrusionHeight <= 0) return emptyList()
-
-        val baseAltitude = basePoints.first().altitude
-
-        // 1. Create points for the top face
-        val topPoints = basePoints.map { basePoint ->
-            latLngAltitude {
-                latitude = basePoint.latitude
-                longitude = basePoint.longitude
-                altitude = baseAltitude + extrusionHeight
-            }
-        }
-
-        val faces = mutableListOf<List<LatLngAltitude>>()
-
-        // 2. Add bottom face
-        faces.add(basePoints.toList())
-
-        // 3. Add top face (reversed for winding order)
-        faces.add(topPoints.toList().reversed())
-
-        // 4. Add side wall faces
-        for (i in basePoints.indices) {
-            val p1Base = basePoints[i]
-            val p2Base = basePoints[(i + 1) % basePoints.size] // Wrap around
-
-            val p1Top = topPoints[i]
-            val p2Top = topPoints[(i + 1) % basePoints.size]
-
-            // Define the quad for this side
-            val sideFace = listOf(p1Base, p2Base, p2Top, p1Top)
-            faces.add(sideFace)
-        }
-
-        return faces
-    }
-    */
-
+    // See Utilities.kt for extrudePolygon Algorithm
     // TODO: Step 7 - Setup Balloon Model
     /*
     private fun setupBalloon(map: GoogleMap3D) {

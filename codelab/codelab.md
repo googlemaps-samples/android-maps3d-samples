@@ -192,12 +192,11 @@ Open `app/src/main/res/layout/activity_main.xml`. We want a full-screen 3D map w
 
 ### Step 1.2: Project Skeleton
 
-Open `MainActivity.kt`. First, we'll set up the class structure, binding constants, and helper variables. We also handle the "Edge-to-Edge" UI logic here.
+Open `MainActivity.kt`. We will set up the class structure, state variables, and handle the "Edge-to-Edge" UI logic here. Note that all of our geographic constants and model URLs have been pre-defined for you in `HonoluluData.kt` to keep this class clean.
 
 **Tasks**:
-1.  Define **Constants** for our locations and assets.
-2.  Setup **State Management** lists to track objects.
-3.  Handle **Window Insets** in `onCreate`.
+1.  Setup **State Management** lists to track objects.
+2.  Handle **Window Insets** in `onCreate`.
 
 ```kotlin
 class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
@@ -211,26 +210,6 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private val activePolylines = mutableListOf<Polyline>()
     private val activeModels = mutableListOf<Model>()
     private val activePopovers = mutableListOf<Popover>()
-
-    companion object {
-        // Locations
-        val HONOLULU = latLngAltitude { latitude = 21.3069; longitude = -157.8583; altitude = 0.0 }
-        val IOLANI_PALACE = latLngAltitude { latitude = 21.306740; longitude = -157.858803; altitude = 0.0 }
-        val WAIKIKI = latLngAltitude { latitude = 21.2766; longitude = -157.8286; altitude = 0.0 }
-        
-        // Assets
-        // 3D models must be hosted online and reachable via a URL (e.g. Cloud Storage).
-        const val BALLOON_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/balloon-pin-BlXF32yD.glb"
-        const val BALLOON_SCALE = 5.0
-        
-        // Geometry
-        val IOLANI_PALACE_GEO = listOf(
-            21.307180365, -157.858769898,
-            21.306765552, -157.858390366,
-            21.306476932, -157.858755146,
-            21.306892995, -157.859134679,
-        )
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -378,7 +357,7 @@ Here is where many developers trip up. Animations take time. Network loading tak
 
 **The Solution: Suspending Helper Functions**
 
-We wrap the SDK's callback-based listeners into Kotlin Coroutine `suspend` functions. This lets us write linear, readable code like "Fly THERE, then wait, then Fly HERE".
+Open `Utilities.kt` to see how we wrap the SDK's callback-based listeners into Kotlin Coroutine `suspend` functions. This lets us write linear, readable code like "Fly THERE, then wait, then Fly HERE".
 
 ```kotlin
 // Pauses execution until the camera stops moving
@@ -457,7 +436,7 @@ private fun addMarker(markerOptions: MarkerOptions) {
 private fun addMarkers(map: GoogleMap3D) {
     resetMap()
 
-    // 1. ABSOLUTE: Altitude is relative to the WGS84 ellipsoid (rough sea level).
+    // 4.1. ABSOLUTE: Altitude is relative to the WGS84 ellipsoid (rough sea level).
     addMarker(
         markerOptions {
             position = latLngAltitude {
@@ -472,7 +451,7 @@ private fun addMarkers(map: GoogleMap3D) {
         }
     )
 
-    // 2. RELATIVE_TO_GROUND: Altitude is added to the terrain height at that point.
+    // 4.2. RELATIVE_TO_GROUND: Altitude is added to the terrain height at that point.
     addMarker(
         markerOptions {
             position = latLngAltitude {
@@ -487,7 +466,7 @@ private fun addMarkers(map: GoogleMap3D) {
         }
     )
 
-    // 3. CLAMP_TO_GROUND: Snaps to the terrain.
+    // 4.3. CLAMP_TO_GROUND: Snaps to the terrain.
     addMarker(
         markerOptions {
             position = latLngAltitude {
@@ -520,7 +499,7 @@ private fun addMarkers(map: GoogleMap3D) {
 Let's highlight the Palace grounds. A flat polygon is okay, but a 3D volume is better.
 
 ### Extrusion Algorithm
-We can "extrude" a flat shape by:
+Open `Utilities.kt` to review the `extrudePolygon` helper function. We can "extrude" a flat shape by:
 1.  Taking the base coordinates.
 2.  Duplicating them at a higher altitude (the "roof").
 3.  Stitching the sides together with new polygons.
@@ -588,7 +567,7 @@ When we add these faces to the map, we use `AltitudeMode.ABSOLUTE` to ensure the
 A map isn't an image; it's an interface. Let's make our markers interactive.
 
 ```kotlin
-// Step 6: Tapping the Turf
+// 6.1. Tapping the Turf
 // Add click listener to each face
 palacePolygons.forEach { polygon ->
     polygon.setClickListener {
@@ -736,19 +715,7 @@ In this example, we will attach a "Hello World" message to the Iolani Palace mar
     private fun setupPopover(map: GoogleMap3D) {
         resetMap()
 
-        // 1. Add a marker to serve as a visual anchor reference
-        val marker = map.addMarker(markerOptions {
-            position = latLngAltitude {
-                latitude = IOLANI_PALACE.latitude
-                longitude = IOLANI_PALACE.longitude
-                altitude = 50.0 // Floating, matching our "Relative" example
-            }
-            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-            label = "Click me!"
-        })
-        marker?.let { activeMarkers.add(it) }
-
-        // 2. Create a simple text view for the popover content
+        // 9.1. Create a simple text view for the popover content
         // In a real app, you could inflate this from XML using layoutInflater
         val textView = TextView(this).apply {
             text = "Welcome to Iolani Palace!\nA symbol of Hawaiian sovereignty."
@@ -757,14 +724,14 @@ In this example, we will attach a "Hello World" message to the Iolani Palace mar
             setBackgroundColor(Color.WHITE)
         }
 
-        // 3. Add a Popover attached to the same location
+        // 9.2. Add a Popover attached to the same location
         val popover = map.addPopover(popoverOptions {
             positionAnchor = latLngAltitude {
                 latitude = IOLANI_PALACE.latitude
                 longitude = IOLANI_PALACE.longitude
-                altitude = 50.0
+                altitude = 10.0
             }
-            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+            altitudeMode = AltitudeMode.RELATIVE_TO_MESH
             content = textView
             autoCloseEnabled = true // Close when user clicks elsewhere
             autoPanEnabled = true   // Move camera to ensure popover is visible
@@ -781,15 +748,10 @@ In this example, we will attach a "Hello World" message to the Iolani Palace mar
         })
         
         // Track it
-        popover?.let { activePopovers.add(it) }
-        
-        // 4. Show popover on marker click
-        marker?.setClickListener {
-            popover?.show()
-        }
+        activePopovers.add(popover)
         
         // Show immediately for demo purposes
-        popover?.show()
+        popover.show()
     }
 ```
 
