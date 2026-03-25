@@ -149,6 +149,7 @@ dependencies {
     // `testImplementation` is for local unit tests (running on the JVM).
     testImplementation(libs.junit)
     testImplementation(libs.google.truth)
+    testImplementation(libs.robolectric)
     // `androidTestImplementation` is for instrumented tests (running on an Android device or emulator).
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core) // For UI testing with the View system.

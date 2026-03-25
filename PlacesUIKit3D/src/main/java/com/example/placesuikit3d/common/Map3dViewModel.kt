@@ -318,17 +318,17 @@ abstract class Map3dViewModel : ViewModel() {
 
   open fun setCameraTilt(tilt: Number) {
     updateCameraAndMove {
-      copy(heading = tilt.toTilt())
+      copy(tilt = tilt.toTilt())
     }
   }
 
-  open fun setCamaraRange(range: Number) {
+  open fun setCameraRange(range: Number) {
     updateCameraAndMove {
       copy(range = range.toRange())
     }
   }
 
-  open fun setCamaraRoll(roll: Number) {
+  open fun setCameraRoll(roll: Number) {
     updateCameraAndMove {
       copy(roll = roll.toRoll())
     }
