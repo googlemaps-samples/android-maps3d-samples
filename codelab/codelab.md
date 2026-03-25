@@ -262,7 +262,15 @@ Add this logic to `MainActivity.kt`:
         
         // Initialize the Map3DView
         map3DView = findViewById(R.id.map3dView)
-        map3DView.onCreate(savedInstanceState)
+        
+        // 1.4. Map Lifecycle
+        // Manually trigger onCreate (and unpack any saved state from rotation)
+        val mapState = savedStateRegistry.consumeRestoredStateForKey("map3d_state_provider")
+        map3DView.onCreate(mapState)
+        
+        // Attach the automated Lifecycle Observer
+        lifecycle.addObserver(Map3DLifecycleObserver(map3DView, this))
+
         map3DView.getMap3DViewAsync(this)
     }
 
@@ -317,6 +325,16 @@ Add this logic to `MainActivity.kt`:
 ```
 > **Note**: You will see red errors for `startFromGlobalView`, `flyToHonolulu`, and other helper functions. Don't worry! We will implement these in the next sections.
 ```
+
+### Step 1.4: Map Lifecycle (The Modern Way)
+
+Unlike standard Android Views, the `Map3DView` contains a powerful 3D rendering engine that must be explicitly paused and resumed to preserve battery life and system resources.
+
+Normally, this would mean overriding `onResume`, `onPause`, `onDestroy`, and `onSaveInstanceState` in your `MainActivity` and manually forwarding those events to the map.
+
+**To avoid this messy boilerplate, we have pre-provided `Map3DLifecycleObserver.kt`.** 
+
+This useful utility class implements `DefaultLifecycleObserver`. By calling `lifecycle.addObserver(Map3DLifecycleObserver(map3DView, this))` inside `onCreate`, the map will automatically listen to your Activity's lifecycle events, keeping your UI controller clean!
 
 ---
 

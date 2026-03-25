@@ -60,6 +60,8 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
         }
 
         // TODO: Step 1.3 - Initialize Map3DView
+        
+        // TODO: Step 1.4 - Map Lifecycle
 
         setupButtonsStub()
     }
@@ -410,31 +412,5 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
     }
     */
 
-    // TODO: Step 1.3 - Lifecycle Forwarding
-    /*
-    override fun onResume() {
-        super.onResume()
-        map3DView.onResume()
-    }
-    
-    override fun onPause() {
-        super.onPause()
-        map3DView.onPause()
-    }
-    
-    override fun onDestroy() {
-        super.onDestroy()
-        map3DView.onDestroy()
-    }
-    
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        map3DView.onSaveInstanceState(outState)
-    }
-    
-    override fun onLowMemory() {
-        super.onLowMemory()
-        map3DView.onLowMemory()
-    }
-    */
+
 }

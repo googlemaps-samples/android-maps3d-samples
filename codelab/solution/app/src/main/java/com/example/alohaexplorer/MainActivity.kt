@@ -89,11 +89,17 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         setUpInsets()
 
         // 1.3. Initialize Map3DView
-        // The Map3DView is not a standard View; it requires explicit lifecycle management
-        // (onCreate, onResume, etc.) to function correctly.
         map3DView = findViewById(R.id.map3dView)
-        map3DView.onCreate(savedInstanceState)
         
+        // 1.4. Map Lifecycle
+        // Manually trigger onCreate (and unpack any saved state from rotation)
+        val mapState = savedStateRegistry.consumeRestoredStateForKey("map3d_state_provider")
+        map3DView.onCreate(mapState)
+        
+        // Attach the automated Lifecycle Observer to gracefully handle 
+        // onResume, onPause, onDestroy, and onSaveInstanceState.
+        lifecycle.addObserver(Map3DLifecycleObserver(map3DView, this))
+
         // This starts the map loading process. onMap3DViewReady will be called when it's done.
         map3DView.getMap3DViewAsync(this)
     }
@@ -590,35 +596,6 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         })
     }
 
-    // ---------------------------------------------------------------------------------------------
-    // Lifecycle Forwarding
-    // The Map3DView requires us to forward standard Android Activity lifecycle events
-    // so it can manage its internal 3D rendering engine (pause rendering when backgrounded, etc.).
-    // ---------------------------------------------------------------------------------------------
-    override fun onResume() {
-        super.onResume()
-        map3DView.onResume()
-    }
-    
-    override fun onPause() {
-        super.onPause()
-        map3DView.onPause()
-    }
-    
-    override fun onDestroy() {
-        super.onDestroy()
-        map3DView.onDestroy()
-    }
-    
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        map3DView.onSaveInstanceState(outState)
-    }
-    
-    override fun onLowMemory() {
-        super.onLowMemory()
-        map3DView.onLowMemory()
-    }
 
     private fun setUpInsets() {
         // **Window Insets Handling**:
