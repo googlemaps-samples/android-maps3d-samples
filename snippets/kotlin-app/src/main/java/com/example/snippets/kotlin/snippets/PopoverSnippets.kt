@@ -17,25 +17,42 @@
 package com.example.snippets.kotlin.snippets
 
 import android.content.Context
+import android.graphics.Color
 import android.widget.TextView
-import com.google.android.gms.maps3d.GoogleMap3D
+import com.example.snippets.common.R
+import com.example.snippets.kotlin.TrackedMap3D
+import com.example.snippets.kotlin.annotations.SnippetGroup
+import com.example.snippets.kotlin.annotations.SnippetItem
 import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.markerOptions
-import com.example.snippets.common.R
-import android.graphics.Color
 import com.google.android.gms.maps3d.model.popoverOptions
 
-class PopoverSnippets(private val context: Context, private val map: GoogleMap3D) {
+@SnippetGroup(
+    title = "Popovers",
+    description = "Snippets demonstrating anchored and configured 3D Popover views.",
+)
+class PopoverSnippets(private val context: Context, private val map: TrackedMap3D) {
 
-    // [START maps_android_3d_popover_add_kt]
     /**
      * Adds a popover anchored to a marker.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "1. Marker Anchor",
+        description = "Adds a 'Hello Popover!' text bubble anchored to a marker",
+    )
     fun addPopoverToMarker() {
+        // [START maps_android_3d_popover_add_kt]
         // Create a marker first
         val markerOptions = markerOptions {
-            position = latLngAltitude { latitude = 37.422; longitude = -122.084; altitude = 0.0 }
+            position = latLngAltitude {
+                latitude = 37.422
+                longitude = -122.084
+                altitude = 0.0
+            }
         }
         val marker = map.addMarker(markerOptions) ?: return
 
@@ -52,31 +69,82 @@ class PopoverSnippets(private val context: Context, private val map: GoogleMap3D
             positionAnchor = marker
             altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
         }
-        
+
         val popover = map.addPopover(options)
-        
+
         // You can show/hide it
-        popover.show()
+        popover?.show()
+        // [END maps_android_3d_popover_add_kt]
+
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = latLngAltitude {
+                        latitude = 37.422
+                        longitude = -122.084
+                        altitude = 0.0
+                    }
+                    tilt = 45.0
+                    heading = 0.0
+                    range = 2000.0
+                }
+                durationInMillis = 1000
+            },
+        )
     }
-    // [END maps_android_3d_popover_add_kt]
-    
-    // [START maps_android_3d_popover_options_kt]
+
     /**
      * Adds a configured popover (auto-close enabled, auto-pan disabled).
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "2. Configured",
+        description = "Adds an 'Info' popover anchored to a marker with auto-close enabled and auto-pan disabled.",
+    )
     fun addConfiguredPopover() {
+        // [START maps_android_3d_popover_options_kt]
+        // Create a marker at an interesting location (e.g., Golden Gate Bridge)
+        val markerOptions = markerOptions {
+            position = latLngAltitude {
+                latitude = 37.8199
+                longitude = -122.4783
+                altitude = 0.0
+            }
+            label = "Golden Gate Bridge"
+        }
+        val marker = map.addMarker(markerOptions) ?: return
+
         val textView = TextView(context).apply {
-            text = context.getString(com.example.snippets.common.R.string.popover_info)
+            text = context.getString(R.string.popover_info)
+            setPadding(16, 16, 16, 16)
+            setBackgroundColor(Color.WHITE)
         }
 
         val options = popoverOptions {
             content = textView
-            positionAnchor = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
+            positionAnchor = marker
             autoCloseEnabled = true // Close when clicking elsewhere
             autoPanEnabled = false // Do not pan to popover
         }
 
-        map.addPopover(options)
+        val popover = map.addPopover(options)
+        popover?.show()
+        // [END maps_android_3d_popover_options_kt]
+
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = camera {
+                    center = latLngAltitude {
+                        latitude = 37.8199
+                        longitude = -122.4783
+                        altitude = 0.0
+                    }
+                    tilt = 45.0
+                    heading = 0.0
+                    range = 1000.0
+                }
+                durationInMillis = 2000
+            },
+        )
     }
-    // [END maps_android_3d_popover_options_kt]
 }

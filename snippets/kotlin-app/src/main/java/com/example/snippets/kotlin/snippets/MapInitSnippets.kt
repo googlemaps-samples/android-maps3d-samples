@@ -16,28 +16,41 @@
 
 package com.example.snippets.kotlin.snippets
 
-import androidx.compose.foundation.layout.fillMaxSize
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.snippets.kotlin.annotations.SnippetGroup
+import com.example.snippets.kotlin.annotations.SnippetItem
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 
-
+@SnippetGroup(
+    title = "Map Initialization",
+    description = "Snippets demonstrating map lifecycle, listeners and readiness states.",
+)
 class MapInitSnippets {
 
     // [START maps_android_3d_init_basic_kt]
     /**
      * Initializes a standard 3D Map View using AndroidView in Compose.
      */
+    // [END_EXCLUDE]
     @Composable
+    // [START_EXCLUDE]
+    @Suppress("unused")
+    @SnippetItem(
+        title = "2. Add Map to AndroidView",
+        description = "Shows how to add a Map3DView to an AndroidView which bridges to Jetpack Compose.",
+    )
     fun BasicMap3D() {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
@@ -59,22 +72,28 @@ class MapInitSnippets {
                             googleMap3D.setCamera(camera)
                         }
                         override fun onError(error: Exception) {
-                            // Handle initialization error
+                            // Log exception trace guiding developers to key deficits or mismatches
+                            Log.e("MapInitSnippets", "Failed to initialize 3D Map: ${error.message}", error)
                         }
                     })
                 }
-            }
+            },
         )
     }
     // [END maps_android_3d_init_basic_kt]
 
-    // [START maps_android_3d_init_listeners_kt]
     /**
      * Sets up listeners for map readiness and steady state.
      */
+    @Suppress("unused")
+    @SnippetItem(
+        title = "1. Listen Events",
+        description = "Initializes a 3D map and logs events when the scene is ready (100% loaded) and steady (camera stopped moving).",
+    )
     fun setupMapListeners(context: Context, map: GoogleMap3D) {
+        // [START maps_android_3d_init_listeners_kt]
         val mainHandler = Handler(Looper.getMainLooper())
-        
+
         map.setOnMapReadyListener { sceneReadiness ->
             if (sceneReadiness == 1.0) {
                 // Scene is fully loaded
@@ -92,6 +111,6 @@ class MapInitSnippets {
                 }
             }
         }
+        // [END maps_android_3d_init_listeners_kt]
     }
-    // [END maps_android_3d_init_listeners_kt]
 }

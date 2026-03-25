@@ -31,6 +31,7 @@
         <activity
             android:name=".KotlinSnippetsActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:theme="@style/Theme.Snippets">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -41,7 +42,8 @@
         <activity
             android:name=".MapActivity"
             android:exported="false"
-            android:label="Snippet Demo" />
+            android:label="Snippet Demo"
+            android:theme="@style/Theme.Snippets.Map" />
         <meta-data
             android:name="com.google.android.geo.maps3d.API_KEY"
             android:value="${MAPS3D_API_KEY}" />
