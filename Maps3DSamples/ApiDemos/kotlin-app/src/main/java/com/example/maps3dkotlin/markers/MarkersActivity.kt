@@ -29,13 +29,21 @@ import com.google.android.gms.maps3d.model.Glyph
 import com.google.android.gms.maps3d.model.ImageView
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.Marker
+import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.markerOptions
 import com.google.android.gms.maps3d.model.pinConfiguration
+import com.google.android.gms.maps3d.model.popoverOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import com.example.maps3dkotlin.common.awaitCameraAnimation
+import com.example.maps3dkotlin.common.awaitMapSteady
+import com.example.maps3dkotlin.markers.data.MonsterParser
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * This activity demonstrates the various altitude modes available for markers on a 3D map.
@@ -56,6 +64,7 @@ import kotlinx.coroutines.launch
  */
 class MarkersActivity : SampleBaseActivity() {
     override val TAG = MarkersActivity::class.java.simpleName
+    private var activePopover: com.google.android.gms.maps3d.Popover? = null
 
     val berlinCamera = camera {
         center = latLngAltitude {
@@ -79,16 +88,12 @@ class MarkersActivity : SampleBaseActivity() {
         range = 1518.0
     }
 
-    val tokyoCamera = camera {
-        center = latLngAltitude {
-            latitude = 35.658708
-            longitude = 139.702206
-            altitude = 23.3
-        }
-        heading = 117.0
-        tilt = 55.0
-        range = 2868.0
-    }
+    private var monsterCameras: List<Camera> = emptyList()
+    private var monsterMarkers: List<Marker> = emptyList()
+    private var monsterIds: List<String> = emptyList()
+    private var monsterLabels: List<String> = emptyList()
+    
+    private var tourJob: kotlinx.coroutines.Job? = null
 
     // The initial camera position is defined declaratively, providing a clear overview of
     // the starting view of the map. This makes it easy to understand and modify the initial
@@ -104,9 +109,10 @@ class MarkersActivity : SampleBaseActivity() {
                 visibility = View.VISIBLE
             }
             setOnClickListener {
+                stopMonsterTour()
                 googleMap3D.flyCameraTo(flyToOptions {
                     endCamera = berlinCamera
-                    durationInMillis = 2_000
+                    durationInMillis = 4_000
                 })
             }
         }
@@ -116,27 +122,134 @@ class MarkersActivity : SampleBaseActivity() {
                 visibility = View.VISIBLE
             }
             setOnClickListener {
+                stopMonsterTour()
                 googleMap3D.flyCameraTo(flyToOptions {
                     endCamera = nycCamera
-                    durationInMillis = 2_000
+                    durationInMillis = 4_000
                 })
             }
         }
 
-        findViewById<Button>(R.id.fly_tokyo_button)?.apply {
+        findViewById<Button>(R.id.fly_random_monster_button)?.apply {
             runOnUiThread {
                 visibility = View.VISIBLE
             }
             setOnClickListener {
-                googleMap3D.flyCameraTo(flyToOptions {
-                    endCamera = tokyoCamera
-                    durationInMillis = 2_000
-                })
+                stopMonsterTour()
+                if (monsterCameras.isNotEmpty()) {
+                    googleMap3D.flyCameraTo(flyToOptions {
+                        endCamera = monsterCameras.random()
+                        durationInMillis = 4_000
+                    })
+                }
+            }
+            setOnLongClickListener { view ->
+                if (monsterLabels.isNotEmpty()) {
+                    val popup = android.widget.PopupMenu(this@MarkersActivity, view)
+                    monsterLabels.forEachIndexed { index, label ->
+                        popup.menu.add(0, index, index, label)
+                    }
+                    popup.setOnMenuItemClickListener { item ->
+                        stopMonsterTour()
+                        val selectedCamera = monsterCameras[item.itemId]
+                        googleMap3D.flyCameraTo(flyToOptions {
+                            endCamera = selectedCamera
+                            durationInMillis = 4_000
+                        })
+                        true
+                    }
+                    popup.show()
+                }
+                true
+            }
+        }
+
+        findViewById<Button>(R.id.tour_monsters_button)?.apply {
+            runOnUiThread {
+                visibility = View.VISIBLE
+            }
+            setOnClickListener {
+                if (monsterCameras.isNotEmpty() && monsterMarkers.size == monsterCameras.size && tourJob == null) {
+                    startMonsterTour()
+                }
+            }
+        }
+        
+        findViewById<Button>(R.id.stop_button)?.apply {
+            setOnClickListener {
+                stopMonsterTour()
             }
         }
 
         lifecycleScope.launch(Dispatchers.Default) {
             addMarkers(googleMap3D)
+        }
+        
+        googleMap3D.setMap3DClickListener { _, _ ->
+            lifecycleScope.launch(Dispatchers.Main) {
+                activePopover?.remove()
+                activePopover = null
+            }
+        }
+    }
+
+    private fun startMonsterTour() {
+        val stopButton = findViewById<Button>(R.id.stop_button)
+        val tourButton = findViewById<Button>(R.id.tour_monsters_button)
+        val map = googleMap3D ?: return
+        
+        runOnUiThread {
+            stopButton?.visibility = View.VISIBLE
+            tourButton?.visibility = View.GONE
+        }
+        
+        tourJob = lifecycleScope.launch(Dispatchers.Main) {
+            var i = 0
+            while (isActive) {
+                activePopover?.remove()
+                activePopover = null
+                
+                val camera = monsterCameras[i]
+                val marker = monsterMarkers[i]
+                val monsterId = monsterIds[i]
+                
+                // Fly to the monster
+                map.awaitCameraAnimation(flyToOptions {
+                    endCamera = camera
+                    durationInMillis = 4.seconds.inWholeMilliseconds
+                })
+
+                // Wait for the 3D mesh building geometry to load, but don't hang forever
+                map.awaitMapSteady(5.seconds)
+                if (!isActive) break
+
+                // Perform an orbit
+                map.awaitCameraAnimation(com.google.android.gms.maps3d.model.flyAroundOptions {
+                    center = camera
+                    durationInMillis = 5.seconds.inWholeMilliseconds
+                    rounds = 1.0
+                })
+                if (!isActive) break
+
+                showMonsterPopover(marker, getMonsterBlurbResId(monsterId), map)
+                
+                delay(4.seconds)
+                
+                i = (i + 1) % monsterCameras.size
+            }
+        }
+    }
+
+    private fun stopMonsterTour() {
+        tourJob?.cancel()
+        tourJob = null
+        googleMap3D?.stopCameraAnimation()
+        googleMap3D?.setCameraAnimationEndListener(null)
+        googleMap3D?.setOnMapSteadyListener(null)
+        
+        runOnUiThread {
+            findViewById<Button>(R.id.stop_button)?.visibility = View.GONE
+            findViewById<Button>(R.id.tour_monsters_button)?.visibility = View.VISIBLE
         }
     }
 
@@ -148,8 +261,6 @@ class MarkersActivity : SampleBaseActivity() {
      * @param googleMap3D The map object to which the markers will be added.
      */
     private fun addMarkers(googleMap3D: GoogleMap3D) {
-        Log.d(TAG, "addMarkers: start")
-
         // Marker 1: Absolute Altitude
         // This marker is placed at a fixed altitude of 150 meters above sea level.
         googleMap3D.addMarker(markerOptions {
@@ -164,7 +275,7 @@ class MarkersActivity : SampleBaseActivity() {
             isExtruded = true
             isDrawnWhenOccluded = true
             collisionBehavior = CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY
-        })?.let(::setupMarkerClickListener)
+        })?.let { setupMarkerClickListener(it, null, googleMap3D) }
 
         // Marker 2: Relative to Ground
         // This marker is positioned 50 meters above the ground.
@@ -180,7 +291,7 @@ class MarkersActivity : SampleBaseActivity() {
             isExtruded = true
             isDrawnWhenOccluded = true
             collisionBehavior = CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY
-        })?.let(::setupMarkerClickListener)
+        })?.let { setupMarkerClickListener(it, null, googleMap3D) }
 
         // Marker 3: Clamped to Ground
         // This marker is attached to the ground, with its altitude effectively being zero.
@@ -199,7 +310,7 @@ class MarkersActivity : SampleBaseActivity() {
             isExtruded = true
             isDrawnWhenOccluded = true
             collisionBehavior = CollisionBehavior.REQUIRED
-        })?.let(::setupMarkerClickListener)
+        })?.let { setupMarkerClickListener(it, null, googleMap3D) }
 
         // Marker 4: Relative to Mesh
         // This marker is placed 10 meters above the 3D mesh, which includes buildings.
@@ -214,7 +325,7 @@ class MarkersActivity : SampleBaseActivity() {
             isExtruded = true
             isDrawnWhenOccluded = true
             collisionBehavior = CollisionBehavior.REQUIRED
-        })?.let(::setupMarkerClickListener)
+        })?.let { setupMarkerClickListener(it, null, googleMap3D) }
 
         // Marker 8: Empire State Building Ape
         googleMap3D.addMarker(markerOptions {
@@ -224,12 +335,34 @@ class MarkersActivity : SampleBaseActivity() {
                 altitude = 100.0
             }
             zIndex = 1
-            label = "King Kong / Empire State Building"
+            label = "Giant Ape / Empire State Building"
             isExtruded = true
             isDrawnWhenOccluded = true
             altitudeMode = AltitudeMode.RELATIVE_TO_MESH
             setStyle(ImageView(R.drawable.ook))
-        })?.let(::setupMarkerClickListener)
+        })?.let { marker ->
+            marker.setClickListener {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    val textView = android.widget.TextView(this@MarkersActivity).apply {
+                        text = getString(R.string.monster_ape_blurb)
+                        setPadding(32, 16, 32, 16)
+                        setTextColor(Color.BLACK)
+                        setBackgroundColor(Color.WHITE)
+                    }
+                    val newPopover = googleMap3D.addPopover(popoverOptions {
+                        positionAnchor = marker
+                        altitudeMode = AltitudeMode.ABSOLUTE
+                        content = textView
+                        autoCloseEnabled = true
+                        autoPanEnabled = false
+                    })
+                    
+                    activePopover?.remove()
+                    activePopover = newPopover
+                    activePopover?.show()
+                }
+            }
+        }
 
         // Marker 9: Custom Color Pin near ESB
         val customColorGlyph = Glyph.fromColor(Color.CYAN)
@@ -248,7 +381,7 @@ class MarkersActivity : SampleBaseActivity() {
                 borderColor = Color.WHITE
                 setGlyph(customColorGlyph)
             })
-        })?.let(::setupMarkerClickListener)
+        })?.let { setupMarkerClickListener(it, null, googleMap3D) }
 
         // Marker 10: Custom Text Pin near ESB
         val textGlyph = Glyph.fromColor(Color.RED).apply {
@@ -269,23 +402,64 @@ class MarkersActivity : SampleBaseActivity() {
                 backgroundColor = Color.YELLOW
                 borderColor = Color.BLUE
             })
-        })?.let(::setupMarkerClickListener)
+        })?.let { setupMarkerClickListener(it, null, googleMap3D) }
 
-        // Marker 11: Shibuya Crossing
-        googleMap3D.addMarker(markerOptions {
-            position = latLngAltitude {
-                latitude = 35.6595
-                longitude = 139.7005
-                altitude = 50.0
+        // Monsters from JSON
+        try {
+            val jsonString = assets.open("monsters.json").bufferedReader().use { it.readText() }
+            val parsedMonsters = MonsterParser.parse(jsonString)
+            
+            val cameras = mutableListOf<Camera>()
+            val markers = mutableListOf<Marker>()
+            val ids = mutableListOf<String>()
+            val labels = mutableListOf<String>()
+            
+            for (monster in parsedMonsters) {
+                val cam = camera {
+                    center = latLngAltitude {
+                        latitude = monster.latitude
+                        longitude = monster.longitude
+                        altitude = monster.altitude
+                    }
+                    heading = monster.heading
+                    tilt = monster.tilt
+                    range = monster.range
+                }
+                
+                val markerPos = latLngAltitude {
+                    latitude = monster.markerLatitude
+                    longitude = monster.markerLongitude
+                    altitude = monster.markerAltitude
+                }
+                
+                val drawableId = getMonsterDrawableId(monster.drawable)
+                
+                if (drawableId != 0) {
+                    val m = googleMap3D.addMarker(markerOptions {
+                        position = markerPos
+                        label = monster.label
+                        isExtruded = true
+                        isDrawnWhenOccluded = true
+                        this.altitudeMode = monster.altitudeMode
+                        setStyle(ImageView(drawableId))
+                    })
+                    
+                    if (m != null) {
+                        cameras.add(cam)
+                        markers.add(m)
+                        ids.add(monster.id)
+                        labels.add(monster.label)
+                        setupMarkerClickListener(m, getMonsterBlurbResId(monster.id), googleMap3D)
+                    }
+                }
             }
-            isExtruded = true
-            isDrawnWhenOccluded = true
-            label = "🦖 🥚"
-            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-            setStyle(ImageView(R.drawable.gz))
-        })?.let(::setupMarkerClickListener)
-
-        Log.d(TAG, "addMarkers: finished")
+            monsterCameras = cameras
+            monsterMarkers = markers
+            monsterIds = ids
+            monsterLabels = labels
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading monsters.json", e)
+        }
     }
 
     /**
@@ -294,14 +468,72 @@ class MarkersActivity : SampleBaseActivity() {
      *
      * @param marker The marker to which the click listener will be attached.
      */
-    private fun setupMarkerClickListener(marker: Marker) {
-        Log.d(TAG, "Marker added: ${marker.id}")
+    private fun setupMarkerClickListener(marker: Marker, blurbResId: Int?, googleMap3D: GoogleMap3D) {
         marker.setClickListener {
-            // The toast is shown on the main thread, which is the required context for UI operations.
             lifecycleScope.launch(Dispatchers.Main) {
-                Toast.makeText(this@MarkersActivity, "Clicked on marker: ${marker.label}", Toast.LENGTH_SHORT)
-                    .show()
+                if (blurbResId != null && blurbResId != 0) {
+                    showMonsterPopover(marker, blurbResId, googleMap3D)
+                } else {
+                    Toast.makeText(this@MarkersActivity, "Clicked on marker: ${marker.label}", Toast.LENGTH_SHORT)
+                        .show()
+                }
             }
+        }
+    }
+
+    private fun showMonsterPopover(marker: Marker, blurbResId: Int, googleMap3D: GoogleMap3D) {
+        if (blurbResId != 0) {
+            val textView = android.widget.TextView(this@MarkersActivity).apply {
+                text = getString(blurbResId)
+                setPadding(32, 16, 32, 16)
+                setTextColor(Color.BLACK)
+                setBackgroundColor(Color.WHITE)
+            }
+
+            val newPopover = googleMap3D.addPopover(popoverOptions {
+                positionAnchor = marker
+                altitudeMode = marker.altitudeMode
+                content = textView
+                autoCloseEnabled = true
+                autoPanEnabled = false
+            })
+
+            activePopover?.remove()
+            activePopover = newPopover
+            activePopover?.show()
+        }
+    }
+    /**
+     * Helper to map monster IDs to their drawable resources without using discouraged reflection.
+     */
+    private fun getMonsterDrawableId(drawableName: String): Int {
+        return when (drawableName) {
+            "alien" -> R.drawable.alien
+            "bigfoot" -> R.drawable.bigfoot
+            "frank" -> R.drawable.frank
+            "godzilla" -> R.drawable.godzilla
+            "mothra" -> R.drawable.mothra
+            "mummy" -> R.drawable.mummy
+            "nessie" -> R.drawable.nessie
+            "yeti" -> R.drawable.yeti
+            else -> 0
+        }
+    }
+
+    /**
+     * Helper to map monster IDs to their blurb string resources.
+     */
+    private fun getMonsterBlurbResId(monsterId: String): Int {
+        return when (monsterId) {
+            "alien" -> R.string.monster_alien_blurb
+            "bigfoot" -> R.string.monster_bigfoot_blurb
+            "frank" -> R.string.monster_frank_blurb
+            "godzilla" -> R.string.monster_godzilla_blurb
+            "mothra" -> R.string.monster_mothra_blurb
+            "mummy" -> R.string.monster_mummy_blurb
+            "nessie" -> R.string.monster_nessie_blurb
+            "yeti" -> R.string.monster_yeti_blurb
+            else -> 0
         }
     }
 }
