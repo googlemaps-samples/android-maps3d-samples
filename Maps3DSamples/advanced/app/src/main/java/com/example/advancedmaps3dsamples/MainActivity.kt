@@ -39,7 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.advancedmaps3dsamples.scenarios.RouteSampleActivity
+import com.example.advancedmaps3dsamples.route.RouteSampleActivity
 import com.example.advancedmaps3dsamples.scenarios.ScenariosActivity
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
 import dagger.hilt.android.AndroidEntryPoint

@@ -16,53 +16,90 @@
 
 package com.example.snippets.java.snippets;
 
+import android.content.Context;
 import android.graphics.Color;
-import com.google.android.gms.maps3d.GoogleMap3D;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.Toast;
+import com.example.snippets.java.TrackedMap3D;
+import com.example.snippets.java.annotations.SnippetGroup;
+import com.example.snippets.java.annotations.SnippetItem;
 import com.google.android.gms.maps3d.model.AltitudeMode;
+import com.google.android.gms.maps3d.model.Camera;
+import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.Polyline;
 import com.google.android.gms.maps3d.model.PolylineOptions;
 import java.util.Arrays;
 import java.util.List;
 
+@SnippetGroup(
+        title = "Polylines",
+        description = "Snippets demonstrating 2D and 3D extruded polyline paths on the map.")
 public class PolylineSnippets {
 
-    private final GoogleMap3D map;
+    private final Context context;
+    private final TrackedMap3D map;
 
-    public PolylineSnippets(GoogleMap3D map) {
+    public PolylineSnippets(Context context, TrackedMap3D map) {
+        this.context = context;
         this.map = map;
     }
 
-    // [START maps_android_3d_polyline_add_java]
-    /**
-     * Adds a basic polyline to the map.
-     */
+    /** Adds a basic polyline to the map. */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+            title = "1. Basic",
+            description = "Draws a thick red polyline connecting three points")
     public void addBasicPolyline() {
-        List<LatLngAltitude> points = Arrays.asList(
-            new LatLngAltitude(37.42, -122.08, 0.0),
-            new LatLngAltitude(37.43, -122.09, 0.0),
-            new LatLngAltitude(37.44, -122.08, 0.0)
-        );
+        // [START maps_android_3d_polyline_add_java]
+        List<LatLngAltitude> points =
+                Arrays.asList(
+                        new LatLngAltitude(37.42, -122.08, 0.0),
+                        new LatLngAltitude(37.43, -122.09, 0.0),
+                        new LatLngAltitude(37.44, -122.08, 0.0));
 
         PolylineOptions options = new PolylineOptions();
         options.setPath(points);
         options.setStrokeColor(Color.RED);
         options.setStrokeWidth(10.0);
         options.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
-        
-        Polyline polyline = map.addPolyline(options);
-    }
-    // [END maps_android_3d_polyline_add_java]
 
-    // [START maps_android_3d_polyline_options_java]
-    /**
-     * Adds a styled polyline with complex configuration.
-     */
+        Polyline polyline = map.addPolyline(options);
+        // [START_EXCLUDE]
+        polyline.setClickListener(
+                () -> {
+                    new Handler(Looper.getMainLooper())
+                            .post(
+                                    () -> {
+                                        Toast.makeText(
+                                                        context,
+                                                        "Polyline Clicked!",
+                                                        Toast.LENGTH_SHORT)
+                                                .show();
+                                    });
+                });
+        // [END_EXCLUDE]
+        // [END maps_android_3d_polyline_add_java]
+
+        Camera camera =
+                new Camera(new LatLngAltitude(37.43, -122.085, 0.0), 0.0, 45.0, 0.0, 5000.0);
+        FlyToOptions flyToOptions = new FlyToOptions(camera, 1000L);
+        map.flyCameraTo(flyToOptions);
+    }
+
+    /** Adds a styled polyline with complex configuration. */
+    @SuppressWarnings("unused")
+    @SnippetItem(
+            title = "2. Styled",
+            description =
+                    "Draws a magenta polyline with a green outline, extruded and following the ground curvature (geodesic), connecting two points.")
     public void addStyledPolyline() {
-        List<LatLngAltitude> points = Arrays.asList(
-            new LatLngAltitude(37.42, -122.08, 50.0),
-            new LatLngAltitude(37.43, -122.09, 100.0)
-        );
+        // [START maps_android_3d_polyline_options_java]
+        List<LatLngAltitude> points =
+                Arrays.asList(
+                        new LatLngAltitude(37.42, -122.08, 50.0),
+                        new LatLngAltitude(37.43, -122.09, 100.0));
 
         PolylineOptions options = new PolylineOptions();
         options.setPath(points);
@@ -74,8 +111,27 @@ public class PolylineSnippets {
         options.setExtruded(true);
         options.setGeodesic(true);
         options.setDrawsOccludedSegments(true);
-        
+
         Polyline polyline = map.addPolyline(options);
+        // [START_EXCLUDE]
+        polyline.setClickListener(
+                () -> {
+                    new Handler(Looper.getMainLooper())
+                            .post(
+                                    () -> {
+                                        Toast.makeText(
+                                                        context,
+                                                        "Polyline Clicked!",
+                                                        Toast.LENGTH_SHORT)
+                                                .show();
+                                    });
+                });
+        // [END_EXCLUDE]
+        // [END maps_android_3d_polyline_options_java]
+
+        Camera camera =
+                new Camera(new LatLngAltitude(37.425, -122.085, 0.0), 0.0, 45.0, 0.0, 4000.0);
+        FlyToOptions flyToOptions = new FlyToOptions(camera, 1000L);
+        map.flyCameraTo(flyToOptions);
     }
-    // [END maps_android_3d_polyline_options_java]
 }

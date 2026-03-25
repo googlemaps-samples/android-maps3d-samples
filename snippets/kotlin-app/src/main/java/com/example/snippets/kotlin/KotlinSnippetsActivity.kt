@@ -18,12 +18,12 @@ package com.example.snippets.kotlin
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -36,6 +36,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -49,55 +50,74 @@ class KotlinSnippetsActivity : AppCompatActivity() {
         setContent {
             SnippetsTheme {
                 val snackbarHostState = remember { SnackbarHostState() }
-                
-                    Scaffold(
-                        modifier = Modifier.fillMaxSize(),
-                        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-                    ) { innerPadding ->
-                        SnippetList(
-                            snippets = SnippetRegistry.snippets.values.toList(),
-                            contentPadding = innerPadding,
-                            onItemClick = { snippet ->
-                                val intent = Intent(this, MapActivity::class.java)
-                                intent.putExtra(MapActivity.EXTRA_SNIPPET_TITLE, snippet.title)
-                                startActivity(intent)
-                            }
-                        )
-                    }
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+                ) { innerPadding ->
+                    SnippetGroupList(
+                        groups = SnippetRegistry.getSnippetGroups(),
+                        contentPadding = innerPadding,
+                        onItemClick = { item ->
+                            val intent = Intent(this, MapActivity::class.java)
+                            intent.putExtra("group_title", item.groupTitle)
+                            intent.putExtra(MapActivity.EXTRA_SNIPPET_TITLE, item.title)
+                            startActivity(intent)
+                        },
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun SnippetList(
-    snippets: List<Snippet>,
+fun SnippetGroupList(
+    groups: List<SnippetGroupInfo>,
     modifier: Modifier = Modifier,
-    contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp),
-    onItemClick: (Snippet) -> Unit
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    onItemClick: (SnippetItemInfo) -> Unit,
 ) {
+    val expandedGroups = remember { mutableStateMapOf<String, Boolean>() }
+
     LazyColumn(
         modifier = modifier,
-        contentPadding = contentPadding
+        contentPadding = contentPadding,
     ) {
-        items(snippets) { snippet ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onItemClick(snippet) }
-                    .padding(16.dp)
-            ) {
+        groups.forEach { group ->
+            val isExpanded = expandedGroups[group.title] ?: true // Default to expanded
+            item {
                 Text(
-                    text = snippet.title,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = snippet.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "${if (isExpanded) "▼ " else "▶ "}${group.title}",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { expandedGroups[group.title] = !isExpanded }
+                        .padding(16.dp),
+                    color = MaterialTheme.colorScheme.primary,
                 )
             }
-            HorizontalDivider()
+            if (isExpanded) {
+                items(group.items) { item ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onItemClick(item) }
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                    ) {
+                        Text(
+                            text = item.title,
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Text(
+                            text = item.description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    HorizontalDivider()
+                }
+            }
         }
     }
 }
