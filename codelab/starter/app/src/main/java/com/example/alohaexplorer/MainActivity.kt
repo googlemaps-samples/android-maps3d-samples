@@ -352,7 +352,45 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
     }
     */
     
-    // TODO: Step 9 - Setup Popover
+    // TODO: Step 9 - Scenic Tour Challenge
+    /*
+    private suspend fun flyTour(map: GoogleMap3D) {
+        val locations = listOf(
+            HONOLULU to "Honolulu",
+            DIAMOND_HEAD to "Diamond Head",
+            HANAUMA_BAY to "Hanauma Bay",
+            KOKO_HEAD to "Koko Head",
+            LANIKAI_BEACH to "Lanikai Beach",
+            MOUNT_KAALA to "Mount Ka'ala",
+            PEARL_HARBOR to "Pearl Harbor"
+        )
+        
+        // Add all markers for the tour
+        resetMap()
+        locations.forEach { (location, name) ->
+            activeMarkers.add(map.addMarker(
+                markerOptions {
+                    position = location
+                    label = name
+                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                    isExtruded = true
+                }
+            )!!)
+        }
+
+        // Fly to each location
+        for ((location, _) in locations) {
+            // TODO: CHALLENGE!
+            // 1. Tell the map to flyCameraTo this 'location'. 
+            //    (Hint: Use tilt = 45.0, range = 2500.0, heading = 0.0, durationInMillis = 3000L)
+            // 2. Wait for the animation to finish using awaitCameraAnimation(map)
+            // 3. Optional: Add a delay so the user can enjoy the view before flying to the next!
+            
+        }
+    }
+    */
+    
+    // TODO: Step 10 - Setup Popover
     /*
     private fun setupPopover(map: GoogleMap3D) {
         resetMap()

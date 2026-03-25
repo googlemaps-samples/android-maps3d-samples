@@ -29,62 +29,38 @@ Before we start coding, ensure your environment is ready.
     *   Select your project and click **Enable** to turn on the "Maps 3D SDK for Android".
     *   Make sure you have an API Key created in the "Credentials" section.
 
-2.  **Dependencies**:
-    *   Open `gradle/libs.versions.toml` and add the secrets plugin to the `[versions]` and `[plugins]` sections:
-        ```toml
-        [versions]
-        # ... existing versions ...
-        playServicesMaps3d = "0.2.0"
-        secretsGradlePlugin = "2.0.1"
+2.  **Add Your API Key**:
+    To authenticate with Google Maps Platform services, your app must provide an API key. We use the **Secrets Gradle Plugin** to do this securely. 
+    
+    > **[!NOTE] Why the Secrets Plugin?**
+    > Hardcoding an API key into your Android Manifest or source code is dangerous! If you check your code into GitHub, malicious bots can scrape the key in seconds. 
+    > 
+    > The Secrets Gradle Plugin extracts the key from a local text file and injects it into the build process securely without exposing it to version control.
+    
+    The `starter` project comes with the Secrets plugin pre-configured for you! All you need to do is open the `secrets.properties` file in the root of your project (create it if it doesn't exist) and add:
+    ```properties
+    MAPS_API_KEY=YOUR_API_KEY_HERE
+    ```
 
-        [libraries]
-        # ... existing libraries ...
-        play-services-maps3d = { group = "com.google.android.gms", name = "play-services-maps3d", version.ref = "playServicesMaps3d" }
-
-        [plugins]
-        # ... existing plugins ...
-        secrets-gradle-plugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
-        ```
-    *   Open `app/build.gradle.kts` and apply the plugin:
-        ```kotlin
-        plugins {
-            // ... other plugins
-            alias(libs.plugins.secrets.gradle.plugin)
-        }
-
-        // Add this block to configure the plugin
-        secrets {
-            propertiesFileName = "secrets.properties"
-            defaultPropertiesFileName = "local.defaults.properties"
-        }
-        ```
+3.  **Dependencies**:
+    Finally, you need to import the SDK itself. Open `gradle/libs.versions.toml` and uncomment the `play-services-maps3d` library line under `[libraries]`:
+    ```toml
+    # TODO: Prerequisites - Add the Maps 3D SDK library
+    play-services-maps3d = { group = "com.google.android.gms", name = "play-services-maps3d", version.ref = "playServicesMaps3d" }
+    ```
+    Then, open `app/build.gradle.kts` and uncomment the dependency:
+    ```kotlin
+    dependencies {
+        // ...
+        implementation(libs.play.services.maps3d)
+    }
+    ```
     *   Ensure the Maps 3D SDK dependency is also present in `dependencies { ... }`:
         ```kotlin
         dependencies {
             implementation(libs.play.services.maps3d)
         }
-        ```
 
-3.  **API Key**:
-    *   Create a file named `secrets.properties` in your project's root directory.
-    *   Add your API key to this file:
-        ```properties
-        MAPS3D_API_KEY=YOUR_ACTUAL_API_KEY
-        ```
-    *   **Note**: `secrets.properties` should NOT be committed to version control.
-    *   Create another file named `local.defaults.properties` in the root directory.
-    *   Add a fallback value:
-        ```properties
-        MAPS3D_API_KEY=DEFAULT_API_KEY
-        ```
-    *   This file *should* be committed to version control to verify which keys are required.
-    *   Open `app/src/main/AndroidManifest.xml` and add the following metadata tag inside the `<application>` element:
-        ```xml
-        <meta-data
-            android:name="com.google.android.geo.maps3d.API_KEY"
-            android:value="${MAPS3D_API_KEY}" />
-        ```
-        The secrets plugin will inject the key from `secrets.properties` into this placeholder.
 
     *  **Be sure to sync the project if you haven't already!**
 
@@ -375,6 +351,13 @@ Here is where many developers trip up. Animations take time. Network loading tak
 
 **The Solution: Suspending Helper Functions**
 
+> **[!NOTE] Deep Dive: The Magic of `suspendCancellableCoroutine`**
+> The Maps 3D SDK relies heavily on trailing callback functions (e.g. `setCameraAnimationEndListener`). If you want to fly to five different places sequentially, chaining five callbacks inside each other quickly turns into an unreadable "Pyramid of Doom" (affectionately known as Callback Hell).
+> 
+> By wrapping these listeners inside Kotlin's `suspendCancellableCoroutine`, we temporarily pause the execution of our Kotlin code *without blocking the main UI thread*! Once the Maps SDK fires the callback indicating the flight is over, `continuation.resume(Unit)` allows our code to cleanly wake back up and proceed to the next line.
+>
+> **The Result:** We can write flat, sequential, and highly readable synchronous-looking code!
+
 Open `Utilities.kt` to see how we wrap the SDK's callback-based listeners into Kotlin Coroutine `suspend` functions. This lets us write linear, readable code like "Fly THERE, then wait, then Fly HERE".
 
 ```kotlin
@@ -570,6 +553,18 @@ private fun extrudePolygon(
 }
 ```
 
+> **[!TIP] Visualizing the Extrusion Math**
+> When stitching the vertical side walls, we create a single face polygon using four vertices: two from the "ground" (Base) and two directly above them (Top) at the extrusion altitude.
+> 
+> ```text
+>        p1Top -------- p2Top     (Altitude: 35.0)
+>          |              |
+>          |  (Side Wall) |
+>          |              |
+>       p1Base ------- p2Base     (Altitude:  0.0)
+> ```
+> By looping this logic for every pair of points around the perimeter, we seamlessly form an unbroken 3D perimeter wall.
+
 When we add these faces to the map, we use `AltitudeMode.ABSOLUTE` to ensure the building keeps its shape perfectly.
 
 <!-- TODO: Add screenshot here.
@@ -703,20 +698,12 @@ Let's spread our wings and explore the whole island! In this step, we'll scatter
 
         // Fly to each location
         for ((location, _) in locations) {
-            map.flyCameraTo(
-                flyToOptions {
-                    endCamera = camera {
-                        center = location
-                        tilt = 45.0
-                        range = 2500.0
-                        heading = 0.0
-                    }
-                    durationInMillis = 3000L
-                }
-            )
-            awaitCameraAnimation(map)
-            // Pause at each location to enjoy the view!
-            kotlinx.coroutines.delay(1500)
+            // TODO: CHALLENGE!
+            // 1. Tell the map to flyCameraTo this 'location'. 
+            //    (Hint: Use tilt = 45.0, range = 2500.0, heading = 0.0, durationInMillis = 3000L)
+            // 2. Wait for the animation to finish using awaitCameraAnimation(map)
+            // 3. Optional: Add a delay so the user can enjoy the view before flying to the next!
+            
         }
     }
 ```
