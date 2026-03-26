@@ -21,6 +21,7 @@ First, add the necessary versions and libraries to your `libs.versions.toml` fil
 [versions]
 # NOTE: Verify this is the latest version of the Maps 3D SDK, as it is subject to change.
 playServicesMaps3d = "0.2.0"
+# NOTE: Verify this is the latest version of lifecycle-runtime-ktx.
 lifecycleRuntimeKtx = "2.8.5"
 
 [libraries]
