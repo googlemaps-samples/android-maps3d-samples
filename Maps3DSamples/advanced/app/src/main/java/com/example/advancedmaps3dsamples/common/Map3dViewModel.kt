@@ -348,7 +348,7 @@ abstract class Map3dViewModel : ViewModel() {
 
   open fun setCameraTilt(tilt: Number) {
     updateCameraAndMove {
-      copy(heading = tilt.toTilt())
+      copy(tilt = tilt.toTilt())
     }
   }
 
