@@ -19,6 +19,7 @@
 
     <string name="map_sample_title" translatable="false">3D Map Samples</string>
     <string name="map_sample_scenarios" translatable="false">Scenarios (video visuals)</string>
+    <string name="map_sample_route" translatable="false">Routes API Integration</string>
 
     <!--
     Distance in feet, formatted to 0 decimal places.
@@ -44,7 +45,6 @@
     -->
     <string name="in_kilometers" translatable="false">%1$,.1f km</string>
 
-    <string name="title_activity_camera" translatable="false">CameraActivity</string>
 
     <string name="scenarios_none" translatable="false">Pick a scenario</string>
     <string name="scenarios_tower_bridge" translatable="false">Tower Bridge</string>

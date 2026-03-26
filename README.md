@@ -26,6 +26,7 @@ Android Views. It's a great starting point to understand core concepts like map 
 * **[Maps3DSamples/advanced](Maps3DSamples/advanced)**: For developers using Jetpack Compose, this sample demonstrates
 how to integrate the Maps3D SDK into a declarative UI. It utilizes helper classes to bridge the SDK's View-based SDK with Compose, offering a more modern
 approach to building UIs with 3D maps.
+* **[snippets](snippets)**: A collection of standalone, extraction-ready code snippets demonstrating standard integration endpoints in both Kotlin and Java. Includes a coordinate checklist mapping tracker listed in [CATALOG.md](snippets/CATALOG.md).
 
 ## View-based Kotlin Samples
 
@@ -57,6 +58,14 @@ To run the samples, you will need:
 - Copy `Maps3DSamples/ApiDemos/local.defaults.properties` to `Maps3DSamples/ApiDemos/secrets.properties` and set the value of `MAPS3D_API_KEY` to your API key.
 - (for the advanced sample, copy `Maps3DSamples/advanced/local.defaults.properties` to `Maps3DSamples/advanced/secrets.properties` and set the value of `MAPS3D_API_KEY` to your API key.)
 - All samples require up-to-date versions of the Android build tools and the Android support repository.
+
+## Gemini Code Assist Integration
+
+This repository includes custom instructions (Skills) for **Gemini Code Assist** to help generate code adhering to Maps3D best practices. 
+
+The skill is located in the `.gemini/skills/android-maps3d-sdk` directory. You should install this skill into your working environment following the instructions for your specific setup. 
+
+As a reference, you can view the [Gemini CLI documentation](https://geminicli.com/) for one way to use local skills. Please note that your specific AI agent or development environment may require different installation steps.
 
 ## Running the sample(s)
 

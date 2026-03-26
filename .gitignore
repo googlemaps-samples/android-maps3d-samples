@@ -4,6 +4,7 @@ build/
 
 # Local configuration file (sdk path, etc)
 local.properties
+secrets.properties
 
 # Log/OS Files
 *.log
@@ -37,3 +38,4 @@ google-services.json
 
 # VS Code
 .vscode/
+snippets/docs/

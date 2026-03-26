@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
+import java.util.Properties
 import org.gradle.api.GradleException
-import java.io.File
 
-// Check for secrets.properties file before proceeding with build tasks.
+// Check for secrets.properties file and valid API key before proceeding with build tasks.
 val secretsFile = rootProject.file("secrets.properties")
-if (!secretsFile.exists()) {
+val isCI = System.getenv("CI")?.toBoolean() ?: false
+
+if (!isCI) {
     val requestedTasks = gradle.startParameter.taskNames
-    if (requestedTasks.isEmpty()) {
+    if (requestedTasks.isEmpty() && !secretsFile.exists()) {
         // It's likely an IDE sync if no tasks are specified, so just issue a warning.
         println("Warning: secrets.properties not found. Gradle sync may succeed, but building/running the app will fail.")
-    } else {
+    } else if (requestedTasks.isNotEmpty()) {
         val buildTaskKeywords = listOf("build", "install", "assemble")
         val isBuildTask = requestedTasks.any { task ->
             buildTaskKeywords.any { keyword ->
@@ -39,17 +41,33 @@ if (!secretsFile.exists()) {
             }
         }
 
-        if (isBuildTask && !isTestTask) {
+        val isDebugTask = requestedTasks.any { task ->
+            task.contains("Debug", ignoreCase = true) || task.contains("installAndLaunch", ignoreCase = true)
+        }
+
+        if (isBuildTask && !isTestTask && isDebugTask) {
             val defaultsFile = rootProject.file("local.defaults.properties")
             val requiredKeysMessage = if (defaultsFile.exists()) {
                 defaultsFile.readText()
             } else {
-                "MAPS_API_KEY=<YOUR_API_KEY>"
+                "MAPS3D_API_KEY=<YOUR_API_KEY>"
             }
 
-            throw GradleException("secrets.properties file not found. Please create a 'secrets.properties' file in the root project directory with the following content:\n" +
-                    "\n" +
-                    requiredKeysMessage)
+            if (!secretsFile.exists()) {
+                throw GradleException("secrets.properties file not found. Please create a 'secrets.properties' file in the root project directory with the following content:\n\n$requiredKeysMessage")
+            }
+
+            val secrets = Properties()
+            secretsFile.inputStream().use { secrets.load(it) }
+            val apiKey = secrets.getProperty("MAPS3D_API_KEY")
+
+            if (apiKey.isNullOrBlank() || !apiKey.matches(Regex("^AIza[a-zA-Z0-9_-]{35}$"))) {
+                throw GradleException("Invalid or missing MAPS3D_API_KEY in secrets.properties. Please provide a valid Google Maps API key (starts with 'AIza').")
+            }
+
+            if (secrets.getProperty("MAPS_API_KEY") != null) {
+                println("Warning: Found MAPS_API_KEY in secrets.properties. This project relies exclusively on MAPS3D_API_KEY.")
+            }
         }
     }
 }
@@ -62,6 +80,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.secrets.gradle.plugin)
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 android {
@@ -76,7 +95,7 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "1.3.0"
+        versionName = "1.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -136,6 +155,12 @@ dependencies {
     // Google Maps Utils for the polyline decoder
     implementation(libs.maps.utils.ktx)
 
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.kotlinx.serialization.json)
+
     implementation(libs.androidx.material.icons.extended)
 }
 
@@ -148,3 +173,12 @@ secrets {
     // checked in version control.
     defaultPropertiesFileName = "local.defaults.properties"
 }
+
+tasks.register<Exec>("installAndLaunch") {
+    description = "Installs and launches the demo app."
+    group = "install"
+    dependsOn("installDebug")
+    commandLine("adb", "shell", "am", "start", "-n", "com.example.advancedmaps3dsamples/.MainActivity")
+}
+
+tasks.register("prepareKotlinBuildScriptModel"){} 

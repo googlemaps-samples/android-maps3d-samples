@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
+import java.util.Properties
 import org.gradle.api.GradleException
-import java.io.File
 
-// Check for secrets.properties file before proceeding with build tasks.
+// Check for secrets.properties file and valid API key before proceeding with build tasks.
 val secretsFile = rootProject.file("secrets.properties")
-if (!secretsFile.exists() && System.getenv("CI") != "true") {
+val isCI = System.getenv("CI")?.toBoolean() ?: false
+
+if (!isCI) {
     val requestedTasks = gradle.startParameter.taskNames
-    if (requestedTasks.isEmpty()) {
+    if (requestedTasks.isEmpty() && !secretsFile.exists()) {
         // It's likely an IDE sync if no tasks are specified, so just issue a warning.
         println("Warning: secrets.properties not found. Gradle sync may succeed, but building/running the app will fail.")
-    } else {
+    } else if (requestedTasks.isNotEmpty()) {
         val buildTaskKeywords = listOf("build", "install", "assemble")
         val isBuildTask = requestedTasks.any { task ->
             buildTaskKeywords.any { keyword ->
@@ -39,17 +41,33 @@ if (!secretsFile.exists() && System.getenv("CI") != "true") {
             }
         }
 
-        if (isBuildTask && !isTestTask) {
+        val isDebugTask = requestedTasks.any { task ->
+            task.contains("Debug", ignoreCase = true) || task.contains("installAndLaunch", ignoreCase = true)
+        }
+
+        if (isBuildTask && !isTestTask && isDebugTask) {
             val defaultsFile = rootProject.file("local.defaults.properties")
             val requiredKeysMessage = if (defaultsFile.exists()) {
                 defaultsFile.readText()
             } else {
-                "MAPS_API_KEY=<YOUR_API_KEY>"
+                "MAPS3D_API_KEY=<YOUR_API_KEY>"
             }
 
-            throw GradleException("secrets.properties file not found. Please create a 'secrets.properties' file in the root project directory with the following content:\n" +
-                    "\n" +
-                    requiredKeysMessage)
+            if (!secretsFile.exists()) {
+                throw GradleException("secrets.properties file not found. Please create a 'secrets.properties' file in the root project directory with the following content:\n\n$requiredKeysMessage")
+            }
+
+            val secrets = Properties()
+            secretsFile.inputStream().use { secrets.load(it) }
+            val apiKey = secrets.getProperty("MAPS3D_API_KEY")
+
+            if (apiKey.isNullOrBlank() || !apiKey.matches(Regex("^AIza[a-zA-Z0-9_-]{35}$"))) {
+                throw GradleException("Invalid or missing MAPS3D_API_KEY in secrets.properties. Please provide a valid Google Maps API key (starts with 'AIza').")
+            }
+
+            if (secrets.getProperty("MAPS_API_KEY") != null) {
+                println("Warning: Found MAPS_API_KEY in secrets.properties. This project relies exclusively on MAPS3D_API_KEY.")
+            }
         }
     }
 }
@@ -93,6 +111,11 @@ android {
     buildFeatures {
         buildConfig = true
     }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -108,17 +131,23 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    testImplementation(libs.junit)
+    implementation(libs.play.services.base) // "com.google.android.gms:play-services-base:18.10.0"
+    implementation(project(":Maps3DSamples:ApiDemos:common"))
+
+    testImplementation(libs.junit) // "junit:junit:4.13.2"
+    testImplementation(libs.json) // "org.json:json:20251224"
+    testImplementation(libs.robolectric) // "org.robolectric:robolectric:4.16.1"
+    testImplementation(libs.androidx.core) // "androidx.test:core:1.7.0"
+    testImplementation(libs.truth) // "com.google.truth:truth:1.4.5"
+
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(project(":common"))
+    androidTestImplementation(project(":Maps3DSamples:ApiDemos:common"))
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.google.truth)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    implementation(libs.play.services.base)
-    implementation(project(":common"))
 }
 
 secrets {
@@ -129,4 +158,11 @@ secrets {
     // A properties file containing default secret values. This file can be
     // checked in version control.
     defaultPropertiesFileName = "local.defaults.properties"
+}
+
+tasks.register<Exec>("installAndLaunch") {
+    description = "Installs and launches the demo app."
+    group = "install"
+    dependsOn("installDebug")
+    commandLine("adb", "shell", "am", "start", "-n", "com.example.maps3djava/.mainactivity.MainActivity")
 }

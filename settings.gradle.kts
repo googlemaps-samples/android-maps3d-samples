@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,32 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        val useLocalMaven = providers.gradleProperty("use_local_maven")
+            .getOrElse("false")
+            .toBoolean()
+
+        if (useLocalMaven) {
+            mavenLocal()
+        }
         google()
         mavenCentral()
     }
 }
 
-rootProject.name = "Maps 3D Samples"
-include(":kotlin-app")
-include(":java-app")
-include(":common")
+rootProject.name = "Android Maps 3D Samples"
+
+// Snippets
+include(":snippets:kotlin-app")
+include(":snippets:java-app")
+include(":snippets:common")
+
+// Maps3DSamples Advanced
+include(":Maps3DSamples:advanced:app")
+
+// Maps3DSamples ApiDemos
+include(":Maps3DSamples:ApiDemos:kotlin-app")
+include(":Maps3DSamples:ApiDemos:java-app")
+include(":Maps3DSamples:ApiDemos:common")
+
+// PlacesUIKit3D
+include(":PlacesUIKit3D")

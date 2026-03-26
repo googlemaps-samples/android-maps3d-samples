@@ -95,6 +95,15 @@
             android:exported="true"
             />
 
+        <activity
+            android:name=".popovers.PopoversActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="Popovers"
+            android:exported="true"
+            />
+
+
+
     </application>
 
 </manifest>

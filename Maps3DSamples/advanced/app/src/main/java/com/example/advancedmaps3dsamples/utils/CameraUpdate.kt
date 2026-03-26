@@ -119,3 +119,21 @@ suspend fun awaitCameraUpdate(
 
     cameraUpdate.invoke(controller)
 }
+
+/**
+ * Suspends the coroutine until the current camera animation is finished.
+ * 
+ * In a 3D environment, this is essential for sequencing cinematic movements.
+ */
+suspend fun GoogleMap3D.awaitCameraAnimation() = suspendCancellableCoroutine { continuation ->
+    setCameraAnimationEndListener {
+        setCameraAnimationEndListener(null) // Cleanup
+        if (continuation.isActive) {
+            continuation.resume(Unit)
+        }
+    }
+
+    continuation.invokeOnCancellation {
+        setCameraAnimationEndListener(null)
+    }
+}

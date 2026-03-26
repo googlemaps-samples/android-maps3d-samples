@@ -88,6 +88,20 @@
             android:exported="true"
             />
 
+        <activity
+            android:name="com.example.maps3djava.mapinteractions.MapInteractionsActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_map_interactions"
+            android:exported="true"
+            />
+
+        <activity
+            android:name="com.example.maps3djava.popovers.PopoversActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="Popovers"
+            android:exported="true"
+            />
+
     </application>
 
 </manifest>

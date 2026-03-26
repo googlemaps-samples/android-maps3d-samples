@@ -86,24 +86,29 @@ public abstract class SampleBaseActivity extends Activity implements OnMap3DView
 
         setContentView(R.layout.activity_common_map);
         View rootView = findViewById(R.id.map_container);
+        MaterialToolbar topBar = findViewById(R.id.top_bar);
+
+        topBar.setTitle(getTitle());
+
         ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, windowInsets) -> {
-            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            Insets statusBarInsets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars());
+            Insets navInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars());
 
-            // Apply the insets as padding to the view.
-            // This will push the content down from behind the status bar and up from
-            // behind the navigation bar.
-            v.setPadding(
-                insets.left,
-                insets.top,
-                insets.right,
-                insets.bottom
-            );
+            View appBarLayout = findViewById(R.id.app_bar_layout);
+            if (appBarLayout != null) {
+                appBarLayout.setPadding(0, statusBarInsets.top, 0, 0);
+            }
+            View controlScrollView = findViewById(R.id.control_scroll_view);
+            if (controlScrollView != null) {
+                android.view.ViewGroup.MarginLayoutParams layoutParams = (android.view.ViewGroup.MarginLayoutParams) controlScrollView
+                        .getLayoutParams();
+                int margin16dp = (int) (16 * getResources().getDisplayMetrics().density);
+                layoutParams.bottomMargin = navInsets.bottom + margin16dp;
+                controlScrollView.setLayoutParams(layoutParams);
+            }
 
-            // Return CONSUMED to signal that we've handled the insets.
             return WindowInsetsCompat.CONSUMED;
         });
-
-        ((MaterialToolbar) findViewById(R.id.top_bar)).setTitle(getTitle());
 
         map3DView = findViewById(R.id.map3dView);
         map3DView.onCreate(savedInstanceState);
@@ -218,5 +223,58 @@ public abstract class SampleBaseActivity extends Activity implements OnMap3DView
 
     protected void showToast(String message) {
         runOnUiThread(() -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, android.view.KeyEvent event) {
+        if (googleMap3D == null)
+            return super.onKeyDown(keyCode, event);
+        Camera currentCamera = googleMap3D.getCamera();
+        if (currentCamera == null)
+            return super.onKeyDown(keyCode, event);
+
+        float dTilt = 0f;
+        float dHeading = 0f;
+        float dRange = 0f;
+
+        float incrementAmount = 5.0f;
+        float rangeIncrementAmount = 200.0f;
+        boolean handled = true;
+
+        switch (keyCode) {
+            case android.view.KeyEvent.KEYCODE_W:
+                dTilt = -incrementAmount;
+                break;
+            case android.view.KeyEvent.KEYCODE_S:
+                dTilt = incrementAmount;
+                break;
+            case android.view.KeyEvent.KEYCODE_A:
+                dHeading = -incrementAmount;
+                break;
+            case android.view.KeyEvent.KEYCODE_D:
+                dHeading = incrementAmount;
+                break;
+            case android.view.KeyEvent.KEYCODE_Z:
+                dRange = -rangeIncrementAmount;
+                break;
+            case android.view.KeyEvent.KEYCODE_X:
+                dRange = rangeIncrementAmount;
+                break;
+            default:
+                handled = false;
+        }
+
+        if (handled) {
+            Camera newCamera = new Camera(
+                    currentCamera.getCenter(),
+                    com.example.maps3d.common.UtilitiesKt.toHeading(currentCamera.getHeading() + dHeading),
+                    com.example.maps3d.common.UtilitiesKt.toTilt(currentCamera.getTilt() + dTilt),
+                    currentCamera.getRoll(),
+                    com.example.maps3d.common.UtilitiesKt.toRange(currentCamera.getRange() + dRange));
+            googleMap3D.setCamera(newCamera);
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 }
