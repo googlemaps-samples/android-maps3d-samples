@@ -56,3 +56,6 @@ include(":Maps3DSamples:advanced:app")
 include(":Maps3DSamples:ApiDemos:kotlin-app")
 include(":Maps3DSamples:ApiDemos:java-app")
 include(":Maps3DSamples:ApiDemos:common")
+
+// PlacesUIKit3D
+include(":PlacesUIKit3D")

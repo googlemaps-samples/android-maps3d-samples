@@ -180,3 +180,5 @@ tasks.register<Exec>("installAndLaunch") {
     dependsOn("installDebug")
     commandLine("adb", "shell", "am", "start", "-n", "com.example.advancedmaps3dsamples/.MainActivity")
 }
+
+tasks.register("prepareKotlinBuildScriptModel"){} 

@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.example.advancedmaps3dsamples.common
+package com.example.placesuikit3d.common
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.advancedmaps3dsamples.utils.CameraUpdate
-import com.example.advancedmaps3dsamples.utils.copy
-import com.example.advancedmaps3dsamples.utils.toCameraUpdate
-import com.example.advancedmaps3dsamples.utils.toHeading
-import com.example.advancedmaps3dsamples.utils.toRange
-import com.example.advancedmaps3dsamples.utils.toRoll
-import com.example.advancedmaps3dsamples.utils.toTilt
-import com.example.advancedmaps3dsamples.utils.toValidCamera
+import com.example.placesuikit3d.utils.CameraUpdate
+import com.example.placesuikit3d.utils.copy
+import com.example.placesuikit3d.utils.toCameraUpdate
+import com.example.placesuikit3d.utils.toHeading
+import com.example.placesuikit3d.utils.toRange
+import com.example.placesuikit3d.utils.toRoll
+import com.example.placesuikit3d.utils.toTilt
+import com.example.placesuikit3d.utils.toValidCamera
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.OnCameraChangedListener
 import com.google.android.gms.maps3d.model.Camera
@@ -44,16 +44,13 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
 
 abstract class Map3dViewModel : ViewModel() {
   abstract val TAG: String
@@ -71,9 +68,6 @@ abstract class Map3dViewModel : ViewModel() {
 
   private val _cameraRestriction = MutableStateFlow<CameraRestriction?>(null)
   val cameraRestriction = _cameraRestriction.asStateFlow()
-
-  private val _isMapSteady = MutableStateFlow(false)
-  val isMapSteady = _isMapSteady.asStateFlow()
 
   private val _mapMode = MutableStateFlow(Map3DMode.SATELLITE)
   val mapMode = _mapMode.asStateFlow()
@@ -112,8 +106,10 @@ abstract class Map3dViewModel : ViewModel() {
       _googleMap3D.collect { controller ->
         stopAnimations()
         clearObjects()
+        Log.d(TAG, "Map3D Controller attached")
         if (controller != null) {
           launch {
+            Log.d(TAG, "Getting camera flow")
             getCameraFlow(controller).collect { camera ->
               _currentCamera.value = camera
             }
@@ -191,7 +187,7 @@ abstract class Map3dViewModel : ViewModel() {
         Log.d(TAG, "Detaching CameraChangeListener")
         controller.setCameraChangedListener(null)
       }
-    }
+    }.conflate()
   }
 
   /**
@@ -299,32 +295,6 @@ abstract class Map3dViewModel : ViewModel() {
     _mapMode.value = mode
   }
 
-  fun onMapSteadyChange(isSteady: Boolean) {
-    _isMapSteady.value = isSteady
-  }
-
-  /**
-   * Suspends until the map has entered a steady state, meaning it is not moving and has
-   * finished loading. This is useful to ensure that camera animations start from a stable
-   * and predictable state.
-   *
-   * @param timeoutMillis The maximum time to wait in milliseconds. A value of 0 means no timeout.
-   */
-  @OptIn(ExperimentalTime::class)
-  suspend fun awaitMapSteady(timeoutMillis: Long) {
-    if (timeoutMillis > 0) {
-      try {
-        withTimeout(timeoutMillis) {
-          isMapSteady.first { it }
-        }
-      } catch (_: TimeoutCancellationException) {
-        Log.w("Map3dViewModel", "awaitMapSteady timed out after $timeoutMillis ms")
-      }
-    } else {
-      isMapSteady.first { it }
-    }
-  }
-
   override fun onCleared() {
     _googleMap3D.value = null
     super.onCleared()
@@ -352,13 +322,13 @@ abstract class Map3dViewModel : ViewModel() {
     }
   }
 
-  open fun setCamaraRange(range: Number) {
+  open fun setCameraRange(range: Number) {
     updateCameraAndMove {
       copy(range = range.toRange())
     }
   }
 
-  open fun setCamaraRoll(roll: Number) {
+  open fun setCameraRoll(roll: Number) {
     updateCameraAndMove {
       copy(roll = roll.toRoll())
     }
@@ -403,7 +373,7 @@ abstract class Map3dViewModel : ViewModel() {
 
   suspend fun awaitCameraUpdate(cameraUpdate: CameraUpdate) {
     _googleMap3D.value?.let { controller ->
-      com.example.advancedmaps3dsamples.utils.awaitCameraUpdate(controller, cameraUpdate)
+      com.example.placesuikit3d.utils.awaitCameraUpdate(controller, cameraUpdate)
     }
   }
 }
