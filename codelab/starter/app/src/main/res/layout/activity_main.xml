@@ -7,14 +7,14 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-
-
     <!-- TODO: Step 1.1 - The Layout. Replace this TextView with the com.google.android.gms.maps3d.Map3DView. -->
     <TextView
         android:id="@+id/map3dView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Map3DView will go here"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:text="@string/placeholder_text"
+        android:background="#DDDDDD"
         app:layout_constraintBottom_toTopOf="@id/controls_scroll_view"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -45,7 +45,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Camera"
+                android:text="@string/btn_camera"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -53,7 +53,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Markers"
+                android:text="@string/btn_markers"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -61,7 +61,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Custom"
+                android:text="@string/btn_custom_markers"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -69,7 +69,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Polygons"
+                android:text="@string/btn_polygons"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -77,7 +77,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Polylines"
+                android:text="@string/btn_polylines"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -85,14 +85,14 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Models" />
+                android:text="@string/btn_models" />
             
             <Button
                 android:id="@+id/btn_show_popovers"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Popovers" />
+                android:text="@string/btn_popovers" />
 
         </LinearLayout>
     </HorizontalScrollView>

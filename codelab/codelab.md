@@ -60,9 +60,15 @@ Before we start coding, ensure your environment is ready.
         dependencies {
             implementation(libs.play.services.maps3d)
         }
-
+        ```
 
     *  **Be sure to sync the project if you haven't already!**
+
+4.  **Uncomment SDK-Dependent Files**:
+    The starter project contains several helper files (`HonoluluData.kt`, `Map3DLifecycleObserver.kt`, and `Utilities.kt`) that rely heavily on the Maps 3D SDK. They were temporarily commented out to prevent compilation errors before you synced the SDK dependency.
+    *   Open `HonoluluData.kt`. Remove the `/*` at the top and the `*/` at the bottom to uncomment the file.
+    *   Do the same for `Map3DLifecycleObserver.kt`.
+    *   Do the same for `Utilities.kt`.
 
 ---
 
@@ -72,21 +78,16 @@ Before we can explore the islands, we need to set up our "cockpit". We need a la
 
 ### Step 1.1: The Layout
 
-Open `app/src/main/res/layout/activity_main.xml`. We want a full-screen 3D map with a scrollable row of control buttons at the bottom.
+Open `app/src/main/res/layout/activity_main.xml`. The layout is mostly provided for you in the starter project. It features a `ConstraintLayout` containing a placeholder `TextView` at the top and a scrollable row of control buttons at the bottom.
+
+To insert the 3D Map, find the `TextView` with the `id` of `@+id/map3dView` and replace the entire `<TextView ... />` block with the `Map3DView` component below.
 
 **Key Changes:**
-1.  **Map3DView**: This is our main canvas. We place it at the top.
-2.  **HorizontalScrollView**: This holds our buttons. We verify it's pinned to the *bottom* of the screen.
+1.  **Map3DView**: We replace the placeholder with the actual SDK component. Notice all the `app:` attributes provided to configure the initial state of the camera!
+2.  **Attributes**: We configure its boundaries, tilt limits, and the initial hybrid map mode.
 
 ```xml
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
-
+    <!-- Replace the placeholder TextView with this Map3DView -->
     <com.google.android.gms.maps3d.Map3DView
         android:id="@+id/map3dView"
         android:layout_width="match_parent"
@@ -109,61 +110,6 @@ Open `app/src/main/res/layout/activity_main.xml`. We want a full-screen 3D map w
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <HorizontalScrollView
-        android:id="@+id/controls_scroll_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingVertical="16dp"
-        android:fillViewport="true"
-        android:scrollbars="none"
-        android:background="#FFFFFFFF"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <LinearLayout
-            style="?android:attr/buttonBarStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp">
-
-            <Button
-                android:id="@+id/btn_fly_honolulu"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Camera"
-                android:layout_marginEnd="8dp" />
-
-            <Button
-                android:id="@+id/btn_show_markers"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Markers"
-                android:layout_marginEnd="8dp" />
-
-            <Button
-                android:id="@+id/btn_show_polygons"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Polygons"
-                android:layout_marginEnd="8dp" />
-
-            <Button
-                android:id="@+id/btn_show_balloon"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Models" />
-
-        </LinearLayout>
-    </HorizontalScrollView>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
 ```
 
 ### Step 1.2: Project Skeleton

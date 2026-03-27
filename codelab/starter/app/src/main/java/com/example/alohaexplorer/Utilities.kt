@@ -1,5 +1,7 @@
 package com.example.alohaexplorer
 
+/* TODO: Prerequisites - Uncomment the rest of this file after synchronizing the Maps 3D SDK dependency!
+
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.latLngAltitude
@@ -102,3 +104,5 @@ suspend fun awaitCameraAnimation(map: GoogleMap3D) = suspendCancellableCoroutine
         map.setCameraAnimationEndListener(null)
     }
 }
+
+*/

@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">Aloha Explorer</string>
+
+    <!-- UI Buttons -->
+    <string name="btn_camera">Camera</string>
+    <string name="btn_markers">Markers</string>
+    <string name="btn_custom_markers">Custom</string>
+    <string name="btn_polygons">Polygons</string>
+    <string name="btn_polylines">Polylines</string>
+    <string name="btn_models">Models</string>
+    <string name="btn_popovers">Popovers</string>
+    <string name="btn_tour">Tour</string>
+    <string name="btn_clear">Clear</string>
+
+    <!-- Layout Placeholders -->
+    <string name="placeholder_text">Map3DView will go here</string>
 </resources>

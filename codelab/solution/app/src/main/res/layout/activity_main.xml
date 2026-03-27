@@ -55,7 +55,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Camera"
+                android:text="@string/btn_camera"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -63,7 +63,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Markers"
+                android:text="@string/btn_markers"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -71,7 +71,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Custom Markers"
+                android:text="@string/btn_custom_markers"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -79,7 +79,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Polygons"
+                android:text="@string/btn_polygons"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -87,7 +87,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Polylines"
+                android:text="@string/btn_polylines"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -95,7 +95,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Models"
+                android:text="@string/btn_models"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -103,7 +103,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Popovers"
+                android:text="@string/btn_popovers"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -111,7 +111,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tour"
+                android:text="@string/btn_tour"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -119,7 +119,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Clear"
+                android:text="@string/btn_clear"
                 android:textColor="@android:color/holo_red_dark" />
 
         </LinearLayout>

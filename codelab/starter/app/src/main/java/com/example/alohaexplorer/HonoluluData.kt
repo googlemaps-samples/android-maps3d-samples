@@ -1,5 +1,7 @@
 package com.example.alohaexplorer
 
+/* TODO: Prerequisites - Uncomment the rest of this file after synchronizing the Maps 3D SDK dependency!
+
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 
@@ -105,3 +107,5 @@ val BALLOON_CAMERA = camera {
     range = 1000.0
     heading = 0.0
 }
+
+*/

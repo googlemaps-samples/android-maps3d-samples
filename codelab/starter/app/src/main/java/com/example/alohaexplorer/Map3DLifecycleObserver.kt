@@ -1,5 +1,7 @@
 package com.example.alohaexplorer
 
+/* TODO: Prerequisites - Uncomment the rest of this file after synchronizing the Maps 3D SDK dependency!
+
 import android.os.Bundle
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -44,3 +46,5 @@ class Map3DLifecycleObserver(
         savedStateRegistryOwner.savedStateRegistry.unregisterSavedStateProvider("map3d_state_provider")
     }
 }
+
+*/
