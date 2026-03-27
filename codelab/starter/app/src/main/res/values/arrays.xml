@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sdk_fortunes">
+        <item>Your journey to mapping mastery begins now. Hook up that SDK!</item>
+        <item>A world of possibilities awaits. The SDK is your key.</item>
+        <item>Don\'t delay, integrate today! The codelab beckons.</item>
+        <item>The best way to predict the future is to create it. Start with the SDK.</item>
+        <item>Great maps are built one SDK integration at a time. You\'re next!</item>
+        <item>Unlock the power of location. The SDK is your first step.</item>
+        <item>Success is not final, failure is not fatal: it is the courage to continue that counts. And that starts with the SDK.</item>
+        <item>The map to your success is in the SDK. Follow the codelab!</item>
+        <item>Every great app starts with a single line of code. Make it an SDK call.</item>
+        <item>The journey of a thousand miles begins with a single map tile. Integrate the SDK.</item>
+        <item>Your destiny is in your hands, and the SDK is in your project.</item>
+        <item>Seek and you shall find… especially with the Maps SDK.</item>
+        <item>Innovation awaits. The SDK is your canvas.</item>
+        <item>Don\'t just build an app, build an experience. The SDK helps.</item>
+        <item>The future is location-aware. Get started with the SDK.</item>
+        <item>Your users will thank you for the amazing maps. The SDK is the secret.</item>
+    </string-array>
+</resources>
