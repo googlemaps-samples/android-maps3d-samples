@@ -120,93 +120,45 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         }
     }
 
-    private var currentAnimationJob: Job? = null
+    private fun setupPopover(map: GoogleMap3D) {
+        clearMap()
 
-    /**
-     * Sets up click listeners for the UI buttons to trigger camera animations.
-     * Note how we wrap the calls in `lifecycleScope.launch`. This is because:
-     * 1.  The `flyTo...` functions are `suspend` functions (they take time to complete).
-     * 2.  We want them to run on the main thread (UI interactions).
-     */
-    private fun setupButtons(map: GoogleMap3D) {
-        findViewById<Button>(R.id.btn_fly_honolulu).setOnClickListener {
-            // Cancel any ongoing tour or flight
-            currentAnimationJob?.cancel()
-            // "Launch" starts a new coroutine.
-            currentAnimationJob = lifecycleScope.launch {
-                clearMap()
-                flyToHonolulu(map)
+        // 9.1. Create a simple text view for the popover content
+        val textView = TextView(this@MainActivity).apply {
+            text = getString(R.string.toast_palace)
+            setPadding(32, 16, 32, 16)
+            setTextColor(Color.BLACK)
+            setBackgroundColor(Color.WHITE)
+        }
+
+        // 9.2. Add a Popover attached to the same location
+        val popover = map.addPopover(popoverOptions {
+            positionAnchor = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude
+                longitude = IOLANI_PALACE.longitude
+                altitude = 10.0
             }
-        }
-
-        findViewById<Button>(R.id.btn_show_markers).setOnClickListener {
-            currentAnimationJob?.cancel()
-            currentAnimationJob = lifecycleScope.launch {
-                addMarkers(map)
-                flyCameraToAndWait(map, MARKER_CAMERA)
+            altitudeMode = AltitudeMode.RELATIVE_TO_MESH
+            content = textView
+            autoCloseEnabled = true // Close when user clicks elsewhere
+            autoPanEnabled = true   // Move camera to ensure popover is visible
+            popoverStyle = popoverStyle {
+                backgroundColor = Color.WHITE
+                borderRadius = 16f
+                shadow = popoverShadow {
+                    color = Color.DKGRAY
+                    radius = 8f
+                    offsetX = 4f
+                    offsetY = 4f
+                }
             }
-        }
-
-        findViewById<Button>(R.id.btn_show_custom_markers).setOnClickListener {
-            currentAnimationJob?.cancel()
-            currentAnimationJob = lifecycleScope.launch {
-                addCustomMarkers(map)
-                flyCameraToAndWait(map, CUSTOM_MARKER_CAMERA)
-            }
-        }
-
-        findViewById<Button>(R.id.btn_show_polygons).setOnClickListener {
-            currentAnimationJob?.cancel()
-            currentAnimationJob = lifecycleScope.launch {
-                addPolygon(map)
-                flyCameraToAndWait(map, POLYGON_CAMERA)
-            }
-        }
-
-        findViewById<Button>(R.id.btn_show_polylines).setOnClickListener {
-            currentAnimationJob?.cancel()
-            currentAnimationJob = lifecycleScope.launch {
-                setupPolylines(map)
-                flyCameraToAndWait(map, BALLOON_CAMERA)
-            }
-        }
-
-        findViewById<Button>(R.id.btn_show_balloon).setOnClickListener {
-            currentAnimationJob?.cancel()
-            currentAnimationJob = lifecycleScope.launch {
-                setupBalloon(map)
-                flyCameraToAndWait(map, BALLOON_CAMERA)
-            }
-        }
-
-        findViewById<Button>(R.id.btn_show_popovers).setOnClickListener {
-            currentAnimationJob?.cancel()
-            currentAnimationJob = lifecycleScope.launch {
-                setupPopover(map)
-                flyCameraToAndWait(map, MARKER_CAMERA)
-            }
-        }
-
-        findViewById<Button>(R.id.btn_tour).setOnClickListener {
-            currentAnimationJob?.cancel()
-            currentAnimationJob = lifecycleScope.launch { 
-                flyTour(map) 
-            }
-        }
-
-        findViewById<Button>(R.id.btn_clear).setOnClickListener {
-            currentAnimationJob?.cancel()
-            clearMap()
-        }
-    }
-
-    private suspend fun flyCameraToAndWait(map: GoogleMap3D, camera: Camera, duration: Duration = 2.seconds) {
-        map.flyCameraTo(options = flyToOptions {
-            endCamera = camera
-            durationInMillis = duration.inWholeMilliseconds
         })
 
-        awaitCameraAnimation(map)
+        // Track it
+        activePopovers.add(popover)
+
+        // Show immediately for demo purposes
+        popover.show()
     }
 
     private suspend fun flyTour(map: GoogleMap3D) {
@@ -430,46 +382,6 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         activeModels.add(balloon)
     }
 
-    private fun setupPopover(map: GoogleMap3D) {
-        clearMap()
-
-        // 9.1. Create a simple text view for the popover content
-        val textView = TextView(this@MainActivity).apply {
-            text = getString(R.string.toast_palace)
-            setPadding(32, 16, 32, 16)
-            setTextColor(Color.BLACK)
-            setBackgroundColor(Color.WHITE)
-        }
-
-        // 9.2. Add a Popover attached to the same location
-        val popover = map.addPopover(popoverOptions {
-            positionAnchor = latLngAltitude {
-                latitude = IOLANI_PALACE.latitude
-                longitude = IOLANI_PALACE.longitude
-                altitude = 10.0
-            }
-            altitudeMode = AltitudeMode.RELATIVE_TO_MESH
-            content = textView
-            autoCloseEnabled = true // Close when user clicks elsewhere
-            autoPanEnabled = true   // Move camera to ensure popover is visible
-            popoverStyle = popoverStyle {
-                backgroundColor = Color.WHITE
-                borderRadius = 16f
-                shadow = popoverShadow {
-                    color = Color.DKGRAY
-                    radius = 8f
-                    offsetX = 4f
-                    offsetY = 4f
-                }
-            }
-        })
-
-        // Track it
-        activePopovers.add(popover)
-
-        // Show immediately for demo purposes
-        popover.show()
-    }
 
     /**
      * Helper function for adding a clickable marker.
@@ -622,4 +534,98 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             insets
         }
     }
+
+    // ------------------------------------------------------------------------
+    // PRE-PROVIDED BOILERPLATE (Kept out of the way)
+    // ------------------------------------------------------------------------
+
+    private var currentAnimationJob: Job? = null
+
+    /**
+     * Sets up click listeners for the UI buttons to trigger camera animations.
+     * Note how we wrap the calls in `lifecycleScope.launch`. This is because:
+     * 1.  The `flyTo...` functions are `suspend` functions (they take time to complete).
+     * 2.  We want them to run on the main thread (UI interactions).
+     */
+    private fun setupButtons(map: GoogleMap3D) {
+        findViewById<Button>(R.id.btn_fly_honolulu).setOnClickListener {
+            // Cancel any ongoing tour or flight
+            currentAnimationJob?.cancel()
+            // "Launch" starts a new coroutine.
+            currentAnimationJob = lifecycleScope.launch {
+                clearMap()
+                flyToHonolulu(map)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_show_markers).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                addMarkers(map)
+                flyCameraToAndWait(map, MARKER_CAMERA)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_show_custom_markers).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                addCustomMarkers(map)
+                flyCameraToAndWait(map, CUSTOM_MARKER_CAMERA)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_show_polygons).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                addPolygon(map)
+                flyCameraToAndWait(map, POLYGON_CAMERA)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_show_polylines).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                setupPolylines(map)
+                flyCameraToAndWait(map, BALLOON_CAMERA)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_show_balloon).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                setupBalloon(map)
+                flyCameraToAndWait(map, BALLOON_CAMERA)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_show_popovers).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                setupPopover(map)
+                flyCameraToAndWait(map, MARKER_CAMERA)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_tour).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch { 
+                flyTour(map) 
+            }
+        }
+
+        findViewById<Button>(R.id.btn_clear).setOnClickListener {
+            currentAnimationJob?.cancel()
+            clearMap()
+        }
+    }
+
+    private suspend fun flyCameraToAndWait(map: GoogleMap3D, camera: Camera, duration: Duration = 2.seconds) {
+        map.flyCameraTo(options = flyToOptions {
+            endCamera = camera
+            durationInMillis = duration.inWholeMilliseconds
+        })
+
+        awaitCameraAnimation(map)
+    }
+
 }

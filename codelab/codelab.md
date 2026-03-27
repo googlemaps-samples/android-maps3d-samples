@@ -33,21 +33,18 @@ Before we start coding, ensure your environment is ready.
     To authenticate with Google Maps Platform services, your app must provide an API key. We use the **Secrets Gradle Plugin** to do this securely. 
     
     > **[!NOTE] Why the Secrets Plugin?**
-    > Hardcoding an API key into your Android Manifest or source code is dangerous! If you check your code into GitHub, malicious bots can scrape the key in seconds. 
+    > Hardcoding an API key into your Android Manifest or source code is dangerous! If you check your code into GitHub, malicious bots can scrape your key! 
     > 
     > The Secrets Gradle Plugin extracts the key from a local text file and injects it into the build process securely without exposing it to version control.
     
-    The `starter` project comes with the Secrets plugin pre-configured for you! All you need to do is open the `secrets.properties` file in the root of your project (create it if it doesn't exist) and add:
+    The `starter` project comes with the Secrets plugin pre-configured for you! All you need to do is create a new file called `secrets.properties` in the root of your project and add:
     ```properties
     MAPS_API_KEY=YOUR_API_KEY_HERE
     ```
 
 3.  **Dependencies**:
-    Finally, you need to import the SDK itself. Open `gradle/libs.versions.toml` and uncomment the `play-services-maps3d` library line under `[libraries]`:
-    ```toml
-    # TODO: Prerequisites - Add the Maps 3D SDK library
-    play-services-maps3d = { group = "com.google.android.gms", name = "play-services-maps3d", version.ref = "playServicesMaps3d" }
-    ```
+    Finally, you need to import the SDK itself. Open `gradle/libs.versions.toml` and uncomment the `playServicesMaps3d` line in the `[versions]` section and the `play-services-maps3d` line in the `[libraries]` section.
+
     Then, open `app/build.gradle.kts` and uncomment the dependency:
     ```kotlin
     dependencies {
@@ -219,34 +216,8 @@ Add this logic to `MainActivity.kt`:
             }
         )
     }
-
-    // Wire up UI buttons to functions
-    private fun setupButtons(map: GoogleMap3D) {
-        findViewById<Button>(R.id.btn_fly_honolulu).setOnClickListener {
-            lifecycleScope.launch { flyToHonolulu(map) }
-        }
-        findViewById<Button>(R.id.btn_show_markers).setOnClickListener {
-            addMarkers(map)
-            lifecycleScope.launch { flyToMarkers(map) }
-        }
-        findViewById<Button>(R.id.btn_show_polygons).setOnClickListener {
-            addPolygon(map)
-            lifecycleScope.launch { flyToMarkers(map) } // Re-use marker view for polygons
-        }
-        findViewById<Button>(R.id.btn_show_balloon).setOnClickListener {
-            setupBalloon(map)
-            lifecycleScope.launch { flyToBalloon(map) }
-        }
-        findViewById<Button>(R.id.btn_show_popovers).setOnClickListener {
-            setupPopover(map)
-            // No flight needed, we reuse the camera if we are already there, or we could fly to it.
-            // Let's fly to the same spot as markers for now.
-             lifecycleScope.launch { flyToMarkers(map) }
-        }
-    }
 ```
-> **Note**: You will see red errors for `startFromGlobalView`, `flyToHonolulu`, and other helper functions. Don't worry! We will implement these in the next sections.
-```
+> **Note**: You will see red errors for `startFromGlobalView` and other helper functions. Don't worry! We will implement these in the next sections. The `setupButtons` wiring has been pre-provided at the bottom of your file.
 
 ### Step 1.4: Map Lifecycle (The Modern Way)
 
@@ -441,7 +412,87 @@ private fun addMarkers(map: GoogleMap3D) {
 
 ---
 
-## 5. Highlighting History (Polygons & Extrusion)
+## 5. Advanced Custom Markers
+
+Markers don't have to be just standard red pins. The Maps 3D SDK allows you to heavily customize their appearance using the `setStyle()` method on `MarkerOptions`.
+
+Here we'll add three new markers next to Iolani Palace to demonstrate:
+1.  **A Styled Pin**: A customized standard pin with a specific color and scale.
+2.  **An Image Glyph**: A marker that uses a standard Android Drawable resource (a Hibiscus flower).
+3.  **A Text Glyph**: A marker that uses an emoji (`🌸`) scaled elegantly.
+
+Add the following function below `addMarkers`:
+
+```kotlin
+    private fun addCustomMarkers(map: GoogleMap3D) {
+        resetMap()
+
+        // 5.1. Styled Pin
+        addMarker(
+            markerOptions {
+                position = latLngAltitude {
+                    latitude = IOLANI_PALACE.latitude
+                    longitude = IOLANI_PALACE.longitude + 0.002
+                    altitude = 0.0
+                }
+                label = getString(R.string.label_styled_pin)
+                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                setStyle(pinConfiguration {
+                    backgroundColor = Color.BLUE
+                    borderColor = Color.WHITE
+                    scale = 1.5f
+                })
+            }
+        )
+
+        // 5.2. Image Glyph (Hibiscus)
+        addMarker(
+            markerOptions {
+                position = latLngAltitude {
+                    latitude = IOLANI_PALACE.latitude
+                    longitude = IOLANI_PALACE.longitude + 0.004
+                    altitude = 0.0
+                }
+                label = getString(R.string.label_hibiscus)
+                isExtruded = true
+                isDrawnWhenOccluded = true
+                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                setStyle(ImageView(this@MainActivity).apply { 
+                    setImageResource(R.drawable.hibiscus) 
+                })
+            }
+        )
+
+        // 5.3. Text Glyph
+        val glyphText = Glyph.fromColor(Color.YELLOW).apply {
+            setText("🌸")
+        }
+
+        addMarker(
+            markerOptions {
+                position = latLngAltitude {
+                    latitude = IOLANI_PALACE.latitude
+                    longitude = IOLANI_PALACE.longitude + 0.006
+                    altitude = 0.0
+                }
+                label = getString(R.string.label_text_glyph)
+                isExtruded = true
+                isDrawnWhenOccluded = true
+                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                setStyle(pinConfiguration {
+                    setGlyph(glyphText)
+                    scale = 1.2f
+                    backgroundColor = Color.BLUE
+                    borderColor = Color.GREEN
+                })
+            }
+        )
+    }
+```
+
+---
+
+## 6. Highlighting History (Polygons & Extrusion)
 
 Let's highlight the Palace grounds. A flat polygon is okay, but a 3D volume is better.
 
@@ -521,7 +572,7 @@ When we add these faces to the map, we use `AltitudeMode.ABSOLUTE` to ensure the
 
 ---
 
-## 6. Interaction (Touching the World)
+## 7. Interaction (Touching the World)
 
 A map isn't an image; it's an interface. Let's make our markers interactive.
 
@@ -541,7 +592,7 @@ palacePolygons.forEach { polygon ->
 }
 ```
 
-## 7. Connecting the Dots (Polylines)
+## 8. Connecting the Dots (Polylines)
 
 While markers show discrete locations, polylines show paths. Let's draw a path from Iolani Palace to Waikiki Beach.
 
@@ -572,7 +623,7 @@ map.setCamera(camera {
 
 ---
 
-## 8. Up, Up, and Away (The Balloon)
+## 9. Up, Up, and Away (The Balloon)
 
 Finally, let's have some fun. We'll load a 3D asset (a glTF file) of a Hot Air Balloon and place it over Waikiki.
 
@@ -606,73 +657,6 @@ balloon.setClickListener {
      Subject: "The Balloon"
      Description: Show the 3D Balloon model floating over Waikiki.
 -->
-
----
-
-## 9. The Scenic Tour (Animating Between Markers)
-
-Let's spread our wings and explore the whole island! In this step, we'll scatter markers across Oahu's most famous landmarks and animate the camera flying point-to-point. 
-
-1. Add the `btn_tour` and `btn_clear` buttons to your `activity_main.xml` layout, next to the other buttons.
-2. In `MainActivity.kt`, add the geographic constants for the landmarks to the `companion object`.
-3. Add a helper function `flyTour` to orchestrate the flight:
-
-```kotlin
-    private suspend fun flyTour(map: GoogleMap3D) {
-        val locations = listOf(
-            HONOLULU to "Honolulu",
-            DIAMOND_HEAD to "Diamond Head",
-            HANAUMA_BAY to "Hanauma Bay",
-            KOKO_HEAD to "Koko Head",
-            LANIKAI_BEACH to "Lanikai Beach",
-            MOUNT_KAALA to "Mount Ka'ala",
-            PEARL_HARBOR to "Pearl Harbor"
-        )
-        
-        // Add all markers for the tour
-        resetMap()
-        locations.forEach { (location, name) ->
-            activeMarkers.add(map.addMarker(
-                markerOptions {
-                    position = location
-                    label = name
-                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                    isExtruded = true
-                }
-            )!!)
-        }
-
-        // Fly to each location
-        for ((location, _) in locations) {
-            // TODO: CHALLENGE!
-            // 1. Tell the map to flyCameraTo this 'location'. 
-            //    (Hint: Use tilt = 45.0, range = 2500.0, heading = 0.0, durationInMillis = 3000L)
-            // 2. Wait for the animation to finish using awaitCameraAnimation(map)
-            // 3. Optional: Add a delay so the user can enjoy the view before flying to the next!
-            
-        }
-    }
-```
-
-### Stopping Animations
-
-If the tour is running and the user clicks another button, we must cancel the existing animation. Notice in the solution code we wrap `lifecycleScope.launch` in a variable `currentAnimationJob` and call `currentAnimationJob?.cancel()` before starting any new action!
-
-Wire up the new buttons in `setupButtons`:
-
-```kotlin
-        findViewById<Button>(R.id.btn_tour).setOnClickListener {
-            currentAnimationJob?.cancel()
-            currentAnimationJob = lifecycleScope.launch { 
-                flyTour(map) 
-            }
-        }
-
-        findViewById<Button>(R.id.btn_clear).setOnClickListener {
-            currentAnimationJob?.cancel()
-            resetMap()
-        }
-```
 
 ---
 
@@ -741,7 +725,74 @@ Popovers bridge the gap between the 3D world and 2D information. They are perfec
 
 ---
 
-## 11. Bonus: Jetpack Compose
+## 11. The Scenic Tour (Animating Between Markers)
+
+Let's spread our wings and explore the whole island! In this step, we'll scatter markers across Oahu's most famous landmarks and animate the camera flying point-to-point. 
+
+1. Add the `btn_tour` and `btn_clear` buttons to your `activity_main.xml` layout, next to the other buttons.
+2. In `MainActivity.kt`, add the geographic constants for the landmarks to the `companion object`.
+3. Add a helper function `flyTour` to orchestrate the flight:
+
+```kotlin
+    private suspend fun flyTour(map: GoogleMap3D) {
+        val locations = listOf(
+            HONOLULU to "Honolulu",
+            DIAMOND_HEAD to "Diamond Head",
+            HANAUMA_BAY to "Hanauma Bay",
+            KOKO_HEAD to "Koko Head",
+            LANIKAI_BEACH to "Lanikai Beach",
+            MOUNT_KAALA to "Mount Ka'ala",
+            PEARL_HARBOR to "Pearl Harbor"
+        )
+        
+        // Add all markers for the tour
+        resetMap()
+        locations.forEach { (location, name) ->
+            activeMarkers.add(map.addMarker(
+                markerOptions {
+                    position = location
+                    label = name
+                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                    isExtruded = true
+                }
+            )!!)
+        }
+
+        // Fly to each location
+        for ((location, _) in locations) {
+            // TODO: CHALLENGE!
+            // 1. Tell the map to flyCameraTo this 'location'. 
+            //    (Hint: Use tilt = 45.0, range = 2500.0, heading = 0.0, durationInMillis = 3000L)
+            // 2. Wait for the animation to finish using awaitCameraAnimation(map)
+            // 3. Optional: Add a delay so the user can enjoy the view before flying to the next!
+            
+        }
+    }
+```
+
+### Stopping Animations
+
+If the tour is running and the user clicks another button, we must cancel the existing animation. Notice in the solution code we wrap `lifecycleScope.launch` in a variable `currentAnimationJob` and call `currentAnimationJob?.cancel()` before starting any new action!
+
+Wire up the new buttons in `setupButtons`:
+
+```kotlin
+        findViewById<Button>(R.id.btn_tour).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch { 
+                flyTour(map) 
+            }
+        }
+
+        findViewById<Button>(R.id.btn_clear).setOnClickListener {
+            currentAnimationJob?.cancel()
+            resetMap()
+        }
+```
+
+---
+
+## 12. Bonus: Jetpack Compose
 
 Prefer **Jetpack Compose** over XML? The Maps 3D SDK is View-based, but is a perfect candidate for `AndroidView`.
 

@@ -29,7 +29,7 @@
             </intent-filter>
         </activity>
 
-        <!-- TODO: Step 9 - Jetpack Compose Activity -->
+        <!-- TODO: Step 12 - Jetpack Compose Activity -->
         <!-- <activity
             android:name=".Map3DComposeActivity"
             android:exported="true"

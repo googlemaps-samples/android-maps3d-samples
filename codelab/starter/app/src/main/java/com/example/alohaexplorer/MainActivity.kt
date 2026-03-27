@@ -1,16 +1,11 @@
 package com.example.alohaexplorer
 
 import android.os.Bundle
-import android.util.Log
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
-import androidx.core.view.allViews
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.children
+import kotlinx.coroutines.Job
 
 /**
  * This is the main entry point for the "Aloha Explorer" 3D Maps Codelab.
@@ -28,6 +23,8 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
     // private val activePolylines = mutableListOf<Polyline>()
     // private val activeModels = mutableListOf<Model>()
     // private val activePopovers = mutableListOf<Popover>()
+
+    private var currentAnimationJob: Job? = null
 
     companion object {
         // Constants are now located in HonoluluData.kt
@@ -63,7 +60,8 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
         
         // TODO: Step 1.4 - Map Lifecycle
 
-        setupButtonsStub()
+        // TODO: Step 1.5 - Configure the UI buttons
+        // setupButtons()
     }
 
     // TODO: Step 1.3 - Implement onMap3DViewReady
@@ -72,32 +70,7 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
     }
     */
 
-    // TODO: Step 1.3 - Placeholder button functionality -- you can delete this code as part of 1.3
-    private fun setupButtonsStub() {
-        val fortunes = resources.getStringArray(R.array.sdk_fortunes)
 
-        // Find all buttons within the button_bar ViewGroup and set a click listener
-        findViewById<ViewGroup>(R.id.button_bar)?.allViews
-            ?.filterIsInstance<Button>()?.forEach { button ->
-                Log.d("MainActivity", "Button: $button")
-                button.setOnClickListener {
-                    Toast.makeText(
-                        this,
-                        fortunes.random(),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        findViewById<Button>(R.id.btn_fly_honolulu).setOnClickListener {
-            Toast.makeText(this, "Add the SDK to fly!", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    // TODO: Step 1.3 - Wire up Button Listeners
-    /*
-    private fun setupButtons(map: GoogleMap3D) {
-    }
-    */
     
     // TODO: Step 1.3 - Start from Global View
     /*
@@ -112,42 +85,22 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
         // TODO: Step 2 - Position the Camera high above Honolulu
         // Wait for the animation to finish
         // Wait for tiles to load and settle
-
         // Wait for the animation to finish
-        awaitCameraAnimation(map)
     }
     */
 
     // TODO: Step 2 - Helper to fly to markers (for other buttons)
     /*
     private suspend fun flyToMarkers(map: GoogleMap3D) {
-        map.flyCameraTo(
-            flyToOptions {
-                endCamera = camera {
-                    center = IOLANI_PALACE
-                    tilt = 60.0    // Look down at a 60-degree angle
-                    range = 500.0  // 500 meters away for a closer view
-                    heading = 0.0  // North up
-                }
-                durationInMillis = 2000L
-            }
-        )
-        awaitCameraAnimation(map)
+        // Fly to the Iolani Palace
+        // Wait for the animation to finish
     }
+    */
 
+    /*
     private suspend fun flyToBalloon(map: GoogleMap3D) {
-        map.flyCameraTo(
-            flyToOptions {
-                endCamera = camera {
-                    center = WAIKIKI
-                    tilt = 60.0
-                    range = 1000.0
-                    heading = 0.0
-                }
-                durationInMillis = 2000L
-            }
-        )
-        awaitCameraAnimation(map)
+        // Fly to the Balloon on Waikiki Beach
+        // Wait for the animation to finish
     }
     */
 
@@ -178,215 +131,56 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
     private fun addMarkers(map: GoogleMap3D) {
         resetMap()
 
-        // Note to self (and Gemini if you are reading this), let's move the markers to somewhere else to show off more of the 3D terrain
-
-        buildList {
-            // 1. ABSOLUTE
-            add(map.addMarker(
-                markerOptions {
-                    position = latLngAltitude {
-                        latitude = IOLANI_PALACE.latitude
-                        longitude = IOLANI_PALACE.longitude
-                        altitude = 100.0 // 100 meters above sea level
-                    }
-                    altitudeMode = AltitudeMode.ABSOLUTE
-                    label = getString(R.string.label_absolute)
-                    isDrawnWhenOccluded = true
-                    isExtruded = true
-                }
-            )?.apply {
-                setClickListener {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "Clicked Absolute Marker", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            })
-
-            // 2. RELATIVE_TO_GROUND
-            add(map.addMarker(
-                markerOptions {
-                    position = latLngAltitude {
-                        latitude = IOLANI_PALACE.latitude + 0.001
-                        longitude = IOLANI_PALACE.longitude
-                        altitude = 50.0 // 50m above ground
-                    }
-                    altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-                    label = getString(R.string.label_relative)
-                    isDrawnWhenOccluded = true
-                    isExtruded = true
-                }
-            )?.apply {
-                setClickListener {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "Clicked Relative Marker", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            })
-
-            // 3. CLAMP_TO_GROUND
-            add(map.addMarker(
-                markerOptions {
-                    position = latLngAltitude {
-                        latitude = IOLANI_PALACE.latitude - 0.001
-                        longitude = IOLANI_PALACE.longitude
-                        altitude = 0.0 // Ignored
-                    }
-                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                    label = getString(R.string.label_clamped)
-                    isDrawnWhenOccluded = true
-                    isExtruded = true
-                }
-            )?.apply {
-                setClickListener {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "Clicked Clamped Marker", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            })
-        }.filterNotNull().forEach { activeMarkers.add(it) }
+        // 1. Add ABSOLUTE Marker
+        
+        // 2. Add RELATIVE_TO_GROUND Marker
+        
+        // 3. Add CLAMP_TO_GROUND Marker
     }
     */
 
-    // TODO: Step 5 - Add Polygon
+    // TODO: Step 5 - Advanced Custom Markers
+    /*
+    private fun addCustomMarkers(map: GoogleMap3D) {
+        // Implementation provided in Advanced Custom Markers step
+    }
+    */
+
+    // TODO: Step 6 - Add Polygon
     /*
     private fun addPolygon(map: GoogleMap3D) {
         resetMap()
 
-        // Define the base (ground) shape of Iolani Palace.
-        val palaceBaseFace = IOLANI_PALACE_GEO.windowed(2, 2).map { 
-             latLngAltitude { latitude = it[0]; longitude = it[1]; altitude = 0.0 }
-        }.let { points -> points + points.first() }
-
+        // Define the base (ground) shape of Iolani Palace
+        
         // Extrude!
-        val extrudedPalace = extrudePolygon(palaceBaseFace, 35.0) // 35 meters tall
-
+        
         // Add all faces to the map
-        val palacePolygons = extrudedPalace.map { facePoints ->
-            map.addPolygon(
-                polygonOptions {
-                    path = facePoints
-                    fillColor = Color.argb(100, 255, 215, 0) // Gold with transparency
-                    strokeColor = Color.YELLOW
-                    strokeWidth = 5.0
-                    altitudeMode = AltitudeMode.ABSOLUTE
-                }
-            )
-        }
-        activePolygons.addAll(palacePolygons)
-
+        
         // Step 6: Tapping the Turf
-        palacePolygons.forEach { polygon ->
-            polygon.setClickListener {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "The Royal Palace: A symbol of Hawaiian sovereignty.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        }
     }
     */
     
     // See Utilities.kt for extrudePolygon Algorithm
-    // TODO: Step 7 - Setup Polylines
+    // TODO: Step 8 - Setup Polylines
     /*
     private fun setupPolylines(map: GoogleMap3D) {
         resetMap()
 
         // Draw path to Waikiki
-        activePolylines.add(map.addPolyline(
-            polylineOptions {
-                path = listOf(IOLANI_PALACE, WAIKIKI)
-                strokeWidth = 10.0
-                strokeColor = Color.BLUE
-            }
-        ))
         
         // Jump the camera to the Polyline to see it
-        map.setCamera(camera {
-            center = latLngAltitude {
-                latitude = 21.2893
-                longitude = -157.8441
-                altitude = 0.0
-            }
-            heading = 0.0
-            tilt = 0.0
-            range = 8000.0
-        })
     }
     */
 
-    // TODO: Step 8 - Setup Balloon Model
+    // TODO: Step 9 - Setup Balloon Model
     /*
     private fun setupBalloon(map: GoogleMap3D) {
         resetMap()
 
         // Add "Balloon" Model (glTF)
-        val balloon = map.addModel(
-            modelOptions {
-                position = latLngAltitude {
-                    latitude = WAIKIKI.latitude
-                    longitude = WAIKIKI.longitude
-                    altitude = 20.0 // Float 20 meters above the beach
-                }
-                altitudeMode = AltitudeMode.ABSOLUTE
-                orientation = orientation {
-                    heading = 0.0 // North
-                    tilt = 0.0    // Upright
-                    roll = 0.0    // Level
-                }
-                url = BALLOON_MODEL_URL
-                scale = vector3D { x = BALLOON_SCALE; y = BALLOON_SCALE; z = BALLOON_SCALE }
-            }
-        )
-
-        balloon.setClickListener {
-            lifecycleScope.launch(Dispatchers.Main) {
-                Toast.makeText(this@MainActivity, "Clicked the Balloon!", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        activeModels.add(balloon)
-    }
-    */
-    
-    // TODO: Step 9 - Scenic Tour Challenge
-    /*
-    private suspend fun flyTour(map: GoogleMap3D) {
-        val locations = listOf(
-            HONOLULU to "Honolulu",
-            DIAMOND_HEAD to "Diamond Head",
-            HANAUMA_BAY to "Hanauma Bay",
-            KOKO_HEAD to "Koko Head",
-            LANIKAI_BEACH to "Lanikai Beach",
-            MOUNT_KAALA to "Mount Ka'ala",
-            PEARL_HARBOR to "Pearl Harbor"
-        )
         
-        // Add all markers for the tour
-        resetMap()
-        locations.forEach { (location, name) ->
-            activeMarkers.add(map.addMarker(
-                markerOptions {
-                    position = location
-                    label = name
-                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                    isExtruded = true
-                }
-            )!!)
-        }
-
-        // Fly to each location
-        for ((location, _) in locations) {
-            // TODO: CHALLENGE!
-            // 1. Tell the map to flyCameraTo this 'location'. 
-            //    (Hint: Use tilt = 45.0, range = 2500.0, heading = 0.0, durationInMillis = 3000L)
-            // 2. Wait for the animation to finish using awaitCameraAnimation(map)
-            // 3. Optional: Add a delay so the user can enjoy the view before flying to the next!
-            
-        }
+        // Setup click listener
     }
     */
     
@@ -396,57 +190,115 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
         resetMap()
 
         // 1. Add a marker to serve as a visual anchor reference
-        val marker = map.addMarker(markerOptions {
-            position = latLngAltitude {
-                latitude = IOLANI_PALACE.latitude
-                longitude = IOLANI_PALACE.longitude
-                altitude = 50.0 
-            }
-            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-            label = "Click me!"
-        })
-        marker?.let { activeMarkers.add(it) }
-
-        // 2. Create a simple text view for the popover content
-        val textView = TextView(this).apply {
-            text = "Welcome to Iolani Palace!\nA symbol of Hawaiian sovereignty."
-            setPadding(32, 16, 32, 16)
-            setTextColor(Color.BLACK)
-            setBackgroundColor(Color.WHITE)
-        }
-
-        // 3. Add a Popover attached to the same location
-        val popover = map.addPopover(popoverOptions {
-            positionAnchor = latLngAltitude {
-                latitude = IOLANI_PALACE.latitude
-                longitude = IOLANI_PALACE.longitude
-                altitude = 50.0
-            }
-            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-            content = textView
-            autoCloseEnabled = true // Close when user clicks elsewhere
-            autoPanEnabled = true   // Move camera to ensure popover is visible
-            popoverStyle = popoverStyle {
-                backgroundColor = Color.WHITE
-                borderRadius = 16f
-                shadow = popoverShadow {
-                    color = Color.DKGRAY
-                    radius = 8f
-                    offsetX = 4f
-                    offsetY = 4f
-                }
-            }
-        })
         
-        popover?.let { activePopovers.add(it) }
+        // 2. Create a simple text view for the popover content
+        
+        // 3. Add a Popover attached to the same location
         
         // 4. Show popover on marker click
-        marker?.setClickListener {
-            popover?.show()
-        }
+    }
+    */
+    
+    // TODO: Step 11 - Scenic Tour Challenge
+    /*
+    private suspend fun flyTour(map: GoogleMap3D) {
+        // Define Locations
         
-        // Show immediately for demo purposes
-        popover?.show()
+        // Add all markers for the tour
+        
+        // Fly to each location (CHALLENGE!)
+        // 1. Tell the map to flyCameraTo this 'location'. 
+        // 2. Wait for the animation to finish using awaitCameraAnimation(map)
+        // 3. Optional: Add a delay so the user can enjoy the view before flying to the next!
+    }
+    */
+
+    // TODO: Step 1.2 - Uncomment the setupButtons boilerplate after adding Maps 3D SDK dependencies
+    /*
+
+    /**
+     * Sets up click listeners for the UI buttons to trigger camera animations.
+     * Note how we wrap the calls in `lifecycleScope.launch`. This is because:
+     * 1.  The `flyTo...` functions are `suspend` functions (they take time to complete).
+     * 2.  We want them to run on the main thread (UI interactions).
+     */
+    private fun setupButtons(map: GoogleMap3D) {
+        findViewById<Button>(R.id.btn_fly_honolulu).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                resetMap()
+                flyToHonolulu(map)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_show_markers).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                addMarkers(map)
+                flyCameraToAndWait(map, MARKER_CAMERA)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_show_custom_markers).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                addCustomMarkers(map)
+                flyCameraToAndWait(map, CUSTOM_MARKER_CAMERA)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_show_polygons).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                addPolygon(map)
+                flyCameraToAndWait(map, POLYGON_CAMERA)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_show_polylines).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                setupPolylines(map)
+                flyCameraToAndWait(map, BALLOON_CAMERA)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_show_balloon).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                setupBalloon(map)
+                flyCameraToAndWait(map, BALLOON_CAMERA)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_show_popovers).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch {
+                setupPopover(map)
+                flyCameraToAndWait(map, MARKER_CAMERA)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_tour).setOnClickListener {
+            currentAnimationJob?.cancel()
+            currentAnimationJob = lifecycleScope.launch { 
+                flyTour(map) 
+            }
+        }
+
+        findViewById<Button>(R.id.btn_clear).setOnClickListener {
+            currentAnimationJob?.cancel()
+            resetMap()
+        }
+    }
+
+    private suspend fun flyCameraToAndWait(map: GoogleMap3D, camera: Camera, duration: Duration = 2.seconds) {
+        map.flyCameraTo(options = flyToOptions {
+            endCamera = camera
+            durationInMillis = duration.inWholeMilliseconds
+        })
+        // See Utilities.kt
+        awaitCameraAnimation(map)
     }
     */
 

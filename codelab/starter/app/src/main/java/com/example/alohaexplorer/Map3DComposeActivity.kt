@@ -34,7 +34,7 @@ import androidx.activity.enableEdgeToEdge
 // import kotlinx.coroutines.suspendCancellableCoroutine
 // import kotlin.coroutines.resume
 
-// TODO: Step 9 - Jetpack Compose
+// TODO: Step 12 - Jetpack Compose
 /*
 class Map3DComposeActivity : ComponentActivity() {
 
