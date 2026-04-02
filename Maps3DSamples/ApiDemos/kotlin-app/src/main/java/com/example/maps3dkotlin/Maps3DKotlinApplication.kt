@@ -49,6 +49,9 @@ class Maps3DKotlinApplication : Application() {
      * incorrectly configured, and a RuntimeException is thrown.
      */
     private fun checkApiKey() {
+        if (BuildConfig.IS_CI) {
+            return
+        }
         try {
             val appInfo =
                 packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
