@@ -58,6 +58,9 @@ public class Maps3DJavaApplication extends Application {
      * incorrectly configured, and a RuntimeException is thrown.
      */
     private void checkApiKey() {
+        if (BuildConfig.IS_CI) {
+            return;
+        }
         try {
             ApplicationInfo appInfo =
                     getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+val isCI = rootProject.extra["isCI"] as? Boolean ?: false
+
 // The `plugins` block is where we apply Gradle plugins to this module.
 // Plugins add new tasks and configurations to our build process.
 plugins {
@@ -57,6 +59,13 @@ android {
 
         // Specifies the instrumentation runner for running Android tests.
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        if (isCI) {
+            manifestPlaceholders["MAPS3D_API_KEY"] = "DEFAULT_API_KEY"
+            manifestPlaceholders["PLACES_API_KEY"] = "DEFAULT_API_KEY"
+        }
+
+        buildConfigField("Boolean", "IS_CI", "${isCI}")
     }
 
     buildTypes {
