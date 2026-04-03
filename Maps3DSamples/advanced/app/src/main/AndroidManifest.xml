@@ -54,6 +54,10 @@
             android:name=".route.RouteSampleActivity"
             android:exported="true"
             />
+        <activity
+            android:name=".basicmap.BasicComposeMapActivity"
+            android:exported="true"
+            />
     </application>
 
 </manifest>

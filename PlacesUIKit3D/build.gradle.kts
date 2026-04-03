@@ -152,6 +152,7 @@ dependencies {
     testImplementation(libs.robolectric)
     // `androidTestImplementation` is for instrumented tests (running on an Android device or emulator).
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.google.truth)
     androidTestImplementation(libs.androidx.espresso.core) // For UI testing with the View system.
 
     // --- Compose Testing ---
