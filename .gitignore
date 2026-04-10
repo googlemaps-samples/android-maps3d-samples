@@ -39,3 +39,7 @@ google-services.json
 # VS Code
 .vscode/
 snippets/docs/
+
+# Skill development scratchpad
+skill-dev.md
+
