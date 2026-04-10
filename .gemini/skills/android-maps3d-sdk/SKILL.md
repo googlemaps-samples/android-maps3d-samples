@@ -2,7 +2,7 @@
 name: android-maps3d-sdk
 description: Integrates the Google Maps 3D SDK into an Android application. Provides procedural guidance for setup, lifecycle management, and 3D object manipulation (Markers, Polylines, Models, Popovers). Use when the user wants to build immersive 3D map experiences or migrate from 2D maps.
 license: Apache-2.0
-compatibility: Requires Android project, internet access, and at least version 0.2.0 of play-services-maps3d.
+compatibility: Requires an Android project and internet access. Uses play-services-maps3d version 0.2.0 or higher.
 metadata:
   version: "1.1"
   author: Google Maps Samples

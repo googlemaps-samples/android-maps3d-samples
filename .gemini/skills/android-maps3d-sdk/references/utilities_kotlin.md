@@ -236,3 +236,29 @@ fun haversineDistance(p1: LatLng, p2: LatLng): Double {
 }
 ```
 
+## Synchronization Utilities
+
+### Double-Wait Utility
+
+Use `awaitArrivedAndSteady()` to ensure the camera has arrived and the 3D scene has fully rendered before proceeding.
+
+```kotlin
+import com.google.android.gms.maps3d.GoogleMap3D
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+
+/**
+ * Standardized "Double-Wait" utility.
+ * Waits for the map to become steady (rendering complete and camera idle).
+ * Use this after starting a camera animation to ensure the scene is fully loaded.
+ */
+suspend fun GoogleMap3D.awaitArrivedAndSteady(timeoutMs: Long = 5000): Boolean = suspendCancellableCoroutine { cont ->
+    setOnMapSteadyListener { isSteady ->
+        if (isSteady) {
+            setOnMapSteadyListener(null)
+            cont.resume(true)
+        }
+    }
+}
+```
+

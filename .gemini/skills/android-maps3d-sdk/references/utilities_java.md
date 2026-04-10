@@ -221,6 +221,23 @@ public class PathUtils {
 
         return r * c;
     }
+
+    /**
+     * Standardized "Double-Wait" utility for Java.
+     * Returns a CompletableFuture that completes when the map becomes steady.
+     * Use this after starting a camera animation to ensure the scene is fully loaded.
+     */
+    public static java.util.concurrent.CompletableFuture<Boolean> awaitArrivedAndSteady(com.google.android.gms.maps3d.GoogleMap3D map) {
+        java.util.concurrent.CompletableFuture<Boolean> future = new java.util.concurrent.CompletableFuture<>();
+        map.setOnMapSteadyListener(isSteady -> {
+            if (isSteady) {
+                map.setOnMapSteadyListener(null);
+                future.complete(true);
+            }
+        });
+        return future;
+    }
 }
+
 ```
 
