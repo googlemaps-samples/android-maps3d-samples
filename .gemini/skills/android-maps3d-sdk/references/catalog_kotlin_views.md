@@ -225,4 +225,39 @@ faces.forEach { face ->
 }
 ```
 
+## 13. Camera State Logger (Debug Helper)
+Description: A utility to log the current camera state to Logcat on every movement, helping you design 3D views.
+
+```kotlin
+map.addOnCameraMoveListener {
+    val camera = map.camera
+    Log.d("CameraLogger", """
+        Camera State:
+        Lat: ${camera.center.latitude}
+        Lng: ${camera.center.longitude}
+        Alt: ${camera.center.altitude}
+        Heading: ${camera.heading}
+        Tilt: ${camera.tilt}
+        Range: ${camera.range}
+    """.trimIndent())
+}
+```
+
+## 14. 3D View Validation (Testing)
+Description: Verifying that the `Map3DView` is visible and loads correctly using Espresso.
+
+```kotlin
+@Test
+fun testMapVisible() {
+    // Launch Activity
+    ActivityScenario.launch(MapActivity::class.java)
+    
+    // Verify Map3DView is displayed
+    onView(withId(R.id.map3d_view))
+        .check(matches(isDisplayed()))
+}
+```
+
+
+
 

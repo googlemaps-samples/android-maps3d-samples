@@ -175,4 +175,23 @@ for (List<LatLngAltitude> face : faces) {
 }
 ```
 
+## 13. Camera State Logger (Debug Helper)
+Description: A utility to log the current camera state to Logcat on every movement, helping you design 3D views.
+
+```java
+map.addOnCameraMoveListener(() -> {
+    Camera camera = map.getCamera();
+    Log.d("CameraLogger", String.format(
+        "Camera State:\nLat: %f\nLng: %f\nAlt: %f\nHeading: %f\nTilt: %f\nRange: %f",
+        camera.getCenter().getLatitude(),
+        camera.getCenter().getLongitude(),
+        camera.getCenter().getAltitude(),
+        camera.getHeading(),
+        camera.getTilt(),
+        camera.getRange()
+    ));
+});
+```
+
+
 

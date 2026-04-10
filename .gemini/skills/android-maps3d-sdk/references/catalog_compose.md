@@ -2,7 +2,42 @@
 
 This catalog provides reference snippets for common operations when using the Google Maps 3D SDK with Jetpack Compose (via `AndroidView` interoperability).
 
+## 0. The Reusable `Map3DContainer` Pattern
+Description: The recommended way to use `Map3DView` in Compose is to create a reusable wrapper Composable that handles lifecycle and map state.
+
+```kotlin
+@Composable
+fun Map3DContainer(
+    modifier: Modifier = Modifier,
+    options: Map3DOptions,
+    onMapReady: (GoogleMap3D) -> Unit
+) {
+    AndroidView(
+        modifier = modifier,
+        factory = { context ->
+            Map3DView(context, options).apply {
+                onCreate(null) // Handle lifecycle manually if needed
+            }
+        },
+        update = { view ->
+            view.getMap3DViewAsync(object : OnMap3DViewReadyCallback {
+                override fun onMap3DViewReady(map: GoogleMap3D) {
+                    onMapReady(map)
+                }
+                override fun onError(e: Exception) {
+                    // Handle error
+                }
+            })
+        },
+        onRelease = { view ->
+            view.onDestroy()
+        }
+    )
+}
+```
+
 ## 1. Adding a Marker
+
 Description: Markers point out points of interest.
 
 ```kotlin
@@ -243,6 +278,88 @@ AndroidView(
     }
 )
 ```
+
+## 12. ViewModel Integration
+Description: The advanced sample demonstrates hoisting the `GoogleMap3D` instance to a `ViewModel` to manage state and handle actions outside the UI tree.
+
+```kotlin
+class MapViewModel : ViewModel() {
+    private val _googleMap3D = MutableStateFlow<GoogleMap3D?>(null)
+    val googleMap3D: StateFlow<GoogleMap3D?> = _googleMap3D.asStateFlow()
+
+    private val _isMapSteady = MutableStateFlow(false)
+    val isMapSteady: StateFlow<Boolean> = _isMapSteady.asStateFlow()
+
+    fun setGoogleMap3D(map: GoogleMap3D) {
+        _googleMap3D.value = map
+    }
+
+    fun onMapSteadyChange(isSteady: Boolean) {
+        _isMapSteady.value = isSteady
+    }
+
+    fun releaseGoogleMap3D() {
+        _googleMap3D.value = null
+    }
+}
+```
+
+In your Composable:
+```kotlin
+val viewModel: MapViewModel = viewModel()
+val map3D by viewModel.googleMap3D.collectAsState()
+
+ThreeDMap(
+    options = mapOptions,
+    onMapReady = { map ->
+        viewModel.setGoogleMap3D(map)
+        map.setOnMapSteadyListener { isSteady ->
+            viewModel.onMapSteadyChange(isSteady)
+        }
+    }
+)
+```
+
+## 13. Camera State Logger (Debug Helper)
+Description: A utility to log the current camera state to Logcat on every movement, helping you design 3D views.
+
+```kotlin
+AndroidView(
+    factory = { context ->
+        Map3DView(context).apply {
+            getMapAsync { map ->
+                map.addOnCameraMoveListener {
+                    val camera = map.camera
+                    Log.d("CameraLogger", "Lat: ${camera.center.latitude}, Lng: ${camera.center.longitude}, Alt: ${camera.center.altitude}, Heading: ${camera.heading}, Tilt: ${camera.tilt}, Range: ${camera.range}")
+                }
+            }
+        }
+    }
+)
+```
+
+## 14. 3D View Validation (Testing)
+Description: Verifying that the `Map3DView` is visible using `ComposeTestRule`.
+
+```kotlin
+@Test
+fun testMapVisible() {
+    composeTestRule.setContent {
+        Map3DContainer(
+            modifier = Modifier.testTag("map3d_container"),
+            options = Map3DOptions(),
+            onMapReady = {}
+        )
+    }
+    
+    // Verify AndroidView hosting Map3DView is displayed
+    composeTestRule.onNodeWithTag("map3d_container")
+        .assertIsDisplayed()
+}
+```
+
+
+
 
 
 

@@ -1,7 +1,13 @@
 ---
 name: android-maps3d-sdk
-description: Use this skill when the user wants to integrate the Google Maps 3D SDK into an Android application. This skill provides procedural guidance for setup, lifecycle, and 3D object manipulation. Do NOT use for standard 2D maps.
+description: Integrates the Google Maps 3D SDK into an Android application. Provides procedural guidance for setup, lifecycle management, and 3D object manipulation (Markers, Polylines, Models, Popovers). Use when the user wants to build immersive 3D map experiences or migrate from 2D maps.
+license: Apache-2.0
+compatibility: Requires Android project, internet access, and at least version 0.2.0 of play-services-maps3d.
+metadata:
+  version: "1.1"
+  author: Google Maps Samples
 ---
+
 
 # Android Maps 3D SDK Integration
 
@@ -26,14 +32,16 @@ Before asking the user for clarification or writing code, search the local works
 2. Consult `references/documentation.md` for a map of where to look.
 
 
-### Step 1: Determine the Environment and Features
-You MUST ask the user to clarify their stack and needs:
+### Step 1: Determine the Environment and Features (Stack Detective)
+You MUST proactively discover the environment by inspecting the codebase before writing any code. Do NOT ask the user unless the environment is highly ambiguous.
 
-1.  **Language**: Kotlin or Java?
-2.  **UI Framework**: Jetpack Compose or standard XML Views?
-3.  **Features**: Do they need automatic object management (cleanup)?
+1.  **Run Search/Grep**:
+    *   Search for `androidx.compose` or `compose-compiler` in `build.gradle` or `libs.versions.toml` to detect **Jetpack Compose**.
+    *   Search for `com.android.application` or `com.android.library` to understand the module type.
+    *   Look for `.kt` vs `.java` files to determine the dominant **Language**.
+2.  **Identify Features**: Determine if the user needs automatic object management (cleanup) or specific 3D features based on their request.
 
-Based on their response, follow the **Selection Logic** to retrieve boilerplate from `assets/samples/` and consult rules in `references/`.
+Based on your discovery, follow the **Selection Logic** to retrieve boilerplate from `assets/samples/` and consult rules in `references/`.
 
 ### Implementation Guidance (Selection Logic)
 1.  Identify the user's stack: (Language: Kotlin/Java, UI: Compose/Views).
@@ -45,12 +53,16 @@ Based on their response, follow the **Selection Logic** to retrieve boilerplate 
 ### Step 2: Base Setup
 Regardless of the environment, the following setup is required.
 
-#### 1. Dependencies
+#### 1. Dependencies (Dynamic Version Resolution)
+Before adding the dependency, you MUST identify the latest version.
+1.  Run `./gradlew :app:dependencies | grep maps3d` to check if a version is already resolved.
+2.  Or search the Google Maven repository or use available tools to find the latest version (must be **at least** `0.2.0`).
+
 Add the necessary versions and libraries to your `libs.versions.toml` file:
 
 ```toml
 [versions]
-# NOTE: Verify this is the latest version of the Maps 3D SDK
+# NOTE: Verify this is the latest version of the Maps 3D SDK (must be at least "0.2.0")
 playServicesMaps3d = "0.2.0"
 lifecycleRuntimeKtx = "2.8.5"
 
@@ -107,7 +119,7 @@ After determining the stack, load the corresponding files from `assets/samples/`
     - Layout: `assets/samples/views_kotlin/activity_main.xml`
     - Activity: `assets/samples/views_kotlin/MapActivity.kt.txt`
     - Snippet (Object Manager): `assets/samples/views_kotlin/snippets/object_manager_usage.kt.txt`
-- Kotlin + Compose: (To be created in `assets/samples/compose/`)
+- Kotlin + Compose: Refer to `references/catalog_compose.md` for the `Map3DContainer` wrapper and Compose patterns.
 - Java: 
     - Layout: `assets/samples/views_java/activity_main.xml`
     - Activity: `assets/samples/views_java/MapActivity.java.txt`
@@ -128,6 +140,8 @@ Consult `references/best_practices.md` for detailed explanation of rules. Key ru
     *   Java: `references/catalog_java.md`
     *   Kotlin + Views: `references/catalog_kotlin_views.md`
     *   Jetpack Compose: `references/catalog_compose.md`
+9. **Scenario Storyboards**: For complex, multi-step workflows (e.g., Immersive Arrival), consult `references/scenarios.md`.
+
 
 
 
