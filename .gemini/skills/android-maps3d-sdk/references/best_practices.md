@@ -17,7 +17,10 @@ When the 3D map is first loaded, the viewport layout and binding matrix may not 
 
 ### The Delay Pattern
 If you attempt to add objects or set the camera immediately in `onMap3DViewReady`, it might fail or render incorrectly on cold starts.
-*Rule*: Always introduce a small delay (e.g., 500ms using coroutines `delay(500)`) before initializing map elements to ensure the renderer is fully ready.
+*Rule*: Always introduce a delay before initializing map elements to ensure the renderer is fully ready. A **1-second delay** (e.g., `delay(1000)` or `Handler.postDelayed` with 1000ms) is recommended to bypass these readiness bugs.
+
+
+
 
 ## 3. Object Management and Cleanup
 

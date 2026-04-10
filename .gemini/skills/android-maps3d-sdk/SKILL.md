@@ -97,11 +97,23 @@ After determining the stack, load the corresponding files from `assets/samples/`
     - Activity: `assets/samples/views_kotlin/MapActivity.kt.txt`
     - Snippet (Object Manager): `assets/samples/views_kotlin/snippets/object_manager_usage.kt.txt`
 - Kotlin + Compose: (To be created in `assets/samples/compose/`)
-- Java: (To be created in `assets/samples/views_java/`)
+- Java: 
+    - Layout: `assets/samples/views_java/activity_main.xml`
+    - Activity: `assets/samples/views_java/MapActivity.java.txt`
+    - Snippet (Object Manager): `assets/samples/views_java/snippets/object_manager_usage.java.txt`
+
 
 ### Step 4: Apply Best Practices
 Consult `references/best_practices.md` for detailed explanation of rules. Key rules to enforce:
-1. **Initialization Delay**: Always use a 500ms delay before initializing map elements.
+1. **Initialization Delay**: Always use a 1-second delay before initializing map elements.
 2. **Object Management**: Use the `TrackedMap3D` delegate to clean up objects on destroy to avoid cruft.
-3. **Double-Wait Pattern**: For animations, wait for camera animation end AND map steady state.
-4. **Object Updates**: Use matching IDs to update Polygons/Polylines instead of removing and re-adding.
+3. **Utilities**: Use validation utilities to prevent crashes, and path utilities for smoothing/simplification (see `references/utilities_kotlin.md` or `references/utilities_java.md`).
+
+4. **Double-Wait Pattern**: For animations, wait for camera animation end AND map steady state.
+5. **Object Updates**: Use matching IDs to update Polygons/Polylines instead of removing and re-adding.
+6. **Unit Conversions**: For type-safe measurements and conversions, see `references/units_kotlin.md` or `references/units_java.md` (Optional).
+7. **Secrets Security**: NEVER add `secrets.properties` to version control. NEVER add real API keys to source code or `local.defaults.properties` (see `references/secrets_enforcement.md` for Gradle enforcement snippet).
+
+
+
+

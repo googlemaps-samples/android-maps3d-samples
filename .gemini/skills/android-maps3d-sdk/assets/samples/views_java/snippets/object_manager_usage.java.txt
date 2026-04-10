@@ -1,0 +1,23 @@
+// 1. Declare the tracked map instance and items list
+private TrackedMap3D trackedMap;
+private final List<Object> mapItems = new ArrayList<>();
+
+// 2. In onCreate, update the lifecycle observer to clean up on destroy
+getLifecycle().addObserver(new DefaultLifecycleObserver() {
+    // ... other methods
+    @Override
+    public void onDestroy(@NonNull LifecycleOwner owner) {
+        // Automatically clean up objects to avoid cruft
+        if (trackedMap != null) {
+            trackedMap.clearAll();
+        }
+        mapView.onDestroy();
+    }
+});
+
+// 3. In onMap3DViewReady, wrap the map
+@Override
+public void onMap3DViewReady(@NonNull GoogleMap3D map) {
+    trackedMap = new TrackedMap3D(map, mapItems);
+    // ...
+}
