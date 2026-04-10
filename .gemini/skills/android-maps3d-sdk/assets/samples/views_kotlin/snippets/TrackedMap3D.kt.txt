@@ -1,0 +1,41 @@
+import com.google.android.gms.maps3d.GoogleMap3D
+import com.google.android.gms.maps3d.model.Marker
+import com.google.android.gms.maps3d.model.MarkerOptions
+import com.google.android.gms.maps3d.model.Polygon
+import com.google.android.gms.maps3d.model.PolygonOptions
+import com.google.android.gms.maps3d.model.Polyline
+import com.google.android.gms.maps3d.model.PolylineOptions
+
+class TrackedMap3D(
+    val delegate: GoogleMap3D,
+    private val items: MutableList<Any> = mutableListOf()
+) {
+    fun addMarker(options: MarkerOptions): Marker? {
+        val marker = delegate.addMarker(options)
+        if (marker != null) items.add(marker)
+        return marker
+    }
+
+    fun addPolyline(options: PolylineOptions): Polyline? {
+        val polyline = delegate.addPolyline(options)
+        if (polyline != null) items.add(polyline)
+        return polyline
+    }
+
+    fun addPolygon(options: PolygonOptions): Polygon? {
+        val polygon = delegate.addPolygon(options)
+        if (polygon != null) items.add(polygon)
+        return polygon
+    }
+
+    fun clearAll() {
+        items.forEach { item ->
+            when (item) {
+                is Marker -> item.remove()
+                is Polyline -> item.remove()
+                is Polygon -> item.remove()
+            }
+        }
+        items.clear()
+    }
+}

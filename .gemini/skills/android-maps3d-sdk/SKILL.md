@@ -16,15 +16,20 @@ This skill guides you through integrating the Google Maps 3D SDK into an Android
 
 ## Procedural Workflow
 
-### Step 1: Determine the Environment
-You MUST ask the user which development environment they are targeting before providing code:
-1. **Kotlin (Views)** (Prioritized)
-2. **Kotlin + Compose**
-3. **Java**
+### Step 1: Determine the Environment and Features
+You MUST ask the user to clarify their stack and needs:
+1.  **Language**: Kotlin or Java?
+2.  **UI Framework**: Jetpack Compose or standard XML Views?
+3.  **Features**: Do they need automatic object management (cleanup)?
 
-Additionally, ask if they want to use the **Object Tracking Delegate** pattern (useful for clean cleanup in complex apps).
+Based on their response, follow the **Selection Logic** to retrieve boilerplate from `assets/samples/` and consult rules in `references/`.
 
-Based on their response, you will load the appropriate template from the `references/` directory.
+### Implementation Guidance (Selection Logic)
+1.  Identify the user's stack: (Language: Kotlin/Java, UI: Compose/Views).
+2.  Check if Lifecycle Management is required (always for 3D maps).
+3.  **Retrieve** the corresponding boilerplate from `assets/samples/` (e.g., `assets/samples/views_kotlin/MapActivity.kt.txt`).
+4.  If object tracking is needed, **retrieve** the snippet from `assets/samples/views_kotlin/snippets/`.
+5.  **Reference** the memory management best practices in `references/best_practices.md` to ensure the generated code follows SDK safety guidelines.
 
 ### Step 2: Base Setup
 Regardless of the environment, the following setup is required.
@@ -86,15 +91,17 @@ In `AndroidManifest.xml`, add the required permissions and reference the injecte
 ```
 
 ### Step 3: Load Environment Template
-After the user selects the environment, load the corresponding file from:
-- Kotlin (Views): `references/kotlin_views_template.md`
-- Kotlin + Compose: (To be created)
-- Java: (To be created)
+After determining the stack, load the corresponding files from `assets/samples/`:
+- Kotlin (Views): 
+    - Layout: `assets/samples/views_kotlin/activity_main.xml`
+    - Activity: `assets/samples/views_kotlin/MapActivity.kt.txt`
+    - Snippet (Object Manager): `assets/samples/views_kotlin/snippets/object_manager_usage.kt.txt`
+- Kotlin + Compose: (To be created in `assets/samples/compose/`)
+- Java: (To be created in `assets/samples/views_java/`)
 
 ### Step 4: Apply Best Practices
-Follow these strict procedural rules to avoid common pitfalls:
-
-1. **Initialization Delay**: Fails on cold starts due to viewport layout races. Always use a 500ms delay before initializing map elements (camera updates, adding objects).
-2. **Double-Wait Pattern**: For animations, wait for camera animation end AND map steady state.
-3. **Object Updates**: Use matching IDs to update Polygons/Polylines instead of removing and re-adding (prevents flickering).
-4. **Null Safety**: Camera properties like heading and tilt can be null. Handle them defensively.
+Consult `references/best_practices.md` for detailed explanation of rules. Key rules to enforce:
+1. **Initialization Delay**: Always use a 500ms delay before initializing map elements.
+2. **Object Management**: Use the `TrackedMap3D` delegate to clean up objects on destroy to avoid cruft.
+3. **Double-Wait Pattern**: For animations, wait for camera animation end AND map steady state.
+4. **Object Updates**: Use matching IDs to update Polygons/Polylines instead of removing and re-adding.
