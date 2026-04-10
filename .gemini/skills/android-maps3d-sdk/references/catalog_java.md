@@ -132,3 +132,47 @@ map.setOnMapSteadyListener(isSteady -> {
 });
 ```
 
+## 10. Adding a 3D Model
+Description: Loading and placing glTF assets on the map.
+
+```java
+Model model = map.addModel(new ModelOptions()
+    .position(new LatLngAltitude(37.7749, -122.4194, 0.0))
+    .url("https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb")
+    .scale(new Vector3D(1.0, 1.0, 1.0))
+    .altitudeMode(AltitudeMode.RELATIVE_TO_GROUND));
+```
+
+## 11. Adding a Popover (Info Window)
+Description: 2D views that stick to a 3D location and always face the camera.
+
+```java
+TextView textView = new TextView(context);
+textView.setText("Hello World");
+textView.setBackgroundColor(Color.WHITE);
+
+Popover popover = map.addPopover(new PopoverOptions()
+    .positionAnchor(new LatLngAltitude(37.7749, -122.4194, 10.0))
+    .content(textView)
+    .altitudeMode(AltitudeMode.RELATIVE_TO_MESH)
+    .autoCloseEnabled(true));
+
+popover.show();
+```
+
+## 12. Extruded Polygons (3D Volumes)
+Description: Turning flat footprints into 3D volumes by duplicating vertices at height and stitching sides.
+
+```java
+// Helper to extrude (see full Codelab for complete implementation)
+List<List<LatLngAltitude>> faces = extrude(basePoints, 35.0);
+
+for (List<LatLngAltitude> face : faces) {
+    map.addPolygon(new PolygonOptions()
+        .addAll(face)
+        .fillColor(Color.argb(128, 255, 215, 0))
+        .altitudeMode(AltitudeMode.ABSOLUTE));
+}
+```
+
+

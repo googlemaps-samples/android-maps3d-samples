@@ -176,3 +176,53 @@ suspend fun GoogleMap3D.awaitFlyTo(options: FlyToOptions) = suspendCancellableCo
 }
 ```
 
+## 10. Adding a 3D Model
+Description: Loading and placing glTF assets on the map.
+
+```kotlin
+val model = map.addModel(ModelOptions()
+    .position(LatLngAltitude(37.7749, -122.4194, 0.0))
+    .url("https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb")
+    .scale(Vector3D(1.0, 1.0, 1.0))
+    .altitudeMode(AltitudeMode.RELATIVE_TO_GROUND))
+```
+
+## 11. Adding a Popover (Info Window)
+Description: 2D views that stick to a 3D location and always face the camera.
+
+```kotlin
+val textView = TextView(context).apply {
+    text = "Hello World"
+    setBackgroundColor(Color.WHITE)
+}
+
+val popover = map.addPopover(PopoverOptions()
+    .positionAnchor(LatLngAltitude(37.7749, -122.4194, 10.0))
+    .content(textView)
+    .altitudeMode(AltitudeMode.RELATIVE_TO_MESH)
+    .autoCloseEnabled(true))
+
+popover.show()
+```
+
+## 12. Extruded Polygons (3D Volumes)
+Description: Turning flat footprints into 3D volumes by duplicating vertices at height and stitching sides.
+
+```kotlin
+// Helper to extrude (see full Codelab for complete implementation)
+fun extrude(basePoints: List<LatLngAltitude>, height: Double): List<List<LatLngAltitude>> {
+    // Implementation creates top points and side walls...
+    return faces
+}
+
+// Adding extruded faces to map
+val faces = extrude(basePoints, 35.0)
+faces.forEach { face ->
+    map.addPolygon(PolygonOptions()
+        .addAll(face)
+        .fillColor(Color.argb(128, 255, 215, 0))
+        .altitudeMode(AltitudeMode.ABSOLUTE))
+}
+```
+
+

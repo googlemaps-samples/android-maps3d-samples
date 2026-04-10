@@ -189,4 +189,60 @@ if (isMapSteady) {
 }
 ```
 
+## 9. Adding a 3D Model
+Description: Adding a model within `AndroidView`.
+
+```kotlin
+AndroidView(
+    factory = { context ->
+        Map3DView(context).apply {
+            getMapAsync { map ->
+                map.addModel(ModelOptions()
+                    .position(LatLngAltitude(37.7749, -122.4194, 0.0))
+                    .url("https://.../model.glb"))
+            }
+        }
+    }
+)
+```
+
+## 10. Adding a Popover (Info Window)
+Description: Adding a popover within `AndroidView`.
+
+```kotlin
+AndroidView(
+    factory = { context ->
+        Map3DView(context).apply {
+            getMapAsync { map ->
+                val textView = TextView(context).apply { text = "Hello" }
+                map.addPopover(PopoverOptions()
+                    .positionAnchor(LatLngAltitude(37.7749, -122.4194, 10.0))
+                    .content(textView))
+            }
+        }
+    }
+)
+```
+
+## 11. Extruded Polygons (3D Volumes)
+Description: Adding extruded polygons within `AndroidView`.
+
+```kotlin
+AndroidView(
+    factory = { context ->
+        Map3DView(context).apply {
+            getMapAsync { map ->
+                val faces = extrude(basePoints, 35.0)
+                faces.forEach { face ->
+                    map.addPolygon(PolygonOptions()
+                        .addAll(face)
+                        .fillColor(Color.argb(128, 255, 215, 0)))
+                }
+            }
+        }
+    }
+)
+```
+
+
 
