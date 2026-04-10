@@ -7,6 +7,9 @@ description: Use this skill when the user wants to integrate the Google Maps 3D 
 
 This skill guides you through integrating the Google Maps 3D SDK into an Android project. It follows the principles of progressive disclosure and relies on environment-specific templates.
 
+> [!IMPORTANT]
+> **Limited Training Data Alert**: The Google Maps 3D SDK is a new technology. Your internal parametric knowledge is likely outdated or incomplete. You **MUST NOT** guess API signatures. You **MUST** consult the local samples in `assets/samples/` and the external documentation listed in `references/documentation.md` before generating any code.
+
 ## Prerequisites & Skill Alignment
 
 > [!NOTE]
@@ -16,8 +19,15 @@ This skill guides you through integrating the Google Maps 3D SDK into an Android
 
 ## Procedural Workflow
 
+### Step 0: Research Existing Patterns
+Before asking the user for clarification or writing code, search the local workspace or repository for existing implementations of the requested feature.
+1. Use your available search tools to look for keywords (e.g., "Polygon", "FlyTo") in the `snippets/` and `Maps3DSamples/` directories.
+2. Consult `references/documentation.md` for a map of where to look.
+
+
 ### Step 1: Determine the Environment and Features
 You MUST ask the user to clarify their stack and needs:
+
 1.  **Language**: Kotlin or Java?
 2.  **UI Framework**: Jetpack Compose or standard XML Views?
 3.  **Features**: Do they need automatic object management (cleanup)?
@@ -113,6 +123,11 @@ Consult `references/best_practices.md` for detailed explanation of rules. Key ru
 5. **Object Updates**: Use matching IDs to update Polygons/Polylines instead of removing and re-adding.
 6. **Unit Conversions**: For type-safe measurements and conversions, see `references/units_kotlin.md` or `references/units_java.md` (Optional).
 7. **Secrets Security**: NEVER add `secrets.properties` to version control. NEVER add real API keys to source code or `local.defaults.properties` (see `references/secrets_enforcement.md` for Gradle enforcement snippet).
+8. **Common Operations**: Consult the language-specific catalog for short reference snippets (Marker, Polyline, Animation, etc.):
+    *   Java: `references/catalog_java.md`
+    *   Kotlin + Views: `references/catalog_kotlin_views.md`
+    *   Jetpack Compose: `references/catalog_compose.md`
+
 
 
 
