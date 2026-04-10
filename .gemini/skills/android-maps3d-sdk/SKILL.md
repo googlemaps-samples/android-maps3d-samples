@@ -15,7 +15,8 @@ This skill guides you through integrating the Google Maps 3D SDK into an Android
 > [!NOTE]
 > This skill should be used in conjunction with:
 > - **Android Architecture Skill**: For proper MVVM/MVI layering.
-> - **Android Security Skill**: For API key protection and permissions.
+> - [Android Security Skill](https://github.com/kikoso/android-skills/blob/main/android-security-skill/SKILL.md): For API key protection and permissions.
+
 
 ## Procedural Workflow
 
