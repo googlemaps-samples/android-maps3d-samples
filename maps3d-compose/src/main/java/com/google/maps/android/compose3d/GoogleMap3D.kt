@@ -56,13 +56,13 @@ import com.google.android.gms.maps3d.model.Map3DMode
 @Composable
 fun GoogleMap3D(
     camera: Camera,
+    modifier: Modifier = Modifier,
     markers: List<MarkerConfig> = emptyList(),
     polylines: List<PolylineConfig> = emptyList(),
     polygons: List<PolygonConfig> = emptyList(),
     models: List<ModelConfig> = emptyList(),
     cameraRestriction: CameraRestriction? = null,
     @Map3DMode mapMode: Int = Map3DMode.SATELLITE,
-    modifier: Modifier = Modifier,
     options: Map3DOptions = Map3DOptions(),
     onMapReady: (GoogleMap3D) -> Unit = {},
     onMapSteady: () -> Unit = {}

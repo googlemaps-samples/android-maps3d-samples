@@ -115,7 +115,7 @@ class Maps3DVisualTest : BaseVisualTest() {
     @org.junit.Test
     fun verifyCameraControlsRenders() = kotlinx.coroutines.runBlocking {
         // Launch CameraControlsActivity directly
-        val intent = android.content.Intent(context, CameraControlsActivity::class.java).apply {
+        val intent = Intent(context, CameraControlsActivity::class.java).apply {
             addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
@@ -166,18 +166,42 @@ class Maps3DVisualTest : BaseVisualTest() {
         // Wait for the map to render and tiles to load
         waitForMapRendering(60)
 
+        // Strategy 1: Click the center of the screen and surrounding points
+        val screenWidth = uiDevice.displayWidth
+        val screenHeight = uiDevice.displayHeight
+        
+        val centerX = screenWidth / 2
+        val centerY = screenHeight / 2
+        
+        // Click center and a few points around it to increase chances
+        uiDevice.click(centerX, centerY)
+        android.os.SystemClock.sleep(500)
+        uiDevice.click(centerX + 50, centerY + 50)
+        android.os.SystemClock.sleep(500)
+        uiDevice.click(centerX - 50, centerY - 50)
+        android.os.SystemClock.sleep(500)
+        uiDevice.click(centerX + 50, centerY - 50)
+        android.os.SystemClock.sleep(500)
+        uiDevice.click(centerX - 50, centerY + 50)
+
+        // Wait for the click info card to update (let Gemini handle verification if UiAutomator misses it)
+        uiDevice.wait(
+            androidx.test.uiautomator.Until.hasObject(androidx.test.uiautomator.By.textContains("Clicked")),
+            5000
+        )
+
         // Capture a screenshot
         val screenshotBitmap = captureScreenshot("map_interactions_screenshot.png")
 
         // Define the verification prompt for Gemini
         val prompt = """
-            Please act as a UI tester and analyze this screenshot to verify the application is rendering correctly. 
-            Check the image against the following criteria:
+            Please act as a UI tester and analyze this screenshot.
             1. Confirm that a 3D map view is visible.
-            2. Confirm that the Colorado State Capitol building (with its gold dome) or the surrounding Denver downtown area is visible.
+            2. Read the text in the card at the bottom of the screen and report exactly what it says.
+            3. Confirm if it shows clicked coordinates or place ID (i.e., does it contain the word 'Clicked').
             
-            If all elements are present and look reasonable for a 3D map of Denver, reply with "PASSED". 
-            If any element is missing or incorrect, please detail the discrepancy.
+            If the map is visible and the card shows clicked info, reply with "PASSED". 
+            Otherwise, report what you see.
         """.trimIndent()
 
         // Analyze the image using Gemini
