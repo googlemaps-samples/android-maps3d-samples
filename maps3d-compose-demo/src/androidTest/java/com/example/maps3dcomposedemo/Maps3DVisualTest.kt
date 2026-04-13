@@ -153,66 +153,57 @@ class Maps3DVisualTest : BaseVisualTest() {
     }
 
     @org.junit.Test
-    fun verifyMapInteractionsRenders() = kotlinx.coroutines.runBlocking {
-        // Launch MapInteractionsActivity directly
-        val intent = android.content.Intent(context, MapInteractionsActivity::class.java).apply {
-            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(intent)
-        
-        // Wait for the activity to be displayed
-        uiDevice.wait(androidx.test.uiautomator.Until.hasObject(androidx.test.uiautomator.By.pkg(context.packageName).depth(0)), 10000)
-        
-        // Wait for the map to render and tiles to load
-        waitForMapRendering(60)
-
-        // Strategy 1: Click the center of the screen and surrounding points
-        val screenWidth = uiDevice.displayWidth
-        val screenHeight = uiDevice.displayHeight
-        
-        val centerX = screenWidth / 2
-        val centerY = screenHeight / 2
-        
-        // Click center and a few points around it to increase chances
-        uiDevice.click(centerX, centerY)
-        android.os.SystemClock.sleep(500)
-        uiDevice.click(centerX + 50, centerY + 50)
-        android.os.SystemClock.sleep(500)
-        uiDevice.click(centerX - 50, centerY - 50)
-        android.os.SystemClock.sleep(500)
-        uiDevice.click(centerX + 50, centerY - 50)
-        android.os.SystemClock.sleep(500)
-        uiDevice.click(centerX - 50, centerY + 50)
-
-        // Wait for the click info card to update (let Gemini handle verification if UiAutomator misses it)
-        uiDevice.wait(
-            androidx.test.uiautomator.Until.hasObject(androidx.test.uiautomator.By.textContains("Clicked")),
-            5000
-        )
-
-        // Capture a screenshot
-        val screenshotBitmap = captureScreenshot("map_interactions_screenshot.png")
-
-        // Define the verification prompt for Gemini
-        val prompt = """
-            Please act as a UI tester and analyze this screenshot.
-            1. Confirm that a 3D map view is visible.
-            2. Read the text in the card at the bottom of the screen and report exactly what it says.
-            3. Confirm if it shows clicked coordinates or place ID (i.e., does it contain the word 'Clicked').
+    fun verifyMapInteractionsRenders() {
+        kotlinx.coroutines.runBlocking {
+            // Launch MapInteractionsActivity directly
+            val intent = android.content.Intent(context, MapInteractionsActivity::class.java).apply {
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
             
-            If the map is visible and the card shows clicked info, reply with "PASSED". 
-            Otherwise, report what you see.
-        """.trimIndent()
-
-        // Analyze the image using Gemini
-        val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)
-
-        println("Gemini's analysis: $geminiResponse")
-
-        // Assert on Gemini's response
-        org.junit.Assert.assertTrue(
-            "Visual verification failed. Gemini response: $geminiResponse",
-            geminiResponse?.contains("PASSED", ignoreCase = true) == true
-        )
+            // Wait for the activity to be displayed
+            uiDevice.wait(androidx.test.uiautomator.Until.hasObject(androidx.test.uiautomator.By.pkg(context.packageName).depth(0)), 10000)
+            
+            // Wait for the map to render and tiles to load
+            waitForMapRendering(60)
+    
+            // Strategy 1: Click the center of the screen and surrounding points
+            val screenWidth = uiDevice.displayWidth
+            val screenHeight = uiDevice.displayHeight
+            
+            val centerX = screenWidth / 2
+            val centerY = screenHeight / 2
+            
+            // Click center and a few points around it to increase chances
+            uiDevice.click(centerX, centerY)
+            android.os.SystemClock.sleep(500)
+            uiDevice.click(centerX + 50, centerY + 50)
+            android.os.SystemClock.sleep(500)
+            uiDevice.click(centerX - 50, centerY - 50)
+            android.os.SystemClock.sleep(500)
+            uiDevice.click(centerX + 50, centerY - 50)
+            android.os.SystemClock.sleep(500)
+            uiDevice.click(centerX - 50, centerY + 50)
+    
+            // Wait for the click info card to update with text containing "Clicked"
+            val textUpdated = uiDevice.wait(
+                androidx.test.uiautomator.Until.hasObject(androidx.test.uiautomator.By.descContains("Clicked")),
+                5000
+            )
+            org.junit.Assert.assertTrue("Card text did not update after click", textUpdated)
+    
+            // Verify that the text contains coordinates or place ID
+            val cardObject = uiDevice.findObject(androidx.test.uiautomator.By.descContains("Clicked"))
+            val description = cardObject.contentDescription
+            println("Card text: $description")
+            
+            org.junit.Assert.assertTrue(
+                "Card text should contain 'Location' or 'Place ID'",
+                description.contains("Location") || description.contains("Place ID")
+            )
+    
+            // Capture a screenshot for visual confirmation
+            captureScreenshot("map_interactions_success.png")
+        }
     }
 }
