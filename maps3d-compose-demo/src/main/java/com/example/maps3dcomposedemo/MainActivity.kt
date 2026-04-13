@@ -92,7 +92,11 @@ fun CatalogScreen() {
                     context.startActivity(Intent(context, MapInteractionsActivity::class.java))
                 } 
             }
-            item { SampleItem("Markers") { selectedSample = "markers" } }
+            item { 
+                SampleItem("Markers") { 
+                    context.startActivity(Intent(context, MarkersActivity::class.java))
+                } 
+            }
             item { SampleItem("Models") { selectedSample = "models" } }
             item { SampleItem("Polygons") { selectedSample = "polygons" } }
             item { SampleItem("Polylines") { selectedSample = "polylines" } }

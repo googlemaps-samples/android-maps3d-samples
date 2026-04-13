@@ -206,4 +206,44 @@ class Maps3DVisualTest : BaseVisualTest() {
             captureScreenshot("map_interactions_success.png")
         }
     }
+
+    @org.junit.Test
+    fun verifyMarkersRenders() {
+        kotlinx.coroutines.runBlocking {
+            // Launch MarkersActivity directly
+            val intent = android.content.Intent(context, MarkersActivity::class.java).apply {
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            
+            // Wait for the activity to be displayed
+            uiDevice.wait(androidx.test.uiautomator.Until.hasObject(androidx.test.uiautomator.By.pkg(context.packageName).depth(0)), 10000)
+            
+            // Wait for the map to render and tiles to load
+            waitForMapRendering(60)
+    
+            // Capture a screenshot
+            val screenshotBitmap = captureScreenshot("markers_devils_tower.png")
+    
+            // Define the verification prompt for Gemini
+            val prompt = """
+                Please act as a UI tester and analyze this screenshot.
+                1. Confirm that a 3D map view is visible.
+                2. Confirm that an alien icon or marker is visible on top of the prominent rock formation (Devils Tower).
+                
+                If the map is visible and the alien marker is seen on the tower, reply with "PASSED". 
+                Otherwise, report what you see.
+            """.trimIndent()
+    
+            // Analyze the image using Gemini
+            val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)
+            println("Gemini's analysis: $geminiResponse")
+    
+            // Assert on Gemini's response
+            org.junit.Assert.assertTrue(
+                "Visual verification failed. Gemini response: $geminiResponse",
+                geminiResponse?.contains("PASSED", ignoreCase = true) == true
+            )
+        }
+    }
 }

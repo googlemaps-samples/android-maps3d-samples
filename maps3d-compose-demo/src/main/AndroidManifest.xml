@@ -48,8 +48,10 @@
 
         <activity
             android:name=".MapInteractionsActivity"
-            android:exported="false"
-            android:label="Map Interactions" />
+            android:exported="false" />
+        <activity
+            android:name=".MarkersActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
