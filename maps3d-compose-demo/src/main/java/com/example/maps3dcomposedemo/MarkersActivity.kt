@@ -89,43 +89,31 @@ fun MarkersScreen() {
 
     val context = LocalContext.current
     var activePopover by remember { mutableStateOf<Popover?>(null) }
+    var googleMap3DInstance by remember { mutableStateOf<com.google.android.gms.maps3d.GoogleMap3D?>(null) }
  
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" }
-    ) {
-        GoogleMap3D(
-            camera = devilsTowerCamera,
-            mapMode = Map3DMode.HYBRID,
-            modifier = Modifier.fillMaxSize(),
-            onMapSteady = {
-                isMapSteady = true
+    val alienMarker = remember {
+        MarkerConfig(
+            key = "alien",
+            position = latLngAltitude {
+                latitude = 44.59054845363309
+                longitude = -104.715177415273
+                altitude = 10.0
             },
-            onMapReady = { googleMap3D ->
-                val alienMarker = googleMap3D.addMarker(markerOptions {
-                    position = latLngAltitude {
-                        latitude = 44.59054845363309
-                        longitude = -104.715177415273
-                        altitude = 10.0
-                    }
-                    zIndex = 1
-                    label = "Devil's Tower Alien"
-                    isExtruded = true
-                    isDrawnWhenOccluded = true
-                    altitudeMode = AltitudeMode.RELATIVE_TO_MESH
-                    setStyle(ImageView(R.drawable.alien))
-                })
-                
-                alienMarker?.setClickListener {
+            altitudeMode = AltitudeMode.RELATIVE_TO_MESH,
+            styleView = ImageView(R.drawable.alien),
+            label = "Devil's Tower Alien",
+            isExtruded = true,
+            isDrawnWhenOccluded = true,
+            onClick = { marker ->
+                googleMap3DInstance?.let { map ->
                     val textView = android.widget.TextView(context).apply {
                         text = "They didn't just come to sculpt mashed potatoes."
                         setPadding(32, 16, 32, 16)
                         setTextColor(Color.BLACK)
                         setBackgroundColor(Color.WHITE)
                     }
-                    val newPopover = googleMap3D.addPopover(popoverOptions {
-                        positionAnchor = alienMarker
+                    val newPopover = map.addPopover(popoverOptions {
+                        positionAnchor = marker
                         altitudeMode = AltitudeMode.ABSOLUTE
                         content = textView
                         autoCloseEnabled = true
@@ -136,6 +124,25 @@ fun MarkersScreen() {
                     activePopover = newPopover
                     activePopover?.show()
                 }
+            }
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" }
+    ) {
+        GoogleMap3D(
+            camera = devilsTowerCamera,
+            mapMode = Map3DMode.HYBRID,
+            markers = listOf(alienMarker),
+            modifier = Modifier.fillMaxSize(),
+            onMapSteady = {
+                isMapSteady = true
+            },
+            onMapReady = { instance ->
+                googleMap3DInstance = instance
             }
         )
 

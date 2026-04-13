@@ -79,7 +79,7 @@ class Map3DState {
     }
 
     private fun createMarker(map: GoogleMap3D, config: MarkerConfig): Marker? {
-        return map.addMarker(markerOptions {
+        val marker = map.addMarker(markerOptions {
             position = config.position
             altitudeMode = config.altitudeMode
             config.styleView?.let { setStyle(it) }
@@ -89,6 +89,14 @@ class Map3DState {
             isDrawnWhenOccluded = config.isDrawnWhenOccluded
             collisionBehavior = config.collisionBehavior
         })
+        
+        config.onClick?.let { callback ->
+            marker?.setClickListener {
+                callback(marker)
+            }
+        }
+        
+        return marker
     }
 
     /**

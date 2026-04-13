@@ -36,7 +36,8 @@ data class MarkerConfig(
     val zIndex: Int = 0,
     val isExtruded: Boolean = false,
     val isDrawnWhenOccluded: Boolean = false,
-    val collisionBehavior: Int = CollisionBehavior.REQUIRED
+    val collisionBehavior: Int = CollisionBehavior.REQUIRED,
+    val onClick: ((com.google.android.gms.maps3d.model.Marker) -> Unit)? = null
 )
 
 /**
