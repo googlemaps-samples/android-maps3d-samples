@@ -94,9 +94,9 @@ class Maps3DVisualTest : BaseVisualTest() {
             Please act as a UI tester and analyze this screenshot to verify the application is rendering correctly. 
             Check the image against the following criteria:
             1. Confirm that a 3D map view is visible.
-            2. Confirm that the landscape appears to be a mountain range (Flatirons in Boulder).
+            2. Confirm that the landscape appears to be a desert arch area (like Delicate Arch).
             
-            If all elements are present and look reasonable for a 3D map of a mountain area, reply with "PASSED". 
+            If all elements are present and look reasonable for a 3D map of an arch area, reply with "PASSED". 
             If any element is missing or incorrect, please detail the discrepancy.
         """.trimIndent()
 

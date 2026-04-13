@@ -66,13 +66,13 @@ fun HelloMapScreen(onBackClick: () -> Unit) {
     val flatironsCamera = remember {
         camera {
             center = latLngAltitude {
-                latitude = 39.9988
-                longitude = -105.2761
+                latitude = 38.7436
+                longitude = -109.4993
                 altitude = 0.0
             }
-            heading = 270.0 // Look west towards the Flatirons
+            heading = 0.0
             tilt = 60.0
-            range = 2000.0
+            range = 500.0
             roll = 0.0
         }
     }

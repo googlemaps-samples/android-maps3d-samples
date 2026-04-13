@@ -44,12 +44,16 @@ abstract class BaseVisualTest {
     }
 
     protected fun captureScreenshot(filename: String = "screenshot_${System.currentTimeMillis()}.png"): Bitmap {
-        val screenshotFile = File(context.cacheDir, filename)
+        val screenshotFile = File(context.getExternalFilesDir(null), filename)
         val screenshotTaken = uiDevice.takeScreenshot(screenshotFile)
         assertTrue("Failed to take screenshot: $filename", screenshotTaken)
 
         val bitmap = BitmapFactory.decodeFile(screenshotFile.absolutePath)
         assertTrue("Failed to decode screenshot file: $filename", bitmap != null)
+        
+        println("Screenshot saved to device: ${screenshotFile.absolutePath}")
+        println("To pull: adb pull ${screenshotFile.absolutePath}")
+        
         return bitmap
     }
 
