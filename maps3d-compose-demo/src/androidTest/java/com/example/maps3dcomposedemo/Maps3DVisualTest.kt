@@ -151,4 +151,44 @@ class Maps3DVisualTest : BaseVisualTest() {
             geminiResponse?.contains("PASSED", ignoreCase = true) == true
         )
     }
+
+    @org.junit.Test
+    fun verifyMapInteractionsRenders() = kotlinx.coroutines.runBlocking {
+        // Launch MapInteractionsActivity directly
+        val intent = android.content.Intent(context, MapInteractionsActivity::class.java).apply {
+            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+        
+        // Wait for the activity to be displayed
+        uiDevice.wait(androidx.test.uiautomator.Until.hasObject(androidx.test.uiautomator.By.pkg(context.packageName).depth(0)), 10000)
+        
+        // Wait for the map to render and tiles to load
+        waitForMapRendering(60)
+
+        // Capture a screenshot
+        val screenshotBitmap = captureScreenshot("map_interactions_screenshot.png")
+
+        // Define the verification prompt for Gemini
+        val prompt = """
+            Please act as a UI tester and analyze this screenshot to verify the application is rendering correctly. 
+            Check the image against the following criteria:
+            1. Confirm that a 3D map view is visible.
+            2. Confirm that the Colorado State Capitol building (with its gold dome) or the surrounding Denver downtown area is visible.
+            
+            If all elements are present and look reasonable for a 3D map of Denver, reply with "PASSED". 
+            If any element is missing or incorrect, please detail the discrepancy.
+        """.trimIndent()
+
+        // Analyze the image using Gemini
+        val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)
+
+        println("Gemini's analysis: $geminiResponse")
+
+        // Assert on Gemini's response
+        org.junit.Assert.assertTrue(
+            "Visual verification failed. Gemini response: $geminiResponse",
+            geminiResponse?.contains("PASSED", ignoreCase = true) == true
+        )
+    }
 }

@@ -45,6 +45,11 @@
             android:name=".CameraControlsActivity"
             android:exported="false"
             android:label="Camera Controls" />
+
+        <activity
+            android:name=".MapInteractionsActivity"
+            android:exported="false"
+            android:label="Map Interactions" />
     </application>
 
 </manifest>
