@@ -53,7 +53,7 @@ class HelloMapActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HelloMapScreen { finish() }
+                    HelloMapScreen()
                 }
             }
         }
@@ -61,7 +61,7 @@ class HelloMapActivity : ComponentActivity() {
 }
 
 @Composable
-fun HelloMapScreen(onBackClick: () -> Unit) {
+fun HelloMapScreen() {
     var isMapSteady by remember { mutableStateOf(false) }
     
     val flatironsCamera = remember {
@@ -91,15 +91,6 @@ fun HelloMapScreen(onBackClick: () -> Unit) {
             }
         )
 
-        // Back button
-        FloatingActionButton(
-            onClick = onBackClick,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(16.dp)
-                .statusBarsPadding()
-        ) {
-            Text("Back")
-        }
+
     }
 }

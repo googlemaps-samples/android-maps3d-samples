@@ -52,7 +52,7 @@ class CameraControlsActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    CameraControlsScreen { finish() }
+                    CameraControlsScreen()
                 }
             }
         }
@@ -60,7 +60,7 @@ class CameraControlsActivity : ComponentActivity() {
 }
 
 @Composable
-fun CameraControlsScreen(onBackClick: () -> Unit) {
+fun CameraControlsScreen() {
     var isMapSteady by remember { mutableStateOf(false) }
     
     // Calibrated camera centered around Seattle (Space Needle area)
@@ -91,15 +91,6 @@ fun CameraControlsScreen(onBackClick: () -> Unit) {
             }
         )
 
-        // Back button
-        FloatingActionButton(
-            onClick = onBackClick,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(16.dp)
-                .statusBarsPadding()
-        ) {
-            Text("Back")
-        }
+
     }
 }

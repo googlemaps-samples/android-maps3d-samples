@@ -61,7 +61,7 @@ class MarkersActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MarkersScreen { finish() }
+                    MarkersScreen()
                 }
             }
         }
@@ -69,7 +69,7 @@ class MarkersActivity : ComponentActivity() {
 }
 
 @Composable
-fun MarkersScreen(onBackClick: () -> Unit) {
+fun MarkersScreen() {
     var isMapSteady by remember { mutableStateOf(false) }
 
     // Camera centered on Devils Tower
@@ -139,15 +139,6 @@ fun MarkersScreen(onBackClick: () -> Unit) {
             }
         )
 
-        // Back button
-        FloatingActionButton(
-            onClick = onBackClick,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(16.dp)
-                .statusBarsPadding()
-        ) {
-            Text("Back")
-        }
+
     }
 }

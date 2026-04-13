@@ -55,7 +55,7 @@ class MapInteractionsActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MapInteractionsScreen { finish() }
+                    MapInteractionsScreen()
                 }
             }
         }
@@ -63,7 +63,7 @@ class MapInteractionsActivity : ComponentActivity() {
 }
 
 @Composable
-fun MapInteractionsScreen(onBackClick: () -> Unit) {
+fun MapInteractionsScreen() {
     var isMapSteady by remember { mutableStateOf(false) }
     var clickedInfo by remember { mutableStateOf("Click on the map to see details") }
     var map3dInstance by remember { mutableStateOf<GoogleMap3D?>(null) }
@@ -108,16 +108,7 @@ fun MapInteractionsScreen(onBackClick: () -> Unit) {
             }
         )
 
-        // Back button
-        FloatingActionButton(
-            onClick = onBackClick,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(16.dp)
-                .statusBarsPadding()
-        ) {
-            Text("Back")
-        }
+
 
         // Click Info Card
         Card(
