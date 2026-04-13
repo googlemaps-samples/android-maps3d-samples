@@ -1,0 +1,128 @@
+/*
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.example.maps3dcomposedemo
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            MaterialTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    CatalogScreen()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CatalogScreen() {
+    var selectedSample by remember { mutableStateOf<String?>(null) }
+
+    if (selectedSample == null) {
+        LazyColumn(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
+            item {
+                Text(
+                    text = "Maps 3D Compose Samples",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+            item { SampleItem("Basic Map with Marker & Polyline") { selectedSample = "basic" } }
+            item { SampleItem("Hello Map") { selectedSample = "hello" } }
+            item { SampleItem("Camera Controls") { selectedSample = "camera" } }
+            item { SampleItem("Map Interactions") { selectedSample = "interactions" } }
+            item { SampleItem("Markers") { selectedSample = "markers" } }
+            item { SampleItem("Models") { selectedSample = "models" } }
+            item { SampleItem("Polygons") { selectedSample = "polygons" } }
+            item { SampleItem("Polylines") { selectedSample = "polylines" } }
+            item { SampleItem("Popovers") { selectedSample = "popovers" } }
+        }
+    } else {
+        Box(modifier = Modifier.fillMaxSize()) {
+            when (selectedSample) {
+                "basic" -> BasicMapSample()
+                "hello" -> HelloMapSample()
+                "camera" -> CameraControlsSample()
+                "interactions" -> MapInteractionsSample()
+                "markers" -> MarkersSample()
+                "models" -> ModelsSample()
+                "polygons" -> PolygonsSample()
+                "polylines" -> PolylinesSample()
+                "popovers" -> PopoversSample()
+            }
+
+            FloatingActionButton(
+                onClick = { selectedSample = null },
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(16.dp)
+                    .statusBarsPadding()
+            ) {
+                Text("Back")
+            }
+        }
+    }
+}
+
+@Composable
+fun SampleItem(title: String, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable { onClick() },
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Text(
+            text = title,
+            modifier = Modifier.padding(16.dp),
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
