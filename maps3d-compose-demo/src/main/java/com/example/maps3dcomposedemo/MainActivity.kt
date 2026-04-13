@@ -39,8 +39,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import android.content.Intent
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
@@ -62,6 +64,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun CatalogScreen() {
+    val context = LocalContext.current
     var selectedSample by remember { mutableStateOf<String?>(null) }
 
     if (selectedSample == null) {
@@ -74,7 +77,11 @@ fun CatalogScreen() {
                 )
             }
             item { SampleItem("Basic Map with Marker & Polyline") { selectedSample = "basic" } }
-            item { SampleItem("Hello Map") { selectedSample = "hello" } }
+            item { 
+                SampleItem("Hello Map") { 
+                    context.startActivity(Intent(context, HelloMapActivity::class.java))
+                } 
+            }
             item { SampleItem("Camera Controls") { selectedSample = "camera" } }
             item { SampleItem("Map Interactions") { selectedSample = "interactions" } }
             item { SampleItem("Markers") { selectedSample = "markers" } }

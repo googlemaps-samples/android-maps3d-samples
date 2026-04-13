@@ -22,6 +22,8 @@ import androidx.test.uiautomator.Until
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import android.content.Intent
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.TimeUnit
@@ -54,6 +56,47 @@ class Maps3DVisualTest : BaseVisualTest() {
             2. Confirm that there are multiple list items visible (e.g., "Basic Map with Marker & Polyline", "Hello Map", etc.).
             
             If all elements are present and look reasonable for a list of samples, reply with "PASSED". 
+            If any element is missing or incorrect, please detail the discrepancy.
+        """.trimIndent()
+
+        // Analyze the image using Gemini
+        val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)
+
+        println("Gemini's analysis: $geminiResponse")
+
+        // Assert on Gemini's response
+        assertTrue(
+            "Visual verification failed. Gemini response: $geminiResponse",
+            geminiResponse?.contains("PASSED", ignoreCase = true) == true
+        )
+    }
+
+    @Test
+    fun verifyHelloMapRenders() = runBlocking {
+        // Launch HelloMapActivity
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val intent = Intent(context, HelloMapActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+        
+        // Wait for the activity to be displayed
+        uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
+
+        // Wait for the map to render and tiles to load (up to 60 seconds for 3D SDK)
+        waitForMapRendering(60)
+
+        // Capture a screenshot
+        val screenshotBitmap = captureScreenshot("hello_map_screenshot.png")
+
+        // Define the verification prompt for Gemini
+        val prompt = """
+            Please act as a UI tester and analyze this screenshot to verify the application is rendering correctly. 
+            Check the image against the following criteria:
+            1. Confirm that a 3D map view is visible.
+            2. Confirm that the landscape appears to be a mountain range (Flatirons in Boulder).
+            
+            If all elements are present and look reasonable for a 3D map of a mountain area, reply with "PASSED". 
             If any element is missing or incorrect, please detail the discrepancy.
         """.trimIndent()
 
