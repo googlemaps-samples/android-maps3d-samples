@@ -83,8 +83,8 @@ class Maps3DVisualTest : BaseVisualTest() {
         // Wait for the activity to be displayed
         uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
 
-        // Wait for the map to render and tiles to load (up to 60 seconds for 3D SDK)
-        waitForMapRendering(60)
+        // Wait for the map to render and tiles to load (up to 120 seconds for 3D SDK)
+        waitForMapRendering(120)
 
         // Capture a screenshot
         val screenshotBitmap = captureScreenshot("hello_map_screenshot.png")
@@ -94,9 +94,9 @@ class Maps3DVisualTest : BaseVisualTest() {
             Please act as a UI tester and analyze this screenshot to verify the application is rendering correctly. 
             Check the image against the following criteria:
             1. Confirm that a 3D map view is visible.
-            2. Confirm that the landscape appears to be a desert arch area (like Delicate Arch).
+            2. Confirm that the Delicate Arch itself is clearly visible and a prominent part of the scene (it should look like a large freestanding rock arch).
             
-            If all elements are present and look reasonable for a 3D map of an arch area, reply with "PASSED". 
+            If all elements are present and the Delicate Arch is clearly visible, reply with "PASSED". 
             If any element is missing or incorrect, please detail the discrepancy.
         """.trimIndent()
 

@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.google.android.gms.maps3d.GoogleMap3D as Map3D
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.maps.android.compose3d.GoogleMap3D
@@ -66,13 +67,13 @@ fun HelloMapScreen(onBackClick: () -> Unit) {
     val flatironsCamera = remember {
         camera {
             center = latLngAltitude {
-                latitude = 38.7436
-                longitude = -109.4993
-                altitude = 0.0
+                latitude = 38.74349839523953
+                longitude = -109.49930710001824
+                altitude = 1467.1204001315878
             }
-            heading = 0.0
-            tilt = 60.0
-            range = 500.0
+            heading = 151.8340412978984
+            tilt = 68.31411315130784
+            range = 250.56850704659155
             roll = 0.0
         }
     }
