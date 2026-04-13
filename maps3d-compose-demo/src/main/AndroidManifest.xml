@@ -40,6 +40,11 @@
             android:name=".HelloMapActivity"
             android:exported="false"
             android:label="Hello Map" />
+
+        <activity
+            android:name=".CameraControlsActivity"
+            android:exported="false"
+            android:label="Camera Controls" />
     </application>
 
 </manifest>

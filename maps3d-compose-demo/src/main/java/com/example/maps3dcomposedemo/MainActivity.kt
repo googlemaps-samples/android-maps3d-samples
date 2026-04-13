@@ -82,7 +82,11 @@ fun CatalogScreen() {
                     context.startActivity(Intent(context, HelloMapActivity::class.java))
                 } 
             }
-            item { SampleItem("Camera Controls") { selectedSample = "camera" } }
+            item { 
+                SampleItem("Camera Controls") { 
+                    context.startActivity(Intent(context, CameraControlsActivity::class.java))
+                } 
+            }
             item { SampleItem("Map Interactions") { selectedSample = "interactions" } }
             item { SampleItem("Markers") { selectedSample = "markers" } }
             item { SampleItem("Models") { selectedSample = "models" } }
