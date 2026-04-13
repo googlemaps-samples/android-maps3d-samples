@@ -38,20 +38,20 @@
 
         <activity
             android:name=".HelloMapActivity"
-            android:exported="false"
+            android:exported="true"
             android:label="Hello Map" />
 
         <activity
             android:name=".CameraControlsActivity"
-            android:exported="false"
+            android:exported="true"
             android:label="Camera Controls" />
 
         <activity
             android:name=".MapInteractionsActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".MarkersActivity"
-            android:exported="false" />
+            android:exported="true" />
     </application>
 
 </manifest>
