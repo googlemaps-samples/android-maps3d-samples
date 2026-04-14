@@ -60,6 +60,14 @@
             android:name=".PolygonsActivity"
             android:exported="true"
             android:label="Polygons" />
+        <activity
+            android:name=".PopoversActivity"
+            android:exported="true"
+            android:label="Popovers" />
+        <activity
+            android:name=".MapOptionsActivity"
+            android:exported="true"
+            android:label="Map Options" />
     </application>
 
 </manifest>

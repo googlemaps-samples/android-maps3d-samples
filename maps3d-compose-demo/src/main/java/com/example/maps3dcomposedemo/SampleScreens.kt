@@ -150,57 +150,8 @@ fun BasicMapSample() {
 }
 
 @Composable
-fun HelloMapSample() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Hello Map Sample Placeholder\nTODO: Implement basic map initialization.")
-    }
-}
-
-@Composable
-fun CameraControlsSample() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Camera Controls Sample Placeholder\nTODO: Implement camera movements and animations.")
-    }
-}
-
-@Composable
-fun MapInteractionsSample() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Map Interactions Sample Placeholder\nTODO: Implement click listeners and UI interactions.")
-    }
-}
-
-@Composable
-fun MarkersSample() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Markers Sample Placeholder\nTODO: Implement adding and customizing 3D markers.")
-    }
-}
-
-@Composable
 fun ModelsSample() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text("Models Sample Placeholder\nTODO: Implement loading 3D models (glTF).")
-    }
-}
-
-@Composable
-fun PolygonsSample() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Polygons Sample Placeholder\nTODO: Implement drawing polygons.")
-    }
-}
-
-@Composable
-fun PolylinesSample() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Polylines Sample Placeholder\nTODO: Implement drawing polylines.")
-    }
-}
-
-@Composable
-fun PopoversSample() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Popovers Sample Placeholder\nTODO: Implement showing interactive popovers.")
     }
 }

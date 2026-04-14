@@ -108,20 +108,22 @@ fun CatalogScreen() {
                     context.startActivity(Intent(context, PolylinesActivity::class.java))
                 } 
             }
-            item { SampleItem("Popovers") { selectedSample = "popovers" } }
+            item { 
+                SampleItem("Popovers") { 
+                    context.startActivity(Intent(context, PopoversActivity::class.java))
+                } 
+            }
+            item { 
+                SampleItem("Map Options") { 
+                    context.startActivity(Intent(context, MapOptionsActivity::class.java))
+                } 
+            }
         }
     } else {
         Box(modifier = Modifier.fillMaxSize()) {
             when (selectedSample) {
                 "basic" -> BasicMapSample()
-                "hello" -> HelloMapSample()
-                "camera" -> CameraControlsSample()
-                "interactions" -> MapInteractionsSample()
-                "markers" -> MarkersSample()
                 "models" -> ModelsSample()
-                "polygons" -> PolygonsSample()
-                "polylines" -> PolylinesSample()
-                "popovers" -> PopoversSample()
             }
 
             FloatingActionButton(

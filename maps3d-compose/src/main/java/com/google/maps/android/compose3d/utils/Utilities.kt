@@ -18,10 +18,12 @@ package com.google.maps.android.compose3d.utils
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.model.Camera
+import com.google.android.gms.maps3d.model.CameraRestriction
 import com.google.android.gms.maps3d.model.FlyAroundOptions
 import com.google.android.gms.maps3d.model.FlyToOptions
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.cameraRestriction
 import com.google.android.gms.maps3d.model.flyAroundOptions
 import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
@@ -71,6 +73,61 @@ fun Camera?.toValidCamera(): Camera {
         roll = source.roll.toRoll()
         range = source.range.toRange()
     }
+}
+
+/**
+ * Converts a nullable CameraRestriction object into a valid CameraRestriction object.
+ * Provides safe defaults for null parameters to prevent crashes in the native SDK.
+ * Ensures min <= max for altitude, heading, and tilt.
+ *
+ * @receiver The nullable CameraRestriction object to validate.
+ * @return A valid CameraRestriction object, or null if the input was null.
+ */
+fun CameraRestriction?.toValidCameraRestriction(): CameraRestriction? {
+    val source = this ?: return null
+
+    val minAlt = source.minAltitude ?: altitudeRange.start
+    val maxAlt = source.maxAltitude ?: altitudeRange.endInclusive
+    val (finalMinAlt, finalMaxAlt) = if (minAlt > maxAlt) {
+        Pair(maxAlt, minAlt)
+    } else {
+        Pair(minAlt, maxAlt)
+    }
+
+    val minHead = source.minHeading ?: headingRange.start
+    val maxHead = source.maxHeading ?: headingRange.endInclusive
+    val (finalMinHead, finalMaxHead) = if (minHead > maxHead) {
+        Pair(maxHead, minHead)
+    } else {
+        Pair(minHead, maxHead)
+    }
+
+    val minT = source.minTilt ?: tiltRange.start
+    val maxT = source.maxTilt ?: tiltRange.endInclusive
+    val (finalMinT, finalMaxT) = if (minT > maxT) {
+        Pair(maxT, minT)
+    } else {
+        Pair(minT, maxT)
+    }
+
+    if (source.minAltitude == null || source.maxAltitude == null ||
+        source.minHeading == null || source.maxHeading == null ||
+        source.minTilt == null || source.maxTilt == null ||
+        finalMinAlt != source.minAltitude || finalMaxAlt != source.maxAltitude ||
+        finalMinHead != source.minHeading || finalMaxHead != source.maxHeading ||
+        finalMinT != source.minTilt || finalMaxT != source.maxTilt) {
+        
+        return cameraRestriction {
+            bounds = source.bounds
+            minAltitude = finalMinAlt
+            maxAltitude = finalMaxAlt
+            minHeading = finalMinHead
+            maxHeading = finalMaxHead
+            minTilt = finalMinT
+            maxTilt = finalMaxT
+        }
+    }
+    return source
 }
 
 /**

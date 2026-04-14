@@ -29,6 +29,7 @@ import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.CameraRestriction
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.maps.android.compose3d.utils.toValidCamera
+import com.google.maps.android.compose3d.utils.toValidCameraRestriction
 
 /**
  * A declarative Compose wrapper for the Google Maps 3D SDK [Map3DView].
@@ -97,7 +98,7 @@ fun GoogleMap3D(
 
                         // Sync hoisted state with the imperative map instance
                         googleMap3D.setCamera(camera.toValidCamera())
-                        googleMap3D.setCameraRestriction(cameraRestriction)
+                        googleMap3D.setCameraRestriction(cameraRestriction.toValidCameraRestriction())
                         googleMap3D.setMapMode(mapMode)
 
                         state.syncMarkers(googleMap3D, markers)
