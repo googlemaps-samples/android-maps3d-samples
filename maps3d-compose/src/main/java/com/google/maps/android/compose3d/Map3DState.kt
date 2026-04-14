@@ -19,19 +19,12 @@ package com.google.maps.android.compose3d
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Hole
 import com.google.android.gms.maps3d.model.Marker
-import com.google.android.gms.maps3d.model.Polyline
-import com.google.android.gms.maps3d.model.Polygon
 import com.google.android.gms.maps3d.model.Model
+import com.google.android.gms.maps3d.model.Polygon
+import com.google.android.gms.maps3d.model.Polyline
 import com.google.android.gms.maps3d.model.markerOptions
-import com.google.android.gms.maps3d.model.polylineOptions
 import com.google.android.gms.maps3d.model.polygonOptions
-import com.google.android.gms.maps3d.model.modelOptions
-import com.google.android.gms.maps3d.model.vector3D
-import com.google.android.gms.maps3d.model.orientation
 import com.google.maps.android.compose3d.utils.toValidLocation
-import com.google.maps.android.compose3d.utils.toHeading
-import com.google.maps.android.compose3d.utils.toTilt
-import com.google.maps.android.compose3d.utils.toRoll
 
 /**
  * Internal state holder for the Maps 3D Compose library.
@@ -184,7 +177,7 @@ class Map3DState {
     }
 
     private fun createPolygon(map: GoogleMap3D, config: PolygonConfig): Polygon? {
-        return map.addPolygon(polygonOptions {
+        val polygon = map.addPolygon(polygonOptions {
             this.path = config.path.map { it.toValidLocation() }
             innerPaths = config.innerPaths.map { Hole(it.map { p -> p.toValidLocation() }) }
             fillColor = config.fillColor
@@ -192,6 +185,12 @@ class Map3DState {
             strokeWidth = config.strokeWidth.toDouble()
             altitudeMode = config.altitudeMode
         })
+        config.onClick?.let { callback ->
+            polygon.setClickListener {
+                callback(polygon)
+            }
+        }
+        return polygon
     }
 
     /**
@@ -230,21 +229,7 @@ class Map3DState {
     }
 
     private fun createModel(map: GoogleMap3D, config: ModelConfig): Model? {
-        return map.addModel(modelOptions {
-            position = config.position.toValidLocation()
-            url = config.url
-            altitudeMode = config.altitudeMode
-            scale = vector3D {
-                x = config.scale.toDouble()
-                y = config.scale.toDouble()
-                z = config.scale.toDouble()
-            }
-            orientation = orientation {
-                heading = config.heading.toHeading()
-                tilt = config.tilt.toTilt()
-                roll = config.roll.toRoll()
-            }
-        })
+        return map.addModel(config.toModelOptions())
     }
 
     /**

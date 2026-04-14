@@ -59,6 +59,7 @@ dependencies {
     implementation(libs.maps.utils.ktx)
     
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

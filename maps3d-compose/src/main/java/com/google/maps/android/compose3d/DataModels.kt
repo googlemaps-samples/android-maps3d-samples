@@ -16,16 +16,15 @@
 
 package com.google.maps.android.compose3d
 
-import android.view.View
 import androidx.annotation.WorkerThread
 import androidx.compose.runtime.Immutable
-import com.google.android.gms.maps3d.model.ImageView
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.CollisionBehavior
+import com.google.android.gms.maps3d.model.ImageView
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.Marker
-import com.google.android.gms.maps3d.model.polylineOptions
-import com.google.maps.android.compose3d.utils.toValidLocation
+import com.google.android.gms.maps3d.model.Polygon
+import com.google.android.gms.maps3d.model.Polyline
 
 /**
  * Data class representing a Marker to be added to the 3D map.
@@ -59,7 +58,7 @@ data class PolylineConfig(
     val outerWidth: Float = 0f,
     val drawsOccludedSegments: Boolean = false,
     @get:WorkerThread
-    val onClick: ((com.google.android.gms.maps3d.model.Polyline) -> Unit)? = null
+    val onClick: ((Polyline) -> Unit)? = null
 )
 
 /**
@@ -73,8 +72,17 @@ data class PolygonConfig(
     val fillColor: Int,
     val strokeColor: Int,
     val strokeWidth: Float,
-    val altitudeMode: Int = AltitudeMode.CLAMP_TO_GROUND
+    val altitudeMode: Int = AltitudeMode.CLAMP_TO_GROUND,
+    val onClick: ((Polygon) -> Unit)? = null
 )
+
+/**
+ * Sealed class representing the scale of a 3D model.
+ */
+sealed class ModelScale {
+    data class Uniform(val value: Float) : ModelScale()
+    data class PerAxis(val x: Float, val y: Float, val z: Float) : ModelScale()
+}
 
 /**
  * Data class representing a 3D Model to be added to the 3D map.
@@ -85,8 +93,9 @@ data class ModelConfig(
     val position: LatLngAltitude,
     val url: String,
     val altitudeMode: Int = AltitudeMode.CLAMP_TO_GROUND,
-    val scale: Float = 1.0f,
+    val scale: ModelScale = ModelScale.Uniform(1.0f),
     val heading: Double = 0.0,
     val tilt: Double = 0.0,
     val roll: Double = 0.0
 )
+
