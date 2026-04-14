@@ -68,6 +68,14 @@
             android:name=".MapOptionsActivity"
             android:exported="true"
             android:label="Map Options" />
+        <activity
+            android:name=".CameraAnimationsActivity"
+            android:exported="true"
+            android:label="Camera Animations" />
+        <activity
+            android:name=".ModelsActivity"
+            android:exported="true"
+            android:label="Models" />
     </application>
 
 </manifest>

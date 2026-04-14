@@ -28,6 +28,8 @@ import com.google.android.gms.maps3d.model.flyAroundOptions
 import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import java.util.Locale
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -541,3 +543,5 @@ fun haversineDistance(p1: LatLng, p2: LatLng): Double {
 
     return r * c
 }
+
+

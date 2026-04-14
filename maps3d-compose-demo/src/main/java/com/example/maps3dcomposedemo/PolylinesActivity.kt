@@ -16,27 +16,23 @@ package com.example.maps3dcomposedemo
 
 import android.graphics.Color
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.google.android.gms.maps3d.model.AltitudeMode
@@ -44,11 +40,8 @@ import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.maps.android.compose3d.GoogleMap3D
-import com.google.maps.android.compose3d.Map3DRegistry
 import com.google.maps.android.compose3d.PolylineConfig
-import com.google.maps.android.compose3d.toPolylineOptions
-import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.launch
 
 /**
  * Activity that demonstrates the use of polylines on a 3D map using Compose.
@@ -118,7 +111,7 @@ fun PolylinesScreen() {
             color = Color.RED,
             width = 7f,
             altitudeMode = AltitudeMode.RELATIVE_TO_GROUND,
-            zIndex = 5,
+            zIndex = 10,
             outerColor = Color.BLACK,
             outerWidth = 13f,
             drawsOccludedSegments = true,

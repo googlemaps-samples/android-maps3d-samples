@@ -97,7 +97,11 @@ fun CatalogScreen() {
                     context.startActivity(Intent(context, MarkersActivity::class.java))
                 } 
             }
-            item { SampleItem("Models") { selectedSample = "models" } }
+            item { 
+                SampleItem("Models") { 
+                    context.startActivity(Intent(context, ModelsActivity::class.java))
+                } 
+            }
             item { 
                 SampleItem("Polygons") { 
                     context.startActivity(Intent(context, PolygonsActivity::class.java))
@@ -118,12 +122,16 @@ fun CatalogScreen() {
                     context.startActivity(Intent(context, MapOptionsActivity::class.java))
                 } 
             }
+            item { 
+                SampleItem("Camera Animations") { 
+                    context.startActivity(Intent(context, CameraAnimationsActivity::class.java))
+                } 
+            }
         }
     } else {
         Box(modifier = Modifier.fillMaxSize()) {
             when (selectedSample) {
                 "basic" -> BasicMapSample()
-                "models" -> ModelsSample()
             }
 
             FloatingActionButton(
