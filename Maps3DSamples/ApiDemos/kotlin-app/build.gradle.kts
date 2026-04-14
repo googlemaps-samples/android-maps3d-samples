@@ -65,10 +65,7 @@ if (!isCI) {
             if (apiKey.isNullOrBlank() || !apiKey.matches(Regex("^AIza[a-zA-Z0-9_-]{35}$"))) {
                 throw GradleException("Invalid or missing MAPS3D_API_KEY in secrets.properties. Please provide a valid Google Maps API key (starts with 'AIza').")
             }
-
-            if (secrets.getProperty("MAPS_API_KEY") != null) {
-                println("Warning: Found MAPS_API_KEY in secrets.properties. This project relies exclusively on MAPS3D_API_KEY.")
-            }
+        }
         }
     }
 }

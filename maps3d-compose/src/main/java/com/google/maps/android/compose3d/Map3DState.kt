@@ -28,6 +28,10 @@ import com.google.android.gms.maps3d.model.polygonOptions
 import com.google.android.gms.maps3d.model.modelOptions
 import com.google.android.gms.maps3d.model.vector3D
 import com.google.android.gms.maps3d.model.orientation
+import com.google.maps.android.compose3d.utils.toValidLocation
+import com.google.maps.android.compose3d.utils.toHeading
+import com.google.maps.android.compose3d.utils.toTilt
+import com.google.maps.android.compose3d.utils.toRoll
 
 /**
  * Internal state holder for the Maps 3D Compose library.
@@ -80,7 +84,7 @@ class Map3DState {
 
     private fun createMarker(map: GoogleMap3D, config: MarkerConfig): Marker? {
         val marker = map.addMarker(markerOptions {
-            position = config.position
+            position = config.position.toValidLocation()
             altitudeMode = config.altitudeMode
             config.styleView?.let { setStyle(it) }
             label = config.label
@@ -135,15 +139,13 @@ class Map3DState {
     }
 
     private fun createPolyline(map: GoogleMap3D, config: PolylineConfig): Polyline? {
-        return map.addPolyline(polylineOptions {
-            this.path = config.points
-            strokeColor = config.color
-            strokeWidth = config.width.toDouble()
-            altitudeMode = config.altitudeMode
-            zIndex = config.zIndex
-            outerColor = config.outerColor
-            outerWidth = config.outerWidth.toDouble()
-        })
+        val polyline = map.addPolyline(config.toPolylineOptions())
+        config.onClick?.let { callback ->
+            polyline.setClickListener {
+                callback(polyline)
+            }
+        }
+        return polyline
     }
 
     /**
@@ -183,8 +185,8 @@ class Map3DState {
 
     private fun createPolygon(map: GoogleMap3D, config: PolygonConfig): Polygon? {
         return map.addPolygon(polygonOptions {
-            this.path = config.path
-            innerPaths = config.innerPaths.map { Hole(it) }
+            this.path = config.path.map { it.toValidLocation() }
+            innerPaths = config.innerPaths.map { Hole(it.map { p -> p.toValidLocation() }) }
             fillColor = config.fillColor
             strokeColor = config.strokeColor
             strokeWidth = config.strokeWidth.toDouble()
@@ -229,7 +231,7 @@ class Map3DState {
 
     private fun createModel(map: GoogleMap3D, config: ModelConfig): Model? {
         return map.addModel(modelOptions {
-            position = config.position
+            position = config.position.toValidLocation()
             url = config.url
             altitudeMode = config.altitudeMode
             scale = vector3D {
@@ -238,9 +240,9 @@ class Map3DState {
                 z = config.scale.toDouble()
             }
             orientation = orientation {
-                heading = config.heading
-                tilt = config.tilt
-                roll = config.roll
+                heading = config.heading.toHeading()
+                tilt = config.tilt.toTilt()
+                roll = config.roll.toRoll()
             }
         })
     }

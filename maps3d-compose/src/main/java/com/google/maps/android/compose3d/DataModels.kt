@@ -17,12 +17,15 @@
 package com.google.maps.android.compose3d
 
 import android.view.View
+import androidx.annotation.WorkerThread
 import androidx.compose.runtime.Immutable
 import com.google.android.gms.maps3d.model.ImageView
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.CollisionBehavior
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.Marker
+import com.google.android.gms.maps3d.model.polylineOptions
+import com.google.maps.android.compose3d.utils.toValidLocation
 
 /**
  * Data class representing a Marker to be added to the 3D map.
@@ -53,7 +56,10 @@ data class PolylineConfig(
     val altitudeMode: Int = AltitudeMode.CLAMP_TO_GROUND,
     val zIndex: Int = 0,
     val outerColor: Int = 0,
-    val outerWidth: Float = 0f
+    val outerWidth: Float = 0f,
+    val drawsOccludedSegments: Boolean = false,
+    @get:WorkerThread
+    val onClick: ((com.google.android.gms.maps3d.model.Polyline) -> Unit)? = null
 )
 
 /**

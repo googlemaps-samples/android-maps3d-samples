@@ -98,8 +98,16 @@ fun CatalogScreen() {
                 } 
             }
             item { SampleItem("Models") { selectedSample = "models" } }
-            item { SampleItem("Polygons") { selectedSample = "polygons" } }
-            item { SampleItem("Polylines") { selectedSample = "polylines" } }
+            item { 
+                SampleItem("Polygons") { 
+                    context.startActivity(Intent(context, PolygonsActivity::class.java))
+                } 
+            }
+            item { 
+                SampleItem("Polylines") { 
+                    context.startActivity(Intent(context, PolylinesActivity::class.java))
+                } 
+            }
             item { SampleItem("Popovers") { selectedSample = "popovers" } }
         }
     } else {

@@ -112,16 +112,16 @@ class Maps3DVisualTest : BaseVisualTest() {
         )
     }
 
-    @org.junit.Test
-    fun verifyCameraControlsRenders() = kotlinx.coroutines.runBlocking {
+    @Test
+    fun verifyCameraControlsRenders() = runBlocking {
         // Launch CameraControlsActivity directly
         val intent = Intent(context, CameraControlsActivity::class.java).apply {
-            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
         
         // Wait for the activity to be displayed
-        uiDevice.wait(androidx.test.uiautomator.Until.hasObject(androidx.test.uiautomator.By.pkg(context.packageName).depth(0)), 10000)
+        uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
         
         // Wait for the map to render and tiles to load
         waitForMapRendering(60)
@@ -146,23 +146,23 @@ class Maps3DVisualTest : BaseVisualTest() {
         println("Gemini's analysis: $geminiResponse")
 
         // Assert on Gemini's response
-        org.junit.Assert.assertTrue(
+        assertTrue(
             "Visual verification failed. Gemini response: $geminiResponse",
             geminiResponse?.contains("PASSED", ignoreCase = true) == true
         )
     }
 
-    @org.junit.Test
+    @Test
     fun verifyMapInteractionsRenders() {
-        kotlinx.coroutines.runBlocking {
+        runBlocking {
             // Launch MapInteractionsActivity directly
-            val intent = android.content.Intent(context, MapInteractionsActivity::class.java).apply {
-                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            val intent = Intent(context, MapInteractionsActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(intent)
             
             // Wait for the activity to be displayed
-            uiDevice.wait(androidx.test.uiautomator.Until.hasObject(androidx.test.uiautomator.By.pkg(context.packageName).depth(0)), 10000)
+            uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
             
             // Wait for the map to render and tiles to load
             waitForMapRendering(60)
@@ -187,17 +187,17 @@ class Maps3DVisualTest : BaseVisualTest() {
     
             // Wait for the click info card to update with text containing "Clicked"
             val textUpdated = uiDevice.wait(
-                androidx.test.uiautomator.Until.hasObject(androidx.test.uiautomator.By.descContains("Clicked")),
+                Until.hasObject(By.descContains("Clicked")),
                 5000
             )
-            org.junit.Assert.assertTrue("Card text did not update after click", textUpdated)
+            assertTrue("Card text did not update after click", textUpdated)
     
             // Verify that the text contains coordinates or place ID
-            val cardObject = uiDevice.findObject(androidx.test.uiautomator.By.descContains("Clicked"))
+            val cardObject = uiDevice.findObject(By.descContains("Clicked"))
             val description = cardObject.contentDescription
             println("Card text: $description")
             
-            org.junit.Assert.assertTrue(
+            assertTrue(
                 "Card text should contain 'Location' or 'Place ID'",
                 description.contains("Location") || description.contains("Place ID")
             )
@@ -207,17 +207,17 @@ class Maps3DVisualTest : BaseVisualTest() {
         }
     }
 
-    @org.junit.Test
+    @Test
     fun verifyMarkersRenders() {
-        kotlinx.coroutines.runBlocking {
+        runBlocking {
             // Launch MarkersActivity directly
-            val intent = android.content.Intent(context, MarkersActivity::class.java).apply {
-                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            val intent = Intent(context, MarkersActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(intent)
             
             // Wait for the activity to be displayed
-            uiDevice.wait(androidx.test.uiautomator.Until.hasObject(androidx.test.uiautomator.By.pkg(context.packageName).depth(0)), 10000)
+            uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
             
             // Wait for the map to render and tiles to load
             waitForMapRendering(60)
@@ -240,7 +240,88 @@ class Maps3DVisualTest : BaseVisualTest() {
             println("Gemini's analysis: $geminiResponse")
     
             // Assert on Gemini's response
-            org.junit.Assert.assertTrue(
+            assertTrue(
+                "Visual verification failed. Gemini response: $geminiResponse",
+                geminiResponse?.contains("PASSED", ignoreCase = true) == true
+            )
+        }
+    }
+
+    @Test
+    fun verifyPolylinesRenders() {
+        // TODO: Add test for polyline click listener when we can reliably click on polylines.
+        runBlocking {
+            // Launch PolylinesActivity directly
+            val intent = Intent(context, PolylinesActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            
+            // Wait for the activity to be displayed
+            uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
+            
+            // Wait for the map to render and tiles to load
+            waitForMapRendering(60)
+    
+            // Capture a screenshot
+            val screenshotBitmap = captureScreenshot("polylines_sanitas.png")
+    
+            // Define the verification prompt for Gemini
+            val prompt = """
+                Please act as a UI tester and analyze this screenshot.
+                1. Confirm that a 3D map view is visible.
+                2. Confirm that a red polyline (line) is visible on the map, representing a trail.
+                
+                If the map is visible and the red polyline is seen, reply with "PASSED". 
+                Otherwise, report what you see.
+            """.trimIndent()
+    
+            // Analyze the image using Gemini
+            val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)
+            println("Gemini's analysis: $geminiResponse")
+    
+            // Assert on Gemini's response
+            assertTrue(
+                "Visual verification failed. Gemini response: $geminiResponse",
+                geminiResponse?.contains("PASSED", ignoreCase = true) == true
+            )
+        }
+    }
+
+    @Test
+    fun verifyPolygonsRenders() {
+        runBlocking {
+            // Launch PolygonsActivity directly
+            val intent = Intent(context, PolygonsActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            
+            // Wait for the activity to be displayed
+            uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
+            
+            // Wait for the map to render and tiles to load
+            waitForMapRendering(60)
+            
+            // Capture a screenshot
+            val screenshotBitmap = captureScreenshot("polygons_denver_zoo.png")
+    
+            // Define the verification prompt for Gemini
+            val prompt = """
+                Please act as a UI tester and analyze this screenshot.
+                1. Confirm that a 3D map view is visible.
+                2. Confirm that a yellow translucent polygon with a green border is visible on the map.
+                
+                If the map is visible and the yellow polygon is seen, reply with "PASSED". 
+                Otherwise, report what you see.
+            """.trimIndent()
+    
+            // Analyze the image using Gemini
+            val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)
+            println("Gemini's analysis: $geminiResponse")
+    
+            // Assert on Gemini's response
+            assertTrue(
                 "Visual verification failed. Gemini response: $geminiResponse",
                 geminiResponse?.contains("PASSED", ignoreCase = true) == true
             )
