@@ -17,6 +17,9 @@
 package com.google.maps.android.compose3d
 
 import com.google.android.gms.maps3d.GoogleMap3D
+import android.content.Context
+import androidx.compose.ui.platform.ComposeView
+import com.google.android.gms.maps3d.Popover
 import com.google.android.gms.maps3d.model.Hole
 import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.Model
@@ -24,6 +27,7 @@ import com.google.android.gms.maps3d.model.Polygon
 import com.google.android.gms.maps3d.model.Polyline
 import com.google.android.gms.maps3d.model.markerOptions
 import com.google.android.gms.maps3d.model.polygonOptions
+import com.google.android.gms.maps3d.model.popoverOptions
 import com.google.maps.android.compose3d.utils.toValidLocation
 
 /**
@@ -39,6 +43,7 @@ class Map3DState {
     private val polylines = mutableMapOf<String, Pair<PolylineConfig, Polyline>>()
     private val polygons = mutableMapOf<String, Pair<PolygonConfig, Polygon>>()
     private val models = mutableMapOf<String, Pair<ModelConfig, Model>>()
+    private val popovers = mutableMapOf<String, Pair<PopoverConfig, Popover>>()
 
     /**
      * Synchronizes the markers on the map with the provided list of configurations.
@@ -233,7 +238,71 @@ class Map3DState {
     }
 
     private fun createModel(map: GoogleMap3D, config: ModelConfig): Model {
-        return map.addModel(config.toModelOptions())
+        val model = map.addModel(config.toModelOptions())
+        config.onClick?.let { callback ->
+            model.setClickListener {
+                callback(model)
+            }
+        }
+        return model
+    }
+
+    /**
+     * Synchronizes the popovers on the map with the provided list of configurations.
+     */
+    fun syncPopovers(context: Context, map: GoogleMap3D, popoverConfigs: List<PopoverConfig>) {
+        val keysToRemove = popovers.keys.toMutableSet()
+
+        popoverConfigs.forEach { config ->
+            keysToRemove.remove(config.key)
+            val existing = popovers[config.key]
+
+            if (existing != null) {
+                val (oldConfig, popover) = existing
+                if (oldConfig != config) {
+                    // Config changed, recreate
+                    popover.remove()
+                    val newPopover = createPopover(context, map, config)
+                    if (newPopover != null) {
+                        popovers[config.key] = Pair(config, newPopover)
+                    }
+                }
+            } else {
+                // New popover
+                val newPopover = createPopover(context, map, config)
+                if (newPopover != null) {
+                    popovers[config.key] = Pair(config, newPopover)
+                }
+            }
+        }
+
+        keysToRemove.forEach { key ->
+            popovers[key]?.second?.remove()
+            popovers.remove(key)
+        }
+    }
+
+    private fun createPopover(context: Context, map: GoogleMap3D, config: PopoverConfig): Popover? {
+        val marker = markers[config.positionAnchorKey]?.second ?: return null
+        
+        val composeView = ComposeView(context).apply {
+            setContent {
+                config.content()
+            }
+        }
+
+        val popover = map.addPopover(
+            popoverOptions {
+                positionAnchor = marker
+                altitudeMode = config.altitudeMode
+                content = composeView
+                autoCloseEnabled = config.autoCloseEnabled
+                autoPanEnabled = config.autoPanEnabled
+            }
+        )
+        
+        popover.show()
+        return popover
     }
 
     /**
@@ -248,5 +317,7 @@ class Map3DState {
         polygons.clear()
         models.values.forEach { it.second.remove() }
         models.clear()
+        popovers.values.forEach { it.second.remove() }
+        popovers.clear()
     }
 }

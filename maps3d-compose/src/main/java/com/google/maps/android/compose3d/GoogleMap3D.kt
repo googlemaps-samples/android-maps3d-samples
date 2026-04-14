@@ -63,11 +63,13 @@ fun GoogleMap3D(
     polylines: List<PolylineConfig> = emptyList(),
     polygons: List<PolygonConfig> = emptyList(),
     models: List<ModelConfig> = emptyList(),
+    popovers: List<PopoverConfig> = emptyList(),
     cameraRestriction: CameraRestriction? = null,
     @Map3DMode mapMode: Int = Map3DMode.SATELLITE,
     options: Map3DOptions = Map3DOptions(),
     onMapReady: (GoogleMap3D) -> Unit = {},
     onMapSteady: () -> Unit = {},
+    onMapClick: (() -> Unit)? = null,
 ) {
     val state = remember { Map3DState() }
     val hasCalledOnMapReady = remember { mutableStateOf(false) }
@@ -105,6 +107,13 @@ fun GoogleMap3D(
                         state.syncPolylines(googleMap3D, polylines)
                         state.syncPolygons(googleMap3D, polygons)
                         state.syncModels(googleMap3D, models)
+                        state.syncPopovers(map3dView.context, googleMap3D, popovers)
+
+                        onMapClick?.let { callback ->
+                            googleMap3D.setMap3DClickListener { _, _ ->
+                                callback()
+                            }
+                        }
                     }
 
                     if (Map3DRegistry.isMapReady) {

@@ -16,13 +16,17 @@
 
 package com.example.maps3dcomposedemo
 
-import android.graphics.Color
 import android.os.Bundle
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -42,6 +46,7 @@ import com.google.android.gms.maps3d.model.popoverShadow
 import com.google.android.gms.maps3d.model.popoverStyle
 import com.google.maps.android.compose3d.GoogleMap3D
 import com.google.maps.android.compose3d.MarkerConfig
+import com.google.maps.android.compose3d.PopoverConfig
 import com.google.android.gms.maps3d.GoogleMap3D as NativeGoogleMap3D
 
 class PopoversActivity : ComponentActivity() {
@@ -63,9 +68,8 @@ class PopoversActivity : ComponentActivity() {
 
 @Composable
 fun PopoversScreen() {
-    val context = LocalContext.current
-    var googleMap3DInstance by remember { mutableStateOf<NativeGoogleMap3D?>(null) }
-    var activePopover by remember { mutableStateOf<Popover?>(null) }
+    var popovers by remember { mutableStateOf(emptyList<PopoverConfig>()) }
+    var isMapSteady by remember { mutableStateOf(false) }
 
     // Camera centered on Devils Tower
     val devilsTowerCamera = remember {
@@ -95,38 +99,28 @@ fun PopoversScreen() {
             label = "Click me for Popover",
             isExtruded = true,
             isDrawnWhenOccluded = true,
-            onClick = { nativeMarker ->
-                googleMap3DInstance?.let { map ->
-                    val textView = android.widget.TextView(context).apply {
-                        text = "This is a Popover anchored to a marker!"
-                        setPadding(32, 16, 32, 16)
-                        setTextColor(Color.BLACK)
-                        setBackgroundColor(Color.WHITE)
-                    }
-                    val newPopover = map.addPopover(
-                        popoverOptions {
-                            positionAnchor = nativeMarker
-                            altitudeMode = AltitudeMode.ABSOLUTE
-                            content = textView
-                            autoCloseEnabled = true
-                            autoPanEnabled = false
-                            popoverStyle = popoverStyle {
-                                backgroundColor = Color.WHITE
-                                borderRadius = 16f
-                                shadow = popoverShadow {
-                                    color = Color.DKGRAY
-                                    radius = 8f
-                                    offsetX = 4f
-                                    offsetY = 4f
-                                }
+            onClick = {
+                popovers = listOf(
+                    PopoverConfig(
+                        key = "popover_1",
+                        positionAnchorKey = "popover_marker",
+                        autoPanEnabled = false,
+                        autoCloseEnabled = false,
+                        content = {
+                            Surface(
+                                color = Color.White,
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.padding(8.dp)
+                            ) {
+                                Text(
+                                    text = "This is a Popover anchored to a marker!",
+                                    modifier = Modifier.padding(16.dp),
+                                    color = Color.Black
+                                )
                             }
-                        },
+                        }
                     )
-
-                    activePopover?.remove()
-                    activePopover = newPopover
-                    activePopover?.show()
-                }
+                )
             },
         )
     }
@@ -135,15 +129,15 @@ fun PopoversScreen() {
         GoogleMap3D(
             camera = devilsTowerCamera,
             markers = listOf(marker),
+            popovers = popovers,
             mapMode = Map3DMode.HYBRID,
             modifier = Modifier.fillMaxSize(),
-            onMapReady = { instance ->
-                googleMap3DInstance = instance
-                instance.setMap3DClickListener { _, _ ->
-                    activePopover?.remove()
-                    activePopover = null
-                }
+            onMapSteady = {
+                isMapSteady = true
             },
+            onMapClick = {
+                popovers = emptyList()
+            }
         )
     }
 }

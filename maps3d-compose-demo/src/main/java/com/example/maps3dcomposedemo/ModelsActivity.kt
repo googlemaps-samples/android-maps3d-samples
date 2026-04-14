@@ -93,6 +93,9 @@ private fun ModelsScreen() {
                 heading = 41.5,
                 tilt = -90.0,
                 roll = 0.0,
+                onClick = {
+                    Toast.makeText(context, "Clicked on Airplane!", Toast.LENGTH_SHORT).show()
+                },
             ),
         )
     }
