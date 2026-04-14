@@ -98,3 +98,10 @@ dependencies {
 secrets {
     propertiesFileName = "secrets.properties"
 }
+
+tasks.register<Exec>("installAndLaunch") {
+    description = "Installs and launches the demo app."
+    group = "install"
+    dependsOn("installDebug")
+    commandLine("adb", "shell", "am", "start", "-n", "com.example.maps3dcomposedemo/.MainActivity")
+}
