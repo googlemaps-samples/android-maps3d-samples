@@ -66,7 +66,6 @@ if (!isCI) {
                 throw GradleException("Invalid or missing MAPS3D_API_KEY in secrets.properties. Please provide a valid Google Maps API key (starts with 'AIza').")
             }
         }
-        }
     }
 }
 
