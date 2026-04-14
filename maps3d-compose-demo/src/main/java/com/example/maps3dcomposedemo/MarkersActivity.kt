@@ -16,41 +16,34 @@
 
 package com.example.maps3dcomposedemo
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
+import com.google.android.gms.maps3d.Popover
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.ImageView
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
-import android.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import com.google.android.gms.maps3d.model.markerOptions
 import com.google.android.gms.maps3d.model.popoverOptions
-import com.google.android.gms.maps3d.Popover
-import com.google.android.gms.maps3d.GoogleMap3D as NativeGoogleMap3D
 import com.google.maps.android.compose3d.GoogleMap3D
 import com.google.maps.android.compose3d.MarkerConfig
+import com.google.android.gms.maps3d.GoogleMap3D as NativeGoogleMap3D
 
 class MarkersActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +53,7 @@ class MarkersActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     MarkersScreen()
                 }
@@ -91,7 +84,7 @@ fun MarkersScreen() {
     val context = LocalContext.current
     var activePopover by remember { mutableStateOf<Popover?>(null) }
     var googleMap3DInstance by remember { mutableStateOf<NativeGoogleMap3D?>(null) }
- 
+
     val alienMarker = remember {
         MarkerConfig(
             key = "alien",
@@ -113,26 +106,28 @@ fun MarkersScreen() {
                         setTextColor(Color.BLACK)
                         setBackgroundColor(Color.WHITE)
                     }
-                    val newPopover = map.addPopover(popoverOptions {
-                        positionAnchor = marker
-                        altitudeMode = AltitudeMode.ABSOLUTE
-                        content = textView
-                        autoCloseEnabled = true
-                        autoPanEnabled = false
-                    })
-                    
+                    val newPopover = map.addPopover(
+                        popoverOptions {
+                            positionAnchor = marker
+                            altitudeMode = AltitudeMode.ABSOLUTE
+                            content = textView
+                            autoCloseEnabled = true
+                            autoPanEnabled = false
+                        },
+                    )
+
                     activePopover?.remove()
                     activePopover = newPopover
                     activePopover?.show()
                 }
-            }
+            },
         )
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" }
+            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" },
     ) {
         GoogleMap3D(
             camera = devilsTowerCamera,
@@ -144,9 +139,7 @@ fun MarkersScreen() {
             },
             onMapReady = { instance ->
                 googleMap3DInstance = instance
-            }
+            },
         )
-
-
     }
 }

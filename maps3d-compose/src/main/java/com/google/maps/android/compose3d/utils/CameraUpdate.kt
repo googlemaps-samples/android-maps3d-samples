@@ -71,13 +71,13 @@ fun FlyAroundOptions.toCameraUpdate(): CameraUpdate {
 
 fun FlyToOptions.toValidFlyToOptions(): FlyToOptions {
     return this.copy(
-        endCamera = this.endCamera.toValidCamera()
+        endCamera = this.endCamera.toValidCamera(),
     )
 }
 
 fun FlyAroundOptions.toValidFlyAroundOptions(): FlyAroundOptions {
     return this.copy(
-        center = this.center.toValidCamera()
+        center = this.center.toValidCamera(),
     )
 }
 
@@ -98,7 +98,7 @@ fun FlyAroundOptions.toValidFlyAroundOptions(): FlyAroundOptions {
 suspend fun awaitCameraUpdate(
     controller: GoogleMap3D,
     cameraUpdate: CameraUpdate,
-    cameraChangedListener: OnCameraAnimationEndListener? = null
+    cameraChangedListener: OnCameraAnimationEndListener? = null,
 ) = suspendCancellableCoroutine { continuation ->
     // No need to wait if the update is a move
     if (cameraUpdate is CameraUpdate.Move) {
@@ -124,7 +124,7 @@ suspend fun awaitCameraUpdate(
 
 /**
  * Suspends the coroutine until the current camera animation is finished.
- * 
+ *
  * In a 3D environment, this is essential for sequencing cinematic movements.
  */
 suspend fun GoogleMap3D.awaitCameraAnimation() = suspendCancellableCoroutine { continuation ->

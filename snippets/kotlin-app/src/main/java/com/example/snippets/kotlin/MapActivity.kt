@@ -56,7 +56,7 @@ class MapActivity : AppCompatActivity() {
         val snippetList = SnippetRegistry.getSnippetGroups().flatMap { it.items }
         var currentIndex = snippetList.indexOfFirst { it.title == snippetTitle && (groupTitle == null || it.groupTitle == groupTitle) }
 
-        val printPoseBtn = findViewById<MaterialButton>(R.id.snapshot_button).apply {
+        findViewById<MaterialButton>(R.id.snapshot_button).apply {
             setOnClickListener {
                 if (::googleMap3D.isInitialized) {
                     val cam = googleMap3D.getCamera() ?: return@setOnClickListener
@@ -91,7 +91,7 @@ class MapActivity : AppCompatActivity() {
             }
         }
 
-        val replayBtn = findViewById<MaterialButton>(R.id.reset_view_button).apply {
+        findViewById<MaterialButton>(R.id.reset_view_button).apply {
             setOnClickListener {
                 if (currentIndex >= 0) {
                     val item = snippetList[currentIndex]

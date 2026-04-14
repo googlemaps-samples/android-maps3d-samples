@@ -20,8 +20,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,18 +29,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
-import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.maps.android.compose3d.GoogleMap3D
 import com.google.maps.android.compose3d.PolygonConfig
+import kotlinx.coroutines.launch
 
 /**
  * Activity that demonstrates the use of polygons on a 3D map using Compose.
@@ -58,7 +58,7 @@ class PolygonsActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     PolygonsScreen()
                 }
@@ -162,7 +162,8 @@ fun PolygonsScreen() {
             key = "denver_zoo",
             path = zooOutline,
             innerPaths = listOf(zooHole),
-            fillColor = Color.argb(70, 255, 255, 0), // Translucent yellow
+            // Translucent yellow
+            fillColor = Color.argb(70, 255, 255, 0),
             strokeColor = Color.GREEN,
             strokeWidth = 3f,
             altitudeMode = AltitudeMode.CLAMP_TO_GROUND,
@@ -171,7 +172,7 @@ fun PolygonsScreen() {
                 scope.launch {
                     Toast.makeText(context, "Zoo time!", Toast.LENGTH_SHORT).show()
                 }
-            }
+            },
         )
     }
 
@@ -182,7 +183,7 @@ fun PolygonsScreen() {
         39.7465307929639, -104.94370889409778
         39.747031745033794, -104.9415078562927
         39.74837320615968, -104.94194414397013
-        39.74812392425406, -104.94414971628434 
+        39.74812392425406, -104.94414971628434
         """.trimIndent()
             .lines()
             .map { line -> line.split(",").map { it.trim().toDouble() } }
@@ -201,7 +202,8 @@ fun PolygonsScreen() {
             PolygonConfig(
                 key = "museum_face_$index",
                 path = outline,
-                fillColor = Color.argb(70, 255, 0, 255), // Semi-transparent magenta
+                // Semi-transparent magenta
+                fillColor = Color.argb(70, 255, 0, 255),
                 strokeColor = Color.MAGENTA,
                 strokeWidth = 3f,
                 altitudeMode = AltitudeMode.ABSOLUTE,
@@ -210,7 +212,7 @@ fun PolygonsScreen() {
                     scope.launch {
                         Toast.makeText(context, "Museum time!", Toast.LENGTH_SHORT).show()
                     }
-                }
+                },
             )
         }
     }
@@ -218,7 +220,7 @@ fun PolygonsScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" }
+            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" },
     ) {
         GoogleMap3D(
             camera = denverCamera,
@@ -227,7 +229,7 @@ fun PolygonsScreen() {
             modifier = Modifier.fillMaxSize(),
             onMapSteady = {
                 isMapSteady = true
-            }
+            },
         )
     }
 }
@@ -238,7 +240,7 @@ fun PolygonsScreen() {
  */
 fun extrudePolygon(
     basePoints: List<LatLngAltitude>,
-    extrusionHeight: Double
+    extrusionHeight: Double,
 ): List<List<LatLngAltitude>> {
     if (basePoints.size < 3) return emptyList()
     if (extrusionHeight <= 0) return emptyList()

@@ -16,17 +16,16 @@
 
 package com.example.maps3dcomposedemo
 
+import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import android.content.Intent
-import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class Maps3DVisualTest : BaseVisualTest() {
@@ -50,12 +49,12 @@ class Maps3DVisualTest : BaseVisualTest() {
 
         // Define the verification prompt for Gemini
         val prompt = """
-            Please act as a UI tester and analyze this screenshot to verify the application is rendering correctly. 
+            Please act as a UI tester and analyze this screenshot to verify the application is rendering correctly.
             Check the image against the following criteria:
             1. Confirm that the title 'Maps 3D Compose Samples' is visible.
             2. Confirm that there are multiple list items visible (e.g., "Basic Map with Marker & Polyline", "Hello Map", etc.).
-            
-            If all elements are present and look reasonable for a list of samples, reply with "PASSED". 
+
+            If all elements are present and look reasonable for a list of samples, reply with "PASSED".
             If any element is missing or incorrect, please detail the discrepancy.
         """.trimIndent()
 
@@ -67,7 +66,7 @@ class Maps3DVisualTest : BaseVisualTest() {
         // Assert on Gemini's response
         assertTrue(
             "Visual verification failed. Gemini response: $geminiResponse",
-            geminiResponse?.contains("PASSED", ignoreCase = true) == true
+            geminiResponse?.contains("PASSED", ignoreCase = true) == true,
         )
     }
 
@@ -79,7 +78,7 @@ class Maps3DVisualTest : BaseVisualTest() {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
-        
+
         // Wait for the activity to be displayed
         uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
 
@@ -91,12 +90,12 @@ class Maps3DVisualTest : BaseVisualTest() {
 
         // Define the verification prompt for Gemini
         val prompt = """
-            Please act as a UI tester and analyze this screenshot to verify the application is rendering correctly. 
+            Please act as a UI tester and analyze this screenshot to verify the application is rendering correctly.
             Check the image against the following criteria:
             1. Confirm that a 3D map view is visible.
             2. Confirm that the Delicate Arch itself is clearly visible and a prominent part of the scene (it should look like a large freestanding rock arch).
-            
-            If all elements are present and the Delicate Arch is clearly visible, reply with "PASSED". 
+
+            If all elements are present and the Delicate Arch is clearly visible, reply with "PASSED".
             If any element is missing or incorrect, please detail the discrepancy.
         """.trimIndent()
 
@@ -108,7 +107,7 @@ class Maps3DVisualTest : BaseVisualTest() {
         // Assert on Gemini's response
         assertTrue(
             "Visual verification failed. Gemini response: $geminiResponse",
-            geminiResponse?.contains("PASSED", ignoreCase = true) == true
+            geminiResponse?.contains("PASSED", ignoreCase = true) == true,
         )
     }
 
@@ -119,10 +118,10 @@ class Maps3DVisualTest : BaseVisualTest() {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
-        
+
         // Wait for the activity to be displayed
         uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
-        
+
         // Wait for the map to render and tiles to load
         waitForMapRendering(60)
 
@@ -131,12 +130,12 @@ class Maps3DVisualTest : BaseVisualTest() {
 
         // Define the verification prompt for Gemini
         val prompt = """
-            Please act as a UI tester and analyze this screenshot to verify the application is rendering correctly. 
+            Please act as a UI tester and analyze this screenshot to verify the application is rendering correctly.
             Check the image against the following criteria:
             1. Confirm that a 3D map view is visible.
             2. Confirm that the Space Needle or surrounding Seattle urban area (like stadiums/arenas) is visible and prominent.
-            
-            If all elements are present and look reasonable for a 3D map of Seattle, reply with "PASSED". 
+
+            If all elements are present and look reasonable for a 3D map of Seattle, reply with "PASSED".
             If any element is missing or incorrect, please detail the discrepancy.
         """.trimIndent()
 
@@ -148,7 +147,7 @@ class Maps3DVisualTest : BaseVisualTest() {
         // Assert on Gemini's response
         assertTrue(
             "Visual verification failed. Gemini response: $geminiResponse",
-            geminiResponse?.contains("PASSED", ignoreCase = true) == true
+            geminiResponse?.contains("PASSED", ignoreCase = true) == true,
         )
     }
 
@@ -160,20 +159,23 @@ class Maps3DVisualTest : BaseVisualTest() {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(intent)
-            
+
             // Wait for the activity to be displayed
             uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
-            
+
             // Wait for the map to render and tiles to load
             waitForMapRendering(60)
-    
+
+            // Wait a bit more to ensure map is interactive
+            android.os.SystemClock.sleep(2000)
+
             // Strategy 1: Click the center of the screen and surrounding points
             val screenWidth = uiDevice.displayWidth
             val screenHeight = uiDevice.displayHeight
-            
+
             val centerX = screenWidth / 2
             val centerY = screenHeight / 2
-            
+
             // Click center and a few points around it to increase chances
             uiDevice.click(centerX, centerY)
             android.os.SystemClock.sleep(500)
@@ -184,24 +186,24 @@ class Maps3DVisualTest : BaseVisualTest() {
             uiDevice.click(centerX + 50, centerY - 50)
             android.os.SystemClock.sleep(500)
             uiDevice.click(centerX - 50, centerY + 50)
-    
+
             // Wait for the click info card to update with text containing "Clicked"
             val textUpdated = uiDevice.wait(
                 Until.hasObject(By.descContains("Clicked")),
-                5000
+                10000,
             )
             assertTrue("Card text did not update after click", textUpdated)
-    
+
             // Verify that the text contains coordinates or place ID
             val cardObject = uiDevice.findObject(By.descContains("Clicked"))
             val description = cardObject.contentDescription
             println("Card text: $description")
-            
+
             assertTrue(
                 "Card text should contain 'Location' or 'Place ID'",
-                description.contains("Location") || description.contains("Place ID")
+                description.contains("Location") || description.contains("Place ID"),
             )
-    
+
             // Capture a screenshot for visual confirmation
             captureScreenshot("map_interactions_success.png")
         }
@@ -215,34 +217,34 @@ class Maps3DVisualTest : BaseVisualTest() {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(intent)
-            
+
             // Wait for the activity to be displayed
             uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
-            
+
             // Wait for the map to render and tiles to load
             waitForMapRendering(60)
-    
+
             // Capture a screenshot
             val screenshotBitmap = captureScreenshot("markers_devils_tower.png")
-    
+
             // Define the verification prompt for Gemini
             val prompt = """
                 Please act as a UI tester and analyze this screenshot.
                 1. Confirm that a 3D map view is visible.
                 2. Confirm that an alien icon or marker is visible on top of the prominent rock formation (Devils Tower).
-                
-                If the map is visible and the alien marker is seen on the tower, reply with "PASSED". 
+
+                If the map is visible and the alien marker is seen on the tower, reply with "PASSED".
                 Otherwise, report what you see.
             """.trimIndent()
-    
+
             // Analyze the image using Gemini
             val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)
             println("Gemini's analysis: $geminiResponse")
-    
+
             // Assert on Gemini's response
             assertTrue(
                 "Visual verification failed. Gemini response: $geminiResponse",
-                geminiResponse?.contains("PASSED", ignoreCase = true) == true
+                geminiResponse?.contains("PASSED", ignoreCase = true) == true,
             )
         }
     }
@@ -256,34 +258,34 @@ class Maps3DVisualTest : BaseVisualTest() {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(intent)
-            
+
             // Wait for the activity to be displayed
             uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
-            
+
             // Wait for the map to render and tiles to load
             waitForMapRendering(60)
-    
+
             // Capture a screenshot
             val screenshotBitmap = captureScreenshot("polylines_sanitas.png")
-    
+
             // Define the verification prompt for Gemini
             val prompt = """
                 Please act as a UI tester and analyze this screenshot.
                 1. Confirm that a 3D map view is visible.
                 2. Confirm that a red polyline (line) is visible on the map, representing a trail.
-                
-                If the map is visible and the red polyline is seen, reply with "PASSED". 
+
+                If the map is visible and the red polyline is seen, reply with "PASSED".
                 Otherwise, report what you see.
             """.trimIndent()
-    
+
             // Analyze the image using Gemini
             val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)
             println("Gemini's analysis: $geminiResponse")
-    
+
             // Assert on Gemini's response
             assertTrue(
                 "Visual verification failed. Gemini response: $geminiResponse",
-                geminiResponse?.contains("PASSED", ignoreCase = true) == true
+                geminiResponse?.contains("PASSED", ignoreCase = true) == true,
             )
         }
     }
@@ -296,34 +298,34 @@ class Maps3DVisualTest : BaseVisualTest() {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(intent)
-            
+
             // Wait for the activity to be displayed
             uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
-            
+
             // Wait for the map to render and tiles to load
             waitForMapRendering(60)
-            
+
             // Capture a screenshot
             val screenshotBitmap = captureScreenshot("polygons_denver_zoo.png")
-    
+
             // Define the verification prompt for Gemini
             val prompt = """
                 Please act as a UI tester and analyze this screenshot.
                 1. Confirm that a 3D map view is visible.
                 2. Confirm that a yellow translucent polygon with a green border is visible on the map.
-                
-                If the map is visible and the yellow polygon is seen, reply with "PASSED". 
+
+                If the map is visible and the yellow polygon is seen, reply with "PASSED".
                 Otherwise, report what you see.
             """.trimIndent()
-    
+
             // Analyze the image using Gemini
             val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)
             println("Gemini's analysis: $geminiResponse")
-    
+
             // Assert on Gemini's response
             assertTrue(
                 "Visual verification failed. Gemini response: $geminiResponse",
-                geminiResponse?.contains("PASSED", ignoreCase = true) == true
+                geminiResponse?.contains("PASSED", ignoreCase = true) == true,
             )
         }
     }

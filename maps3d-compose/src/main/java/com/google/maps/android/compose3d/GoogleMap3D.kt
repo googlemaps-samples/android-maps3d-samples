@@ -67,7 +67,7 @@ fun GoogleMap3D(
     @Map3DMode mapMode: Int = Map3DMode.SATELLITE,
     options: Map3DOptions = Map3DOptions(),
     onMapReady: (GoogleMap3D) -> Unit = {},
-    onMapSteady: () -> Unit = {}
+    onMapSteady: () -> Unit = {},
 ) {
     val state = remember { Map3DState() }
     val hasCalledOnMapReady = remember { mutableStateOf(false) }
@@ -129,6 +129,6 @@ fun GoogleMap3D(
             state.clear()
             Map3DRegistry.clearInstance()
             map3dView.onDestroy()
-        }
+        },
     )
 }

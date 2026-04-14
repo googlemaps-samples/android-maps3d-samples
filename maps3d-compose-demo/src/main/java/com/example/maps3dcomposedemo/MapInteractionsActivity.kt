@@ -17,15 +17,14 @@
 package com.example.maps3dcomposedemo
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Card
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -53,7 +52,7 @@ class MapInteractionsActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     MapInteractionsScreen()
                 }
@@ -86,7 +85,7 @@ fun MapInteractionsScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" }
+            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" },
     ) {
         GoogleMap3D(
             camera = calibratedCamera,
@@ -96,6 +95,7 @@ fun MapInteractionsScreen() {
                 map3dInstance = instance
                 // Set up click listener directly on the instance
                 instance.setMap3DClickListener { location, placeId ->
+                    Log.d("MapInteractionsActivity", "Map clicked at ${location.latitude}, ${location.longitude}")
                     clickedInfo = if (placeId != null) {
                         "Clicked Place ID: $placeId\nAt: ${location.latitude}, ${location.longitude}"
                     } else {
@@ -105,24 +105,23 @@ fun MapInteractionsScreen() {
             },
             onMapSteady = {
                 isMapSteady = true
-            }
+            },
         )
-
-
 
         // Click Info Card
         Card(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(16.dp)
-                .padding(bottom = 32.dp) // Extra padding to avoid system bars
+                // Extra padding to avoid system bars
+                .padding(bottom = 32.dp),
         ) {
             Text(
                 text = clickedInfo,
                 modifier = Modifier
                     .padding(16.dp)
                     .semantics { contentDescription = clickedInfo },
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
         }
     }

@@ -76,23 +76,25 @@ class Map3DState {
     }
 
     private fun createMarker(map: GoogleMap3D, config: MarkerConfig): Marker? {
-        val marker = map.addMarker(markerOptions {
-            position = config.position.toValidLocation()
-            altitudeMode = config.altitudeMode
-            config.styleView?.let { setStyle(it) }
-            label = config.label
-            zIndex = config.zIndex
-            isExtruded = config.isExtruded
-            isDrawnWhenOccluded = config.isDrawnWhenOccluded
-            collisionBehavior = config.collisionBehavior
-        })
-        
+        val marker = map.addMarker(
+            markerOptions {
+                position = config.position.toValidLocation()
+                altitudeMode = config.altitudeMode
+                config.styleView?.let { setStyle(it) }
+                label = config.label
+                zIndex = config.zIndex
+                isExtruded = config.isExtruded
+                isDrawnWhenOccluded = config.isDrawnWhenOccluded
+                collisionBehavior = config.collisionBehavior
+            },
+        )
+
         config.onClick?.let { callback ->
             marker?.setClickListener {
                 callback(marker)
             }
         }
-        
+
         return marker
     }
 
@@ -131,7 +133,7 @@ class Map3DState {
         }
     }
 
-    private fun createPolyline(map: GoogleMap3D, config: PolylineConfig): Polyline? {
+    private fun createPolyline(map: GoogleMap3D, config: PolylineConfig): Polyline {
         val polyline = map.addPolyline(config.toPolylineOptions())
         config.onClick?.let { callback ->
             polyline.setClickListener {
@@ -176,15 +178,17 @@ class Map3DState {
         }
     }
 
-    private fun createPolygon(map: GoogleMap3D, config: PolygonConfig): Polygon? {
-        val polygon = map.addPolygon(polygonOptions {
-            this.path = config.path.map { it.toValidLocation() }
-            innerPaths = config.innerPaths.map { Hole(it.map { p -> p.toValidLocation() }) }
-            fillColor = config.fillColor
-            strokeColor = config.strokeColor
-            strokeWidth = config.strokeWidth.toDouble()
-            altitudeMode = config.altitudeMode
-        })
+    private fun createPolygon(map: GoogleMap3D, config: PolygonConfig): Polygon {
+        val polygon = map.addPolygon(
+            polygonOptions {
+                this.path = config.path.map { it.toValidLocation() }
+                innerPaths = config.innerPaths.map { Hole(it.map { p -> p.toValidLocation() }) }
+                fillColor = config.fillColor
+                strokeColor = config.strokeColor
+                strokeWidth = config.strokeWidth.toDouble()
+                altitudeMode = config.altitudeMode
+            },
+        )
         config.onClick?.let { callback ->
             polygon.setClickListener {
                 callback(polygon)
@@ -228,7 +232,7 @@ class Map3DState {
         }
     }
 
-    private fun createModel(map: GoogleMap3D, config: ModelConfig): Model? {
+    private fun createModel(map: GoogleMap3D, config: ModelConfig): Model {
         return map.addModel(config.toModelOptions())
     }
 

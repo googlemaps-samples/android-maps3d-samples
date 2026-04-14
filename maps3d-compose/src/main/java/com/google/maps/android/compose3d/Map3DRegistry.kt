@@ -31,7 +31,7 @@ import com.google.android.gms.maps3d.GoogleMap3D
  */
 object Map3DRegistry {
     private var mapInstance: GoogleMap3D? = null
-    
+
     /**
      * Tracks whether the map has been initialized and is ready for content.
      * The SDK only calls `OnMapReadyListener` once.
@@ -61,7 +61,7 @@ object Map3DRegistry {
         // We do not reset isMapReady here, as the underlying SDK instance might still be ready
         // even if we detach from a specific view.
     }
-    
+
     /**
      * Marks the map as ready. Called when the `OnMapReadyListener` fires.
      */

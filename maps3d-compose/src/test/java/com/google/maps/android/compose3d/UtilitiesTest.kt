@@ -47,7 +47,7 @@ class UtilitiesTest {
             maxTilt = 45.0
         }
         val valid = restriction.toValidCameraRestriction()
-        
+
         assertEquals(10.0, valid?.minAltitude)
         assertEquals(100.0, valid?.maxAltitude)
         assertEquals(0.0, valid?.minHeading)
@@ -62,7 +62,7 @@ class UtilitiesTest {
             // Leave fields null
         }
         val valid = restriction.toValidCameraRestriction()
-        
+
         assertEquals(altitudeRange.start, valid?.minAltitude)
         assertEquals(altitudeRange.endInclusive, valid?.maxAltitude)
         assertEquals(headingRange.start, valid?.minHeading)
@@ -82,7 +82,7 @@ class UtilitiesTest {
             maxTilt = 0.0
         }
         val valid = restriction.toValidCameraRestriction()
-        
+
         assertEquals(10.0, valid?.minAltitude)
         assertEquals(100.0, valid?.maxAltitude)
         assertEquals(0.0, valid?.minHeading)

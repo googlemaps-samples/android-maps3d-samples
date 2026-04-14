@@ -38,8 +38,8 @@ import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.popoverOptions
-import com.google.android.gms.maps3d.model.popoverStyle
 import com.google.android.gms.maps3d.model.popoverShadow
+import com.google.android.gms.maps3d.model.popoverStyle
 import com.google.maps.android.compose3d.GoogleMap3D
 import com.google.maps.android.compose3d.MarkerConfig
 import com.google.android.gms.maps3d.GoogleMap3D as NativeGoogleMap3D
@@ -52,7 +52,7 @@ class PopoversActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     PopoversScreen()
                 }
@@ -103,29 +103,31 @@ fun PopoversScreen() {
                         setTextColor(Color.BLACK)
                         setBackgroundColor(Color.WHITE)
                     }
-                    val newPopover = map.addPopover(popoverOptions {
-                        positionAnchor = nativeMarker
-                        altitudeMode = AltitudeMode.ABSOLUTE
-                        content = textView
-                        autoCloseEnabled = true
-                        autoPanEnabled = false
-                        popoverStyle = popoverStyle {
-                            backgroundColor = Color.WHITE
-                            borderRadius = 16f
-                            shadow = popoverShadow {
-                                color = Color.DKGRAY
-                                radius = 8f
-                                offsetX = 4f
-                                offsetY = 4f
+                    val newPopover = map.addPopover(
+                        popoverOptions {
+                            positionAnchor = nativeMarker
+                            altitudeMode = AltitudeMode.ABSOLUTE
+                            content = textView
+                            autoCloseEnabled = true
+                            autoPanEnabled = false
+                            popoverStyle = popoverStyle {
+                                backgroundColor = Color.WHITE
+                                borderRadius = 16f
+                                shadow = popoverShadow {
+                                    color = Color.DKGRAY
+                                    radius = 8f
+                                    offsetX = 4f
+                                    offsetY = 4f
+                                }
                             }
-                        }
-                    })
-                    
+                        },
+                    )
+
                     activePopover?.remove()
                     activePopover = newPopover
                     activePopover?.show()
                 }
-            }
+            },
         )
     }
 
@@ -141,7 +143,7 @@ fun PopoversScreen() {
                     activePopover?.remove()
                     activePopover = null
                 }
-            }
+            },
         )
     }
 }

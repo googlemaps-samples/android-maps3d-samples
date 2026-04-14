@@ -58,7 +58,7 @@ class PolylinesActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     PolylinesScreen()
                 }
@@ -72,7 +72,7 @@ fun PolylinesScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var isMapSteady by remember { mutableStateOf(false) }
-    
+
     // Define the camera position centered around Mount Sanitas trailhead
     val boulderCamera = remember {
         camera {
@@ -103,54 +103,38 @@ fun PolylinesScreen() {
             }
     }
 
-    // Create a polyline config with a stroked effect
+    // Create a polyline config
     val polylineConfig = remember {
         PolylineConfig(
             key = "sanitas_loop",
             points = trailPoints,
             color = Color.RED,
-            width = 7f,
+            width = 10f,
             altitudeMode = AltitudeMode.RELATIVE_TO_GROUND,
             zIndex = 10,
-            outerColor = Color.BLACK,
-            outerWidth = 13f,
             drawsOccludedSegments = true,
             onClick = { polyline ->
                 Log.d("PolylinesActivity", "Polyline clicked: $polyline")
                 scope.launch {
                     Toast.makeText(context, "Hiking time!", Toast.LENGTH_SHORT).show()
                 }
-            }
-        )
-    }
-
-    val bgPolylineConfig = remember {
-        PolylineConfig(
-            key = "sanitas_loop_background",
-            points = trailPoints,
-            color = Color.BLACK,
-            width = 11f,
-            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND,
-            zIndex = 4,
-            outerColor = Color.BLACK,
-            outerWidth = 13f,
-            drawsOccludedSegments = true,
+            },
         )
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" }
+            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" },
     ) {
         GoogleMap3D(
             camera = boulderCamera,
             mapMode = Map3DMode.HYBRID,
-            polylines = listOf(bgPolylineConfig, polylineConfig),
+            polylines = listOf(polylineConfig),
             modifier = Modifier.fillMaxSize(),
             onMapSteady = {
                 isMapSteady = true
-            }
+            },
         )
     }
 }

@@ -58,7 +58,7 @@ class CameraAnimationsActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     CameraAnimationsScreen()
                 }
@@ -73,8 +73,16 @@ fun CameraAnimationsScreen() {
     var statusText by remember { mutableStateOf("Idle") }
     val coroutineScope = rememberCoroutineScope()
 
-    val newYork = latLngAltitude { latitude = 40.7128; longitude = -74.0060; altitude = 0.0 }
-    val sf = latLngAltitude { latitude = 37.7749; longitude = -122.4194; altitude = 0.0 }
+    val newYork = latLngAltitude {
+        latitude = 40.7128
+        longitude = -74.0060
+        altitude = 0.0
+    }
+    val sf = latLngAltitude {
+        latitude = 37.7749
+        longitude = -122.4194
+        altitude = 0.0
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         GoogleMap3D(
@@ -86,13 +94,13 @@ fun CameraAnimationsScreen() {
             modifier = Modifier.fillMaxSize(),
             onMapReady = { googleMap3D ->
                 mapInstance = googleMap3D
-                
+
                 googleMap3D.setOnMapSteadyListener { isSteady ->
                     if (isSteady) {
                         statusText = "Steady"
                     }
                 }
-            }
+            },
         )
 
         Column(
@@ -101,13 +109,13 @@ fun CameraAnimationsScreen() {
                 .padding(16.dp)
                 .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(text = "Status: $statusText", color = Color.White)
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
                 Button(onClick = {
                     mapInstance?.let { map ->
@@ -120,7 +128,7 @@ fun CameraAnimationsScreen() {
                                     tilt = 60.0
                                 }
                                 durationInMillis = 5000
-                            }
+                            },
                         )
                         coroutineScope.launch {
                             map.awaitCameraAnimation()
@@ -138,7 +146,7 @@ fun CameraAnimationsScreen() {
                             flyAroundOptions {
                                 rounds = 1.0
                                 durationInMillis = 10000
-                            }
+                            },
                         )
                         coroutineScope.launch {
                             map.awaitCameraAnimation()
@@ -152,7 +160,7 @@ fun CameraAnimationsScreen() {
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
                 Button(onClick = {
                     mapInstance?.let { map ->

@@ -22,22 +22,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.maps.android.compose3d.GoogleMap3D
@@ -50,7 +44,7 @@ class CameraControlsActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     CameraControlsScreen()
                 }
@@ -62,7 +56,7 @@ class CameraControlsActivity : ComponentActivity() {
 @Composable
 fun CameraControlsScreen() {
     var isMapSteady by remember { mutableStateOf(false) }
-    
+
     // Calibrated camera centered around Seattle (Space Needle area)
     val seattleCamera = remember {
         camera {
@@ -81,16 +75,14 @@ fun CameraControlsScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" }
+            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" },
     ) {
         GoogleMap3D(
             camera = seattleCamera,
             modifier = Modifier.fillMaxSize(),
             onMapSteady = {
                 isMapSteady = true
-            }
+            },
         )
-
-
     }
 }

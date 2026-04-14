@@ -22,8 +22,16 @@ class MappersTest {
     @Test
     fun testPolylineConfigToPolylineOptions() {
         val points = listOf(
-            latLngAltitude { latitude = 1.0; longitude = 2.0; altitude = 3.0 },
-            latLngAltitude { latitude = 4.0; longitude = 5.0; altitude = 6.0 }
+            latLngAltitude {
+                latitude = 1.0
+                longitude = 2.0
+                altitude = 3.0
+            },
+            latLngAltitude {
+                latitude = 4.0
+                longitude = 5.0
+                altitude = 6.0
+            },
         )
         val config = PolylineConfig(
             key = "test_polyline",
@@ -34,7 +42,7 @@ class MappersTest {
             zIndex = 1,
             outerColor = Color.BLACK,
             outerWidth = 2f,
-            drawsOccludedSegments = true
+            drawsOccludedSegments = true,
         )
 
         val options = config.toPolylineOptions()
@@ -54,7 +62,11 @@ class MappersTest {
 
     @Test
     fun testMarkerConfigToMarkerOptions() {
-        val position = latLngAltitude { latitude = 1.0; longitude = 2.0; altitude = 3.0 }
+        val position = latLngAltitude {
+            latitude = 1.0
+            longitude = 2.0
+            altitude = 3.0
+        }
         val config = MarkerConfig(
             key = "test_marker",
             position = position,
@@ -63,7 +75,7 @@ class MappersTest {
             zIndex = 2,
             isExtruded = true,
             isDrawnWhenOccluded = true,
-            collisionBehavior = CollisionBehavior.REQUIRED
+            collisionBehavior = CollisionBehavior.REQUIRED,
         )
 
         val options = config.toMarkerOptions()
@@ -80,13 +92,33 @@ class MappersTest {
     @Test
     fun testPolygonConfigToPolygonOptions() {
         val path = listOf(
-            latLngAltitude { latitude = 1.0; longitude = 2.0; altitude = 0.0 },
-            latLngAltitude { latitude = 3.0; longitude = 4.0; altitude = 0.0 },
-            latLngAltitude { latitude = 5.0; longitude = 6.0; altitude = 0.0 }
+            latLngAltitude {
+                latitude = 1.0
+                longitude = 2.0
+                altitude = 0.0
+            },
+            latLngAltitude {
+                latitude = 3.0
+                longitude = 4.0
+                altitude = 0.0
+            },
+            latLngAltitude {
+                latitude = 5.0
+                longitude = 6.0
+                altitude = 0.0
+            },
         )
         val hole = listOf(
-            latLngAltitude { latitude = 1.5; longitude = 2.5; altitude = 0.0 },
-            latLngAltitude { latitude = 2.0; longitude = 3.0; altitude = 0.0 }
+            latLngAltitude {
+                latitude = 1.5
+                longitude = 2.5
+                altitude = 0.0
+            },
+            latLngAltitude {
+                latitude = 2.0
+                longitude = 3.0
+                altitude = 0.0
+            },
         )
         val config = PolygonConfig(
             key = "test_polygon",
@@ -95,7 +127,7 @@ class MappersTest {
             fillColor = Color.YELLOW,
             strokeColor = Color.GREEN,
             strokeWidth = 3f,
-            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+            altitudeMode = AltitudeMode.CLAMP_TO_GROUND,
         )
 
         val options = config.toPolygonOptions()
@@ -116,7 +148,11 @@ class MappersTest {
 
     @Test
     fun testModelConfigToModelOptions() {
-        val position = latLngAltitude { latitude = 1.0; longitude = 2.0; altitude = 3.0 }
+        val position = latLngAltitude {
+            latitude = 1.0
+            longitude = 2.0
+            altitude = 3.0
+        }
         val config = ModelConfig(
             key = "test_model",
             position = position,
@@ -125,7 +161,7 @@ class MappersTest {
             scale = ModelScale.Uniform(2.0f),
             heading = 10.0,
             tilt = 20.0,
-            roll = 30.0
+            roll = 30.0,
         )
 
         val options = config.toModelOptions()
@@ -144,7 +180,11 @@ class MappersTest {
 
     @Test
     fun testModelConfigToModelOptionsWithPerAxisScale() {
-        val position = latLngAltitude { latitude = 1.0; longitude = 2.0; altitude = 3.0 }
+        val position = latLngAltitude {
+            latitude = 1.0
+            longitude = 2.0
+            altitude = 3.0
+        }
         val config = ModelConfig(
             key = "test_model_per_axis",
             position = position,
@@ -153,7 +193,7 @@ class MappersTest {
             scale = ModelScale.PerAxis(1.0f, 2.0f, 3.0f),
             heading = 10.0,
             tilt = 20.0,
-            roll = 30.0
+            roll = 30.0,
         )
 
         val options = config.toModelOptions()
@@ -163,16 +203,21 @@ class MappersTest {
         assertEquals(2.0, options.scale.y, 0.0)
         assertEquals(3.0, options.scale.z, 0.0)
     }
+
     @Test
     fun testPolylineConfigToPolylineOptions_defaults() {
         val points = listOf(
-            latLngAltitude { latitude = 1.0; longitude = 2.0; altitude = 3.0 }
+            latLngAltitude {
+                latitude = 1.0
+                longitude = 2.0
+                altitude = 3.0
+            },
         )
         val config = PolylineConfig(
             key = "test_polyline_defaults",
             points = points,
             color = Color.RED,
-            width = 5f
+            width = 5f,
         )
 
         val options = config.toPolylineOptions()
@@ -189,10 +234,14 @@ class MappersTest {
 
     @Test
     fun testMarkerConfigToMarkerOptions_defaults() {
-        val position = latLngAltitude { latitude = 1.0; longitude = 2.0; altitude = 3.0 }
+        val position = latLngAltitude {
+            latitude = 1.0
+            longitude = 2.0
+            altitude = 3.0
+        }
         val config = MarkerConfig(
             key = "test_marker_defaults",
-            position = position
+            position = position,
         )
 
         val options = config.toMarkerOptions()
@@ -210,14 +259,18 @@ class MappersTest {
     @Test
     fun testPolygonConfigToPolygonOptions_defaults() {
         val path = listOf(
-            latLngAltitude { latitude = 1.0; longitude = 2.0; altitude = 0.0 }
+            latLngAltitude {
+                latitude = 1.0
+                longitude = 2.0
+                altitude = 0.0
+            },
         )
         val config = PolygonConfig(
             key = "test_polygon_defaults",
             path = path,
             fillColor = Color.YELLOW,
             strokeColor = Color.GREEN,
-            strokeWidth = 3f
+            strokeWidth = 3f,
         )
 
         val options = config.toPolygonOptions()

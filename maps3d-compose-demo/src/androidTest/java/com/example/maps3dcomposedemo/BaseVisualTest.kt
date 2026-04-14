@@ -38,7 +38,7 @@ abstract class BaseVisualTest {
         val key = BuildConfig.GEMINI_API_KEY
         assertTrue(
             "GEMINI_API_KEY is not set in secrets.properties. Please add GEMINI_API_KEY=YOUR_API_KEY to your secrets.properties file.",
-            key != "YOUR_GEMINI_API_KEY"
+            key != "YOUR_GEMINI_API_KEY",
         )
         key
     }
@@ -50,10 +50,10 @@ abstract class BaseVisualTest {
 
         val bitmap = BitmapFactory.decodeFile(screenshotFile.absolutePath)
         assertTrue("Failed to decode screenshot file: $filename", bitmap != null)
-        
+
         println("Screenshot saved to device: ${screenshotFile.absolutePath}")
         println("To pull: adb pull ${screenshotFile.absolutePath}")
-        
+
         return bitmap
     }
 
@@ -65,6 +65,6 @@ abstract class BaseVisualTest {
      */
     protected fun waitForMapRendering(timeoutSeconds: Long = 30) {
         val found = uiDevice.wait(Until.hasObject(By.desc("MapSteady")), timeoutSeconds * 1000)
-        assertTrue("Map did not become steady within ${timeoutSeconds} seconds", found)
+        assertTrue("Map did not become steady within $timeoutSeconds seconds", found)
     }
 }

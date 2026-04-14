@@ -16,31 +16,25 @@
 
 package com.example.maps3dcomposedemo
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import android.content.Intent
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -53,7 +47,7 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     CatalogScreen()
                 }
@@ -65,83 +59,67 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CatalogScreen() {
     val context = LocalContext.current
-    var selectedSample by remember { mutableStateOf<String?>(null) }
-
-    if (selectedSample == null) {
-        LazyColumn(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
-            item {
-                Text(
-                    text = "Maps 3D Compose Samples",
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-            item { SampleItem("Basic Map with Marker & Polyline") { selectedSample = "basic" } }
-            item { 
-                SampleItem("Hello Map") { 
-                    context.startActivity(Intent(context, HelloMapActivity::class.java))
-                } 
-            }
-            item { 
-                SampleItem("Camera Controls") { 
-                    context.startActivity(Intent(context, CameraControlsActivity::class.java))
-                } 
-            }
-            item { 
-                SampleItem("Map Interactions") { 
-                    context.startActivity(Intent(context, MapInteractionsActivity::class.java))
-                } 
-            }
-            item { 
-                SampleItem("Markers") { 
-                    context.startActivity(Intent(context, MarkersActivity::class.java))
-                } 
-            }
-            item { 
-                SampleItem("Models") { 
-                    context.startActivity(Intent(context, ModelsActivity::class.java))
-                } 
-            }
-            item { 
-                SampleItem("Polygons") { 
-                    context.startActivity(Intent(context, PolygonsActivity::class.java))
-                } 
-            }
-            item { 
-                SampleItem("Polylines") { 
-                    context.startActivity(Intent(context, PolylinesActivity::class.java))
-                } 
-            }
-            item { 
-                SampleItem("Popovers") { 
-                    context.startActivity(Intent(context, PopoversActivity::class.java))
-                } 
-            }
-            item { 
-                SampleItem("Map Options") { 
-                    context.startActivity(Intent(context, MapOptionsActivity::class.java))
-                } 
-            }
-            item { 
-                SampleItem("Camera Animations") { 
-                    context.startActivity(Intent(context, CameraAnimationsActivity::class.java))
-                } 
+    LazyColumn(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
+        item {
+            Text(
+                text = "Maps 3D Compose Samples",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(16.dp),
+            )
+        }
+        item {
+            SampleItem("Basic Map with Marker & Polyline") {
+                context.startActivity(Intent(context, BasicMapActivity::class.java))
             }
         }
-    } else {
-        Box(modifier = Modifier.fillMaxSize()) {
-            when (selectedSample) {
-                "basic" -> BasicMapSample()
+        item {
+            SampleItem("Hello Map") {
+                context.startActivity(Intent(context, HelloMapActivity::class.java))
             }
-
-            FloatingActionButton(
-                onClick = { selectedSample = null },
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(16.dp)
-                    .statusBarsPadding()
-            ) {
-                Text("Back")
+        }
+        item {
+            SampleItem("Camera Controls") {
+                context.startActivity(Intent(context, CameraControlsActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Map Interactions") {
+                context.startActivity(Intent(context, MapInteractionsActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Markers") {
+                context.startActivity(Intent(context, MarkersActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Models") {
+                context.startActivity(Intent(context, ModelsActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Polygons") {
+                context.startActivity(Intent(context, PolygonsActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Polylines") {
+                context.startActivity(Intent(context, PolylinesActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Popovers") {
+                context.startActivity(Intent(context, PopoversActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Map Options") {
+                context.startActivity(Intent(context, MapOptionsActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Camera Animations") {
+                context.startActivity(Intent(context, CameraAnimationsActivity::class.java))
             }
         }
     }
@@ -154,12 +132,12 @@ fun SampleItem(title: String, onClick: () -> Unit) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Text(
             text = title,
             modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge,
         )
     }
 }

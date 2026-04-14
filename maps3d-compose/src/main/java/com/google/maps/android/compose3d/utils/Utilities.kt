@@ -28,8 +28,6 @@ import com.google.android.gms.maps3d.model.flyAroundOptions
 import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import java.util.Locale
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -117,8 +115,8 @@ fun CameraRestriction?.toValidCameraRestriction(): CameraRestriction? {
         source.minTilt == null || source.maxTilt == null ||
         finalMinAlt != source.minAltitude || finalMaxAlt != source.maxAltitude ||
         finalMinHead != source.minHeading || finalMaxHead != source.maxHeading ||
-        finalMinT != source.minTilt || finalMaxT != source.maxTilt) {
-        
+        finalMinT != source.minTilt || finalMaxT != source.maxTilt
+    ) {
         return cameraRestriction {
             bounds = source.bounds
             minAltitude = finalMinAlt
@@ -263,7 +261,7 @@ fun Number.toCompassDirection(): String {
         "N", "NNE", "NE", "ENE",
         "E", "ESE", "SE", "SSE",
         "S", "SSW", "SW", "WSW",
-        "W", "WNW", "NW", "NNW"
+        "W", "WNW", "NW", "NNW",
     )
 
     val headingDegrees = this.toDouble()
@@ -312,7 +310,7 @@ fun FlyAroundOptions.copy(
     center: Camera? = null,
     durationInMillis: Long? = null,
     rounds: Double? = null,
-) : FlyAroundOptions {
+): FlyAroundOptions {
     val objectToCopy = this
 
     return flyAroundOptions {
@@ -325,7 +323,7 @@ fun FlyAroundOptions.copy(
 fun FlyToOptions.copy(
     endCamera: Camera? = null,
     durationInMillis: Long? = null,
-) : FlyToOptions {
+): FlyToOptions {
     val objectToCopy = this
 
     return flyToOptions {
@@ -378,7 +376,8 @@ fun Camera.toCameraString(): String {
             heading = ${camera.heading.format(0)}
             tilt = ${camera.tilt.format(0)}
             range = ${camera.range.format(0)}
-        }""".trimIndent()
+        }
+    """.trimIndent()
 }
 
 /**
@@ -406,7 +405,7 @@ internal fun Double?.format(decimalPlaces: Int): String {
 
 /**
  * Smooths a path of LatLng points using Chaikin's algorithm.
- * 
+ *
  * Chaikin's algorithm works by cutting corners. Each iteration replaces each
  * internal point with two points, each 1/4 and 3/4 along the edge between the
  * previous and next points.
@@ -431,13 +430,13 @@ fun List<LatLng>.smoothPath(iterations: Int = 1): List<LatLng> {
             // Point at 1/4 of the way
             val q = LatLng(
                 p0.latitude * 0.75 + p1.latitude * 0.25,
-                p0.longitude * 0.75 + p1.longitude * 0.25
+                p0.longitude * 0.75 + p1.longitude * 0.25,
             )
 
             // Point at 3/4 of the way
             val r = LatLng(
                 p0.latitude * 0.25 + p1.latitude * 0.75,
-                p0.longitude * 0.25 + p1.longitude * 0.75
+                p0.longitude * 0.25 + p1.longitude * 0.75,
             )
 
             nextPath.add(q)
@@ -466,15 +465,15 @@ fun calculateHeading(from: LatLng, to: LatLng): Double {
     val dLon = lon2 - lon1
     val y = sin(dLon) * cos(lat2)
     val x = cos(lat1) * sin(lat2) -
-            sin(lat1) * cos(lat2) * cos(dLon)
-    
+        sin(lat1) * cos(lat2) * cos(dLon)
+
     val bearing = Math.toDegrees(atan2(y, x))
     return (bearing + 360.0) % 360.0
 }
 
 /**
  * Simplifies a path of LatLng points using the Ramer-Douglas-Peucker algorithm.
- * 
+ *
  * This algorithm reduces the number of points in a curve that is approximated
  * by a series of points, while preserving the overall shape.
  *
@@ -538,10 +537,8 @@ fun haversineDistance(p1: LatLng, p2: LatLng): Double {
     val dLon = lon2 - lon1
 
     val a = sin(dLat / 2).pow(2.0) +
-            cos(lat1) * cos(lat2) * sin(dLon / 2).pow(2.0)
+        cos(lat1) * cos(lat2) * sin(dLon / 2).pow(2.0)
     val c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
     return r * c
 }
-
-

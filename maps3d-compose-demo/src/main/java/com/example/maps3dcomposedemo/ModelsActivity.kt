@@ -62,7 +62,7 @@ class ModelsActivity : ComponentActivity() {
 private fun ModelsScreen() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    
+
     val initialCamera = camera {
         center = latLngAltitude {
             latitude = 47.133971
@@ -92,8 +92,8 @@ private fun ModelsScreen() {
                 scale = ModelScale.Uniform(0.05f),
                 heading = 41.5,
                 tilt = -90.0,
-                roll = 0.0
-            )
+                roll = 0.0,
+            ),
         )
     }
 
@@ -105,12 +105,12 @@ private fun ModelsScreen() {
             modifier = Modifier.fillMaxSize(),
             onMapReady = { googleMap3D ->
                 mapInstance = googleMap3D
-                
+
                 // Start animation sequence when map is ready
                 animationJob = coroutineScope.launch {
                     runAnimationSequence(googleMap3D)
                 }
-            }
+            },
         )
 
         // UI Controls
@@ -124,7 +124,7 @@ private fun ModelsScreen() {
                             flyToOptions {
                                 endCamera = initialCamera
                                 durationInMillis = 2000
-                            }
+                            },
                         )
                         map.awaitCameraAnimation()
                         runAnimationSequence(map)
@@ -133,7 +133,7 @@ private fun ModelsScreen() {
             },
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             Text(text = "Reset")
         }
@@ -146,7 +146,7 @@ private fun ModelsScreen() {
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             Text(text = "Stop")
         }
@@ -172,7 +172,7 @@ private suspend fun runAnimationSequence(googleMap3D: com.google.android.gms.map
         flyToOptions {
             endCamera = camera
             durationInMillis = 3500
-        }
+        },
     )
     googleMap3D.awaitCameraAnimation()
 
@@ -184,7 +184,7 @@ private suspend fun runAnimationSequence(googleMap3D: com.google.android.gms.map
             center = camera
             durationInMillis = 3500
             rounds = 0.5
-        }
+        },
     )
     googleMap3D.awaitCameraAnimation()
 }

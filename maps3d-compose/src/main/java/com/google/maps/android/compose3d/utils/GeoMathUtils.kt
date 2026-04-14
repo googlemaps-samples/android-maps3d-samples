@@ -25,7 +25,9 @@ object GeoMathUtils {
      * Replaces expensive haversine math inside the render loop with a precomputed distance array lookup.
      */
     fun getInterpolatedPoint(
-        distance: Double, path: List<LatLng>, cumulativeDistances: DoubleArray
+        distance: Double,
+        path: List<LatLng>,
+        cumulativeDistances: DoubleArray,
     ): LatLng {
         if (distance <= 0.0) return path.first()
         if (distance >= cumulativeDistances.last()) return path.last()

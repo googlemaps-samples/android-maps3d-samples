@@ -40,7 +40,7 @@ data class MarkerConfig(
     val isExtruded: Boolean = false,
     val isDrawnWhenOccluded: Boolean = false,
     val collisionBehavior: Int = CollisionBehavior.REQUIRED,
-    val onClick: ((Marker) -> Unit)? = null
+    val onClick: ((Marker) -> Unit)? = null,
 )
 
 /**
@@ -58,7 +58,7 @@ data class PolylineConfig(
     val outerWidth: Float = 0f,
     val drawsOccludedSegments: Boolean = false,
     @get:WorkerThread
-    val onClick: ((Polyline) -> Unit)? = null
+    val onClick: ((Polyline) -> Unit)? = null,
 )
 
 /**
@@ -73,7 +73,7 @@ data class PolygonConfig(
     val strokeColor: Int,
     val strokeWidth: Float,
     val altitudeMode: Int = AltitudeMode.CLAMP_TO_GROUND,
-    val onClick: ((Polygon) -> Unit)? = null
+    val onClick: ((Polygon) -> Unit)? = null,
 )
 
 /**
@@ -96,6 +96,5 @@ data class ModelConfig(
     val scale: ModelScale = ModelScale.Uniform(1.0f),
     val heading: Double = 0.0,
     val tilt: Double = 0.0,
-    val roll: Double = 0.0
+    val roll: Double = 0.0,
 )
-

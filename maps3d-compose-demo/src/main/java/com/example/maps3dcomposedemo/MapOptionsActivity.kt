@@ -45,8 +45,8 @@ import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.cameraRestriction
-import com.google.android.gms.maps3d.model.latLngBounds
 import com.google.android.gms.maps3d.model.latLngAltitude
+import com.google.android.gms.maps3d.model.latLngBounds
 import com.google.maps.android.compose3d.GoogleMap3D
 
 class MapOptionsActivity : ComponentActivity() {
@@ -57,7 +57,7 @@ class MapOptionsActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     MapOptionsScreen()
                 }
@@ -103,7 +103,7 @@ fun MapOptionsScreen() {
             camera = devilsTowerCamera,
             mapMode = mapMode,
             cameraRestriction = if (isRestricted) restriction else null,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         )
 
         // Control Panel
@@ -113,32 +113,32 @@ fun MapOptionsScreen() {
                 .padding(16.dp)
                 .background(
                     color = Color.Black.copy(alpha = 0.6f),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
                 )
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
                 text = "Map Options",
                 color = Color.White,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
             )
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Button(
                     onClick = { mapMode = Map3DMode.SATELLITE },
                     modifier = Modifier.weight(1f),
-                    enabled = mapMode != Map3DMode.SATELLITE
+                    enabled = mapMode != Map3DMode.SATELLITE,
                 ) {
                     Text("Satellite")
                 }
                 Button(
                     onClick = { mapMode = Map3DMode.HYBRID },
                     modifier = Modifier.weight(1f),
-                    enabled = mapMode != Map3DMode.HYBRID
+                    enabled = mapMode != Map3DMode.HYBRID,
                 ) {
                     Text("Hybrid")
                 }
@@ -146,7 +146,7 @@ fun MapOptionsScreen() {
 
             Button(
                 onClick = { isRestricted = !isRestricted },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(if (isRestricted) "Clear Restriction" else "Restrict to Area")
             }

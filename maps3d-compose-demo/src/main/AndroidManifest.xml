@@ -76,6 +76,10 @@
             android:name=".ModelsActivity"
             android:exported="true"
             android:label="Models" />
+        <activity
+            android:name=".BasicMapActivity"
+            android:exported="true"
+            android:label="Basic Map" />
     </application>
 
 </manifest>

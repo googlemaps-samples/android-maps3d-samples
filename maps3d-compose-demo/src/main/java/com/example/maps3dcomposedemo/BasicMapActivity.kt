@@ -17,10 +17,16 @@
 package com.example.maps3dcomposedemo
 
 import android.graphics.Color
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,6 +48,26 @@ import com.google.maps.android.compose3d.GoogleMap3D
 import com.google.maps.android.compose3d.MarkerConfig
 import com.google.maps.android.compose3d.PolylineConfig
 
+/**
+ * Activity that demonstrates a basic 3D map with a marker and a polyline using Compose.
+ */
+class BasicMapActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            MaterialTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    BasicMapSample()
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun BasicMapSample() {
     // Hoist the camera state
@@ -57,7 +83,7 @@ fun BasicMapSample() {
                 tilt = 60.0
                 range = 3000.0
                 roll = 0.0
-            }
+            },
         )
     }
 
@@ -77,8 +103,8 @@ fun BasicMapSample() {
                 label = "Golden Gate Bridge",
                 altitudeMode = AltitudeMode.RELATIVE_TO_MESH,
                 isDrawnWhenOccluded = true,
-                collisionBehavior = CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL
-            )
+                collisionBehavior = CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL,
+            ),
         )
     }
 
@@ -88,19 +114,28 @@ fun BasicMapSample() {
             PolylineConfig(
                 key = "sample_line",
                 points = listOf(
-                    latLngAltitude { latitude = 37.8199; longitude = -122.4783; altitude = 0.0 },
-                    latLngAltitude { latitude = 37.8299; longitude = -122.4883; altitude = 0.0 }
+                    latLngAltitude {
+                        latitude = 37.8199
+                        longitude = -122.4783
+                        altitude = 0.0
+                    },
+                    latLngAltitude {
+                        latitude = 37.8299
+                        longitude = -122.4883
+                        altitude = 0.0
+                    },
                 ),
                 color = Color.RED,
                 width = 10f,
-                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-            )
+                altitudeMode = AltitudeMode.CLAMP_TO_GROUND,
+            ),
         )
     }
 
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" },
     ) {
         GoogleMap3D(
             camera = cameraState,
@@ -113,7 +148,7 @@ fun BasicMapSample() {
             },
             onMapSteady = {
                 isMapSteady = true
-            }
+            },
         )
 
         // UI Controls
@@ -127,11 +162,11 @@ fun BasicMapSample() {
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             Text(text = if (mapMode == Map3DMode.SATELLITE) "Hybrid" else "Satellite")
         }
-        
+
         FloatingActionButton(
             onClick = {
                 // Reset camera
@@ -149,7 +184,7 @@ fun BasicMapSample() {
             },
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             Text(text = "Reset")
         }
