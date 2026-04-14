@@ -48,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.google.android.gms.maps3d.model.markerOptions
 import com.google.android.gms.maps3d.model.popoverOptions
 import com.google.android.gms.maps3d.Popover
+import com.google.android.gms.maps3d.GoogleMap3D as NativeGoogleMap3D
 import com.google.maps.android.compose3d.GoogleMap3D
 import com.google.maps.android.compose3d.MarkerConfig
 
@@ -89,7 +90,7 @@ fun MarkersScreen() {
 
     val context = LocalContext.current
     var activePopover by remember { mutableStateOf<Popover?>(null) }
-    var googleMap3DInstance by remember { mutableStateOf<com.google.android.gms.maps3d.GoogleMap3D?>(null) }
+    var googleMap3DInstance by remember { mutableStateOf<NativeGoogleMap3D?>(null) }
  
     val alienMarker = remember {
         MarkerConfig(

@@ -22,6 +22,7 @@ import com.google.android.gms.maps3d.model.ImageView
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.CollisionBehavior
 import com.google.android.gms.maps3d.model.LatLngAltitude
+import com.google.android.gms.maps3d.model.Marker
 
 /**
  * Data class representing a Marker to be added to the 3D map.
@@ -37,7 +38,7 @@ data class MarkerConfig(
     val isExtruded: Boolean = false,
     val isDrawnWhenOccluded: Boolean = false,
     val collisionBehavior: Int = CollisionBehavior.REQUIRED,
-    val onClick: ((com.google.android.gms.maps3d.model.Marker) -> Unit)? = null
+    val onClick: ((Marker) -> Unit)? = null
 )
 
 /**
