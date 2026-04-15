@@ -88,6 +88,10 @@
             android:name=".BasicMapActivity"
             android:exported="true"
             android:label="Basic Map" />
+        <activity
+            android:name=".CameraChangedActivity"
+            android:exported="true"
+            android:label="Camera Changed Listener" />
     </application>
 
 </manifest>

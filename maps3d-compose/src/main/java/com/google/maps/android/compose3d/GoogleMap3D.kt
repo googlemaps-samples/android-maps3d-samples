@@ -71,6 +71,7 @@ fun GoogleMap3D(
     onMapSteady: () -> Unit = {},
     onMapClick: (() -> Unit)? = null,
     onPlaceClick: ((String) -> Unit)? = null,
+    onCameraChanged: (Camera) -> Unit = {},
 ) {
     val state = remember { Map3DState() }
     val hasCalledOnMapReady = remember { mutableStateOf(false) }
@@ -91,6 +92,10 @@ fun GoogleMap3D(
                         if (isSteady) {
                             onMapSteady()
                         }
+                    }
+
+                    googleMap3D.setCameraChangedListener { camera ->
+                        onCameraChanged(camera)
                     }
 
                     fun applyUpdates() {
