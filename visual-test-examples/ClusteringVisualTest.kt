@@ -47,7 +47,7 @@ class ClusteringVisualTest : BaseVisualTest() {
         helper.performActionFromPrompt("Click the CLUSTERING button", uiDevice, geminiApiKey)
 
         // Wait for the clustering screen to load and map to render
-        TimeUnit.SECONDS.sleep(5)
+        waitForMapRendering(5)
 
         // Capture a screenshot to verify the result of the action
         val screenshotBitmap = captureScreenshot("natural_lang_click_screenshot.png")
@@ -84,7 +84,7 @@ class ClusteringVisualTest : BaseVisualTest() {
         clusteringButton.click()
 
         // Wait for the clustering screen to load and map to render
-        TimeUnit.SECONDS.sleep(5)
+        waitForMapRendering(5)
 
         // Capture a screenshot
         val screenshotBitmap = captureScreenshot("clustering_screenshot.png")

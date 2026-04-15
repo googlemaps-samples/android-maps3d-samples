@@ -42,14 +42,18 @@ import java.io.ByteArrayOutputStream
  *
  * This version uses org.json for parsing to avoid binary compatibility issues with kotlinx.serialization.
  */
-class GeminiVisualTestHelper {
+class GeminiVisualTestHelper : AutoCloseable {
 
     private val client = HttpClient(CIO) {
         install(HttpTimeout) {
-            requestTimeoutMillis = 60000
-            connectTimeoutMillis = 60000
-            socketTimeoutMillis = 60000
+            requestTimeoutMillis = 60_000
+            connectTimeoutMillis = 60_000
+            socketTimeoutMillis = 60_000
         }
+    }
+
+    override fun close() {
+        client.close()
     }
 
     /**
