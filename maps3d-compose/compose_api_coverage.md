@@ -15,9 +15,7 @@ The following features and listeners from the Maps 3D SDK are not yet supported 
 | **Anchorable** | Not Supported | Interface for anchorable objects. |
 | **BoundingBox** | Not Supported | Spatial bounding box. |
 | **DrawingState** | Not Supported | State of drawing operations. |
-| **Glyph** | Supported | Text rendering elements. |
 | **MarkerView / MarkerViewOptions** | Not Supported | View-based markers. |
-| **PinConfiguration** | Supported | Pin styling configuration. |
 | **PinView** | Not Supported | Custom pin views. |
 | **VisibilityState** | Not Supported | Visibility state tracking. |
 
