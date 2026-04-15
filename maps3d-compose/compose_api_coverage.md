@@ -11,9 +11,6 @@ The following features and listeners from the Maps 3D SDK are not yet supported 
 
 | Feature / Class | Status | Reference / Notes |
 | :--- | :--- | :--- |
-| **Map3DViewUiController** | Not Supported | Gestures and UI settings controller. |
-| **OnCameraChangedListener** | Not Supported | Camera event listener. |
-| **OnFirstSceneListener** | Not Supported | Scene loaded event listener. |
 | **OnPlaceClickListener** | Not Supported | Place click event listener. |
 | **Anchorable** | Not Supported | Interface for anchorable objects. |
 | **BoundingBox** | Not Supported | Spatial bounding box. |
@@ -29,11 +26,8 @@ The following features and listeners from the Maps 3D SDK are not yet supported 
 | Feature / Class | Status | Reference / Notes |
 | :--- | :--- | :--- |
 | **Map3DOptions** | Supported | Passed to `GoogleMap3D` in [`GoogleMap3D.kt:L69`](src/main/java/com/google/maps/android/compose3d/GoogleMap3D.kt#L69). |
-| **GoogleMap3D api calls** | Partial | Some exposed via parameters, others require native instance via `onMapReady`. |
-| **Map3DViewUiController** | Not Supported | Not yet exposed in the Compose wrapper. |
 | **OnCameraAnimationEndListener** | Supported via Native | Used in sample extensions, not exposed as parameter. |
-| **OnCameraChangedListener** | Not Supported | Not yet exposed. |
-| **OnFirstSceneListener** | Not Supported | Not yet exposed. |
+| **OnCameraChangedListener** | Supported | Covered in demo. |
 | **OnMap3DClickListener** | Supported | Exposed as `onMapClick` in `GoogleMap3D`. |
 | **OnMap3DViewReadyCallback** | Handled Internally | Used in [`GoogleMap3D.kt:L84`](src/main/java/com/google/maps/android/compose3d/GoogleMap3D.kt#L84) to initialize. |
 | **OnMarkerClickListener** | Handled Internally | Exposed as `onClick` in `MarkerConfig`. |
