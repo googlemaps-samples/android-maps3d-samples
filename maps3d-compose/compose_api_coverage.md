@@ -11,7 +11,6 @@ The following features and listeners from the Maps 3D SDK are not yet supported 
 
 | Feature / Class | Status | Reference / Notes |
 | :--- | :--- | :--- |
-| **OnPlaceClickListener** | Not Supported | Place click event listener. |
 | **Anchorable** | Not Supported | Interface for anchorable objects. |
 | **BoundingBox** | Not Supported | Spatial bounding box. |
 | **DrawingState** | Not Supported | State of drawing operations. |
@@ -29,7 +28,7 @@ The following features and listeners from the Maps 3D SDK are not yet supported 
 | **OnMap3DViewReadyCallback** | Handled Internally | Used in [`GoogleMap3D.kt:L84`](src/main/java/com/google/maps/android/compose3d/GoogleMap3D.kt#L84) to initialize. |
 | **OnMarkerClickListener** | Handled Internally | Exposed as `onClick` in `MarkerConfig`. |
 | **OnModelClickListener** | Handled Internally | Exposed as `onClick` in `ModelConfig`. |
-| **OnPlaceClickListener** | Not Supported | Not yet exposed. |
+| **OnPlaceClickListener** | Supported | Exposed as `onPlaceClick` in `GoogleMap3D`. |
 | **OnPolygonClickListener** | Handled Internally | Exposed as `onClick` in `PolygonConfig`. |
 | **OnPolylineClickListener** | Handled Internally | Exposed as `onClick` in `PolylineConfig`. |
 | **AltitudeMode** | Supported | Defined in [`DataModels.kt`](src/main/java/com/google/maps/android/compose3d/DataModels.kt). |

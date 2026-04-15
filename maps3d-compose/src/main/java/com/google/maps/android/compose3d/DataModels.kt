@@ -46,7 +46,7 @@ data class PinConfig(
     val scale: Float? = null,
     val backgroundColor: Int? = null,
     val borderColor: Int? = null,
-    val glyph: GlyphConfig? = null
+    val glyph: GlyphConfig? = null,
 )
 
 /**

@@ -57,6 +57,10 @@
             android:exported="true"
             android:label="Custom Markers" />
         <activity
+            android:name=".PlaceClickActivity"
+            android:exported="true"
+            android:label="Place Clicks" />
+        <activity
             android:name=".PolylinesActivity"
             android:exported="true"
             android:label="Polylines" />

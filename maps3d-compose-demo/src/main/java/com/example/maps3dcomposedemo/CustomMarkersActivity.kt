@@ -37,8 +37,8 @@ import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
-import com.google.maps.android.compose3d.GoogleMap3D
 import com.google.maps.android.compose3d.GlyphConfig
+import com.google.maps.android.compose3d.GoogleMap3D
 import com.google.maps.android.compose3d.MarkerConfig
 import com.google.maps.android.compose3d.PinConfig
 
@@ -92,8 +92,8 @@ fun CustomMarkersScreen() {
                 pinConfig = PinConfig(
                     scale = 1.5f,
                     backgroundColor = Color.RED,
-                    borderColor = Color.WHITE
-                )
+                    borderColor = Color.WHITE,
+                ),
             ),
             MarkerConfig(
                 key = "text_glyph",
@@ -106,8 +106,8 @@ fun CustomMarkersScreen() {
                 label = "Text Glyph",
                 pinConfig = PinConfig(
                     glyph = GlyphConfig.Text("DT", color = Color.BLACK),
-                    backgroundColor = Color.YELLOW
-                )
+                    backgroundColor = Color.YELLOW,
+                ),
             ),
             MarkerConfig(
                 key = "circle_glyph",
@@ -120,10 +120,10 @@ fun CustomMarkersScreen() {
                 label = "Circle Glyph",
                 pinConfig = PinConfig(
                     glyph = GlyphConfig.Circle(color = Color.BLUE),
-                    backgroundColor = Color.GREEN
-                )
+                    backgroundColor = Color.GREEN,
+                ),
             ),
-             MarkerConfig(
+            MarkerConfig(
                 key = "image_glyph",
                 position = latLngAltitude {
                     latitude = 44.5960
@@ -134,9 +134,9 @@ fun CustomMarkersScreen() {
                 label = "Image Glyph",
                 pinConfig = PinConfig(
                     glyph = GlyphConfig.Image(R.drawable.alien, color = Color.WHITE),
-                    backgroundColor = Color.CYAN
-                )
-            )
+                    backgroundColor = Color.CYAN,
+                ),
+            ),
         )
     }
 
@@ -152,7 +152,7 @@ fun CustomMarkersScreen() {
             modifier = Modifier.fillMaxSize(),
             onMapSteady = {
                 isMapSteady = true
-            }
+            },
         )
     }
 }

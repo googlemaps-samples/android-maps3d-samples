@@ -98,6 +98,11 @@ fun CatalogScreen() {
             }
         }
         item {
+            SampleItem("Place Clicks") {
+                context.startActivity(Intent(context, PlaceClickActivity::class.java))
+            }
+        }
+        item {
             SampleItem("Models") {
                 context.startActivity(Intent(context, ModelsActivity::class.java))
             }
