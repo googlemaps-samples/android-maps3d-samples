@@ -42,20 +42,6 @@ This document tracks the coverage of the Maps 3D SDK APIs in the experimental Co
 | **Core state management...** | Partial | Map properties supported, gestures might need `Map3DViewUiController`. |
 | **Camera animation...** | Supported via Native | `flyCameraTo` and `flyCameraAround` used in samples. |
 
-## Not Yet Exposed Functionality
-
-The following features and listeners from the Maps 3D SDK are not yet supported or exposed in this experimental Compose wrapper:
-
-| Feature / Class | Status | Reference / Notes |
-| :--- | :--- | :--- |
-| **Map3DViewUiController** | Not Supported | Gestures and UI settings controller. |
-| **Anchorable** | Not Supported | Interface for anchorable objects. |
-| **BoundingBox** | Not Supported | Spatial bounding box. |
-| **DrawingState** | Not Supported | State of drawing operations. |
-| **MarkerView / MarkerViewOptions** | Not Supported | View-based markers. |
-| **PinView** | Not Supported | Custom pin views. |
-| **VisibilityState** | Not Supported | Visibility state tracking. |
-
 ## References
 
 ### Implementation in `maps3d-compose`
