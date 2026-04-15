@@ -16,7 +16,6 @@ The following features and listeners from the Maps 3D SDK are not yet supported 
 | **BoundingBox** | Not Supported | Spatial bounding box. |
 | **DrawingState** | Not Supported | State of drawing operations. |
 | **MarkerView / MarkerViewOptions** | Not Supported | View-based markers. |
-| **PinView** | Not Supported | Custom pin views. |
 | **VisibilityState** | Not Supported | Visibility state tracking. |
 
 ## Coverage Status
@@ -49,7 +48,6 @@ The following features and listeners from the Maps 3D SDK are not yet supported 
 | **Model / ModelOptions** | Supported | Via `ModelConfig` in [`DataModels.kt:L93`](src/main/java/com/google/maps/android/compose3d/DataModels.kt#L93). |
 | **Orientation** | Supported | Used in `ModelConfig` in [`DataModels.kt`](src/main/java/com/google/maps/android/compose3d/DataModels.kt). |
 | **PinConfiguration** | Supported | Via `PinConfig` in [`DataModels.kt`](src/main/java/com/google/maps/android/compose3d/DataModels.kt). |
-| **PinView** | Not Supported | Not yet exposed. |
 | **Polygon / PolygonOptions** | Supported | Via `PolygonConfig` in [`DataModels.kt:L70`](src/main/java/com/google/maps/android/compose3d/DataModels.kt#L70). |
 | **Polyline / PolylineOptions** | Supported | Via `PolylineConfig` in [`DataModels.kt:L52`](src/main/java/com/google/maps/android/compose3d/DataModels.kt#L52). |
 | **OnMapReady** | Supported | Callback in `GoogleMap3D` [`GoogleMap3D.kt:L70`](src/main/java/com/google/maps/android/compose3d/GoogleMap3D.kt#L70). |
