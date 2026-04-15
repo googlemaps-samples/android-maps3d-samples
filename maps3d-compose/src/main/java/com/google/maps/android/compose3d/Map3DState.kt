@@ -16,13 +16,16 @@
 
 package com.google.maps.android.compose3d
 
-import com.google.android.gms.maps3d.GoogleMap3D
 import android.content.Context
+import android.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Popover
+import com.google.android.gms.maps3d.model.Glyph
 import com.google.android.gms.maps3d.model.Hole
 import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.Model
+import com.google.android.gms.maps3d.model.PinConfiguration
 import com.google.android.gms.maps3d.model.Polygon
 import com.google.android.gms.maps3d.model.Polyline
 import com.google.android.gms.maps3d.model.markerOptions
@@ -91,6 +94,36 @@ class Map3DState {
                 isExtruded = config.isExtruded
                 isDrawnWhenOccluded = config.isDrawnWhenOccluded
                 collisionBehavior = config.collisionBehavior
+
+                config.pinConfig?.let { pin ->
+                    val builder = PinConfiguration.builder()
+                    pin.scale?.let { builder.setScale(it) }
+                    pin.backgroundColor?.let { builder.setBackgroundColor(it) }
+                    pin.borderColor?.let { builder.setBorderColor(it) }
+
+                    pin.glyph?.let { glyphConfig ->
+                        val glyph = when (glyphConfig) {
+                            is GlyphConfig.Color -> Glyph.fromColor(glyphConfig.color)
+                            is GlyphConfig.Text -> {
+                                val g = Glyph.fromText(glyphConfig.text)
+                                glyphConfig.color?.let { g.color = it }
+                                g
+                            }
+                            is GlyphConfig.Circle -> {
+                                val g = Glyph.fromCircle()
+                                glyphConfig.color?.let { g.color = it }
+                                g
+                            }
+                            is GlyphConfig.Image -> {
+                                val g = Glyph.fromColor(glyphConfig.color ?: Color.WHITE)
+                                g.setImage(com.google.android.gms.maps3d.model.ImageView(glyphConfig.imageResId))
+                                g
+                            }
+                        }
+                        builder.setGlyph(glyph)
+                    }
+                    setStyle(builder.build())
+                }
             },
         )
 
@@ -284,7 +317,7 @@ class Map3DState {
 
     private fun createPopover(context: Context, map: GoogleMap3D, config: PopoverConfig): Popover? {
         val marker = markers[config.positionAnchorKey]?.second ?: return null
-        
+
         val composeView = ComposeView(context).apply {
             setContent {
                 config.content()
@@ -298,9 +331,9 @@ class Map3DState {
                 content = composeView
                 autoCloseEnabled = config.autoCloseEnabled
                 autoPanEnabled = config.autoPanEnabled
-            }
+            },
         )
-        
+
         popover.show()
         return popover
     }

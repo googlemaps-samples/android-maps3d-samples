@@ -329,4 +329,121 @@ class Maps3DVisualTest : BaseVisualTest() {
             )
         }
     }
+
+    @Test
+    fun verifyCustomMarkersRenders() {
+        runBlocking {
+            // Launch CustomMarkersActivity directly
+            val intent = Intent(context, CustomMarkersActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+
+            // Wait for the activity to be displayed
+            uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
+
+            // Wait for the map to render and tiles to load
+            waitForMapRendering(60)
+
+            // Capture a screenshot
+            val screenshotBitmap = captureScreenshot("custom_markers_screenshot.png")
+
+            // Define the verification prompt for Gemini
+            val prompt = """
+                Please act as a UI tester and analyze this screenshot.
+                1. Confirm that a 3D map view is visible.
+                2. Confirm that multiple markers with different styles are visible around the rock formation (Devils Tower).
+                3. Specifically look for:
+                    - A red pin.
+                    - A marker with text "DT".
+                    - A green pin with a blue circle.
+                    - A marker with an alien icon.
+
+                If the map is visible and these custom styled markers are seen, reply with "PASSED".
+                Otherwise, report what you see.
+            """.trimIndent()
+
+            // Analyze the image using Gemini
+            val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)
+            println("Gemini's analysis: $geminiResponse")
+
+            // Assert on Gemini's response
+            assertTrue(
+                "Visual verification failed. Gemini response: $geminiResponse",
+                geminiResponse?.contains("PASSED", ignoreCase = true) == true,
+            )
+        }
+    }
+
+    @Test
+    fun verifyPlaceClick() {
+        runBlocking {
+            // Launch PlaceClickActivity directly
+            val intent = Intent(context, PlaceClickActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+
+            // Wait for the activity to be displayed
+            uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
+
+            // Wait for the map to render and tiles to load
+            waitForMapRendering(60)
+
+            // Capture a screenshot to find the place mark
+            val screenshotBitmap = captureScreenshot("place_click_search.png")
+
+            // Define the prompt for Gemini to find coordinates
+            val promptFind = """
+                Analyze this screenshot of a 3D map.
+                You should see a landmark called "Devils Tower" near the center.
+                Find the label or marker for "Devils Tower".
+                Return its center coordinates as a JSON object: {"x": <float>, "y": <float>} where x and y are normalized coordinates between 0.0 and 1.0 (0.0 is top/left, 1.0 is bottom/right).
+                Return ONLY the JSON object, nothing else.
+            """.trimIndent()
+
+            // Analyze the image using Gemini
+            val geminiResponse = helper.analyzeImage(screenshotBitmap, promptFind, geminiApiKey)
+            println("Gemini's coordinate response: $geminiResponse")
+
+            // Parse JSON and click
+            try {
+                val jsonStr = geminiResponse?.substringAfter("{")?.substringBeforeLast("}")?.let { "{$it}" } ?: ""
+                val json = org.json.JSONObject(jsonStr)
+                val x = json.getDouble("x")
+                val y = json.getDouble("y")
+
+                val clickX = (x * uiDevice.displayWidth).toInt()
+                val clickY = (y * uiDevice.displayHeight).toInt()
+
+                uiDevice.click(clickX, clickY)
+            } catch (e: Exception) {
+                org.junit.Assert.fail("Failed to parse coordinates from Gemini response: $geminiResponse. Error: ${e.message}")
+            }
+
+            // Wait for UI to update
+            kotlinx.coroutines.delay(2000)
+
+            // Capture another screenshot to verify the click
+            val verifyBitmap = captureScreenshot("place_click_verification.png")
+
+            // Define the verification prompt
+            val promptVerify = """
+                Please act as a UI tester and analyze this screenshot.
+                Confirm that the text "Clicked Place:" followed by an ID is visible at the bottom of the screen.
+
+                If the text is seen, reply with "PASSED".
+                Otherwise, report what you see.
+            """.trimIndent()
+
+            val verifyResponse = helper.analyzeImage(verifyBitmap, promptVerify, geminiApiKey)
+            println("Gemini's verification response: $verifyResponse")
+
+            // Assert on Gemini's response
+            assertTrue(
+                "Visual verification failed. Gemini response: $verifyResponse",
+                verifyResponse?.contains("PASSED", ignoreCase = true) == true,
+            )
+        }
+    }
 }

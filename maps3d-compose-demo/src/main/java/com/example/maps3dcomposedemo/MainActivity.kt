@@ -93,6 +93,16 @@ fun CatalogScreen() {
             }
         }
         item {
+            SampleItem("Custom Markers (PinConfig)") {
+                context.startActivity(Intent(context, CustomMarkersActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Place Clicks") {
+                context.startActivity(Intent(context, PlaceClickActivity::class.java))
+            }
+        }
+        item {
             SampleItem("Models") {
                 context.startActivity(Intent(context, ModelsActivity::class.java))
             }

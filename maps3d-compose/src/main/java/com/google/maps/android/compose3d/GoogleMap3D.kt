@@ -70,6 +70,7 @@ fun GoogleMap3D(
     onMapReady: (GoogleMap3D) -> Unit = {},
     onMapSteady: () -> Unit = {},
     onMapClick: (() -> Unit)? = null,
+    onPlaceClick: ((String) -> Unit)? = null,
     onCameraChanged: (Camera) -> Unit = {},
 ) {
     val state = remember { Map3DState() }
@@ -114,9 +115,13 @@ fun GoogleMap3D(
                         state.syncModels(googleMap3D, models)
                         state.syncPopovers(map3dView.context, googleMap3D, popovers)
 
-                        onMapClick?.let { callback ->
-                            googleMap3D.setMap3DClickListener { _, _ ->
-                                callback()
+                        if (onMapClick != null || onPlaceClick != null) {
+                            googleMap3D.setMap3DClickListener { _, placeId ->
+                                if (placeId != null) {
+                                    onPlaceClick?.invoke(placeId)
+                                } else {
+                                    onMapClick?.invoke()
+                                }
                             }
                         }
                     }

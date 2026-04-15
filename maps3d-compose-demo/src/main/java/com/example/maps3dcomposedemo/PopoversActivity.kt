@@ -17,37 +17,31 @@
 package com.example.maps3dcomposedemo
 
 import android.os.Bundle
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
-import androidx.compose.ui.graphics.Color
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import com.google.android.gms.maps3d.Popover
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
-import com.google.android.gms.maps3d.model.popoverOptions
-import com.google.android.gms.maps3d.model.popoverShadow
-import com.google.android.gms.maps3d.model.popoverStyle
 import com.google.maps.android.compose3d.GoogleMap3D
 import com.google.maps.android.compose3d.MarkerConfig
 import com.google.maps.android.compose3d.PopoverConfig
-import com.google.android.gms.maps3d.GoogleMap3D as NativeGoogleMap3D
 
 class PopoversActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,16 +104,16 @@ fun PopoversScreen() {
                             Surface(
                                 color = Color.White,
                                 shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.padding(8.dp)
+                                modifier = Modifier.padding(8.dp),
                             ) {
                                 Text(
                                     text = "This is a Popover anchored to a marker!",
                                     modifier = Modifier.padding(16.dp),
-                                    color = Color.Black
+                                    color = Color.Black,
                                 )
                             }
-                        }
-                    )
+                        },
+                    ),
                 )
             },
         )
@@ -137,7 +131,7 @@ fun PopoversScreen() {
             },
             onMapClick = {
                 popovers = emptyList()
-            }
+            },
         )
     }
 }
