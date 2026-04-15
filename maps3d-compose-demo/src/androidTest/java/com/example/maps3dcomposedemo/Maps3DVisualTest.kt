@@ -329,4 +329,49 @@ class Maps3DVisualTest : BaseVisualTest() {
             )
         }
     }
+
+    @Test
+    fun verifyCustomMarkersRenders() {
+        runBlocking {
+            // Launch CustomMarkersActivity directly
+            val intent = Intent(context, CustomMarkersActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+
+            // Wait for the activity to be displayed
+            uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
+
+            // Wait for the map to render and tiles to load
+            waitForMapRendering(60)
+
+            // Capture a screenshot
+            val screenshotBitmap = captureScreenshot("custom_markers_screenshot.png")
+
+            // Define the verification prompt for Gemini
+            val prompt = """
+                Please act as a UI tester and analyze this screenshot.
+                1. Confirm that a 3D map view is visible.
+                2. Confirm that multiple markers with different styles are visible around the rock formation (Devils Tower).
+                3. Specifically look for:
+                    - A red pin.
+                    - A marker with text "DT".
+                    - A green pin with a blue circle.
+                    - A marker with an alien icon.
+
+                If the map is visible and these custom styled markers are seen, reply with "PASSED".
+                Otherwise, report what you see.
+            """.trimIndent()
+
+            // Analyze the image using Gemini
+            val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)
+            println("Gemini's analysis: $geminiResponse")
+
+            // Assert on Gemini's response
+            assertTrue(
+                "Visual verification failed. Gemini response: $geminiResponse",
+                geminiResponse?.contains("PASSED", ignoreCase = true) == true,
+            )
+        }
+    }
 }

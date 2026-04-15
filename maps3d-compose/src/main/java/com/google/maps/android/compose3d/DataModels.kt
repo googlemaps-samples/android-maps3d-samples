@@ -29,6 +29,27 @@ import com.google.android.gms.maps3d.model.Polygon
 import com.google.android.gms.maps3d.model.Polyline
 
 /**
+ * Sealed class representing the glyph (icon/text) inside a pin marker.
+ */
+sealed class GlyphConfig {
+    data class Color(val color: Int) : GlyphConfig()
+    data class Text(val text: String, val color: Int? = null) : GlyphConfig()
+    data class Circle(val color: Int? = null) : GlyphConfig()
+    data class Image(val imageResId: Int, val color: Int? = null) : GlyphConfig()
+}
+
+/**
+ * Data class representing the configuration of a pin marker.
+ */
+@Immutable
+data class PinConfig(
+    val scale: Float? = null,
+    val backgroundColor: Int? = null,
+    val borderColor: Int? = null,
+    val glyph: GlyphConfig? = null
+)
+
+/**
  * Data class representing a Marker to be added to the 3D map.
  */
 @Immutable
@@ -42,6 +63,7 @@ data class MarkerConfig(
     val isExtruded: Boolean = false,
     val isDrawnWhenOccluded: Boolean = false,
     val collisionBehavior: Int = CollisionBehavior.REQUIRED,
+    val pinConfig: PinConfig? = null,
     val onClick: ((Marker) -> Unit)? = null,
 )
 

@@ -53,6 +53,10 @@
             android:name=".MarkersActivity"
             android:exported="true" />
         <activity
+            android:name=".CustomMarkersActivity"
+            android:exported="true"
+            android:label="Custom Markers" />
+        <activity
             android:name=".PolylinesActivity"
             android:exported="true"
             android:label="Polylines" />
