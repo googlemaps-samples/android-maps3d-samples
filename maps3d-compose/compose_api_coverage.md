@@ -31,7 +31,7 @@ The following features and listeners from the Maps 3D SDK are not yet supported 
 | **GoogleMap3D api calls** | Partial | Some exposed via parameters, others require native instance via `onMapReady`. |
 | **Map3DViewUiController** | Not Supported | Not yet exposed in the Compose wrapper. |
 | **OnCameraAnimationEndListener** | Supported via Native | Used in sample extensions, not exposed as parameter. |
-| **OnCameraChangedListener** | Supported | Exposed as `onCameraChanged` in `GoogleMap3D`. |
+| **OnCameraChangedListener** | Supported | Exposed as `onCameraChanged` in `GoogleMap3D` in [`GoogleMap3D.kt:L73`](src/main/java/com/google/maps/android/compose3d/GoogleMap3D.kt#L73). |
 | **OnFirstSceneListener** | Not Supported | Not yet exposed. |
 | **OnMap3DClickListener** | Supported | Exposed as `onMapClick` in `GoogleMap3D`. |
 | **OnMap3DViewReadyCallback** | Handled Internally | Used in [`GoogleMap3D.kt:L84`](src/main/java/com/google/maps/android/compose3d/GoogleMap3D.kt#L84) to initialize. |
