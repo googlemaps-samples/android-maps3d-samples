@@ -122,6 +122,11 @@ fun CatalogScreen() {
                 context.startActivity(Intent(context, CameraAnimationsActivity::class.java))
             }
         }
+        item {
+            SampleItem("Camera Changed Listener (Whiskey Compass)") {
+                context.startActivity(Intent(context, CameraChangedActivity::class.java))
+            }
+        }
     }
 }
 
