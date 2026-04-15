@@ -1,4 +1,4 @@
-package com.example.maps3dcomposedemo
+package com.example.maps3dcomposedemo.widgets
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
