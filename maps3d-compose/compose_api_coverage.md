@@ -80,3 +80,4 @@ The following features and listeners from the Maps 3D SDK are not yet supported 
 - **3D Models**: [`ModelsActivity.kt:L83`](../maps3d-compose-demo/src/main/java/com/example/maps3dcomposedemo/ModelsActivity.kt#L83)
 - **Popovers**: [`PopoversActivity.kt:L102`](../maps3d-compose-demo/src/main/java/com/example/maps3dcomposedemo/PopoversActivity.kt#L102)
 - **Camera Changed Listener**: [`CameraChangedActivity.kt`](../maps3d-compose-demo/src/main/java/com/example/maps3dcomposedemo/CameraChangedActivity.kt)
+- **Place Clicks**: [`PlaceClickActivity.kt`](../maps3d-compose-demo/src/main/java/com/example/maps3dcomposedemo/PlaceClickActivity.kt)
