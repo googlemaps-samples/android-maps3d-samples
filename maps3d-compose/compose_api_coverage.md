@@ -5,18 +5,6 @@ This document tracks the coverage of the Maps 3D SDK APIs in the experimental Co
 > [!WARNING]
 > This implementation is a **Work In Progress (WIP) experiment** and serves as a **reference implementation**. It is not intended for production use.
 
-## Not Yet Exposed Functionality
-
-The following features and listeners from the Maps 3D SDK are not yet supported or exposed in this experimental Compose wrapper:
-
-| Feature / Class | Status | Reference / Notes |
-| :--- | :--- | :--- |
-| **Anchorable** | Not Supported | Interface for anchorable objects. |
-| **BoundingBox** | Not Supported | Spatial bounding box. |
-| **DrawingState** | Not Supported | State of drawing operations. |
-| **MarkerView / MarkerViewOptions** | Not Supported | View-based markers. |
-| **VisibilityState** | Not Supported | Visibility state tracking. |
-
 ## Coverage Status
 
 | Feature / Class | Status | Reference / Notes |
@@ -32,18 +20,14 @@ The following features and listeners from the Maps 3D SDK are not yet supported 
 | **OnPolygonClickListener** | Handled Internally | Exposed as `onClick` in `PolygonConfig`. |
 | **OnPolylineClickListener** | Handled Internally | Exposed as `onClick` in `PolylineConfig`. |
 | **AltitudeMode** | Supported | Defined in [`DataModels.kt`](src/main/java/com/google/maps/android/compose3d/DataModels.kt). |
-| **Anchorable** | Not Supported | Implied by marker anchoring but not explicitly exposed. |
-| **BoundingBox** | Not Supported | Not yet exposed. |
 | **Camera** | Supported | Hoisted in `GoogleMap3D` [`GoogleMap3D.kt:L60`](src/main/java/com/google/maps/android/compose3d/GoogleMap3D.kt#L60). |
 | **CameraRestriction** | Supported | Passed to `GoogleMap3D` [`GoogleMap3D.kt:L67`](src/main/java/com/google/maps/android/compose3d/GoogleMap3D.kt#L67). |
 | **CollisionBehavior** | Supported | Used in `MarkerConfig` in [`DataModels.kt`](src/main/java/com/google/maps/android/compose3d/DataModels.kt). |
-| **DrawingState** | Not Supported | Not yet exposed. |
 | **FlyAround / FlyTo** | Supported via Native | Used in samples via native instance, not declarative. |
 | **Glyph** | Supported | Via `GlyphConfig` in [`DataModels.kt`](src/main/java/com/google/maps/android/compose3d/DataModels.kt). |
 | **Hole** | Supported | Used in `PolygonConfig` in `Map3DState.kt`. |
 | **ImageView** | Handled Internally | Used for Popover content rendering. |
 | **Marker / MarkerOptions** | Supported | Via `MarkerConfig` in [`DataModels.kt:L35`](src/main/java/com/google/maps/android/compose3d/DataModels.kt#L35). |
-| **MarkerView / MarkerViewOptions** | Not Supported | Not yet exposed. |
 | **Model / ModelOptions** | Supported | Via `ModelConfig` in [`DataModels.kt:L93`](src/main/java/com/google/maps/android/compose3d/DataModels.kt#L93). |
 | **Orientation** | Supported | Used in `ModelConfig` in [`DataModels.kt`](src/main/java/com/google/maps/android/compose3d/DataModels.kt). |
 | **PinConfiguration** | Supported | Via `PinConfig` in [`DataModels.kt`](src/main/java/com/google/maps/android/compose3d/DataModels.kt). |
@@ -53,7 +37,6 @@ The following features and listeners from the Maps 3D SDK are not yet supported 
 | **OnMapSteady** | Supported | Callback in `GoogleMap3D` [`GoogleMap3D.kt:L71`](src/main/java/com/google/maps/android/compose3d/GoogleMap3D.kt#L71). |
 | **Popover / PopoverContentsView...**| Supported | Via `PopoverConfig` in [`DataModels.kt:L109`](src/main/java/com/google/maps/android/compose3d/DataModels.kt#L109). |
 | **Vector3D** | Supported | Used for scale in [`Map3DState.kt`](src/main/java/com/google/maps/android/compose3d/Map3DState.kt). |
-| **VisibilityState** | Not Supported | Not yet exposed. |
 | **GoogleMap3D Composable...** | Supported | Lifecycle handling implemented in [`GoogleMap3D.kt`](src/main/java/com/google/maps/android/compose3d/GoogleMap3D.kt). |
 | **Core state management...** | Partial | Map properties supported, gestures might need `Map3DViewUiController`. |
 | **Camera animation...** | Supported via Native | `flyCameraTo` and `flyCameraAround` used in samples. |
