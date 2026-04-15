@@ -12,7 +12,6 @@ The following features and listeners from the Maps 3D SDK are not yet supported 
 | Feature / Class | Status | Reference / Notes |
 | :--- | :--- | :--- |
 | **Map3DViewUiController** | Not Supported | Gestures and UI settings controller. |
-| **OnCameraChangedListener** | Not Supported | Camera event listener. |
 | **OnFirstSceneListener** | Not Supported | Scene loaded event listener. |
 | **OnPlaceClickListener** | Not Supported | Place click event listener. |
 | **Anchorable** | Not Supported | Interface for anchorable objects. |
@@ -32,7 +31,7 @@ The following features and listeners from the Maps 3D SDK are not yet supported 
 | **GoogleMap3D api calls** | Partial | Some exposed via parameters, others require native instance via `onMapReady`. |
 | **Map3DViewUiController** | Not Supported | Not yet exposed in the Compose wrapper. |
 | **OnCameraAnimationEndListener** | Supported via Native | Used in sample extensions, not exposed as parameter. |
-| **OnCameraChangedListener** | Not Supported | Not yet exposed. |
+| **OnCameraChangedListener** | Supported | Exposed as `onCameraChanged` in `GoogleMap3D` in [`GoogleMap3D.kt:L73`](src/main/java/com/google/maps/android/compose3d/GoogleMap3D.kt#L73). |
 | **OnFirstSceneListener** | Not Supported | Not yet exposed. |
 | **OnMap3DClickListener** | Supported | Exposed as `onMapClick` in `GoogleMap3D`. |
 | **OnMap3DViewReadyCallback** | Handled Internally | Used in [`GoogleMap3D.kt:L84`](src/main/java/com/google/maps/android/compose3d/GoogleMap3D.kt#L84) to initialize. |
@@ -91,3 +90,4 @@ The following features and listeners from the Maps 3D SDK are not yet supported 
 - **Polygons**: [`PolygonsActivity.kt:L161`](../maps3d-compose-demo/src/main/java/com/example/maps3dcomposedemo/PolygonsActivity.kt#L161)
 - **3D Models**: [`ModelsActivity.kt:L83`](../maps3d-compose-demo/src/main/java/com/example/maps3dcomposedemo/ModelsActivity.kt#L83)
 - **Popovers**: [`PopoversActivity.kt:L102`](../maps3d-compose-demo/src/main/java/com/example/maps3dcomposedemo/PopoversActivity.kt#L102)
+- **Camera Changed Listener**: [`CameraChangedActivity.kt`](../maps3d-compose-demo/src/main/java/com/example/maps3dcomposedemo/CameraChangedActivity.kt)
