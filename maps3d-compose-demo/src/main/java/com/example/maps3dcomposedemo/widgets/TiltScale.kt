@@ -35,43 +35,43 @@ fun TiltScale(tilt: Float, modifier: Modifier = Modifier) {
             .width(80.dp)
             .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f))
             .clipToBounds(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val centerLineY = size.height / 2f
             val centerLineX = size.width / 2f
-            
+
             // Pixels per degree
             val pixelsPerDegree = 5f
-            
+
             // Draw a fixed center line (pointer)
             drawLine(
                 color = Color.Red,
                 start = Offset(0f, centerLineY),
                 end = Offset(size.width, centerLineY),
-                strokeWidth = 2f
+                strokeWidth = 2f,
             )
 
             // Draw scrolling ticks
             translate(top = centerLineY + (displayedTilt * pixelsPerDegree)) {
                 for (i in 0..90 step 5) {
                     val yPos = -i * pixelsPerDegree
-                    
+
                     val isMajor = i % 15 == 0
                     val tickLength = if (isMajor) 15f else 8f
-                    
+
                     drawLine(
                         color = onPrimaryColor,
                         start = Offset(centerLineX - tickLength, yPos),
                         end = Offset(centerLineX + tickLength, yPos),
-                        strokeWidth = if (isMajor) 2f else 1f
+                        strokeWidth = if (isMajor) 2f else 1f,
                     )
-                    
+
                     if (isMajor) {
                         val measuredText = textMeasurer.measure(i.toString(), style = TextStyle(color = onPrimaryColor, fontSize = 12.sp))
                         drawText(
                             textLayoutResult = measuredText,
-                            topLeft = Offset(centerLineX + 20f, yPos - measuredText.size.height / 2f)
+                            topLeft = Offset(centerLineX + 20f, yPos - measuredText.size.height / 2f),
                         )
                     }
                 }

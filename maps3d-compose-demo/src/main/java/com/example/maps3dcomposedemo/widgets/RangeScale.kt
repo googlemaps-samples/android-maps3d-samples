@@ -15,12 +15,12 @@ fun RangeScale(range: Float, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f))
-            .padding(8.dp)
+            .padding(8.dp),
     ) {
         Text(
             text = "Range: ${range.roundToInt()} m",
             color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
         )
     }
 }

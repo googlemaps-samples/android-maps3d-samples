@@ -60,7 +60,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
-    testImplementation(libs.truth)
+    testImplementation(libs.google.truth)
 
     // Dependencies for GeminiVisualTestHelper
     implementation(libs.ktor.client.core)

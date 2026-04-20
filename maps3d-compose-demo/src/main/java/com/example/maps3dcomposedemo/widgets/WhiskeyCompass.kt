@@ -77,7 +77,8 @@ fun WhiskeyCompass(
     degreeLabelVerticalOffset: Dp = 4.dp,
 
     showCardinalLabels: Boolean = true,
-    cardinalLabelInterval: Int = 45, // Added for clarity
+    // Added for clarity
+    cardinalLabelInterval: Int = 45,
     cardinalLabelTextStyle: TextStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
     cardinalLabelVerticalOffset: Dp = 4.dp,
 
@@ -85,14 +86,14 @@ fun WhiskeyCompass(
     minorTickHeight: Dp = 15.dp,
     majorTickStrokeWidth: Dp = 2.dp,
     minorTickStrokeWidth: Dp = 1.dp,
-    lubberLineStrokeWidth: Dp = 2.dp
+    lubberLineStrokeWidth: Dp = 2.dp,
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
 
     // Normalize heading to the 0-360 range to prevent offset issues
     val normalizedHeading = (heading % 360f + 360f) % 360f
-    
+
     // Memoize measured cardinal labels for performance
     val measuredCardinalLabels = remember(cardinalLabelTextStyle, density) {
         with(density) {
@@ -104,18 +105,17 @@ fun WhiskeyCompass(
                 180 to textMeasurer.measure("S", style = cardinalLabelTextStyle),
                 225 to textMeasurer.measure("SW", style = cardinalLabelTextStyle),
                 270 to textMeasurer.measure("W", style = cardinalLabelTextStyle),
-                315 to textMeasurer.measure("NW", style = cardinalLabelTextStyle)
+                315 to textMeasurer.measure("NW", style = cardinalLabelTextStyle),
             )
         }
     }
-
 
     Box(
         modifier = modifier
             .height(stripHeight)
             .background(backgroundColor)
             .clipToBounds(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         // Canvas 1: Scrolling Compass Strip (ticks, degree labels, cardinal labels)
         Canvas(modifier = Modifier.matchParentSize()) {
@@ -141,7 +141,6 @@ fun WhiskeyCompass(
 
                         val visibilityMargin = canvasWidth
                         if (xPos < -xOffset + canvasWidth + visibilityMargin && xPos > -xOffset - visibilityMargin) {
-
                             val isMajorTickEquivalent = degreeInRepetition % 10 == 0
                             val isMinorTickEquivalent = degreeInRepetition % 5 == 0 && !isMajorTickEquivalent
 
@@ -152,7 +151,7 @@ fun WhiskeyCompass(
                                     color = tickColor,
                                     start = Offset(x = xPos, y = tickTopY),
                                     end = Offset(x = xPos, y = tickBottomY),
-                                    strokeWidth = majorTickStrokeWidthPx
+                                    strokeWidth = majorTickStrokeWidthPx,
                                 )
 
                                 if (showCardinalLabels && measuredCardinalLabels.containsKey(degreeInRepetition)) {
@@ -161,32 +160,39 @@ fun WhiskeyCompass(
                                         textLayoutResult = measuredText,
                                         topLeft = Offset(
                                             x = xPos - measuredText.size.width / 2f,
-                                            y = tickTopY - measuredText.size.height - cardinalLabelVerticalOffsetPx
-                                        )
+                                            y = tickTopY - measuredText.size.height - cardinalLabelVerticalOffsetPx,
+                                        ),
                                     )
                                 }
-                            }
-                            else if (isMinorTickEquivalent) {
+                            } else if (isMinorTickEquivalent) {
                                 val tickTopY = tickCenterY - minorTickHeightPx / 2f
                                 val tickBottomY = tickCenterY + minorTickHeightPx / 2f
                                 drawLine(
                                     color = tickColor,
                                     start = Offset(x = xPos, y = tickTopY),
                                     end = Offset(x = xPos, y = tickBottomY),
-                                    strokeWidth = minorTickStrokeWidthPx
+                                    strokeWidth = minorTickStrokeWidthPx,
                                 )
                             }
 
                             if (showDegreeLabels && degreeInRepetition % degreeLabelInterval == 0) {
-                                val tickBottomY = tickCenterY + (if (isMajorTickEquivalent) majorTickHeightPx else if (isMinorTickEquivalent) minorTickHeightPx else 0f) / 2f
+                                val tickBottomY = tickCenterY + (
+                                    if (isMajorTickEquivalent) {
+                                        majorTickHeightPx
+                                    } else if (isMinorTickEquivalent) {
+                                        minorTickHeightPx
+                                    } else {
+                                        0f
+                                    }
+                                    ) / 2f
                                 val labelText = degreeInRepetition.toString()
                                 val measuredText = textMeasurer.measure(labelText, style = degreeLabelTextStyle)
                                 drawText(
                                     textLayoutResult = measuredText,
                                     topLeft = Offset(
                                         x = xPos - measuredText.size.width / 2f,
-                                        y = tickBottomY + degreeLabelVerticalOffsetPx
-                                    )
+                                        y = tickBottomY + degreeLabelVerticalOffsetPx,
+                                    ),
                                 )
                             }
                         }
@@ -203,7 +209,7 @@ fun WhiskeyCompass(
                 color = lubberLineColor,
                 start = Offset(x = center.x, y = lubberLineVisualPadding),
                 end = Offset(x = center.x, y = size.height - lubberLineVisualPadding),
-                strokeWidth = currentLubberLineStrokeWidthPx
+                strokeWidth = currentLubberLineStrokeWidthPx,
             )
         }
     }
@@ -213,7 +219,13 @@ fun WhiskeyCompass(
 @Composable
 private fun FlatWhiskeyCompassPreview() {
     val exampleHeadings = listOf(
-        0f, 10f, 22.5f, 45f, 168f, 270f, 358f
+        0f,
+        10f,
+        22.5f,
+        45f,
+        168f,
+        270f,
+        358f,
     )
 
     Column(
@@ -223,14 +235,14 @@ private fun FlatWhiskeyCompassPreview() {
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text("Default Flat Compass Strip", color = Color.White, style = MaterialTheme.typography.titleMedium)
         WhiskeyCompass(
             heading = 45f,
             modifier = Modifier.fillMaxWidth(),
             stripHeight = 100.dp,
-            pixelsPerDegree = 8f
+            pixelsPerDegree = 8f,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -250,7 +262,7 @@ private fun FlatWhiskeyCompassPreview() {
             minorTickHeight = 18.dp,
             degreeLabelVerticalOffset = 6.dp,
             cardinalLabelVerticalOffset = 6.dp,
-            majorTickStrokeWidth = 2.5.dp
+            majorTickStrokeWidth = 2.5.dp,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -260,7 +272,7 @@ private fun FlatWhiskeyCompassPreview() {
             modifier = Modifier.fillMaxWidth(),
             stripHeight = 70.dp,
             showCardinalLabels = false,
-            pixelsPerDegree = 6f
+            pixelsPerDegree = 6f,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -270,9 +282,8 @@ private fun FlatWhiskeyCompassPreview() {
             modifier = Modifier.fillMaxWidth(),
             stripHeight = 70.dp,
             showDegreeLabels = false,
-            pixelsPerDegree = 6f
+            pixelsPerDegree = 6f,
         )
-
 
         exampleHeadings.forEach { currentHeading ->
             Spacer(Modifier.height(12.dp))
@@ -280,14 +291,14 @@ private fun FlatWhiskeyCompassPreview() {
                 text = "Test Heading: ${currentHeading.roundToInt()}°",
                 color = Color.LightGray,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 12.sp
+                fontSize = 12.sp,
             )
             WhiskeyCompass(
                 heading = currentHeading,
                 modifier = Modifier.fillMaxWidth(),
                 stripHeight = 90.dp,
                 pixelsPerDegree = 7f,
-                degreeLabelInterval = 30
+                degreeLabelInterval = 30,
             )
         }
     }

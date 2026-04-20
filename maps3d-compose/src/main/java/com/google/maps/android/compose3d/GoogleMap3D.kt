@@ -17,8 +17,10 @@
 package com.google.maps.android.compose3d
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.maps3d.GoogleMap3D
@@ -75,66 +77,43 @@ fun GoogleMap3D(
 ) {
     val state = remember { Map3DState() }
     val hasCalledOnMapReady = remember { mutableStateOf(false) }
+    val googleMap3DState = remember { mutableStateOf<GoogleMap3D?>(null) }
+
+    // Use rememberUpdatedState to avoid capturing stale lambdas in the async callback
+    val currentOnMapSteady by rememberUpdatedState(onMapSteady)
+    val currentOnCameraChanged by rememberUpdatedState(onCameraChanged)
+    val currentOnMapReady by rememberUpdatedState(onMapReady)
+    val currentOnMapClick by rememberUpdatedState(onMapClick)
+    val currentOnPlaceClick by rememberUpdatedState(onPlaceClick)
 
     AndroidView(
         modifier = modifier,
         factory = { context ->
             val map3dView = Map3DView(context, options)
             map3dView.onCreate(null)
-            map3dView
-        },
-        update = { map3dView ->
+
             map3dView.getMap3DViewAsync(object : OnMap3DViewReadyCallback {
                 override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
+                    googleMap3DState.value = googleMap3D
                     Map3DRegistry.setInstance(googleMap3D)
 
                     googleMap3D.setOnMapSteadyListener { isSteady ->
                         if (isSteady) {
-                            onMapSteady()
+                            currentOnMapSteady()
                         }
                     }
 
                     googleMap3D.setCameraChangedListener { camera ->
-                        onCameraChanged(camera)
+                        currentOnCameraChanged(camera)
                     }
 
-                    fun applyUpdates() {
-                        if (!hasCalledOnMapReady.value) {
-                            onMapReady(googleMap3D)
-                            hasCalledOnMapReady.value = true
-                        }
-
-                        // Sync hoisted state with the imperative map instance
-                        googleMap3D.setCamera(camera.toValidCamera())
-                        googleMap3D.setCameraRestriction(cameraRestriction.toValidCameraRestriction())
-                        googleMap3D.setMapMode(mapMode)
-
-                        state.syncMarkers(googleMap3D, markers)
-                        state.syncPolylines(googleMap3D, polylines)
-                        state.syncPolygons(googleMap3D, polygons)
-                        state.syncModels(googleMap3D, models)
-                        state.syncPopovers(map3dView.context, googleMap3D, popovers)
-
-                        if (onMapClick != null || onPlaceClick != null) {
-                            googleMap3D.setMap3DClickListener { _, placeId ->
-                                if (placeId != null) {
-                                    onPlaceClick?.invoke(placeId)
-                                } else {
-                                    onMapClick?.invoke()
-                                }
+                    if (currentOnMapClick != null || currentOnPlaceClick != null) {
+                        googleMap3D.setMap3DClickListener { _, placeId ->
+                            if (placeId != null) {
+                                currentOnPlaceClick?.invoke(placeId)
+                            } else {
+                                currentOnMapClick?.invoke()
                             }
-                        }
-                    }
-
-                    if (Map3DRegistry.isMapReady) {
-                        // Map was already ready (e.g. reused instance), apply updates immediately
-                        applyUpdates()
-                    } else {
-                        // First time initialization, must wait for listener
-                        googleMap3D.setOnMapReadyListener {
-                            googleMap3D.setOnMapReadyListener(null) // Clear it immediately
-                            Map3DRegistry.markReady()
-                            applyUpdates()
                         }
                     }
                 }
@@ -143,6 +122,42 @@ fun GoogleMap3D(
                     throw error
                 }
             })
+
+            map3dView
+        },
+        update = { map3dView ->
+            val googleMap3D = googleMap3DState.value
+            if (googleMap3D != null) {
+                fun applyUpdates() {
+                    if (!hasCalledOnMapReady.value) {
+                        currentOnMapReady(googleMap3D)
+                        hasCalledOnMapReady.value = true
+                    }
+
+                    // Sync hoisted state with the imperative map instance
+                    googleMap3D.setCamera(camera.toValidCamera())
+                    googleMap3D.setCameraRestriction(cameraRestriction.toValidCameraRestriction())
+                    googleMap3D.setMapMode(mapMode)
+
+                    state.syncMarkers(googleMap3D, markers)
+                    state.syncPolylines(googleMap3D, polylines)
+                    state.syncPolygons(googleMap3D, polygons)
+                    state.syncModels(googleMap3D, models)
+                    state.syncPopovers(map3dView.context, googleMap3D, popovers)
+                }
+
+                if (Map3DRegistry.isMapReady) {
+                    // Map was already ready (e.g. reused instance), apply updates immediately
+                    applyUpdates()
+                } else {
+                    // First time initialization, must wait for listener
+                    googleMap3D.setOnMapReadyListener {
+                        googleMap3D.setOnMapReadyListener(null) // Clear it immediately
+                        Map3DRegistry.markReady()
+                        applyUpdates()
+                    }
+                }
+            }
         },
         onRelease = { map3dView ->
             state.clear()

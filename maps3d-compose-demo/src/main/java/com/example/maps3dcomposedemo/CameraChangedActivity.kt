@@ -20,42 +20,27 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.google.android.gms.maps3d.model.Camera
-import com.google.android.gms.maps3d.model.Map3DMode
-import com.example.maps3dcomposedemo.widgets.WhiskeyCompass
-import com.example.maps3dcomposedemo.widgets.TiltScale
 import com.example.maps3dcomposedemo.widgets.RangeScale
+import com.example.maps3dcomposedemo.widgets.TiltScale
+import com.example.maps3dcomposedemo.widgets.WhiskeyCompass
+import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.maps.android.compose3d.GoogleMap3D
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlin.math.roundToInt
 
 class CameraChangedActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,7 +87,7 @@ fun CameraChangedScreen() {
             modifier = Modifier.fillMaxSize(),
             onCameraChanged = { camera ->
                 cameraFlow.value = camera
-            }
+            },
         )
 
         val heading = currentCamera.heading?.toFloat() ?: 0f
@@ -115,8 +100,9 @@ fun CameraChangedScreen() {
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
-                .padding(top = 48.dp), // Padding for edge-to-edge only at top
-            backgroundColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
+                // Padding for edge-to-edge only at top
+                .padding(top = 48.dp),
+            backgroundColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
         )
 
         // Overlay Tilt Scale on the right
@@ -124,7 +110,7 @@ fun CameraChangedScreen() {
             tilt = tilt,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 16.dp)
+                .padding(end = 16.dp),
         )
 
         // Overlay Range Scale at the bottom
@@ -132,9 +118,7 @@ fun CameraChangedScreen() {
             range = range,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 32.dp)
+                .padding(bottom = 32.dp),
         )
     }
 }
-
-

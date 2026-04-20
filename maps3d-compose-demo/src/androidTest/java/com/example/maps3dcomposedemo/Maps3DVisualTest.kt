@@ -446,4 +446,55 @@ class Maps3DVisualTest : BaseVisualTest() {
             )
         }
     }
+
+    @Test
+    fun verifyRotationMaintainsMap() = runBlocking {
+        // Launch PolylinesActivity directly
+        val intent = Intent(context, PolylinesActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+
+        // Wait for the activity to be displayed
+        uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
+
+        // Wait for the map to render and tiles to load
+        waitForMapRendering(60)
+
+        try {
+            // Rotate device to landscape
+            uiDevice.setOrientationLeft()
+
+            // Wait for rotation to complete and map to render again
+            kotlinx.coroutines.delay(5000) // Wait for rotation animation
+            waitForMapRendering(60)
+
+            // Capture a screenshot in landscape
+            val screenshotBitmap = captureScreenshot("polylines_landscape.png")
+
+            // Define the verification prompt for Gemini
+            val prompt = """
+                Please act as a UI tester and analyze this screenshot of a 3D map in landscape mode.
+                1. Confirm that a 3D map view is visible.
+                2. Confirm that a red polyline is still visible on the map.
+
+                If the map is visible and the red polyline is seen, reply with "PASSED".
+                Otherwise, report what you see.
+            """.trimIndent()
+
+            // Analyze the image using Gemini
+            val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)
+            println("Gemini's analysis (Landscape): $geminiResponse")
+
+            // Assert on Gemini's response
+            assertTrue(
+                "Visual verification failed in landscape. Gemini response: $geminiResponse",
+                geminiResponse?.contains("PASSED", ignoreCase = true) == true,
+            )
+        } finally {
+            // Restore orientation
+            uiDevice.setOrientationNatural()
+            kotlinx.coroutines.delay(2000) // Wait for it to settle
+        }
+    }
 }
