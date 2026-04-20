@@ -18,7 +18,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.diffplug.spotless") version "6.25.0"
+    alias(libs.plugins.spotless)
 }
 
 configure<com.diffplug.gradle.spotless.SpotlessExtension> {
