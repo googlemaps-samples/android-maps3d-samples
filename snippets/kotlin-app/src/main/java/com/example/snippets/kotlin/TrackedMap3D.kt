@@ -34,25 +34,25 @@ class TrackedMap3D(
         return marker
     }
 
-    fun addPolyline(options: PolylineOptions): Polyline? {
+    fun addPolyline(options: PolylineOptions): Polyline {
         val polyline = delegate.addPolyline(options)
         if (polyline != null) items.add(polyline)
         return polyline
     }
 
-    fun addPolygon(options: PolygonOptions): Polygon? {
+    fun addPolygon(options: PolygonOptions): Polygon {
         val polygon = delegate.addPolygon(options)
         if (polygon != null) items.add(polygon)
         return polygon
     }
 
-    fun addModel(options: ModelOptions): Model? {
+    fun addModel(options: ModelOptions): Model {
         val model = delegate.addModel(options)
         if (model != null) items.add(model)
         return model
     }
 
-    fun addPopover(options: PopoverOptions): Popover? {
+    fun addPopover(options: PopoverOptions): Popover {
         val popover = delegate.addPopover(options)
         if (popover != null) items.add(popover)
         return popover

@@ -15,6 +15,8 @@
 package com.example.advancedmaps3dsamples.scenarios
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.maps3d.GoogleMap3D
@@ -28,20 +30,23 @@ internal fun ThreeDMap(
   viewModel: ScenariosViewModel,
   modifier: Modifier = Modifier,
 ) {
+  // Use rememberUpdatedState to avoid capturing stale callbacks if they change
+  val currentOnMapSteadyChange by rememberUpdatedState { isSteady: Boolean ->
+    viewModel.onMapSteadyChange(isSteady)
+  }
+
   AndroidView(
     modifier = modifier,
     factory = { context ->
       val map3dView = Map3DView(context = context, options = options)
       map3dView.onCreate(null)
-      map3dView
-    },
-    update = { map3dView ->
+      
       map3dView.getMap3DViewAsync(
         object : OnMap3DViewReadyCallback {
           override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
             viewModel.setGoogleMap3D(googleMap3D)
             googleMap3D.setOnMapSteadyListener { isSceneSteady ->
-                viewModel.onMapSteadyChange(isSceneSteady)
+                currentOnMapSteadyChange(isSceneSteady)
             }
           }
 
@@ -50,6 +55,11 @@ internal fun ThreeDMap(
           }
         }
       )
+      
+      map3dView
+    },
+    update = { _ ->
+      // No-op, updates are handled via viewModel and imperative calls on the stored instance
     },
     onRelease = { _ ->
       // Clean up resources if needed

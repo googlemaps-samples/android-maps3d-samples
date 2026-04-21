@@ -170,7 +170,7 @@ public class PolygonSnippets {
 
         // Core logic: create a Hole object and set InnerPaths (Optional)
         Hole innerHole = new Hole(innerPoints);
-        options.setInnerPaths(Arrays.asList(innerHole));
+        options.setInnerPaths(List.of(innerHole));
 
         Polygon polygon = map.addPolygon(options);
         // [START_EXCLUDE]

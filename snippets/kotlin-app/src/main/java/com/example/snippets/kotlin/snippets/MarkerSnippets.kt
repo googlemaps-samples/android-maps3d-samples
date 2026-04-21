@@ -63,7 +63,7 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
             // MarkerOptions uses label, not title.
         }
 
-        val marker = map.addMarker(options)
+        map.addMarker(options)
         // [START_EXCLUDE]
         map.flyCameraTo(
             flyToOptions {
@@ -107,7 +107,7 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
             isDrawnWhenOccluded = true
         }
 
-        val marker = map.addMarker(options)
+        map.addMarker(options)
         // [START_EXCLUDE]
         map.flyCameraTo(
             flyToOptions {
@@ -207,7 +207,7 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
             )
         }
 
-        val marker = map.addMarker(options)
+        map.addMarker(options)
         // [START_EXCLUDE]
         map.flyCameraTo(
             flyToOptions {

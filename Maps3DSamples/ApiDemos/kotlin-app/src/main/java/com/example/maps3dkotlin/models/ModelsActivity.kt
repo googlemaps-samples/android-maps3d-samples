@@ -20,7 +20,6 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.example.maps3d.common.awaitCameraUpdate
 import com.example.maps3d.common.toCameraUpdate
-import com.example.maps3d.common.toValidCamera
 import com.example.maps3dcommon.R
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
@@ -35,10 +34,9 @@ import com.google.android.gms.maps3d.model.orientation
 import com.google.android.gms.maps3d.model.vector3D
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds

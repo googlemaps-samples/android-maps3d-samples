@@ -49,6 +49,16 @@ The [Maps3DSamples/ApiDemos/common](Maps3DSamples/ApiDemos/common) module contai
 It also has [Map3dViewModel](Maps3DSamples/advanced/app/src/main/java/com/example/advancedmaps3dsamples/common/Map3dViewModel.kt) which demonstrates how to
 create an abstract base class for view models needing to interact with the Maps3DView via a GoogleMap3D.
 
+## Experimental Compose Wrapper
+
+In addition to the advanced sample, this repository contains an experimental, declarative Compose wrapper for the Maps 3D SDK:
+
+* **[maps3d-compose](maps3d-compose)**: Provides the `GoogleMap3D` composable and supports declarative state management for markers, polylines, polygons, models, and popovers.
+* **[maps3d-compose-demo](maps3d-compose-demo)**: Contains sample activities demonstrating how to use the wrapper.
+
+> [!WARNING]
+> These modules are a **Work In Progress (WIP) experiment** and serve as a **reference implementation**. They are not intended for production use.
+
 ## Requirements
 
 To run the samples, you will need:

@@ -22,16 +22,17 @@ material = "1.13.0"
 
 playServicesBase = "18.10.0"
 playServicesMaps3d = "0.2.0"
-places = "5.1.1"
+places = "5.2.0"
 secretsGradlePlugin = "2.0.1"
 truth = "1.4.5"
 uiautomator = "2.3.0"
+spotless = "8.4.0"
 
 kotlinxDatetime = "0.7.1"
-kotlinxSerialization = "1.10.0"
-ktor = "3.4.1"
+kotlinxSerialization = "1.11.0"
+ktor = "3.4.2"
 hilt = "2.59.2"
-ksp = "2.3.2"
+ksp = "2.3.6"
 mapsUtilsKtx = "6.0.1"
 androidx-core-ktx = "1.8.9"
 
@@ -63,7 +64,6 @@ play-services-base = { module = "com.google.android.gms:play-services-base", ver
 play-services-maps3d = { module = "com.google.android.gms:play-services-maps3d", version.ref = "playServicesMaps3d" }
 places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
-truth = { module = "com.google.truth:truth", version.ref = "truth" }
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
 
@@ -89,3 +89,4 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 jetbrains-kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

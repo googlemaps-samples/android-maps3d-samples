@@ -64,10 +64,6 @@ if (!isCI) {
             if (apiKey.isNullOrBlank() || !apiKey.matches(Regex("^AIza[a-zA-Z0-9_-]{35}$"))) {
                 throw GradleException("Invalid or missing MAPS3D_API_KEY in secrets.properties. Please provide a valid Google Maps API key (starts with 'AIza').")
             }
-
-            if (secrets.getProperty("MAPS_API_KEY") != null) {
-                println("Warning: Found MAPS_API_KEY in secrets.properties. This project relies exclusively on MAPS3D_API_KEY.")
-            }
         }
     }
 }
@@ -138,7 +134,7 @@ dependencies {
     testImplementation(libs.json) // "org.json:json:20251224"
     testImplementation(libs.robolectric) // "org.robolectric:robolectric:4.16.1"
     testImplementation(libs.androidx.core) // "androidx.test:core:1.7.0"
-    testImplementation(libs.truth) // "com.google.truth:truth:1.4.5"
+    testImplementation(libs.google.truth) // "com.google.truth:truth:1.4.5"
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(project(":Maps3DSamples:ApiDemos:common"))
