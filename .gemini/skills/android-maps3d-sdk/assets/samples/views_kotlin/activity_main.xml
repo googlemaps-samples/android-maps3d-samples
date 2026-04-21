@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map3d="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Map3DView with common required and optional attributes. 
+         Remove unneeded optional attributes as necessary. -->
+    <com.google.android.gms.maps3d.Map3DView
+        android:id="@+id/map_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        map3d:mapId="your_map_id"
+        map3d:mode="hybrid"
+        map3d:centerLat="40.748392"
+        map3d:centerLng="-73.986060"
+        map3d:centerAlt="175"
+        map3d:heading="0"
+        map3d:tilt="45"
+        map3d:range="1000"
+        map3d:roll="0"
+        map3d:minAltitude="0"
+        map3d:maxAltitude="1000000"
+        map3d:minHeading="0"
+        map3d:maxHeading="360"
+        map3d:minTilt="0"
+        map3d:maxTilt="90" />
+
+</FrameLayout>

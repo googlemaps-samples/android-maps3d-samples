@@ -1,0 +1,53 @@
+import com.google.android.gms.maps3d.GoogleMap3D;
+import com.google.android.gms.maps3d.model.Marker;
+import com.google.android.gms.maps3d.model.MarkerOptions;
+import com.google.android.gms.maps3d.model.Polygon;
+import com.google.android.gms.maps3d.model.PolygonOptions;
+import com.google.android.gms.maps3d.model.Polyline;
+import com.google.android.gms.maps3d.model.PolylineOptions;
+import java.util.List;
+
+/** Decorator wrapper around GoogleMap3D to track elements for automated cleanup. */
+public class TrackedMap3D {
+
+    private final GoogleMap3D delegate;
+    private final List<Object> items;
+
+    public TrackedMap3D(GoogleMap3D delegate, List<Object> items) {
+        this.delegate = delegate;
+        this.items = items;
+    }
+
+    public Marker addMarker(MarkerOptions options) {
+        Marker marker = delegate.addMarker(options);
+        if (marker != null) items.add(marker);
+        return marker;
+    }
+
+    public Polyline addPolyline(PolylineOptions options) {
+        Polyline polyline = delegate.addPolyline(options);
+        if (polyline != null) items.add(polyline);
+        return polyline;
+    }
+
+    public Polygon addPolygon(PolygonOptions options) {
+        Polygon polygon = delegate.addPolygon(options);
+        if (polygon != null) items.add(polygon);
+        return polygon;
+    }
+
+    public void clearAll() {
+        for (Object item : items) {
+            if (item instanceof Marker) {
+                ((Marker) item).remove();
+            } else if (item instanceof Polyline) {
+                ((Polyline) item).remove();
+            } else if (item instanceof Polygon) {
+                ((Polygon) item).remove();
+            }
+        }
+        items.clear();
+    }
+    
+    // Forward other necessary methods to the delegate as needed
+}
