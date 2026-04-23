@@ -16,6 +16,8 @@
 
 package com.example.composedemos.routes
 
+import WindowCompat
+import WindowInsetsControllerCompat
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -82,12 +84,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.edit
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -97,32 +97,29 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.composedemos.BuildConfig
 import com.example.composedemos.R
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.Map3DOptions
-import com.google.android.gms.maps3d.Map3DView
-import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.ImageView
-import com.google.android.gms.maps3d.model.Polyline
+import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
-import com.google.android.gms.maps3d.model.markerOptions
-import com.google.android.gms.maps3d.model.modelOptions
-import com.google.android.gms.maps3d.model.orientation
-import com.google.android.gms.maps3d.model.polylineOptions
-import com.google.android.gms.maps3d.model.vector3D
+import com.google.maps.android.compose3d.GoogleMap3D
+import com.google.maps.android.compose3d.MarkerConfig
+import com.google.maps.android.compose3d.ModelConfig
+import com.google.maps.android.compose3d.ModelScale
+import com.google.maps.android.compose3d.PolylineConfig
+import com.google.maps.android.compose3d.PopoverConfig
 import com.google.maps.android.compose3d.utils.GeoMathUtils
-import com.google.maps.android.compose3d.utils.awaitCameraAnimation
 import com.google.maps.android.compose3d.utils.calculateHeading
 import com.google.maps.android.compose3d.utils.haversineDistance
 import com.google.maps.android.compose3d.utils.toHeading
 import com.google.maps.android.compose3d.utils.toValidCamera
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.debounce
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
+import android.graphics.Color as AndroidColor
 
 sealed interface RouteTracker {
     val name: String
@@ -166,7 +163,7 @@ class RoutesActivity : ComponentActivity() {
 
         // Hide system tray (immersive mode)
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+        windowInsetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
         windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
@@ -183,10 +180,10 @@ class RoutesActivity : ComponentActivity() {
     }
 }
 
+@OptIn(kotlinx.coroutines.FlowPreview::class)
 @Composable
 fun RouteSampleScreen(viewModel: RouteViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var map3D by remember { mutableStateOf<GoogleMap3D?>(null) }
 
     val context = LocalContext.current
     val sharedPrefs = remember { context.getSharedPreferences("route_prefs", Context.MODE_PRIVATE) }
@@ -195,11 +192,32 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
     // Display Warnings
     var displayWarning by remember { mutableStateOf(warningCount < 2) }
 
+    // User calibrated camera position
+    val initialCamera = remember {
+        camera {
+            center = latLngAltitude {
+                latitude = 21.348567086690373
+                longitude = -157.80396135489252
+                altitude = 0.0
+            }
+            heading = 38.685134043475976
+            tilt = 44.96296481747822
+            range = 29158.68678946048
+            roll = 0.0
+        }
+    }
+
+    // State-driven camera
+    var cameraState by remember { mutableStateOf(initialCamera) }
+    var markers by remember { mutableStateOf(emptyList<MarkerConfig>()) }
+    var models by remember { mutableStateOf(emptyList<ModelConfig>()) }
+    var polylines by remember { mutableStateOf(emptyList<PolylineConfig>()) }
+    var popovers by remember { mutableStateOf(emptyList<PopoverConfig>()) }
+
     // Dynamic tracking state
     var cameraRange by remember { mutableFloatStateOf(1500f) }
     var baseSpeedMps by remember { mutableFloatStateOf(150f) }
     var currentTracker by remember { mutableStateOf<RouteTracker>(RouteTracker.Marker) }
-    var currentPolyline by remember { mutableStateOf<Polyline?>(null) }
 
     // Playback controls state
     var elapsedDistance by remember { mutableFloatStateOf(0f) }
@@ -208,7 +226,15 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
     var flyModeActive by remember { mutableStateOf(false) }
     var cameraHeadingOffset by remember { mutableFloatStateOf(0f) }
 
-    var latestCamera by remember { mutableStateOf<Camera?>(null) }
+    val cameraFlow = remember { MutableSharedFlow<Camera>(replay = 0, extraBufferCapacity = 1) }
+
+    LaunchedEffect(cameraFlow) {
+        cameraFlow
+            .debounce(1000)
+            .collect { camera ->
+                Log.d("CameraPosition", "Center: ${camera.center.latitude}, ${camera.center.longitude}, Heading: ${camera.heading}, Tilt: ${camera.tilt}, Range: ${camera.range}")
+            }
+    }
 
     // Automatically fetch route on start
     LaunchedEffect(Unit) {
@@ -217,52 +243,41 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
         viewModel.fetchRoute(BuildConfig.MAPS3D_API_KEY, origin, dest)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // 1. The Map Viewport Layer
-        Map3DViewport(
-            onMapReady = { map3D = it },
-            onMapCleared = { map3D = null },
-            onCameraChanged = { latestCamera = it },
-        )
-
-        var showPositionDialog by remember { mutableStateOf(false) }
-
-        // Show Position Button
-        Button(
-            onClick = { showPositionDialog = true },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 80.dp, end = 16.dp)
-                .semantics { contentDescription = "Show Position Button" },
-        ) {
-            Text("Show Position")
-        }
-
-        if (showPositionDialog) {
-            latestCamera?.let { camera ->
-                AlertDialog(
-                    onDismissRequest = { showPositionDialog = false },
-                    title = { Text("Current Camera Position") },
-                    text = {
-                        Text(
-                            "Lat: ${camera.center.latitude}\n" +
-                                "Lng: ${camera.center.longitude}\n" +
-                                "Heading: ${camera.heading}\n" +
-                                "Tilt: ${camera.tilt}\n" +
-                                "Range: ${camera.range}",
-                        )
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { showPositionDialog = false }) {
-                            Text("OK")
+    // Draw polyline when route is loaded
+    LaunchedEffect(uiState) {
+        if (uiState is RouteUiState.Success) {
+            val state = uiState as RouteUiState.Success
+            polylines = listOf(
+                PolylineConfig(
+                    key = "route_line",
+                    points = state.decodedPolyline.map {
+                        latLngAltitude {
+                            latitude = it.latitude
+                            longitude = it.longitude
+                            altitude = 0.0
                         }
                     },
-                )
-            } ?: run {
-                Toast.makeText(context, "Camera not ready yet", Toast.LENGTH_SHORT).show()
-                showPositionDialog = false
-            }
+                    color = AndroidColor.BLUE,
+                    width = 10f,
+                ),
+            )
         }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // 1. The Map Viewport Layer (Pure State-Driven!)
+        GoogleMap3D(
+            camera = cameraState,
+            markers = markers,
+            models = models,
+            polylines = polylines,
+            popovers = popovers,
+            mapMode = Map3DMode.SATELLITE,
+            modifier = Modifier.fillMaxSize(),
+            onCameraChanged = { camera ->
+                cameraFlow.tryEmit(camera)
+            },
+        )
 
         // 2. Custom Translucent Top Bar
         Box(
@@ -303,9 +318,8 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
             }
         }
 
-        // 3. The Headless Routing Engine
+        // 3. The Headless Routing Engine (Now updates state!)
         RouteFlightEngine(
-            map3D = map3D,
             uiState = uiState,
             config = FlightEngineConfig(
                 flyModeActive = flyModeActive,
@@ -317,19 +331,14 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                 cameraRange = cameraRange,
                 cameraHeadingOffset = cameraHeadingOffset,
             ),
+            onCameraChange = { cameraState = it },
+            onMarkersChange = { markers = it },
+            onModelsChange = { models = it },
             onElapsedDistanceChange = { elapsedDistance = it },
             onIsPlayingChange = { isPlaying = it },
         )
 
-        // 4. UI Path Drawing
-        PolylineDrawer(
-            uiState = uiState,
-            map3D = map3D,
-            currentPolyline = currentPolyline,
-            onPolylineUpdate = { currentPolyline = it },
-        )
-
-        // 5. Interactive Overlay UI
+        // 4. Interactive Overlay UI
         if (!flyModeActive) {
             StandardControlsOverlay(uiState = uiState, onFlyClicked = {
                 val state = uiState as? RouteUiState.Success ?: return@StandardControlsOverlay
@@ -360,14 +369,17 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                 onExitFlyMode = {
                     flyModeActive = false
                     isPlaying = false
+                    cameraState = initialCamera // Reset camera
+                    markers = emptyList()
+                    models = emptyList()
                 },
             )
         }
 
-        // 6. Loading/Error Overlays
+        // 5. Loading/Error Overlays
         StateStatusOverlay(uiState = uiState)
 
-        // 7. Camera Manipulator Overlays
+        // 6. Camera Manipulator Overlays
         if (uiState is RouteUiState.Success) {
             CameraControlsOverlay(
                 flyModeActive = flyModeActive,
@@ -380,7 +392,7 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
             )
         }
 
-        // 8. Dialogs
+        // 7. Dialogs
         if (displayWarning) {
             SecurityWarningDialog(onDismiss = {
                 displayWarning = false
@@ -388,56 +400,6 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
             })
         }
     }
-}
-
-@Composable
-private fun Map3DViewport(
-    onMapReady: (GoogleMap3D) -> Unit,
-    onMapCleared: () -> Unit,
-    onCameraChanged: (Camera) -> Unit,
-) {
-    val context = LocalContext.current
-    AndroidView(modifier = Modifier.fillMaxSize().testTag("map3d_view"), factory = {
-        val options = Map3DOptions(
-            centerLat = 21.3522172132339,
-            centerLng = -157.79645115302867,
-            centerAlt = 0.0,
-            tilt = 45.00610644437725,
-            range = 35967.317610257305,
-        )
-        val view = Map3DView(context, options)
-        view.onCreate(null)
-        view
-    }, update = { view ->
-        view.getMap3DViewAsync(object : OnMap3DViewReadyCallback {
-            override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-                // Set the initial camera view with heading!
-                val initialCamera = camera {
-                    center = latLngAltitude {
-                        latitude = 21.3522172132339
-                        longitude = -157.79645115302867
-                        altitude = 0.0
-                    }
-                    heading = 50.1840072146386
-                    tilt = 45.00610644437725
-                    range = 35967.317610257305
-                    roll = 0.0
-                }
-                googleMap3D.setCamera(initialCamera)
-
-                googleMap3D.setCameraChangedListener { camera ->
-                    Log.d("CameraPosition", "Center: ${camera.center.latitude}, ${camera.center.longitude}, Heading: ${camera.heading}, Tilt: ${camera.tilt}, Range: ${camera.range}")
-                    onCameraChanged(camera)
-                }
-                onMapReady(googleMap3D)
-            }
-
-            override fun onError(error: Exception) {}
-        })
-    }, onRelease = { view ->
-        onMapCleared()
-        view.onDestroy()
-    })
 }
 
 data class FlightEngineConfig(
@@ -453,21 +415,25 @@ data class FlightEngineConfig(
 
 @Composable
 private fun RouteFlightEngine(
-    map3D: GoogleMap3D?,
     uiState: RouteUiState,
     config: FlightEngineConfig,
+    onCameraChange: (Camera) -> Unit,
+    onMarkersChange: (List<MarkerConfig>) -> Unit,
+    onModelsChange: (List<ModelConfig>) -> Unit,
     onElapsedDistanceChange: (Float) -> Unit,
     onIsPlayingChange: (Boolean) -> Unit,
 ) {
     val updatedConfig by rememberUpdatedState(config)
     val updatedOnElapsedDistanceChange by rememberUpdatedState(onElapsedDistanceChange)
     val updatedOnIsPlayingChange by rememberUpdatedState(onIsPlayingChange)
+    val updatedOnCameraChange by rememberUpdatedState(onCameraChange)
+    val updatedOnMarkersChange by rememberUpdatedState(onMarkersChange)
+    val updatedOnModelsChange by rememberUpdatedState(onModelsChange)
 
-    LaunchedEffect(config.flyModeActive, uiState, map3D) {
+    LaunchedEffect(config.flyModeActive, uiState) {
         if (!config.flyModeActive) return@LaunchedEffect
 
         val state = uiState as? RouteUiState.Success ?: return@LaunchedEffect
-        val safeMap = map3D ?: return@LaunchedEffect
         val rawPath = state.decodedPolyline
         if (rawPath.size < 2) return@LaunchedEffect
 
@@ -486,7 +452,6 @@ private fun RouteFlightEngine(
         var currentHeading = calculateHeading(rawPath[0], rawPath[1]).toFloat()
 
         var lastFrameTime = 0L
-        val trackerIds = mutableMapOf<RouteTracker, String>()
         var internalDistance = updatedConfig.elapsedDistance
 
         while (config.flyModeActive) {
@@ -540,135 +505,55 @@ private fun RouteFlightEngine(
                     tilt = 65.0
                     range = cfg.cameraRange.toDouble()
                 }.toValidCamera()
-                safeMap.setCamera(frameCamera)
 
-                val trackers = listOf(RouteTracker.Marker, RouteTracker.RedCar, RouteTracker.BananaCar)
-                for (tracker in trackers) {
-                    val isActive = tracker == cfg.currentTracker
+                // Update camera state!
+                updatedOnCameraChange(frameCamera)
 
-                    when (tracker) {
-                        is RouteTracker.Marker -> {
-                            val m = safeMap.addMarker(
-                                markerOptions {
-                                    trackerIds[tracker]?.let { id = it }
-                                    if (isActive) {
-                                        position = latLngAltitude {
-                                            latitude = targetPos.latitude
-                                            longitude = targetPos.longitude
-                                            altitude = 0.0
-                                        }
-                                        altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                                    } else {
-                                        position = latLngAltitude {
-                                            latitude = 0.0
-                                            longitude = 0.0
-                                            altitude = 0.0
-                                        }
-                                        altitudeMode = AltitudeMode.ABSOLUTE
-                                    }
-                                    setStyle(ImageView(R.drawable.car))
-                                },
-                            )
-                            if (m != null && !trackerIds.containsKey(tracker)) trackerIds[tracker] = m.id
-                        }
+                // Update trackers state!
+                val isActive = true // We only care about active one for display in state-driven mode
 
-                        is RouteTracker.Model -> {
-                            val m = safeMap.addModel(
-                                modelOptions {
-                                    trackerIds[tracker]?.let { id = it }
-                                    if (isActive) {
-                                        position = latLngAltitude {
-                                            latitude = targetPos.latitude
-                                            longitude = targetPos.longitude
-                                            altitude = tracker.hoverAltitude
-                                        }
-                                        altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-                                    } else {
-                                        position = latLngAltitude {
-                                            latitude = 0.0
-                                            longitude = 0.0
-                                            altitude = 0.0
-                                        }
-                                        altitudeMode = AltitudeMode.ABSOLUTE
-                                    }
-                                    url = tracker.url
-                                    scale = if (isActive) {
-                                        vector3D {
-                                            x = tracker.scale
-                                            y = tracker.scale
-                                            z = tracker.scale
-                                        }
-                                    } else {
-                                        vector3D {
-                                            x = 0.001
-                                            y = 0.001
-                                            z = 0.001
-                                        }
-                                    }
-                                    orientation = if (isActive) {
-                                        orientation {
-                                            heading = (currentHeading.toDouble() + tracker.headingOffset).toHeading()
-                                            tilt = tracker.tilt
-                                            roll = 0.0
-                                        }
-                                    } else {
-                                        orientation {
-                                            heading = 0.0
-                                            tilt = 0.0
-                                            roll = 0.0
-                                        }
-                                    }
-                                },
-                            )
-                            if (!trackerIds.containsKey(tracker)) trackerIds[tracker] = m.id
-                            if (isActive) {
-                                m.orientation = orientation {
-                                    heading = (currentHeading.toDouble() + tracker.headingOffset).toHeading()
-                                    tilt = tracker.tilt
-                                    roll = 0.0
-                                }
-                            } else {
-                                m.orientation = orientation {
-                                    heading = 0.0
-                                    tilt = 0.0
-                                    roll = 0.0
-                                }
-                            }
-                        }
+                when (val tracker = cfg.currentTracker) {
+                    is RouteTracker.Marker -> {
+                        updatedOnMarkersChange(
+                            listOf(
+                                MarkerConfig(
+                                    key = "route_marker",
+                                    position = latLngAltitude {
+                                        latitude = targetPos.latitude
+                                        longitude = targetPos.longitude
+                                        altitude = 0.0
+                                    },
+                                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND,
+                                    styleView = ImageView(R.drawable.car),
+                                ),
+                            ),
+                        )
+                        updatedOnModelsChange(emptyList())
+                    }
+
+                    is RouteTracker.Model -> {
+                        updatedOnModelsChange(
+                            listOf(
+                                ModelConfig(
+                                    key = "route_model",
+                                    position = latLngAltitude {
+                                        latitude = targetPos.latitude
+                                        longitude = targetPos.longitude
+                                        altitude = tracker.hoverAltitude
+                                    },
+                                    altitudeMode = AltitudeMode.RELATIVE_TO_GROUND,
+                                    url = tracker.url,
+                                    scale = ModelScale.Uniform(tracker.scale.toFloat()),
+                                    heading = (currentHeading.toDouble() + tracker.headingOffset).toHeading(),
+                                    tilt = tracker.tilt,
+                                    roll = 0.0,
+                                ),
+                            ),
+                        )
+                        updatedOnMarkersChange(emptyList())
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun PolylineDrawer(
-    uiState: RouteUiState,
-    map3D: GoogleMap3D?,
-    currentPolyline: Polyline?,
-    onPolylineUpdate: (Polyline?) -> Unit,
-) {
-    if (uiState is RouteUiState.Success) {
-        LaunchedEffect(uiState.decodedPolyline, map3D) {
-            val safeMap = map3D ?: return@LaunchedEffect
-            currentPolyline?.remove()
-
-            val polylinePath = uiState.decodedPolyline.map { latLng ->
-                latLngAltitude {
-                    latitude = latLng.latitude
-                    longitude = latLng.longitude
-                    altitude = 0.0
-                }
-            }
-
-            val lineOptions = polylineOptions {
-                this.path = polylinePath
-                strokeColor = android.graphics.Color.BLUE
-                strokeWidth = 10.0
-            }
-
-            onPolylineUpdate(safeMap.addPolyline(lineOptions))
         }
     }
 }
@@ -726,7 +611,7 @@ private fun BoxScope.PlaybackControlsOverlay(
                     onIsPlayingChange(false)
                 },
                 valueRange = 0f..kotlin.math.max(1f, totalDistance),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).semantics { contentDescription = "Progress Slider" },
             )
             Spacer(modifier = Modifier.width(8.dp))
             IconButton(onClick = onExitFlyMode) {
@@ -825,7 +710,7 @@ private fun FadingThumbWheel(
 
     LaunchedEffect(sliderInteractionTime) {
         isSliderActive = true
-        delay(3.seconds)
+        delay(3000)
         isSliderActive = false
     }
 
@@ -914,7 +799,7 @@ private fun FadingVerticalSlider(
 
     LaunchedEffect(sliderInteractionTime) {
         isSliderActive = true
-        delay(3.seconds)
+        delay(3000)
         isSliderActive = false
     }
 

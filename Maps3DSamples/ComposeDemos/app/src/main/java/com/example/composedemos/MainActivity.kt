@@ -36,6 +36,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.composedemos.advancedcameraanimation.AdvancedCameraAnimationActivity
 import com.example.composedemos.animatingmodels.AnimatingModelsActivity
 import com.example.composedemos.cameracontrols.CameraControlsActivity

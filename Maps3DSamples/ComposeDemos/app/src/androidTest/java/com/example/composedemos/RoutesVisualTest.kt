@@ -49,7 +49,27 @@ class RoutesVisualTest : BaseVisualTest() {
             println("Waiting 20 seconds for route to load...")
             kotlinx.coroutines.delay(20000)
 
-            // Capture a screenshot
+            // 1. Toggle tracker style to Red Car (starts at Marker, click once for Red Car)
+            val toggleButton = uiDevice.wait(Until.hasObject(By.desc("Toggle Tracker Style")), 5000)
+            assertTrue("Toggle tracker button not found", toggleButton)
+            uiDevice.findObject(By.desc("Toggle Tracker Style")).click()
+            kotlinx.coroutines.delay(1000)
+
+            // 2. Click "Fly Along" button to enter fly mode and show slider
+            val flyButton = uiDevice.wait(Until.hasObject(By.text("Fly Along")), 5000)
+            assertTrue("Fly Along button not found", flyButton)
+            uiDevice.findObject(By.text("Fly Along")).click()
+            kotlinx.coroutines.delay(2000) // Wait for slider to appear
+
+            // 3. Set progress to halfway point by clicking center of the slider
+            val slider = uiDevice.wait(Until.hasObject(By.desc("Progress Slider")), 5000)
+            assertTrue("Progress slider not found", slider)
+            val sliderObj = uiDevice.findObject(By.desc("Progress Slider"))
+            val bounds = sliderObj.visibleBounds
+            uiDevice.click(bounds.centerX(), bounds.centerY())
+            kotlinx.coroutines.delay(2000) // Wait for camera to jump to position
+
+            // Capture a screenshot for the catalog showing the red car at halfway point!
             val screenshotBitmap = captureScreenshot("routes_screenshot.png")
 
             // Define the verification prompt for Gemini
@@ -57,10 +77,12 @@ class RoutesVisualTest : BaseVisualTest() {
                 Please act as a UI tester and analyze this screenshot.
                 1. Confirm that a 3D map view is visible.
                 2. Confirm that a blue polyline (line) is visible on the map, representing a route.
-                3. The route should be in Hawaii (Oahu area).
+                3. Confirm that a RED CAR 3D MODEL is clearly visible on or near the blue polyline.
+                4. The route should be in Hawaii (Oahu area).
 
-                If the map is visible and the blue polyline is seen, reply with "PASSED".
-                Otherwise, report what you see.
+                If and ONLY IF you can clearly see a red car model on or near the blue polyline, reply with "PASSED".
+                If you cannot see a red car model, reply with "FAILED: Red car model not visible".
+                Report what you see in detail.
             """.trimIndent()
 
             // Analyze the image using Gemini
