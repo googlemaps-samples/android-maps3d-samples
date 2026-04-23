@@ -305,11 +305,11 @@ class PlaceDetailsActivity : FragmentActivity() {
             center = latLngAltitude {
                 latitude = 39.982129291022446
                 longitude = -105.30156359691158
-                altitude = 0.0
+                altitude = 2483.5 // Approx 8148 feet (elevation of the area)
             }
             heading = 26.0
             tilt = 67.0
-            range = 4000.0
+            range = 2500.0 // Zoomed in to 2000-3000 meters as requested
         }.toValidCamera()
     }
 }
