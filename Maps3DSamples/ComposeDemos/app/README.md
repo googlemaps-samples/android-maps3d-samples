@@ -10,7 +10,7 @@ This directory contains the Compose samples for the Android Maps 3D SDK. We use 
 | **Polylines** | ✅ Done | [PolylinesActivity.kt](src/main/java/com/example/composedemos/polylines/PolylinesActivity.kt) | <img src="src/main/assets/screenshots/polylines_screenshot.png" alt="Screenshot" width="121"/> |
 | **Map Interactions** | 🚧 Skeleton | [MapInteractionsActivity.kt](src/main/java/com/example/composedemos/mapinteractions/MapInteractionsActivity.kt) | |
 | **Popovers** | ✅ Done | [PopoversActivity.kt](src/main/java/com/example/composedemos/popovers/PopoversActivity.kt) | <img src="src/main/assets/screenshots/popovers_screenshot.png" alt="Screenshot" width="121"/> |
-| **Camera Controls** | 🚧 Skeleton | [CameraControlsActivity.kt](src/main/java/com/example/composedemos/cameracontrols/CameraControlsActivity.kt) | |
+| **Camera Controls** | ✅ Done | [CameraControlsActivity.kt](src/main/java/com/example/composedemos/cameracontrols/CameraControlsActivity.kt) | <img src="src/main/assets/screenshots/camera_controls_screenshot.png" alt="Screenshot" width="121"/> |
 | **Polygons** | 🚧 Skeleton | [PolygonsActivity.kt](src/main/java/com/example/composedemos/polygons/PolygonsActivity.kt) | |
 | **Models** | 🚧 Skeleton | [ModelsActivity.kt](src/main/java/com/example/composedemos/models/ModelsActivity.kt) | |
 | **Markers** | 🚧 Skeleton | [MarkersActivity.kt](src/main/java/com/example/composedemos/markers/MarkersActivity.kt) | |

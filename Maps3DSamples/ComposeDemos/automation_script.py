@@ -47,6 +47,7 @@ def main():
         "PolylinesVisualTest": "polylines_screenshot.png",
         "MapInteractionsVisualTest": "map_interactions_screenshot.png",
         "PopoversVisualTest": "popovers_screenshot.png",
+        "CameraControlsVisualTest": "camera_controls_screenshot.png",
     }
     
     filename = filename_mapping.get(test_class, f"{test_class.lower()}_screenshot.png")
@@ -108,6 +109,7 @@ def main():
         "PolylinesVisualTest": "Polylines",
         "MapInteractionsVisualTest": "Map Interactions",
         "PopoversVisualTest": "Popovers",
+        "CameraControlsVisualTest": "Camera Controls",
     }
     
     feature_name = mapping.get(test_class)
@@ -121,6 +123,7 @@ def main():
             "Polylines": "polylines/PolylinesActivity.kt",
             "Map Interactions": "mapinteractions/MapInteractionsActivity.kt",
             "Popovers": "popovers/PopoversActivity.kt",
+            "Camera Controls": "cameracontrols/CameraControlsActivity.kt",
         }
         activity_path = activity_mapping.get(feature_name)
         
