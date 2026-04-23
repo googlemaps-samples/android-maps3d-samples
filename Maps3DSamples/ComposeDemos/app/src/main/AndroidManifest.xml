@@ -18,6 +18,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
+        android:name=".ComposeDemosApplication"
         android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -55,7 +56,7 @@
         <activity android:name=".animatingmodels.AnimatingModelsActivity" android:exported="true" android:label="Animating Models" />
         <activity android:name=".placesearch.PlaceSearchActivity" android:exported="true" android:label="Place Search" />
         <activity android:name=".placeautocomplete.PlaceAutocompleteActivity" android:exported="true" android:label="Place Autocomplete" />
-        <activity android:name=".placedetails.PlaceDetailsActivity" android:exported="true" android:label="Place Details" />
+        <activity android:name=".placedetails.PlaceDetailsActivity" android:exported="true" android:label="Place Details" android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
         <activity android:name=".advancedcameraanimation.AdvancedCameraAnimationActivity" android:exported="true" android:label="Advanced Camera Animation" />
         <activity android:name=".datavisualization.DataVisualizationActivity" android:exported="true" android:label="Data Visualization" />
         <activity android:name=".cloudstyling.CloudStylingActivity" android:exported="true" android:label="Cloud Map Styling" />

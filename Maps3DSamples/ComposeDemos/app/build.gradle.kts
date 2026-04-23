@@ -92,6 +92,8 @@ dependencies {
 
     // Maps 3D SDK
     implementation(libs.play.services.maps3d)
+    implementation(libs.places)
+    implementation(libs.androidx.fragment.ktx)
 
     // Maps Utils
     implementation(libs.maps.utils.ktx)

@@ -22,7 +22,7 @@ This directory contains the Compose samples for the Android Maps 3D SDK. We use 
 | **Animating Models** | 🚧 Skeleton | [AnimatingModelsActivity.kt](src/main/java/com/example/composedemos/animatingmodels/AnimatingModelsActivity.kt) | |
 | **Place Search** | 🚧 Skeleton | [PlaceSearchActivity.kt](src/main/java/com/example/composedemos/placesearch/PlaceSearchActivity.kt) | |
 | **Place Autocomplete** | 🚧 Skeleton | [PlaceAutocompleteActivity.kt](src/main/java/com/example/composedemos/placeautocomplete/PlaceAutocompleteActivity.kt) | |
-| **Place Details** | 🚧 Skeleton | [PlaceDetailsActivity.kt](src/main/java/com/example/composedemos/placedetails/PlaceDetailsActivity.kt) | |
+| **Place Details** | ✅ Done | [PlaceDetailsActivity.kt](src/main/java/com/example/composedemos/placedetails/PlaceDetailsActivity.kt) | <img src="src/main/assets/screenshots/place_details_screenshot.png" alt="Screenshot" width="121"/> |
 | **Advanced Camera Animation** | 🚧 Skeleton | [AdvancedCameraAnimationActivity.kt](src/main/java/com/example/composedemos/advancedcameraanimation/AdvancedCameraAnimationActivity.kt) | |
 | **Data Visualization** | 🚧 Skeleton | [DataVisualizationActivity.kt](src/main/java/com/example/composedemos/datavisualization/DataVisualizationActivity.kt) | |
 | **Cloud Map Styling** | 🚧 Skeleton | [CloudStylingActivity.kt](src/main/java/com/example/composedemos/cloudstyling/CloudStylingActivity.kt) | |

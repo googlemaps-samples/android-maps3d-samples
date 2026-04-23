@@ -20,7 +20,11 @@ def main():
     test_class = sys.argv[1]
     
     # Workspace root
-    workspace_root = "/Users/dkhawk/AndroidStudioProjects/github-maps-code/android-maps3d-samples/feat-fillout-missing-samples"
+    result = subprocess.run("git rev-parse --show-toplevel", shell=True, capture_output=True, text=True)
+    if result.returncode != 0:
+        print("Failed to find git workspace root.")
+        sys.exit(1)
+    workspace_root = result.stdout.strip()
     
     # 1. Install and Run Test
     # We use am instrument to keep the app installed so we can pull files with run-as.
@@ -48,6 +52,7 @@ def main():
         "MapInteractionsVisualTest": "map_interactions_screenshot.png",
         "PopoversVisualTest": "popovers_screenshot.png",
         "CameraControlsVisualTest": "camera_controls_screenshot.png",
+        "PlaceDetailsVisualTest": "place_details_screenshot.png",
         "PolygonsVisualTest": "polygons_screenshot.png",
         "ModelsVisualTest": "models_screenshot.png",
         "MarkersVisualTest": "markers_screenshot.png",
@@ -120,6 +125,7 @@ def main():
         "MarkersVisualTest": "Markers",
         "CameraRestrictionsVisualTest": "Camera Restrictions",
         "RoutesVisualTest": "Routes API",
+        "PlaceDetailsVisualTest": "Place Details",
     }
     
     feature_name = mapping.get(test_class)
@@ -139,6 +145,7 @@ def main():
             "Markers": "markers/MarkersActivity.kt",
             "Camera Restrictions": "camerarestrictions/CameraRestrictionsActivity.kt",
             "Routes API": "routes/RoutesActivity.kt",
+            "Place Details": "placedetails/PlaceDetailsActivity.kt",
         }
         activity_path = activity_mapping.get(feature_name)
         
