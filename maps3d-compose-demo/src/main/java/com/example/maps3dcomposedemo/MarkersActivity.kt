@@ -100,6 +100,9 @@ fun MarkersScreen() {
             isDrawnWhenOccluded = true,
             onClick = { marker ->
                 googleMap3DInstance?.let { map ->
+
+                    // TODO: We need to create the popover content using Android Views.
+                    //  This should be updated to use a composable.
                     val textView = android.widget.TextView(context).apply {
                         text = "They didn't just come to sculpt mashed potatoes."
                         setPadding(32, 16, 32, 16)
