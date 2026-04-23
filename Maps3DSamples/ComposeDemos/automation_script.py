@@ -48,6 +48,9 @@ def main():
         "MapInteractionsVisualTest": "map_interactions_screenshot.png",
         "PopoversVisualTest": "popovers_screenshot.png",
         "CameraControlsVisualTest": "camera_controls_screenshot.png",
+        "PolygonsVisualTest": "polygons_screenshot.png",
+        "ModelsVisualTest": "models_screenshot.png",
+        "MarkersVisualTest": "markers_screenshot.png",
     }
     
     filename = filename_mapping.get(test_class, f"{test_class.lower()}_screenshot.png")
@@ -110,6 +113,9 @@ def main():
         "MapInteractionsVisualTest": "Map Interactions",
         "PopoversVisualTest": "Popovers",
         "CameraControlsVisualTest": "Camera Controls",
+        "PolygonsVisualTest": "Polygons",
+        "ModelsVisualTest": "Models",
+        "MarkersVisualTest": "Markers",
     }
     
     feature_name = mapping.get(test_class)
@@ -124,6 +130,9 @@ def main():
             "Map Interactions": "mapinteractions/MapInteractionsActivity.kt",
             "Popovers": "popovers/PopoversActivity.kt",
             "Camera Controls": "cameracontrols/CameraControlsActivity.kt",
+            "Polygons": "polygons/PolygonsActivity.kt",
+            "Models": "models/ModelsActivity.kt",
+            "Markers": "markers/MarkersActivity.kt",
         }
         activity_path = activity_mapping.get(feature_name)
         

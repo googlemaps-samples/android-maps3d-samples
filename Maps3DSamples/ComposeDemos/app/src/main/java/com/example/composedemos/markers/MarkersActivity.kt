@@ -20,35 +20,152 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import com.example.composedemos.R
+import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.ImageView
+import com.google.android.gms.maps3d.model.Map3DMode
+import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.latLngAltitude
+import com.google.maps.android.compose3d.GoogleMap3D
+import com.google.maps.android.compose3d.MarkerConfig
+import com.google.maps.android.compose3d.PopoverConfig
 
 class MarkersActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        
+        // Hide system tray (immersive mode)
+        val windowInsetsController = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
+        windowInsetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+        windowInsetsController.systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
         setContent {
             MaterialTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "TODO: Markers sample will be implemented here.",
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                    }
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    MarkersScreen()
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun MarkersScreen() {
+    var isMapSteady by remember { mutableStateOf(false) }
+    var popovers by remember { mutableStateOf(emptyList<PopoverConfig>()) }
+
+    // Camera centered on Devils Tower
+    val devilsTowerCamera = remember {
+        camera {
+            center = latLngAltitude {
+                latitude = 44.589994
+                longitude = -104.715326
+                altitude = 1508.9
+            }
+            heading = 1.0
+            tilt = 75.0
+            range = 1635.0
+            roll = 0.0
+        }
+    }
+
+    val alienMarker = remember {
+        MarkerConfig(
+            key = "alien",
+            position = latLngAltitude {
+                latitude = 44.59054845363309
+                longitude = -104.715177415273
+                altitude = 10.0
+            },
+            altitudeMode = AltitudeMode.RELATIVE_TO_MESH,
+            styleView = ImageView(R.drawable.alien),
+            label = "Devil's Tower Alien",
+            isExtruded = true,
+            isDrawnWhenOccluded = true,
+            onClick = {
+                // State-driven popover creation! No direct map manipulation.
+                popovers = listOf(
+                    PopoverConfig(
+                        key = "alien_popover",
+                        positionAnchorKey = "alien",
+                        autoPanEnabled = false,
+                        autoCloseEnabled = true,
+                        content = {
+                            Surface(
+                                color = Color.White,
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.padding(8.dp),
+                            ) {
+                                Text(
+                                    text = "They didn't just come to sculpt mashed potatoes.",
+                                    modifier = Modifier.padding(16.dp),
+                                    color = Color.Black,
+                                )
+                            }
+                        },
+                    )
+                )
+            },
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" },
+    ) {
+        // 1. Map fills the entire screen
+        GoogleMap3D(
+            camera = devilsTowerCamera,
+            mapMode = Map3DMode.HYBRID,
+            markers = listOf(alienMarker),
+            popovers = popovers,
+            modifier = Modifier.fillMaxSize(),
+            onMapSteady = {
+                isMapSteady = true
+            },
+            onMapClick = {
+                popovers = emptyList()
+            }
+        )
+
+        // 2. Custom Translucent Top Bar
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = "Markers",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
