@@ -39,8 +39,9 @@ def main():
     print("Running test...")
     cmd = f"adb shell am instrument -w -e class com.example.composedemos.{test_class} com.example.composedemos.test/androidx.test.runner.AndroidJUnitRunner"
     success, output = run_command(cmd, cwd=workspace_root)
+    print("Test Output:")
+    print(output)
     if not success:
-        print("Test failed.")
         sys.exit(1)
         
     print("Test passed. Pulling screenshot...")

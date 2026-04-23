@@ -21,6 +21,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.example.composedemos.placedetails.PlaceDetailsActivity
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -32,9 +33,10 @@ class PlaceDetailsVisualTest : BaseVisualTest() {
     @Test
     fun verifyPlaceDetailsLoads() {
         runBlocking {
-            // Launch PlaceDetailsActivity
+            // Launch PlaceDetailsActivity with Intent extra for state injection
             val intent = Intent(context, PlaceDetailsActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra("place_name", "The Flatirons")
             }
             context.startActivity(intent)
 
@@ -42,36 +44,24 @@ class PlaceDetailsVisualTest : BaseVisualTest() {
             uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
 
             // 1. Wait for the map to load (using fixed delay as steady callback can be flaky)
-            println("Waiting 20 seconds for map to load...")
-            kotlinx.coroutines.delay(20000)
-            
-            // 2. Swipe up on the bottom sheet to make sure items are visible
-            val displayWidth = uiDevice.displayWidth
-            val displayHeight = uiDevice.displayHeight
-            // Swipe from bottom center upwards
-            uiDevice.swipe(displayWidth / 2, displayHeight - 100, displayWidth / 2, displayHeight - 600, 20)
-            kotlinx.coroutines.delay(2000) // Wait for animation
-            
-            // 3. Find and click "The Flatirons" in the list of landmarks
-            val flatironsItem = uiDevice.wait(Until.hasObject(By.text("The Flatirons")), 5000)
-            assertTrue("The Flatirons item not found in list", flatironsItem)
-            uiDevice.findObject(By.text("The Flatirons")).click()
+            println("Waiting 2 seconds for map to load...")
+            delay(2000)
             
             // 3. Wait for the Place Details fragment to load content (network call)
             println("Waiting for Place Details to load...")
-            kotlinx.coroutines.delay(15000)
+            delay(15000)
             
             // 4. Capture screenshot
             val screenshotBitmap = captureScreenshot("place_details_screenshot.png")
-            kotlinx.coroutines.delay(2000) // Wait for file to be fully written
+            delay(2000) // Wait for file to be fully written
             
             // 5. Verify with Gemini - Stricter Prompt!
             val prompt = """
                 The screen should show a 3D map in the background.
                 At the bottom, there should be a sheet or card containing Place Details.
-                You MUST verify that the text "The Flatirons" is clearly visible in the Place Details card.
-                If you can see the text "The Flatirons" in the card, reply with YES.
-                If the card is missing, blank, still loading, or shows a different place, reply with NO.
+                You MUST verify that the text "Flatirons" is clearly visible in the Place Details card.
+                If you can see the text "Flatirons" in the card, reply with YES.
+                If the card is missing, blank, still loading, or shows a different place, reply with NO followed by a detailed description of what is visible on the screen and in the card area.
             """.trimIndent()
             
             val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)

@@ -62,6 +62,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.commit
+import kotlinx.coroutines.delay
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.composedemos.R
@@ -84,6 +85,19 @@ import kotlinx.coroutines.launch
  * A simple ViewModel to hold the selected place ID without using Hilt.
  */
 class PlaceDetailsViewModel : ViewModel() {
+    companion object {
+        val initialCamera: Camera = camera {
+            center = latLngAltitude {
+                latitude = 39.982129291022446
+                longitude = -105.30156359691158
+                altitude = 2483.5 // Approx 8148 feet
+            }
+            heading = 26.0
+            tilt = 67.0
+            range = 2500.0
+        }.toValidCamera()
+    }
+
     val landmarks: List<Landmark> = listOf(
         Landmark(
             id = "ChIJfXOTtWbsa4cRmW07qJRB6_8",
@@ -115,12 +129,20 @@ class PlaceDetailsViewModel : ViewModel() {
     private val _placeId = MutableStateFlow<String?>(null)
     val placeId: StateFlow<String?> = _placeId.asStateFlow()
 
+    private val _cameraState = MutableStateFlow<Camera>(initialCamera)
+    val cameraState: StateFlow<Camera> = _cameraState.asStateFlow()
+
     fun setSelectedPlaceId(placeId: String?) {
         _placeId.value = placeId
     }
 
     fun selectLandmark(landmark: Landmark) {
         setSelectedPlaceId(landmark.id)
+        _cameraState.value = camera {
+            center = landmark.location
+            range = 1000.0
+            tilt = 45.0
+        }.toValidCamera()
     }
 }
 
@@ -142,6 +164,18 @@ class PlaceDetailsActivity : FragmentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val viewModel: PlaceDetailsViewModel = viewModel()
+                    
+                    // Handle Intent extra for non-UI state injection (testing)
+                    LaunchedEffect(Unit) {
+                        intent.getStringExtra("place_name")?.let { name ->
+                            delay(2000) // Delay a couple of seconds before showing
+                            val landmark = viewModel.landmarks.find { it.name == name }
+                            if (landmark != null) {
+                                viewModel.selectLandmark(landmark)
+                            }
+                        }
+                    }
+                    
                     MainScreen(viewModel)
                 }
             }
@@ -160,7 +194,7 @@ class PlaceDetailsActivity : FragmentActivity() {
             )
         )
         val sheetPeekHeight = 120.dp
-        var cameraState by remember { mutableStateOf(initialCamera) }
+        val cameraState by viewModel.cameraState.collectAsState()
 
         // Dismiss the place details overlay if the user fully expands the bottom sheet
         LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
@@ -180,12 +214,8 @@ class PlaceDetailsActivity : FragmentActivity() {
                     LandmarkList(
                         landmarks = landmarks,
                         onLandmarkClick = { landmark ->
+                            Log.d(TAG, "LANDMARK_CLICKED: ${landmark.name}")
                             viewModel.selectLandmark(landmark)
-                            cameraState = camera {
-                                center = landmark.location
-                                range = 1000.0
-                                tilt = 45.0
-                            }.toValidCamera()
                             scope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
@@ -292,24 +322,13 @@ class PlaceDetailsActivity : FragmentActivity() {
         androidx.compose.runtime.DisposableEffect(containerId) {
             onDispose {
                 supportFragmentManager.findFragmentById(containerId)?.let {
-                    supportFragmentManager.commit {
-                        remove(it)
-                    }
+                    supportFragmentManager.beginTransaction()
+                        .remove(it)
+                        .commitAllowingStateLoss()
                 }
             }
         }
     }
 
-    companion object {
-        private val initialCamera: Camera = camera {
-            center = latLngAltitude {
-                latitude = 39.982129291022446
-                longitude = -105.30156359691158
-                altitude = 2483.5 // Approx 8148 feet (elevation of the area)
-            }
-            heading = 26.0
-            tilt = 67.0
-            range = 2500.0 // Zoomed in to 2000-3000 meters as requested
-        }.toValidCamera()
-    }
+    
 }
