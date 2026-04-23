@@ -49,13 +49,7 @@ class RoutesVisualTest : BaseVisualTest() {
             println("Waiting 20 seconds for route to load...")
             kotlinx.coroutines.delay(20000)
 
-            // 1. Toggle tracker style to Red Car (starts at Marker, click once for Red Car)
-            val toggleButton = uiDevice.wait(Until.hasObject(By.desc("Toggle Tracker Style")), 5000)
-            assertTrue("Toggle tracker button not found", toggleButton)
-            uiDevice.findObject(By.desc("Toggle Tracker Style")).click()
-            kotlinx.coroutines.delay(1000)
-
-            // 2. Click "Fly Along" button to enter fly mode and show slider
+            // 1. Click "Fly Along" button to enter fly mode and show slider (defaults to Red Car)
             val flyButton = uiDevice.wait(Until.hasObject(By.text("Fly Along")), 5000)
             assertTrue("Fly Along button not found", flyButton)
             uiDevice.findObject(By.text("Fly Along")).click()

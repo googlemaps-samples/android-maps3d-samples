@@ -29,8 +29,10 @@ import com.google.android.gms.maps3d.model.PinConfiguration
 import com.google.android.gms.maps3d.model.Polygon
 import com.google.android.gms.maps3d.model.Polyline
 import com.google.android.gms.maps3d.model.markerOptions
+import com.google.android.gms.maps3d.model.orientation
 import com.google.android.gms.maps3d.model.polygonOptions
 import com.google.android.gms.maps3d.model.popoverOptions
+import com.google.android.gms.maps3d.model.vector3D
 import com.google.maps.android.compose3d.utils.toValidLocation
 
 /**
@@ -61,9 +63,8 @@ class Map3DState {
             if (existing != null) {
                 val (oldConfig, marker) = existing
                 if (oldConfig != config) {
-                    // Config changed, recreate
-                    marker.remove()
-                    val newMarker = createMarker(map, config)
+                    // Config changed, update by adding again with same ID!
+                    val newMarker = createMarker(map, config, marker.id)
                     if (newMarker != null) {
                         markers[config.key] = Pair(config, newMarker)
                     }
@@ -83,58 +84,16 @@ class Map3DState {
         }
     }
 
-    private fun createMarker(map: GoogleMap3D, config: MarkerConfig): Marker? {
-        val marker = map.addMarker(
-            markerOptions {
-                position = config.position.toValidLocation()
-                altitudeMode = config.altitudeMode
-                config.styleView?.let { setStyle(it) }
-                label = config.label
-                zIndex = config.zIndex
-                isExtruded = config.isExtruded
-                isDrawnWhenOccluded = config.isDrawnWhenOccluded
-                collisionBehavior = config.collisionBehavior
-
-                config.pinConfig?.let { pin ->
-                    val builder = PinConfiguration.builder()
-                    pin.scale?.let { builder.setScale(it) }
-                    pin.backgroundColor?.let { builder.setBackgroundColor(it) }
-                    pin.borderColor?.let { builder.setBorderColor(it) }
-
-                    pin.glyph?.let { glyphConfig ->
-                        val glyph = when (glyphConfig) {
-                            is GlyphConfig.Color -> Glyph.fromColor(glyphConfig.color)
-                            is GlyphConfig.Text -> {
-                                val g = Glyph.fromText(glyphConfig.text)
-                                glyphConfig.color?.let { g.color = it }
-                                g
-                            }
-                            is GlyphConfig.Circle -> {
-                                val g = Glyph.fromCircle()
-                                glyphConfig.color?.let { g.color = it }
-                                g
-                            }
-                            is GlyphConfig.Image -> {
-                                val g = Glyph.fromColor(glyphConfig.color ?: Color.WHITE)
-                                g.setImage(com.google.android.gms.maps3d.model.ImageView(glyphConfig.imageResId))
-                                g
-                            }
-                        }
-                        builder.setGlyph(glyph)
-                    }
-                    setStyle(builder.build())
-                }
-            },
-        )
-
+    private fun createMarker(map: GoogleMap3D, config: MarkerConfig, overrideId: String? = null): Marker? {
+        val marker = map.addMarker(config.toMarkerOptions(overrideId))
         config.onClick?.let { callback ->
             marker?.setClickListener {
                 callback(marker)
             }
         }
-
         return marker
     }
+
 
     /**
      * Synchronizes the polylines on the map with the provided list of configurations.
@@ -149,9 +108,8 @@ class Map3DState {
             if (existing != null) {
                 val (oldConfig, polyline) = existing
                 if (oldConfig != config) {
-                    // Config changed, recreate
-                    polyline.remove()
-                    val newPolyline = createPolyline(map, config)
+                    // Config changed, update by adding again with same ID!
+                    val newPolyline = createPolyline(map, config, polyline.id)
                     if (newPolyline != null) {
                         polylines[config.key] = Pair(config, newPolyline)
                     }
@@ -171,8 +129,8 @@ class Map3DState {
         }
     }
 
-    private fun createPolyline(map: GoogleMap3D, config: PolylineConfig): Polyline {
-        val polyline = map.addPolyline(config.toPolylineOptions())
+    private fun createPolyline(map: GoogleMap3D, config: PolylineConfig, overrideId: String? = null): Polyline {
+        val polyline = map.addPolyline(config.toPolylineOptions(overrideId))
         config.onClick?.let { callback ->
             polyline.setClickListener {
                 callback(polyline)
@@ -194,9 +152,8 @@ class Map3DState {
             if (existing != null) {
                 val (oldConfig, polygon) = existing
                 if (oldConfig != config) {
-                    // Config changed, recreate
-                    polygon.remove()
-                    val newPolygon = createPolygon(map, config)
+                    // Config changed, update by adding again with same ID!
+                    val newPolygon = createPolygon(map, config, polygon.id)
                     if (newPolygon != null) {
                         polygons[config.key] = Pair(config, newPolygon)
                     }
@@ -216,17 +173,8 @@ class Map3DState {
         }
     }
 
-    private fun createPolygon(map: GoogleMap3D, config: PolygonConfig): Polygon {
-        val polygon = map.addPolygon(
-            polygonOptions {
-                this.path = config.path.map { it.toValidLocation() }
-                innerPaths = config.innerPaths.map { Hole(it.map { p -> p.toValidLocation() }) }
-                fillColor = config.fillColor
-                strokeColor = config.strokeColor
-                strokeWidth = config.strokeWidth.toDouble()
-                altitudeMode = config.altitudeMode
-            },
-        )
+    private fun createPolygon(map: GoogleMap3D, config: PolygonConfig, overrideId: String? = null): Polygon {
+        val polygon = map.addPolygon(config.toPolygonOptions(overrideId))
         config.onClick?.let { callback ->
             polygon.setClickListener {
                 callback(polygon)
@@ -248,9 +196,8 @@ class Map3DState {
             if (existing != null) {
                 val (oldConfig, model) = existing
                 if (oldConfig != config) {
-                    // Config changed, recreate
-                    model.remove()
-                    val newModel = createModel(map, config)
+                    // Config changed, update by adding again with same ID!
+                    val newModel = createModel(map, config, model.id)
                     if (newModel != null) {
                         models[config.key] = Pair(config, newModel)
                     }
@@ -270,8 +217,8 @@ class Map3DState {
         }
     }
 
-    private fun createModel(map: GoogleMap3D, config: ModelConfig): Model {
-        val model = map.addModel(config.toModelOptions())
+    private fun createModel(map: GoogleMap3D, config: ModelConfig, overrideId: String? = null): Model {
+        val model = map.addModel(config.toModelOptions(overrideId))
         config.onClick?.let { callback ->
             model.setClickListener {
                 callback(model)

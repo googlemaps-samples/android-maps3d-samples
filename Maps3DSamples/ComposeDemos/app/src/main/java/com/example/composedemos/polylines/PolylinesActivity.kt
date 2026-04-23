@@ -16,8 +16,6 @@
 
 package com.example.composedemos.polylines
 
-import WindowCompat
-import WindowInsetsControllerCompat
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
