@@ -16,7 +16,7 @@ This directory contains the Compose samples for the Android Maps 3D SDK. We use 
 | **Markers** | ✅ Done | [MarkersActivity.kt](src/main/java/com/example/composedemos/markers/MarkersActivity.kt) | <img src="src/main/assets/screenshots/markers_screenshot.png" alt="Screenshot" width="121"/> |
 | **Camera Restrictions** | ✅ Done | [CameraRestrictionsActivity.kt](src/main/java/com/example/composedemos/camerarestrictions/CameraRestrictionsActivity.kt) | <img src="src/main/assets/screenshots/camera_restrictions_screenshot.png" alt="Screenshot" width="121"/> |
 | **Flight Simulator** | 🚧 Skeleton | [FlightSimulatorActivity.kt](src/main/java/com/example/composedemos/flightsimulator/FlightSimulatorActivity.kt) | |
-| **Routes API** | 🚧 Skeleton | [RoutesActivity.kt](src/main/java/com/example/composedemos/routes/RoutesActivity.kt) | |
+| **Routes API** | ✅ Done | [RoutesActivity.kt](src/main/java/com/example/composedemos/routes/RoutesActivity.kt) | <img src="src/main/assets/screenshots/routes_screenshot.png" alt="Screenshot" width="121"/> |
 | **Path Following** | 🚧 Skeleton | [PathFollowingActivity.kt](src/main/java/com/example/composedemos/pathfollowing/PathFollowingActivity.kt) | |
 | **Path Styling** | 🚧 Skeleton | [PathStylingActivity.kt](src/main/java/com/example/composedemos/pathstyling/PathStylingActivity.kt) | |
 | **Animating Models** | 🚧 Skeleton | [AnimatingModelsActivity.kt](src/main/java/com/example/composedemos/animatingmodels/AnimatingModelsActivity.kt) | |

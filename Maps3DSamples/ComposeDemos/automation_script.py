@@ -52,6 +52,7 @@ def main():
         "ModelsVisualTest": "models_screenshot.png",
         "MarkersVisualTest": "markers_screenshot.png",
         "CameraRestrictionsVisualTest": "camera_restrictions_screenshot.png",
+        "RoutesVisualTest": "routes_screenshot.png",
     }
     
     filename = filename_mapping.get(test_class, f"{test_class.lower()}_screenshot.png")
@@ -118,6 +119,7 @@ def main():
         "ModelsVisualTest": "Models",
         "MarkersVisualTest": "Markers",
         "CameraRestrictionsVisualTest": "Camera Restrictions",
+        "RoutesVisualTest": "Routes API",
     }
     
     feature_name = mapping.get(test_class)
@@ -136,6 +138,7 @@ def main():
             "Models": "models/ModelsActivity.kt",
             "Markers": "markers/MarkersActivity.kt",
             "Camera Restrictions": "camerarestrictions/CameraRestrictionsActivity.kt",
+            "Routes API": "routes/RoutesActivity.kt",
         }
         activity_path = activity_mapping.get(feature_name)
         

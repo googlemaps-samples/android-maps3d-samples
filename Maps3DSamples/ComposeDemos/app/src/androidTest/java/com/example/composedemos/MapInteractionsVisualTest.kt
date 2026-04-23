@@ -75,7 +75,7 @@ class MapInteractionsVisualTest : BaseVisualTest() {
 
             // Capture a screenshot for visual confirmation
             captureScreenshot("map_interactions_screenshot.png")
-            
+
             // TODO: Implement Gemini verification if needed to check the look of the card.
         }
     }

@@ -47,7 +47,7 @@ class HelloMapActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        
+
         // Hide system tray (immersive mode)
         val windowInsetsController = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
@@ -107,12 +107,12 @@ fun HelloMapScreen() {
                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
                 // Respect status bar / cutout area for padding the content
                 .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
                 text = "Hello Map",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }

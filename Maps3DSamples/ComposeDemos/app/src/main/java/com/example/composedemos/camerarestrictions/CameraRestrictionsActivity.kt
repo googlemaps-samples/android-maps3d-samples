@@ -26,11 +26,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.material3.Card
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,7 +50,7 @@ class CameraRestrictionsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        
+
         // Hide system tray (immersive mode)
         val windowInsetsController = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
@@ -132,15 +132,15 @@ fun CameraRestrictionsScreen() {
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
                 .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
                 text = "Camera Restrictions",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
-        
+
         // 3. Info Card
         Card(
             modifier = Modifier

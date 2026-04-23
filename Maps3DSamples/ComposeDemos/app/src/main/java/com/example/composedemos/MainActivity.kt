@@ -87,7 +87,7 @@ fun CatalogScreen() {
                 modifier = Modifier.padding(16.dp),
             )
         }
-        
+
         // ApiDemos Parity
         item { CategoryHeader("ApiDemos Parity") }
         item {
@@ -212,7 +212,7 @@ fun CategoryHeader(text: String) {
         text = text,
         style = MaterialTheme.typography.titleMedium,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        color = MaterialTheme.colorScheme.primary
+        color = MaterialTheme.colorScheme.primary,
     )
 }
 

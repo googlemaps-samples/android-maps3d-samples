@@ -49,7 +49,7 @@ class MapInteractionsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        
+
         // Hide system tray (immersive mode)
         val windowInsetsController = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
@@ -108,7 +108,7 @@ fun MapInteractionsScreen() {
             },
             onMapSteady = {
                 isMapSteady = true
-            }
+            },
         )
 
         // 2. Custom Translucent Top Bar
@@ -117,12 +117,12 @@ fun MapInteractionsScreen() {
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
                 .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
                 text = "Map Interactions",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
 

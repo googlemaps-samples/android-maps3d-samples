@@ -50,7 +50,7 @@ class CameraControlsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        
+
         // Hide system tray (immersive mode)
         val windowInsetsController = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
@@ -113,12 +113,12 @@ fun CameraControlsScreen() {
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
                 .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
                 text = "Camera Controls",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
 
@@ -136,7 +136,7 @@ fun CameraControlsScreen() {
                     value = heading,
                     onValueChange = { heading = it },
                     valueRange = 0f..360f,
-                    modifier = Modifier.semantics { contentDescription = "Heading Slider" }
+                    modifier = Modifier.semantics { contentDescription = "Heading Slider" },
                 )
 
                 Text(text = "Tilt: ${tilt.toInt()}°", style = MaterialTheme.typography.bodyMedium)
@@ -144,7 +144,7 @@ fun CameraControlsScreen() {
                     value = tilt,
                     onValueChange = { tilt = it },
                     valueRange = 0f..90f,
-                    modifier = Modifier.semantics { contentDescription = "Tilt Slider" }
+                    modifier = Modifier.semantics { contentDescription = "Tilt Slider" },
                 )
 
                 Text(text = "Range: ${range.toInt()}m", style = MaterialTheme.typography.bodyMedium)
@@ -152,7 +152,7 @@ fun CameraControlsScreen() {
                     value = range,
                     onValueChange = { range = it },
                     valueRange = 100f..5000f,
-                    modifier = Modifier.semantics { contentDescription = "Range Slider" }
+                    modifier = Modifier.semantics { contentDescription = "Range Slider" },
                 )
             }
         }

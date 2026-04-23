@@ -54,7 +54,7 @@ class MarkersActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        
+
         // Hide system tray (immersive mode)
         val windowInsetsController = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
@@ -127,7 +127,7 @@ fun MarkersScreen() {
                                 )
                             }
                         },
-                    )
+                    ),
                 )
             },
         )
@@ -150,7 +150,7 @@ fun MarkersScreen() {
             },
             onMapClick = {
                 popovers = emptyList()
-            }
+            },
         )
 
         // 2. Custom Translucent Top Bar
@@ -159,12 +159,12 @@ fun MarkersScreen() {
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
                 .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
                 text = "Markers",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }
