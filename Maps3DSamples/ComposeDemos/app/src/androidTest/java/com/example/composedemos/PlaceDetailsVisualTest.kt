@@ -45,7 +45,14 @@ class PlaceDetailsVisualTest : BaseVisualTest() {
             println("Waiting 20 seconds for map to load...")
             kotlinx.coroutines.delay(20000)
             
-            // 2. Find and click "The Flatirons" in the list of landmarks
+            // 2. Swipe up on the bottom sheet to make sure items are visible
+            val displayWidth = uiDevice.displayWidth
+            val displayHeight = uiDevice.displayHeight
+            // Swipe from bottom center upwards
+            uiDevice.swipe(displayWidth / 2, displayHeight - 100, displayWidth / 2, displayHeight - 600, 20)
+            kotlinx.coroutines.delay(2000) // Wait for animation
+            
+            // 3. Find and click "The Flatirons" in the list of landmarks
             val flatironsItem = uiDevice.wait(Until.hasObject(By.text("The Flatirons")), 5000)
             assertTrue("The Flatirons item not found in list", flatironsItem)
             uiDevice.findObject(By.text("The Flatirons")).click()
