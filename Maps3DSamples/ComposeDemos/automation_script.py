@@ -45,6 +45,7 @@ def main():
     filename_mapping = {
         "HelloMapVisualTest": "hello_map_screenshot.png",
         "PolylinesVisualTest": "polylines_screenshot.png",
+        "MapInteractionsVisualTest": "map_interactions_screenshot.png",
     }
     
     filename = filename_mapping.get(test_class, f"{test_class.lower()}_screenshot.png")
@@ -98,40 +99,49 @@ def main():
     print(f"Screenshot saved to {target_path}")
     
     # 5. Update Catalog
-    catalog_path = f"{workspace_root}/SAMPLE_CATALOG.md"
+    catalog_path = f"{workspace_root}/Maps3DSamples/ComposeDemos/app/README.md"
     
-    # Mapping from test class to catalog section title
+    # Mapping from test class to Feature Name in table
     mapping = {
-        "HelloMapVisualTest": "## 1. Basic Map",
-        "PolylinesVisualTest": "## 12. Polylines",
-        # Add more mappings as we go
+        "HelloMapVisualTest": "Basic Map",
+        "PolylinesVisualTest": "Polylines",
+        "MapInteractionsVisualTest": "Map Interactions",
     }
     
-    section_title = mapping.get(test_class)
-    if section_title:
+    feature_name = mapping.get(test_class)
+    if feature_name:
         with open(catalog_path, "r") as f:
             catalog_content = f.read()
             
-        # Find the section and insert the image link
-        # We look for the section title and insert the image after the description or list items.
-        # Let's insert it at the end of the section before the next section.
-        pattern = re.compile(rf"({re.escape(section_title)}.*?\n)(?=\n##|\Z)", re.DOTALL)
-        match = pattern.search(catalog_content)
-        if match:
-            section_text = match.group(1)
-            # Use relative path from catalog file location (root)
-            image_link = f"\n* **Compose Screenshot:** ![Screenshot](Maps3DSamples/ComposeDemos/app/src/main/assets/screenshots/{local_path})\n"
-            
-            if image_link not in section_text:
-                updated_section = section_text + image_link
-                catalog_content = catalog_content.replace(section_text, updated_section)
-                with open(catalog_path, "w") as f:
-                    f.write(catalog_content)
-                print("Updated SAMPLE_CATALOG.md")
-            else:
-                print("Screenshot already linked in catalog.")
+        # Mapping to get activity file path
+        activity_mapping = {
+            "Basic Map": "hellomap/HelloMapActivity.kt",
+            "Polylines": "polylines/PolylinesActivity.kt",
+            "Map Interactions": "mapinteractions/MapInteractionsActivity.kt",
+        }
+        activity_path = activity_mapping.get(feature_name)
+        
+        image_link = f"![Screenshot](src/main/assets/screenshots/{local_path})"
+        
+        # Find the line for this feature and replace it
+        lines = catalog_content.split("\n")
+        updated = False
+        for i, line in enumerate(lines):
+            if f"| **{feature_name}** |" in line:
+                # Get the activity file basename
+                file_basename = activity_path.split("/")[-1]
+                # Construct new line
+                lines[i] = f"| **{feature_name}** | ✅ Done | [{file_basename}](src/main/java/com/example/composedemos/{activity_path}) | {image_link} |"
+                updated = True
+                break
+                
+        if updated:
+            catalog_content = "\n".join(lines)
+            with open(catalog_path, "w") as f:
+                f.write(catalog_content)
+            print(f"Updated Compose Catalog README.md for {feature_name}")
         else:
-            print(f"Section {section_title} not found in catalog.")
+            print(f"Feature {feature_name} not found in catalog.")
     else:
         print(f"No mapping found for {test_class} in catalog.")
 
