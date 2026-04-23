@@ -46,6 +46,7 @@ def main():
         "HelloMapVisualTest": "hello_map_screenshot.png",
         "PolylinesVisualTest": "polylines_screenshot.png",
         "MapInteractionsVisualTest": "map_interactions_screenshot.png",
+        "PopoversVisualTest": "popovers_screenshot.png",
     }
     
     filename = filename_mapping.get(test_class, f"{test_class.lower()}_screenshot.png")
@@ -106,6 +107,7 @@ def main():
         "HelloMapVisualTest": "Basic Map",
         "PolylinesVisualTest": "Polylines",
         "MapInteractionsVisualTest": "Map Interactions",
+        "PopoversVisualTest": "Popovers",
     }
     
     feature_name = mapping.get(test_class)
@@ -118,6 +120,7 @@ def main():
             "Basic Map": "hellomap/HelloMapActivity.kt",
             "Polylines": "polylines/PolylinesActivity.kt",
             "Map Interactions": "mapinteractions/MapInteractionsActivity.kt",
+            "Popovers": "popovers/PopoversActivity.kt",
         }
         activity_path = activity_mapping.get(feature_name)
         
