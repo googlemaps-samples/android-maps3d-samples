@@ -6,8 +6,8 @@ This directory contains the Compose samples for the Android Maps 3D SDK. We use 
 
 | Feature | Status | Source Code | Screenshot |
 | :--- | :--- | :--- | :--- |
-| **Basic Map** | ✅ Done | [HelloMapActivity.kt](src/main/java/com/example/composedemos/hellomap/HelloMapActivity.kt) | ![Screenshot](src/main/assets/screenshots/hello_map_screenshot.png) |
-| **Polylines** | ✅ Done | [PolylinesActivity.kt](src/main/java/com/example/composedemos/polylines/PolylinesActivity.kt) | ![Screenshot](src/main/assets/screenshots/polylines_screenshot.png) |
+| **Basic Map** | ✅ Done | [HelloMapActivity.kt](src/main/java/com/example/composedemos/hellomap/HelloMapActivity.kt) | <img src="src/main/assets/screenshots/hello_map_screenshot.png" alt="Screenshot" width="121"/> |
+| **Polylines** | ✅ Done | [PolylinesActivity.kt](src/main/java/com/example/composedemos/polylines/PolylinesActivity.kt) | <img src="src/main/assets/screenshots/polylines_screenshot.png" alt="Screenshot" width="121"/> |
 | **Map Interactions** | 🚧 Skeleton | [MapInteractionsActivity.kt](src/main/java/com/example/composedemos/mapinteractions/MapInteractionsActivity.kt) | |
 | **Popovers** | 🚧 Skeleton | [PopoversActivity.kt](src/main/java/com/example/composedemos/popovers/PopoversActivity.kt) | |
 | **Camera Controls** | 🚧 Skeleton | [CameraControlsActivity.kt](src/main/java/com/example/composedemos/cameracontrols/CameraControlsActivity.kt) | |

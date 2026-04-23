@@ -121,7 +121,7 @@ def main():
         }
         activity_path = activity_mapping.get(feature_name)
         
-        image_link = f"![Screenshot](src/main/assets/screenshots/{local_path})"
+        image_link = f'<img src="src/main/assets/screenshots/{local_path}" alt="Screenshot" width="121"/>'
         
         # Find the line for this feature and replace it
         lines = catalog_content.split("\n")
