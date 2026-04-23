@@ -86,6 +86,11 @@ import kotlinx.coroutines.launch
 class PlaceDetailsViewModel : ViewModel() {
     val landmarks: List<Landmark> = listOf(
         Landmark(
+            id = "ChIJfXOTtWbsa4cRmW07qJRB6_8",
+            name = "The Flatirons",
+            location = latLngAltitude { latitude = 39.9880; longitude = -105.2930; altitude = 2100.0 }
+        ),
+        Landmark(
             id = "ChIJwd_EEkfsa4cRqy6eShKXFXY",
             name = "Chautauqua Park",
             location = latLngAltitude { latitude = 39.9989; longitude = -105.2828; altitude = 1750.0 }
@@ -104,11 +109,6 @@ class PlaceDetailsViewModel : ViewModel() {
             id = "ChIJAfFnzszva4cR04sAt0lSm1g",
             name = "Boulder Reservoir",
             location = latLngAltitude { latitude = 40.0780; longitude = -105.2220; altitude = 1580.0 }
-        ),
-        Landmark(
-            id = "ChIJfXOTtWbsa4cRmW07qJRB6_8",
-            name = "The Flatirons",
-            location = latLngAltitude { latitude = 39.9880; longitude = -105.2930; altitude = 2100.0 }
         )
     )
 
