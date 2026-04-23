@@ -41,7 +41,7 @@ import com.example.composedemos.animatingmodels.AnimatingModelsActivity
 import com.example.composedemos.cameracontrols.CameraControlsActivity
 import com.example.composedemos.camerarestrictions.CameraRestrictionsActivity
 import com.example.composedemos.cloudstyling.CloudStylingActivity
-import com.example.composedemos.datavisualisation.DataVisualisationActivity
+import com.example.composedemos.datavisualization.DataVisualizationActivity
 import com.example.composedemos.fieldofview.FieldOfViewActivity
 import com.example.composedemos.flightsimulator.FlightSimulatorActivity
 import com.example.composedemos.hellomap.HelloMapActivity
@@ -184,8 +184,8 @@ fun CatalogScreen() {
             }
         }
         item {
-            SampleItem("Data Visualisation (Flood Fill)") {
-                context.startActivity(Intent(context, DataVisualisationActivity::class.java))
+            SampleItem("Data Visualization (Flood Fill)") {
+                context.startActivity(Intent(context, DataVisualizationActivity::class.java))
             }
         }
         item {

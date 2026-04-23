@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.composedemos.datavisualisation
+package com.example.composedemos.datavisualization
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -29,7 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
-class DataVisualisationActivity : ComponentActivity() {
+class DataVisualizationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -43,7 +43,7 @@ class DataVisualisationActivity : ComponentActivity() {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "TODO: Data Visualisation sample will be implemented here.",
+                            text = "TODO: Data Visualization sample will be implemented here.",
                             style = MaterialTheme.typography.headlineSmall
                         )
                     }

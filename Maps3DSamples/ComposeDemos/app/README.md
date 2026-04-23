@@ -24,7 +24,7 @@ This directory contains the Compose samples for the Android Maps 3D SDK. We use 
 | **Place Autocomplete** | 🚧 Skeleton | [PlaceAutocompleteActivity.kt](src/main/java/com/example/composedemos/placeautocomplete/PlaceAutocompleteActivity.kt) | |
 | **Place Details** | 🚧 Skeleton | [PlaceDetailsActivity.kt](src/main/java/com/example/composedemos/placedetails/PlaceDetailsActivity.kt) | |
 | **Advanced Camera Animation** | 🚧 Skeleton | [AdvancedCameraAnimationActivity.kt](src/main/java/com/example/composedemos/advancedcameraanimation/AdvancedCameraAnimationActivity.kt) | |
-| **Data Visualisation** | 🚧 Skeleton | [DataVisualisationActivity.kt](src/main/java/com/example/composedemos/datavisualisation/DataVisualisationActivity.kt) | |
+| **Data Visualization** | 🚧 Skeleton | [DataVisualizationActivity.kt](src/main/java/com/example/composedemos/datavisualization/DataVisualizationActivity.kt) | |
 | **Cloud Map Styling** | 🚧 Skeleton | [CloudStylingActivity.kt](src/main/java/com/example/composedemos/cloudstyling/CloudStylingActivity.kt) | |
 | **Roadmap Mode** | 🚧 Skeleton | [RoadmapModeActivity.kt](src/main/java/com/example/composedemos/roadmapmode/RoadmapModeActivity.kt) | |
 | **Field Of View** | 🚧 Skeleton | [FieldOfViewActivity.kt](src/main/java/com/example/composedemos/fieldofview/FieldOfViewActivity.kt) | |
