@@ -52,23 +52,19 @@ class PlaceDetailsVisualTest : BaseVisualTest() {
             
             // 3. Wait for the Place Details fragment to load content (network call)
             println("Waiting for Place Details to load...")
-            kotlinx.coroutines.delay(8000)
+            kotlinx.coroutines.delay(15000)
             
             // 4. Capture screenshot
             val screenshotBitmap = captureScreenshot("place_details_screenshot.png")
-            
-            // List files to verify existence!
-            val files = context.filesDir.list()
-            println("Files in filesDir: ${files?.joinToString()}")
-            
             kotlinx.coroutines.delay(2000) // Wait for file to be fully written
             
-            // 5. Verify with Gemini
+            // 5. Verify with Gemini - Stricter Prompt!
             val prompt = """
                 The screen should show a 3D map in the background.
-                At the bottom, there should be a sheet or card containing Place Details (likely showing "Googleplex" or similar information).
-                Verify that this card is visible over the map and contains text information about the place.
-                If the card is visible and contains text, reply with YES. Otherwise, reply with NO.
+                At the bottom, there should be a sheet or card containing Place Details.
+                You MUST verify that the text "The Flatirons" is clearly visible in the Place Details card.
+                If you can see the text "The Flatirons" in the card, reply with YES.
+                If the card is missing, blank, still loading, or shows a different place, reply with NO.
             """.trimIndent()
             
             val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)
