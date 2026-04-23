@@ -51,6 +51,7 @@ def main():
         "PolygonsVisualTest": "polygons_screenshot.png",
         "ModelsVisualTest": "models_screenshot.png",
         "MarkersVisualTest": "markers_screenshot.png",
+        "CameraRestrictionsVisualTest": "camera_restrictions_screenshot.png",
     }
     
     filename = filename_mapping.get(test_class, f"{test_class.lower()}_screenshot.png")
@@ -116,6 +117,7 @@ def main():
         "PolygonsVisualTest": "Polygons",
         "ModelsVisualTest": "Models",
         "MarkersVisualTest": "Markers",
+        "CameraRestrictionsVisualTest": "Camera Restrictions",
     }
     
     feature_name = mapping.get(test_class)
@@ -133,6 +135,7 @@ def main():
             "Polygons": "polygons/PolygonsActivity.kt",
             "Models": "models/ModelsActivity.kt",
             "Markers": "markers/MarkersActivity.kt",
+            "Camera Restrictions": "camerarestrictions/CameraRestrictionsActivity.kt",
         }
         activity_path = activity_mapping.get(feature_name)
         

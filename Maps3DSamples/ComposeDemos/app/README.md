@@ -14,7 +14,7 @@ This directory contains the Compose samples for the Android Maps 3D SDK. We use 
 | **Polygons** | ✅ Done | [PolygonsActivity.kt](src/main/java/com/example/composedemos/polygons/PolygonsActivity.kt) | <img src="src/main/assets/screenshots/polygons_screenshot.png" alt="Screenshot" width="121"/> |
 | **Models** | ✅ Done | [ModelsActivity.kt](src/main/java/com/example/composedemos/models/ModelsActivity.kt) | <img src="src/main/assets/screenshots/models_screenshot.png" alt="Screenshot" width="121"/> |
 | **Markers** | ✅ Done | [MarkersActivity.kt](src/main/java/com/example/composedemos/markers/MarkersActivity.kt) | <img src="src/main/assets/screenshots/markers_screenshot.png" alt="Screenshot" width="121"/> |
-| **Camera Restrictions** | 🚧 Skeleton | [CameraRestrictionsActivity.kt](src/main/java/com/example/composedemos/camerarestrictions/CameraRestrictionsActivity.kt) | |
+| **Camera Restrictions** | ✅ Done | [CameraRestrictionsActivity.kt](src/main/java/com/example/composedemos/camerarestrictions/CameraRestrictionsActivity.kt) | <img src="src/main/assets/screenshots/camera_restrictions_screenshot.png" alt="Screenshot" width="121"/> |
 | **Flight Simulator** | 🚧 Skeleton | [FlightSimulatorActivity.kt](src/main/java/com/example/composedemos/flightsimulator/FlightSimulatorActivity.kt) | |
 | **Routes API** | 🚧 Skeleton | [RoutesActivity.kt](src/main/java/com/example/composedemos/routes/RoutesActivity.kt) | |
 | **Path Following** | 🚧 Skeleton | [PathFollowingActivity.kt](src/main/java/com/example/composedemos/pathfollowing/PathFollowingActivity.kt) | |

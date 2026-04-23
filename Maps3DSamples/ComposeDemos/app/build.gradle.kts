@@ -83,6 +83,9 @@ dependencies {
     // Maps 3D SDK
     implementation(libs.play.services.maps3d)
 
+    // Maps Utils
+    implementation(libs.maps.utils.ktx)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
