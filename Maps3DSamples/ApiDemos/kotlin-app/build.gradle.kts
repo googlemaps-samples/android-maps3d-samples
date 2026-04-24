@@ -91,6 +91,7 @@ android {
         versionName = "1.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["MAPS3D_API_KEY"] = "DEFAULT_API_KEY"
     }
 
     buildTypes {
