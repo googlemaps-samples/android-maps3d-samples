@@ -148,12 +148,11 @@ dependencies {
 }
 
 secrets {
-    // Optionally specify a different file name containing your secrets.
-    // The plugin defaults to "local.properties"
-    propertiesFileName = "secrets.properties"
-
-    // A properties file containing default secret values. This file can be
-    // checked in version control.
+    // Only set propertiesFileName if the file exists to avoid FileNotFoundException in CI
+    val secretsFile = rootProject.file("secrets.properties")
+    if (secretsFile.exists()) {
+        propertiesFileName = "secrets.properties"
+    }
     defaultPropertiesFileName = "local.defaults.properties"
 }
 
