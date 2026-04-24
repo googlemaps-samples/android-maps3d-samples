@@ -159,8 +159,11 @@ def main():
             if f"| **{feature_name}** |" in line:
                 # Get the activity file basename
                 file_basename = activity_path.split("/")[-1]
-                # Construct new line
-                lines[i] = f"| **{feature_name}** | ✅ Done | [{file_basename}](src/main/java/com/example/composedemos/{activity_path}) | {image_link} |"
+                # Split to get description if exists
+                parts = line.split("|")
+                description = parts[5].strip() if len(parts) > 5 else ""
+                # Construct new line preserving description
+                lines[i] = f"| **{feature_name}** | ✅ Done | [{file_basename}](src/main/java/com/example/composedemos/{activity_path}) | {image_link} | {description} |"
                 updated = True
                 break
                 
