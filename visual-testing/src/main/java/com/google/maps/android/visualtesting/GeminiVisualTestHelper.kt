@@ -33,6 +33,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
@@ -106,6 +107,15 @@ class GeminiVisualTestHelper {
 
         val rawBody = response.bodyAsText()
         val jsonResponse = JSONObject(rawBody)
+        
+        // Extract and log usage metrics
+        jsonResponse.optJSONObject("usageMetadata")?.let { usage ->
+            val promptTokens = usage.optInt("promptTokenCount")
+            val candidatesTokens = usage.optInt("candidatesTokenCount")
+            val totalTokens = usage.optInt("totalTokenCount")
+            Log.i("GeminiVisualTestHelper", "Metrics [performAction] - Prompt Tokens: $promptTokens, Candidates Tokens: $candidatesTokens, Total Tokens: $totalTokens")
+        }
+
         val actionJson = jsonResponse.getJSONArray("candidates")
             .getJSONObject(0)
             .getJSONObject("content")
@@ -197,7 +207,7 @@ class GeminiVisualTestHelper {
             })
         }
 
-        val response: HttpResponse = client.post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=$apiKey") {
+        val response: HttpResponse = client.post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=$apiKey") {
             contentType(ContentType.Application.Json)
             setBody(requestJson.toString())
         }
@@ -211,6 +221,14 @@ class GeminiVisualTestHelper {
         val rawBody = response.bodyAsText()
         val jsonResponse = JSONObject(rawBody)
         
+        // Extract and log usage metrics
+        jsonResponse.optJSONObject("usageMetadata")?.let { usage ->
+            val promptTokens = usage.optInt("promptTokenCount")
+            val candidatesTokens = usage.optInt("candidatesTokenCount")
+            val totalTokens = usage.optInt("totalTokenCount")
+            Log.i("GeminiVisualTestHelper", "Metrics [analyzeImage] - Prompt Tokens: $promptTokens, Candidates Tokens: $candidatesTokens, Total Tokens: $totalTokens")
+        }
+
         val candidates = jsonResponse.optJSONArray("candidates")
         if (candidates == null || candidates.length() == 0) {
             Log.w("GeminiVisualTestHelper", "Gemini API returned empty candidates. Full response: $rawBody")
@@ -222,6 +240,24 @@ class GeminiVisualTestHelper {
             .getJSONArray("parts")
             .getJSONObject(0)
             .optString("text")
+    }
+
+    /**
+     * Blocking version of analyzeImage for Java interop.
+     */
+    fun analyzeImageBlocking(
+        bitmap: Bitmap,
+        prompt: String,
+        apiKey: String
+    ): String? = runBlocking {
+        analyzeImage(bitmap, prompt, apiKey)
+    }
+
+    /**
+     * Blocking version of performActionFromPrompt for Java interop.
+     */
+    fun performActionFromPromptBlocking(prompt: String, uiDevice: UiDevice, apiKey: String) = runBlocking {
+        performActionFromPrompt(prompt, uiDevice, apiKey)
     }
 
     private fun Bitmap.toBase64EncodedJpeg(): String {

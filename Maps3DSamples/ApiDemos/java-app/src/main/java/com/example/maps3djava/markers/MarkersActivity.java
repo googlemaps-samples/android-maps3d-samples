@@ -93,6 +93,7 @@ public class MarkersActivity extends SampleBaseActivity {
     private Runnable tourRunnable;
     private int tourIndex = 0;
     private boolean isTourActive = false;
+    private boolean isInitialized = false;
 
     @Override
     public final Camera getInitialCamera() {
@@ -116,11 +117,22 @@ public class MarkersActivity extends SampleBaseActivity {
         googleMap3D.setOnMapReadyListener((map) -> {
             Log.w(getTAG(), "on map ready listener fired");
             googleMap3D.setOnMapReadyListener(null);
-            onMapReady(googleMap3D);
+            initializeMap(googleMap3D);
         });
+
+        // Workaround for bug where onMapReady is not called on reused instances.
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                initializeMap(googleMap3D);
+            }
+        }, 2000);
     }
 
-    private void onMapReady(GoogleMap3D googleMap3D) {
+    private void initializeMap(GoogleMap3D googleMap3D) {
+        if (isInitialized) return;
+        isInitialized = true;
+
         googleMap3D.setCamera(getInitialCamera());
         googleMap3D.setMapMode(Map3DMode.SATELLITE);
 

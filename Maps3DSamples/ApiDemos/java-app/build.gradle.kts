@@ -139,6 +139,8 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(project(":Maps3DSamples:ApiDemos:common"))
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(project(":visual-testing"))
+    androidTestImplementation(libs.androidx.uiautomator)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.google.truth)

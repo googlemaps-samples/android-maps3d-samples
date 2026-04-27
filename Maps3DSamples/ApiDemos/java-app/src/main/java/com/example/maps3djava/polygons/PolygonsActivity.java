@@ -130,10 +130,25 @@ public class PolygonsActivity extends SampleBaseActivity {
         return options;
     }).collect(Collectors.toList());
 
+    private boolean isInitialized = false;
+
     @Override
     public void onMap3DViewReady(GoogleMap3D googleMap3D) {
         super.onMap3DViewReady(googleMap3D);
         googleMap3D.setMapMode(Map3DMode.HYBRID);
+
+        // Workaround for bug or glitch when adding shapes too early.
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                initializePolygons(googleMap3D);
+            }
+        }, 2000);
+    }
+
+    private void initializePolygons(GoogleMap3D googleMap3D) {
+        if (isInitialized) return;
+        isInitialized = true;
 
         // Add extruded polygons to the map. The returned list of polygons can be used to remove them at a later time.
         // The addPolygon method returns a Polygon object, not PolygonOptions

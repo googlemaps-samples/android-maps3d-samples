@@ -53,6 +53,20 @@ import com.example.maps3dkotlin.models.ModelsActivity
 import com.example.maps3dkotlin.polygons.PolygonsActivity
 import com.example.maps3dkotlin.polylines.PolylinesActivity
 import com.example.maps3dkotlin.popovers.PopoversActivity
+import com.example.maps3dkotlin.camerarestrictions.CameraRestrictionsActivity
+import com.example.maps3dkotlin.flightsimulator.FlightSimulatorActivity
+import com.example.maps3dkotlin.routes.RoutesActivity
+import com.example.maps3dkotlin.pathfollowing.PathFollowingActivity
+import com.example.maps3dkotlin.pathstyling.PathStylingActivity
+import com.example.maps3dkotlin.animatingmodels.AnimatingModelsActivity
+import com.example.maps3dkotlin.placesearch.PlaceSearchActivity
+import com.example.maps3dkotlin.placeautocomplete.PlaceAutocompleteActivity
+import com.example.maps3dkotlin.placedetails.PlaceDetailsActivity
+import com.example.maps3dkotlin.advancedcameraanimation.AdvancedCameraAnimationActivity
+import com.example.maps3dkotlin.datavisualization.DataVisualizationActivity
+import com.example.maps3dkotlin.cloudstyling.CloudStylingActivity
+import com.example.maps3dkotlin.roadmapmode.RoadmapModeActivity
+import com.example.maps3dkotlin.fieldofview.FieldOfViewActivity
 import com.example.maps3dkotlin.theme.Maps3DSamplesTheme
 import kotlinx.coroutines.launch
 
@@ -86,6 +100,20 @@ class MainActivity : ComponentActivity() {
         Sample(R.string.feature_title_3d_models, ModelsActivity::class.java),
         Sample(R.string.feature_title_popovers, PopoversActivity::class.java),
         Sample(R.string.feature_title_map_interactions, MapInteractionsActivity::class.java),
+        Sample(R.string.feature_title_camera_restrictions, CameraRestrictionsActivity::class.java),
+        Sample(R.string.feature_title_flight_simulator, FlightSimulatorActivity::class.java),
+        Sample(R.string.feature_title_routes_api, RoutesActivity::class.java),
+        Sample(R.string.feature_title_path_following, PathFollowingActivity::class.java),
+        Sample(R.string.feature_title_path_styling, PathStylingActivity::class.java),
+        Sample(R.string.feature_title_animating_models, AnimatingModelsActivity::class.java),
+        Sample(R.string.feature_title_place_search, PlaceSearchActivity::class.java),
+        Sample(R.string.feature_title_place_autocomplete, PlaceAutocompleteActivity::class.java),
+        Sample(R.string.feature_title_place_details, PlaceDetailsActivity::class.java),
+        Sample(R.string.feature_title_advanced_camera_animation, AdvancedCameraAnimationActivity::class.java),
+        Sample(R.string.feature_title_data_visualization, DataVisualizationActivity::class.java),
+        Sample(R.string.feature_title_cloud_styling, CloudStylingActivity::class.java),
+        Sample(R.string.feature_title_roadmap_mode, RoadmapModeActivity::class.java),
+        Sample(R.string.feature_title_field_of_view, FieldOfViewActivity::class.java),
     )
 
     @OptIn(ExperimentalMaterial3Api::class)
