@@ -94,6 +94,7 @@ android {
         versionName = "1.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["MAPS3D_API_KEY"] = "DEFAULT_API_KEY"
     }
 
     buildTypes {
@@ -133,6 +134,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.google.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
@@ -161,12 +163,11 @@ dependencies {
 }
 
 secrets {
-    // Optionally specify a different file name containing your secrets.
-    // The plugin defaults to "local.properties"
-    propertiesFileName = "secrets.properties"
-
-    // A properties file containing default secret values. This file can be
-    // checked in version control.
+    // Only set propertiesFileName if the file exists to avoid FileNotFoundException in CI
+    val secretsFile = rootProject.file("secrets.properties")
+    if (secretsFile.exists()) {
+        propertiesFileName = "secrets.properties"
+    }
     defaultPropertiesFileName = "local.defaults.properties"
 }
 

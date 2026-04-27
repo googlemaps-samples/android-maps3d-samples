@@ -152,6 +152,7 @@ dependencies {
     testImplementation(libs.robolectric)
     // `androidTestImplementation` is for instrumented tests (running on an Android device or emulator).
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.google.truth)
     androidTestImplementation(libs.androidx.espresso.core) // For UI testing with the View system.
 
     // --- Compose Testing ---
@@ -163,12 +164,12 @@ dependencies {
 
 // This block configures the Secrets Gradle Plugin.
 secrets {
-    // Specifies a default properties file. This is useful for CI/CD environments where
-    // you might not have a local `secrets.properties` file.
+    // Only set propertiesFileName if the file exists to avoid FileNotFoundException in CI
+    val secretsFile = rootProject.file("secrets.properties")
+    if (secretsFile.exists()) {
+        propertiesFileName = "secrets.properties"
+    }
     defaultPropertiesFileName = "local.defaults.properties"
-    // Specifies the local properties file where secret keys (like the Places API key) are stored.
-    // This file should be added to .gitignore to prevent it from being committed to version control.
-    propertiesFileName = "secrets.properties"
 }
 
 tasks.register<Exec>("installAndLaunch") {

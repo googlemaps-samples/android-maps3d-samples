@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DOptions
@@ -36,7 +37,7 @@ internal fun ThreeDMap(
   }
 
   AndroidView(
-    modifier = modifier,
+    modifier = modifier.testTag("map3d_view"),
     factory = { context ->
       val map3dView = Map3DView(context = context, options = options)
       map3dView.onCreate(null)

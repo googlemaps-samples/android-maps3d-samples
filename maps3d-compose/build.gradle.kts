@@ -70,6 +70,7 @@ dependencies {
     
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
+    testImplementation("io.mockk:mockk:1.13.10")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

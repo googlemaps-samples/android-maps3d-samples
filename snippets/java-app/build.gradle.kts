@@ -131,7 +131,11 @@ dependencies {
 }
 
 secrets {
-    propertiesFileName = "secrets.properties"
+    // Only set propertiesFileName if the file exists to avoid FileNotFoundException in CI
+    val secretsFile = rootProject.file("secrets.properties")
+    if (secretsFile.exists()) {
+        propertiesFileName = "secrets.properties"
+    }
     defaultPropertiesFileName = "local.defaults.properties"
 }
 

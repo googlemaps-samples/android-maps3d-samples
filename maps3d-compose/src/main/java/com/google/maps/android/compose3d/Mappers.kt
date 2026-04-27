@@ -12,7 +12,8 @@ import com.google.maps.android.compose3d.utils.toValidLocation
 /**
  * Extension function to map [PolylineConfig] to [PolylineOptions].
  */
-fun PolylineConfig.toPolylineOptions() = polylineOptions {
+fun PolylineConfig.toPolylineOptions(overrideId: String? = null) = polylineOptions {
+    id = overrideId ?: key
     this.path = points.map { it.toValidLocation() }
     strokeColor = color
     strokeWidth = width.toDouble()
@@ -26,8 +27,8 @@ fun PolylineConfig.toPolylineOptions() = polylineOptions {
 /**
  * Extension function to map [MarkerConfig] to [MarkerOptions].
  */
-fun MarkerConfig.toMarkerOptions() = markerOptions {
-    id = key
+fun MarkerConfig.toMarkerOptions(overrideId: String? = null) = markerOptions {
+    id = overrideId ?: key
     position = this@toMarkerOptions.position.toValidLocation()
     altitudeMode = this@toMarkerOptions.altitudeMode
     label = this@toMarkerOptions.label
@@ -40,7 +41,8 @@ fun MarkerConfig.toMarkerOptions() = markerOptions {
 /**
  * Extension function to map [PolygonConfig] to [PolygonOptions].
  */
-fun PolygonConfig.toPolygonOptions() = polygonOptions {
+fun PolygonConfig.toPolygonOptions(overrideId: String? = null) = polygonOptions {
+    id = overrideId ?: key
     path = this@toPolygonOptions.path.map { it.toValidLocation() }
     innerPaths = this@toPolygonOptions.innerPaths.map { Hole(it.map { p -> p.toValidLocation() }) }
     fillColor = this@toPolygonOptions.fillColor
@@ -52,8 +54,8 @@ fun PolygonConfig.toPolygonOptions() = polygonOptions {
 /**
  * Extension function to map [ModelConfig] to [ModelOptions].
  */
-fun ModelConfig.toModelOptions() = modelOptions {
-    id = key
+fun ModelConfig.toModelOptions(overrideId: String? = null) = modelOptions {
+    id = overrideId ?: key
     position = this@toModelOptions.position.toValidLocation()
     altitudeMode = this@toModelOptions.altitudeMode
     orientation = orientation {

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:name=".ComposeDemosApplication"
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.Material.NoActionBar">
+
+        <meta-data
+            android:name="com.google.android.geo.maps3d.API_KEY"
+            android:value="${MAPS3D_API_KEY}" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Skeletons for ApiDemos Parity -->
+        <activity android:name=".hellomap.HelloMapActivity" android:exported="true" android:label="Hello Map" />
+        <activity android:name=".polylines.PolylinesActivity" android:exported="true" android:label="Polylines" />
+        <activity android:name=".mapinteractions.MapInteractionsActivity" android:exported="true" android:label="Map Interactions" />
+        <activity android:name=".popovers.PopoversActivity" android:exported="true" android:label="Popovers" />
+        <activity android:name=".cameracontrols.CameraControlsActivity" android:exported="true" android:label="Camera Controls" />
+        <activity android:name=".polygons.PolygonsActivity" android:exported="true" android:label="Polygons" />
+        <activity android:name=".models.ModelsActivity" android:exported="true" android:label="Models" />
+        <activity android:name=".markers.MarkersActivity" android:exported="true" android:label="Markers" />
+
+        <!-- Skeletons for Additional Catalog Requirements -->
+        <activity android:name=".camerarestrictions.CameraRestrictionsActivity" android:exported="true" android:label="Camera Restrictions" />
+        <activity android:name=".flightsimulator.FlightSimulatorActivity" android:exported="true" android:label="Flight Simulator" />
+        <activity android:name=".routes.RoutesActivity" android:exported="true" android:label="Routes API" />
+        <activity android:name=".pathfollowing.PathFollowingActivity" android:exported="true" android:label="Path Following" />
+        <activity android:name=".pathstyling.PathStylingActivity" android:exported="true" android:label="Path Styling" />
+        <activity android:name=".animatingmodels.AnimatingModelsActivity" android:exported="true" android:label="Animating Models" />
+        <activity android:name=".placesearch.PlaceSearchActivity" android:exported="true" android:label="Place Search" />
+        <activity android:name=".placeautocomplete.PlaceAutocompleteActivity" android:exported="true" android:label="Place Autocomplete" />
+        <activity android:name=".placedetails.PlaceDetailsActivity" android:exported="true" android:label="Place Details" android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
+        <activity android:name=".advancedcameraanimation.AdvancedCameraAnimationActivity" android:exported="true" android:label="Advanced Camera Animation" />
+        <activity android:name=".datavisualization.DataVisualizationActivity" android:exported="true" android:label="Data Visualization" />
+        <activity android:name=".cloudstyling.CloudStylingActivity" android:exported="true" android:label="Cloud Map Styling" />
+        <activity android:name=".roadmapmode.RoadmapModeActivity" android:exported="true" android:label="Roadmap Mode" />
+        <activity android:name=".fieldofview.FieldOfViewActivity" android:exported="true" android:label="Field Of View" />
+
+    </application>
+
+</manifest>

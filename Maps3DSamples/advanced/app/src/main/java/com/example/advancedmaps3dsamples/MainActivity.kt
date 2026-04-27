@@ -37,8 +37,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.advancedmaps3dsamples.basicmap.BasicComposeMapActivity
 import com.example.advancedmaps3dsamples.route.RouteSampleActivity
 import com.example.advancedmaps3dsamples.scenarios.ScenariosActivity
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
@@ -48,6 +50,7 @@ data class MapSample(@StringRes val label: Int, val clazz: Class<*>)
 
 private val samples =
     listOf(
+        MapSample(R.string.map_sample_basic, BasicComposeMapActivity::class.java),
         MapSample(R.string.map_sample_scenarios, ScenariosActivity::class.java),
         MapSample(R.string.map_sample_route, RouteSampleActivity::class.java),
     )
@@ -61,7 +64,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AdvancedMaps3DSamplesTheme {
                 Scaffold(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().testTag("main_screen"),
                     topBar = {
                         CenterAlignedTopAppBar(
                             title = { Text(stringResource(R.string.map_sample_title)) }

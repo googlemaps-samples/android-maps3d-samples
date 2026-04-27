@@ -82,6 +82,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.advancedmaps3dsamples.BuildConfig
@@ -333,7 +334,7 @@ private fun Map3DViewport(
     onMapReady: (GoogleMap3D) -> Unit, onMapCleared: () -> Unit
 ) {
     val context = LocalContext.current
-    AndroidView(modifier = Modifier.fillMaxSize(), factory = {
+    AndroidView(modifier = Modifier.fillMaxSize().testTag("map3d_view"), factory = {
         val options = Map3DOptions(
             centerLat = 21.350,
             centerLng = -157.800,

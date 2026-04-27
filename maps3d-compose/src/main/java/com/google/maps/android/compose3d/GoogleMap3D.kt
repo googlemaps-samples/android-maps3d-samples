@@ -32,6 +32,7 @@ import com.google.android.gms.maps3d.model.CameraRestriction
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.maps.android.compose3d.utils.toValidCamera
 import com.google.maps.android.compose3d.utils.toValidCameraRestriction
+import com.google.android.gms.maps3d.model.LatLngAltitude
 
 /**
  * A declarative Compose wrapper for the Google Maps 3D SDK [Map3DView].
@@ -71,7 +72,7 @@ fun GoogleMap3D(
     options: Map3DOptions = Map3DOptions(),
     onMapReady: (GoogleMap3D) -> Unit = {},
     onMapSteady: () -> Unit = {},
-    onMapClick: (() -> Unit)? = null,
+    onMapClick: ((LatLngAltitude) -> Unit)? = null,
     onPlaceClick: ((String) -> Unit)? = null,
     onCameraChanged: (Camera) -> Unit = {},
 ) {
@@ -108,11 +109,12 @@ fun GoogleMap3D(
                     }
 
                     if (currentOnMapClick != null || currentOnPlaceClick != null) {
-                        googleMap3D.setMap3DClickListener { _, placeId ->
+                        googleMap3D.setMap3DClickListener { location, placeId ->
+                            android.util.Log.d("GoogleMap3D", "Map clicked at $location, placeId: $placeId")
                             if (placeId != null) {
                                 currentOnPlaceClick?.invoke(placeId)
                             } else {
-                                currentOnMapClick?.invoke()
+                                currentOnMapClick?.invoke(location)
                             }
                         }
                     }
