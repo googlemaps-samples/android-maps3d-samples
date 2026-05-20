@@ -104,6 +104,7 @@
     <string name="polygon_zoo_clicked">Zoo time</string>
     <string name="polyline_trail_clicked">Hiking time!</string>
     <string name="model_plane_clicked">Model clicked</string>
+    <string name="map_interactions_clicked_info">Click on the map to see details</string>
 
     <!-- Monster Blurbs -->
     <string name="monster_alien_blurb">They didn\'t just come to sculpt mashed potatoes. 👽</string>
