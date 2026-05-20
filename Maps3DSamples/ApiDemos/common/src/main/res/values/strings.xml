@@ -30,6 +30,20 @@
     <string name="feature_title_polylines">Polylines</string>
     <string name="feature_title_3d_models">3D models</string>
     <string name="feature_title_popovers">Popovers</string>
+    <string name="feature_title_camera_restrictions">Camera Restrictions</string>
+    <string name="feature_title_flight_simulator">Flight Simulator</string>
+    <string name="feature_title_routes_api">Routes API</string>
+    <string name="feature_title_path_following">Path Following</string>
+    <string name="feature_title_path_styling">Path Styling</string>
+    <string name="feature_title_animating_models">Animating Models</string>
+    <string name="feature_title_place_search">Place Search</string>
+    <string name="feature_title_place_autocomplete">Place Autocomplete</string>
+    <string name="feature_title_place_details">Place Details</string>
+    <string name="feature_title_advanced_camera_animation">Advanced Camera Animation</string>
+    <string name="feature_title_data_visualization">Data Visualization</string>
+    <string name="feature_title_cloud_styling">Cloud Map Styling</string>
+    <string name="feature_title_roadmap_mode">Roadmap Mode</string>
+    <string name="feature_title_field_of_view">Field Of View</string>
 
     <string name="feature_not_implemented">Coming soon!</string>
 
@@ -85,11 +99,12 @@
     -->
     <string name="in_kilometers" translatable="false">%1$,.1f km</string>
 
-    <string name="camera_state_format" formatted="false">Lat: %.4f, Lng: %.4f, Alt: %.2fm\nHdg: %.2f° (%s), Tlt: %.2f°, Rng: %.2fm</string>
+    <string name="camera_state_format" formatted="false">Lat: %.4f, Lng: %.4f, Alt: %.2fm\nHeading: %.2f° (%s), Tlt: %.2f°, Rng: %.2fm</string>
     <string name="polygon_museum_clicked">Check out the Museum!</string>
     <string name="polygon_zoo_clicked">Zoo time</string>
     <string name="polyline_trail_clicked">Hiking time!</string>
     <string name="model_plane_clicked">Model clicked</string>
+    <string name="map_interactions_clicked_info">Click on the map to see details</string>
 
     <!-- Monster Blurbs -->
     <string name="monster_alien_blurb">They didn\'t just come to sculpt mashed potatoes. 👽</string>

@@ -144,6 +144,7 @@ dependencies {
     testImplementation(libs.google.truth) // "com.google.truth:truth:1.4.5"
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.uiautomator)
+    androidTestImplementation(project(":visual-testing"))
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)

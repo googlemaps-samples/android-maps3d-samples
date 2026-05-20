@@ -103,6 +103,8 @@ public class PolylinesActivity extends SampleBaseActivity implements OnMap3DView
         trailBackgroundPolylineOptions.setDrawsOccludedSegments(true);
     }
 
+    private boolean isInitialized = false;
+
     /**
      * Called when the Map3DView is ready to be used. This is where you can add polylines,
      * set map modes, and perform other map-related operations.
@@ -112,6 +114,25 @@ public class PolylinesActivity extends SampleBaseActivity implements OnMap3DView
     @Override
     public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
         super.onMap3DViewReady(googleMap3D);
+        
+        googleMap3D.setOnMapReadyListener((map) -> {
+            googleMap3D.setOnMapReadyListener(null);
+            initializeMap(googleMap3D);
+        });
+
+        // Workaround for bug where onMapReady is not called on reused instances.
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                initializeMap(googleMap3D);
+            }
+        }, 2000);
+    }
+
+    private void initializeMap(@NonNull GoogleMap3D googleMap3D) {
+        if (isInitialized) return;
+        isInitialized = true;
+
         googleMap3D.setMapMode(Map3DMode.HYBRID);
         googleMap3D.addPolyline(trailBackgroundPolylineOptions);
         com.google.android.gms.maps3d.model.Polyline foregroundPolyline = googleMap3D.addPolyline(trailForegroundPolylineOptions);
