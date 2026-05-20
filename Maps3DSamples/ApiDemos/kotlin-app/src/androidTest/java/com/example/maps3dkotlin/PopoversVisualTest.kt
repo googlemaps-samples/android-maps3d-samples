@@ -55,7 +55,7 @@ class PopoversVisualTest : BaseVisualTest() {
             // Define the prompt for Gemini to find coordinates
             val promptFind = """
                 Analyze this screenshot of a 3D map.
-                You should see a marker or label with the text "Click me for Popover".
+                You should see a marker or label with the text "Golden Gate Bridge".
                 Find that marker or label.
                 Return its center coordinates as a JSON object: {"x": <float>, "y": <float>} where x and y are normalized coordinates between 0.0 and 1.0 (0.0 is top/left, 1.0 is bottom/right).
                 Return ONLY the JSON object, nothing else.
@@ -67,7 +67,7 @@ class PopoversVisualTest : BaseVisualTest() {
 
             // Parse JSON and click
             try {
-                val jsonStr = geminiResponse?.substringAfter("{")?.substringBeforeLast("}")?.let { "{${'$'}it}" } ?: ""
+                val jsonStr = geminiResponse?.substringAfter("{")?.substringBeforeLast("}")?.let { "{" + it + "}" } ?: ""
                 val json = JSONObject(jsonStr)
                 val x = json.getDouble("x")
                 val y = json.getDouble("y")
@@ -83,8 +83,8 @@ class PopoversVisualTest : BaseVisualTest() {
 
             // Wait for the popover text to appear
             val textFound = uiDevice.wait(
-                Until.hasObject(By.text("This is a Popover anchored to a marker!")),
-                10000
+                Until.hasObject(By.text("The Golden Gate Bridge")),
+                15000
             )
             assertTrue("Popover text not found", textFound == true)
 

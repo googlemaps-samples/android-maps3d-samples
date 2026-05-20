@@ -53,10 +53,11 @@ class MarkersVisualTest : BaseVisualTest() {
             // Define the verification prompt for Gemini
             val prompt = """
                 Please act as a UI tester and analyze this screenshot.
-                1. Confirm that a 3D map view is visible.
-                2. Confirm that an alien icon or marker is visible on top of the prominent rock formation (Devils Tower).
+                1. Confirm that a 3D satellite map view of New York City (Manhattan) is visible.
+                2. Confirm that a Giant Ape/Gorilla marker icon is visible floating near the Empire State Building.
+                3. Confirm that custom red and/or yellow pins are visible in the vicinity.
 
-                If the map is visible and the alien marker is seen, reply with "PASSED".
+                If the map is visible and the giant ape marker and custom pins are seen, reply with "PASSED".
                 Otherwise, report what you see.
             """.trimIndent()
 

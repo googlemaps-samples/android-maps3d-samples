@@ -25,6 +25,8 @@ import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
+import com.google.android.gms.maps3d.model.Camera
+import com.google.android.gms.maps3d.model.LatLngAltitude
 
 /**
  * `HelloMapActivity` serves as a foundational example for integrating `Map3DView` into an
@@ -85,10 +87,33 @@ class HelloMapActivity : Activity(), OnMap3DViewReadyCallback {
      *
      * @param googleMap3D The `GoogleMap3D` object that is now ready.
      */
+    private var isInitialized = false
+
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-        // Once the map is ready, we can store a reference to the GoogleMap3D object.
-        // This allows us to interact with the map later on, for example, in response to user input.
         this.googleMap3D = googleMap3D
+
+        googleMap3D.setOnMapReadyListener {
+            initializeMap()
+        }
+
+        // Workaround for bug where onMapReady is not called on reused instances.
+        // Call initialization after a short delay.
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            initializeMap()
+        }, 2000)
+    }
+
+    private fun initializeMap() {
+        val map = googleMap3D ?: return
+        if (isInitialized) return
+        isInitialized = true
+
+        Log.i(TAG, "Initializing map position to Delicate Arch")
+
+        val center = LatLngAltitude(38.743502, -109.499374, 1467.0)
+        val initialCamera = Camera(center, 349.6, 58.1, 0.0, 138.2)
+
+        map.setCamera(initialCamera)
     }
 
     /**

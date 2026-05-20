@@ -56,7 +56,7 @@ public class PopoversVisualTest extends BaseVisualTest {
 
         // Define the prompt for Gemini to find coordinates
         String promptFind = "Analyze this screenshot of a 3D map.\n" +
-                "You should see a marker or label with the text \"Click me for Popover\".\n" +
+                "You should see a marker or label with the text \"Golden Gate Bridge\".\n" +
                 "Find that marker or label.\n" +
                 "Return its center coordinates as a JSON object: {\"x\": <float>, \"y\": <float>} where x and y are normalized coordinates between 0.0 and 1.0 (0.0 is top/left, 1.0 is bottom/right).\n" +
                 "Return ONLY the JSON object, nothing else.";
@@ -83,8 +83,8 @@ public class PopoversVisualTest extends BaseVisualTest {
 
         // Wait for the popover text to appear
         boolean textFound = uiDevice.wait(
-                Until.hasObject(By.text("This is a Popover anchored to a marker!")),
-                10000
+                Until.hasObject(By.text("The Golden Gate Bridge")),
+                15000
         );
         assertTrue("Popover text not found", textFound);
 

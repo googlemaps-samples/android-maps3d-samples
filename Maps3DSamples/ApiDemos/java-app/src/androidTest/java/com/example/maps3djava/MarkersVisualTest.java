@@ -54,10 +54,11 @@ public class MarkersVisualTest extends BaseVisualTest {
 
         // Define the verification prompt for Gemini
         String prompt = "Please act as a UI tester and analyze this screenshot.\n" +
-                "1. Confirm that a 3D map view is visible.\n" +
-                "2. Confirm that an alien icon or marker is visible on top of the prominent rock formation (Devils Tower).\n" +
+                "1. Confirm that a 3D satellite map view of New York City (Manhattan) is visible.\n" +
+                "2. Confirm that a Giant Ape/Gorilla marker icon is visible floating near the Empire State Building.\n" +
+                "3. Confirm that custom red and/or yellow pins are visible in the vicinity.\n" +
                 "\n" +
-                "If the map is visible and the alien marker is seen, reply with \"PASSED\".\n" +
+                "If the map is visible and the giant ape marker and custom pins are seen, reply with \"PASSED\".\n" +
                 "Otherwise, report what you see.";
 
         // Analyze the image using Gemini (using blocking wrapper)
