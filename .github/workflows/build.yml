@@ -39,7 +39,9 @@ jobs:
           distribution: 'adopt'
           java-version: '21'
       - name: Build ApiDemos
-        run: cd Maps3DSamples/ApiDemos && ./gradlew buildDebugPreBundle
+        run: ./gradlew :Maps3DSamples:ApiDemos:java-app:assembleDebug :Maps3DSamples:ApiDemos:kotlin-app:assembleDebug
+      - name: Run ApiDemos Unit Tests
+        run: ./gradlew :Maps3DSamples:ApiDemos:java-app:testDebugUnitTest :Maps3DSamples:ApiDemos:kotlin-app:testDebugUnitTest
 
   build-advanced:
     runs-on: ubuntu-latest
@@ -52,4 +54,6 @@ jobs:
           distribution: 'adopt'
           java-version: '21'
       - name: Build advanced
-        run: cd Maps3DSamples/advanced && ./gradlew buildDebugPreBundle
+        run: ./gradlew :Maps3DSamples:advanced:app:assembleDebug
+      - name: Run advanced Unit Tests
+        run: ./gradlew :Maps3DSamples:advanced:app:testDebugUnitTest
