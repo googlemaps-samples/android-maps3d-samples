@@ -20,7 +20,11 @@ def main():
     test_class = sys.argv[1]
     
     # Workspace root
-    workspace_root = "/Users/dkhawk/AndroidStudioProjects/github-maps-code/android-maps3d-samples/feat-fillout-missing-samples"
+    result = subprocess.run("git rev-parse --show-toplevel", shell=True, capture_output=True, text=True)
+    if result.returncode != 0:
+        print("Failed to find git workspace root.")
+        sys.exit(1)
+    workspace_root = result.stdout.strip()
     
     # 1. Install and Run Test
     # We use am instrument to keep the app installed so we can pull files with run-as.
@@ -35,8 +39,9 @@ def main():
     print("Running test...")
     cmd = f"adb shell am instrument -w -e class com.example.composedemos.{test_class} com.example.composedemos.test/androidx.test.runner.AndroidJUnitRunner"
     success, output = run_command(cmd, cwd=workspace_root)
+    print("Test Output:")
+    print(output)
     if not success:
-        print("Test failed.")
         sys.exit(1)
         
     print("Test passed. Pulling screenshot...")
@@ -48,6 +53,7 @@ def main():
         "MapInteractionsVisualTest": "map_interactions_screenshot.png",
         "PopoversVisualTest": "popovers_screenshot.png",
         "CameraControlsVisualTest": "camera_controls_screenshot.png",
+        "PlaceDetailsVisualTest": "place_details_screenshot.png",
         "PolygonsVisualTest": "polygons_screenshot.png",
         "ModelsVisualTest": "models_screenshot.png",
         "MarkersVisualTest": "markers_screenshot.png",
@@ -120,6 +126,7 @@ def main():
         "MarkersVisualTest": "Markers",
         "CameraRestrictionsVisualTest": "Camera Restrictions",
         "RoutesVisualTest": "Routes API",
+        "PlaceDetailsVisualTest": "Place Details",
     }
     
     feature_name = mapping.get(test_class)
@@ -139,6 +146,7 @@ def main():
             "Markers": "markers/MarkersActivity.kt",
             "Camera Restrictions": "camerarestrictions/CameraRestrictionsActivity.kt",
             "Routes API": "routes/RoutesActivity.kt",
+            "Place Details": "placedetails/PlaceDetailsActivity.kt",
         }
         activity_path = activity_mapping.get(feature_name)
         
@@ -151,8 +159,11 @@ def main():
             if f"| **{feature_name}** |" in line:
                 # Get the activity file basename
                 file_basename = activity_path.split("/")[-1]
-                # Construct new line
-                lines[i] = f"| **{feature_name}** | ✅ Done | [{file_basename}](src/main/java/com/example/composedemos/{activity_path}) | {image_link} |"
+                # Split to get description if exists
+                parts = line.split("|")
+                description = parts[5].strip() if len(parts) > 5 else ""
+                # Construct new line preserving description
+                lines[i] = f"| **{feature_name}** | ✅ Done | [{file_basename}](src/main/java/com/example/composedemos/{activity_path}) | {image_link} | {description} |"
                 updated = True
                 break
                 

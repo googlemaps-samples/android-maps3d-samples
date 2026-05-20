@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<resources>
+    <!--
+    A custom "Boulder Nature Hippie" theme for the PlaceDetailsCompactFragment.
+    This theme overrides multiple attributes to create an earthy, natural look.
+    -->
+    <style name="BoulderNatureHippieTheme" parent="PlacesMaterialTheme">
+        <!-- Core Colors -->
+        <item name="placesColorSurface">#FFFDF5</item> <!-- Warm Cream/Beige -->
+        <item name="placesColorPrimary">#2C5E3B</item> <!-- Forest Green -->
+        <item name="placesColorOnSurface">#3E2723</item> <!-- Dark Brown -->
+        <item name="placesColorOnSurfaceVariant">#5D4037</item> <!-- Medium Brown -->
+        <item name="placesColorOutlineDecorative">#D7CCC8</item> <!-- Sand/Light Brown -->
+
+        <!-- Status Colors -->
+        <item name="placesColorPositive">#4CAF50</item> <!-- Leaf Green -->
+        <item name="placesColorNegative">#D32F2F</item> <!-- Earthy Red -->
+
+        <!-- Shape -->
+        <item name="placesCornerRadius">16dp</item> <!-- More rounded, organic feel -->
+    </style>
+</resources>

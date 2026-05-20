@@ -51,8 +51,7 @@ abstract class BaseVisualTest {
         val bitmap = BitmapFactory.decodeFile(screenshotFile.absolutePath)
         assertTrue("Failed to decode screenshot file: $filename", bitmap != null)
 
-        println("Screenshot saved to device: ${screenshotFile.absolutePath}")
-        println("To pull: adb pull ${screenshotFile.absolutePath}")
+        android.util.Log.i("BaseVisualTest", "Screenshot saved to device: ${screenshotFile.absolutePath}")
 
         return bitmap
     }

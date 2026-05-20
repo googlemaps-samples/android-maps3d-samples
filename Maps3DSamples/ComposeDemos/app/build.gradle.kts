@@ -43,6 +43,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["MAPS3D_API_KEY"] = "DEFAULT_API_KEY"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -92,6 +93,8 @@ dependencies {
 
     // Maps 3D SDK
     implementation(libs.play.services.maps3d)
+    implementation(libs.places)
+    implementation(libs.androidx.fragment.ktx)
 
     // Maps Utils
     implementation(libs.maps.utils.ktx)
@@ -116,7 +119,12 @@ dependencies {
 }
 
 secrets {
-    propertiesFileName = "secrets.properties"
+    // Only set propertiesFileName if the file exists to avoid FileNotFoundException in CI
+    val secretsFile = rootProject.file("secrets.properties")
+    if (secretsFile.exists()) {
+        propertiesFileName = "secrets.properties"
+    }
+    defaultPropertiesFileName = "local.defaults.properties"
 }
 
 tasks.register<Exec>("installAndLaunch") {
