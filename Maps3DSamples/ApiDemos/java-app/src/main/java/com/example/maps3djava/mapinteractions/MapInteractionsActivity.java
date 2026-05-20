@@ -16,10 +16,14 @@
 
 package com.example.maps3djava.mapinteractions;
 
+import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.view.WindowCompat;
 
+import com.example.maps3dcommon.R;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.Camera;
@@ -30,6 +34,8 @@ public class MapInteractionsActivity extends SampleBaseActivity {
 
   private static final double BOULDER_LATITUDE = 40.029349;
   private static final double BOULDER_LONGITUDE = -105.300354;
+
+  private TextView clickedInfoText;
 
   @NonNull
   @Override
@@ -49,12 +55,22 @@ public class MapInteractionsActivity extends SampleBaseActivity {
   }
 
   @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+    setContentView(R.layout.activity_map_interactions);
+
+    map3DView = findViewById(R.id.map3dView);
+    map3DView.onCreate(savedInstanceState);
+    map3DView.getMap3DViewAsync(this);
+
+    clickedInfoText = findViewById(R.id.clicked_info_text);
+  }
+
+  @Override
   public void onMap3DViewReady(GoogleMap3D googleMap3D) {
     super.onMap3DViewReady(googleMap3D);
-    googleMap3D.setOnMapReadyListener((map) -> {
-      googleMap3D.setOnMapReadyListener(null);
-      onMapReady(googleMap3D);
-    });
+    onMapReady(googleMap3D);
   }
 
   private void onMapReady(@NonNull GoogleMap3D googleMap3D) {
@@ -63,11 +79,15 @@ public class MapInteractionsActivity extends SampleBaseActivity {
     // Listeners for map clicks.
     googleMap3D.setMap3DClickListener((location, placeId) -> {
       runOnUiThread(() -> {
+        String message;
         if (placeId != null) {
-          showToast("Clicked on place with ID: " + placeId);
+          message = "Clicked Place ID: " + placeId;
         } else {
-          showToast("Clicked on location: " + location);
+          message = "Clicked Location: " + location.getLatitude() + ", " + location.getLongitude();
         }
+        clickedInfoText.setText(message);
+        clickedInfoText.setContentDescription(message);
+        showToast(message);
       });
     });
   }

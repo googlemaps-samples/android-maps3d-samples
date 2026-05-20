@@ -6,9 +6,9 @@ This directory contains the Kotlin samples using traditional Android Views for t
 
 | Feature | Status | Source Code | Screenshot |
 | :--- | :--- | :--- | :--- |
-| **Hello Map** | ✅ Done | [HelloMapActivity.kt](src/main/java/com/example/maps3dkotlin/hellomap/HelloMapActivity.kt) | |
+| **Basic Map** | ✅ Done | [HelloMapActivity.kt](src/main/java/com/example/maps3dkotlin/hellomap/HelloMapActivity.kt) | <img src="screenshots/hello_map_screenshot.png" alt="Screenshot" width="121"/> |
 | **Polylines** | ✅ Done | [PolylinesActivity.kt](src/main/java/com/example/maps3dkotlin/polylines/PolylinesActivity.kt) | |
-| **Map Interactions** | ✅ Done | [MapInteractionsActivity.kt](src/main/java/com/example/maps3dkotlin/mapinteractions/MapInteractionsActivity.kt) | |
+| **Map Interactions** | ✅ Done | [MapInteractionsActivity.kt](src/main/java/com/example/maps3dkotlin/mapinteractions/MapInteractionsActivity.kt) | <img src="screenshots/map_interactions_screenshot.png" alt="Screenshot" width="121"/> |
 | **Popovers** | ✅ Done | [PopoversActivity.kt](src/main/java/com/example/maps3dkotlin/popovers/PopoversActivity.kt) | |
 | **Camera Controls** | ✅ Done | [CameraControlsActivity.kt](src/main/java/com/example/maps3dkotlin/cameracontrols/CameraControlsActivity.kt) | <img src="screenshots/camera_controls_screenshot.png" alt="Screenshot" width="121"/> |
 | **Polygons** | ✅ Done | [PolygonsActivity.kt](src/main/java/com/example/maps3dkotlin/polygons/PolygonsActivity.kt) | |

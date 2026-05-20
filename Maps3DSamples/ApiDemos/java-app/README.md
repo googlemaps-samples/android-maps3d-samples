@@ -6,9 +6,9 @@ This directory contains the Java samples using traditional Android Views for the
 
 | Feature | Status | Source Code | Screenshot |
 | :--- | :--- | :--- | :--- |
-| **Hello Map** | ✅ Done | [HelloMapActivity.java](src/main/java/com/example/maps3djava/hellomap/HelloMapActivity.java) | |
+| **Basic Map** | ✅ Done | [HelloMapActivity.java](src/main/java/com/example/maps3djava/hellomap/HelloMapActivity.java) | <img src="screenshots/hello_map_screenshot.png" alt="Screenshot" width="121"/> |
 | **Polylines** | ✅ Done | [PolylinesActivity.java](src/main/java/com/example/maps3djava/polylines/PolylinesActivity.java) | |
-| **Map Interactions** | ✅ Done | [MapInteractionsActivity.java](src/main/java/com/example/maps3djava/mapinteractions/MapInteractionsActivity.java) | |
+| **Map Interactions** | ✅ Done | [MapInteractionsActivity.java](src/main/java/com/example/maps3djava/mapinteractions/MapInteractionsActivity.java) | <img src="screenshots/map_interactions_screenshot.png" alt="Screenshot" width="121"/> |
 | **Popovers** | ✅ Done | [PopoversActivity.java](src/main/java/com/example/maps3djava/popovers/PopoversActivity.java) | |
 | **Camera Controls** | ✅ Done | [CameraControlsActivity.java](src/main/java/com/example/maps3djava/cameracontrols/CameraControlsActivity.java) | <img src="screenshots/camera_controls_screenshot.png" alt="Screenshot" width="121"/> |
 | **Polygons** | ✅ Done | [PolygonsActivity.java](src/main/java/com/example/maps3djava/polygons/PolygonsActivity.java) | |
