@@ -66,16 +66,29 @@ public class PopoversActivity extends SampleBaseActivity {
         4075.0));
   }
 
+  private boolean isInitialized = false;
+
   @Override
   public void onMap3DViewReady(GoogleMap3D googleMap3D) {
     super.onMap3DViewReady(googleMap3D);
     googleMap3D.setOnMapReadyListener((map) -> {
       googleMap3D.setOnMapReadyListener(null);
-      onMapReady(googleMap3D);
+      initializeMap(googleMap3D);
     });
+
+    // Workaround for bug where onMapReady is not called on reused instances.
+    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        initializeMap(googleMap3D);
+      }
+    }, 2000);
   }
 
-  private void onMapReady(@NonNull GoogleMap3D googleMap3D) {
+  private void initializeMap(@NonNull GoogleMap3D googleMap3D) {
+    if (isInitialized) return;
+    isInitialized = true;
+
     googleMap3D.setMapMode(Map3DMode.SATELLITE);
     setupPopover(googleMap3D);
   }

@@ -67,13 +67,30 @@ public class MapInteractionsActivity extends SampleBaseActivity {
     clickedInfoText = findViewById(R.id.clicked_info_text);
   }
 
+  private boolean isInitialized = false;
+
   @Override
   public void onMap3DViewReady(GoogleMap3D googleMap3D) {
     super.onMap3DViewReady(googleMap3D);
-    onMapReady(googleMap3D);
+    
+    googleMap3D.setOnMapReadyListener((map) -> {
+      googleMap3D.setOnMapReadyListener(null);
+      initializeMap(googleMap3D);
+    });
+
+    // Workaround for bug where onMapReady is not called on reused instances.
+    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        initializeMap(googleMap3D);
+      }
+    }, 2000);
   }
 
-  private void onMapReady(@NonNull GoogleMap3D googleMap3D) {
+  private void initializeMap(@NonNull GoogleMap3D googleMap3D) {
+    if (isInitialized) return;
+    isInitialized = true;
+
     googleMap3D.setMapMode(Map3DMode.HYBRID);
 
     // Listeners for map clicks.
