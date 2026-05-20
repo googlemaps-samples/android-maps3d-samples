@@ -54,6 +54,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -179,6 +180,7 @@ class ScenariosActivity : ComponentActivity() {
 fun ScenarioPicker(modifier: Modifier, onScenarioClicked: (Scenario) -> Unit) {
   Column(
     modifier = modifier
+      .testTag("scenario_picker")
       .fillMaxSize()
       .padding(16.dp),
     verticalArrangement = Arrangement.spacedBy(8.dp),

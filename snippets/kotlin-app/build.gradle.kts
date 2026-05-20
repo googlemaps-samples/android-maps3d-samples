@@ -40,6 +40,7 @@ android {
             manifestPlaceholders["MAPS3D_API_KEY"] = "DEFAULT_API_KEY"
             manifestPlaceholders["PLACES_API_KEY"] = "DEFAULT_API_KEY"
         }
+        buildConfigField("Boolean", "IS_CI", "${isCI}")
     }
 
     buildTypes {
@@ -97,7 +98,11 @@ dependencies {
 }
 
 secrets {
-    propertiesFileName = "secrets.properties"
+    // Only set propertiesFileName if the file exists to avoid FileNotFoundException in CI
+    val secretsFile = rootProject.file("secrets.properties")
+    if (secretsFile.exists()) {
+        propertiesFileName = "secrets.properties"
+    }
     defaultPropertiesFileName = "local.defaults.properties"
 }
 

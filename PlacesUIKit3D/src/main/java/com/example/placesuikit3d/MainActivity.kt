@@ -51,6 +51,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
@@ -226,7 +227,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
         AndroidView(
             factory = { map3DView },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().testTag("map3d_view")
         )
     }
 

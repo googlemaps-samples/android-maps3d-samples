@@ -15,7 +15,6 @@
 package com.example.maps3dkotlin.polygons
 
 import android.graphics.Color
-import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
@@ -36,8 +35,6 @@ import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.polygonOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * This activity demonstrates how to create and display polygons on a 3D map. It showcases
@@ -163,7 +160,6 @@ class PolygonsActivity : SampleBaseActivity() {
     }
 
     companion object {
-        private val TAG = PolygonsActivity::class.java.simpleName
         private const val DENVER_LATITUDE = 39.748477
         private const val DENVER_LONGITUDE = -104.947575
 

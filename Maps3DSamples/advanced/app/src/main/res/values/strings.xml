@@ -20,6 +20,7 @@
     <string name="map_sample_title" translatable="false">3D Map Samples</string>
     <string name="map_sample_scenarios" translatable="false">Scenarios (video visuals)</string>
     <string name="map_sample_route" translatable="false">Routes API Integration</string>
+    <string name="map_sample_basic" translatable="false">Basic Map (Compose)</string>
 
     <!--
     Distance in feet, formatted to 0 decimal places.

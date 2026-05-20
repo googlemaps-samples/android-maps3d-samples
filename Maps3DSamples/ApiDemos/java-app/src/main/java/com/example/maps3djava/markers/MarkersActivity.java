@@ -495,7 +495,7 @@ public class MarkersActivity extends SampleBaseActivity {
                 .thenComposeAsync(isSteady -> {
                     // If the user tapped "Stop" while we were waiting, gracefully exit the chain.
                     if (!isTourActive)
-                        return CompletableFuture.completedFuture((Void) null);
+                        return CompletableFuture.completedFuture(null);
 
                     FlyAroundOptions orbitOptions = new FlyAroundOptions(camera, 5000L, 1.0);
                     return com.example.maps3djava.common.MapUtils.awaitCameraAnimation(map, orbitOptions);

@@ -16,6 +16,10 @@
 
 import java.util.Properties
 
+plugins {
+    alias(libs.plugins.spotless) apply false
+}
+
 // Evaluate if we are in a CI environment
 val isCI = System.getenv("CI")?.toBoolean() ?: false
 

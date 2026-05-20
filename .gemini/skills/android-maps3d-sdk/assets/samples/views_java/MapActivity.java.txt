@@ -1,0 +1,86 @@
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import com.google.android.gms.maps3d.GoogleMap3D;
+import com.google.android.gms.maps3d.Map3DView;
+import com.google.android.gms.maps3d.OnMap3DViewReadyCallback;
+
+
+public class MainActivity extends AppCompatActivity {
+
+    private Map3DView mapView;
+    private GoogleMap3D googleMap;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+
+        mapView = findViewById(R.id.map_view);
+        mapView.onCreate(savedInstanceState);
+
+        // Use DefaultLifecycleObserver to handle most lifecycle events automatically
+        getLifecycle().addObserver(new DefaultLifecycleObserver() {
+            @Override
+            public void onStart(@NonNull LifecycleOwner owner) { mapView.onStart(); }
+            @Override
+            public void onResume(@NonNull LifecycleOwner owner) { mapView.onResume(); }
+            @Override
+            public void onPause(@NonNull LifecycleOwner owner) { mapView.onPause(); }
+            @Override
+            public void onStop(@NonNull LifecycleOwner owner) { mapView.onStop(); }
+            @Override
+            public void onDestroy(@NonNull LifecycleOwner owner) { mapView.onDestroy(); }
+        });
+
+        mapView.getMap3DViewAsync(new OnMap3DViewReadyCallback() {
+            @Override
+            public void onMap3DViewReady(@NonNull GoogleMap3D map) {
+                googleMap = map;
+                
+                // Fails on cold starts because the viewport layout and binding matrix are not yet stable.
+                // The SDK requires a delay to bypass these readiness bugs before adding objects or setting camera.
+                // 1 second is usually sufficient.
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        setupMapElements();
+                    }
+                }, 1000);
+
+
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                Log.e("MainActivity", "Error loading map", e);
+            }
+        });
+    }
+
+    private void setupMapElements() {
+        if (googleMap == null) return;
+        
+        Log.d("MainActivity", "Setting up map elements after delay");
+        // Add your map initialization logic here (markers, polylines, etc.)
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
+    }
+}

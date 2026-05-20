@@ -57,5 +57,15 @@ include(":Maps3DSamples:ApiDemos:kotlin-app")
 include(":Maps3DSamples:ApiDemos:java-app")
 include(":Maps3DSamples:ApiDemos:common")
 
+// Maps3DSamples ComposeDemos
+include(":Maps3DSamples:ComposeDemos:app")
+
 // PlacesUIKit3D
 include(":PlacesUIKit3D")
+
+// Maps 3D Compose Library
+include(":maps3d-compose")
+include(":maps3d-compose-demo")
+
+// Visual Testing
+include(":visual-testing")

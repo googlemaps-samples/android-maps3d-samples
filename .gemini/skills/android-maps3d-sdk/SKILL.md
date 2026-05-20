@@ -1,27 +1,69 @@
 ---
 name: android-maps3d-sdk
-description: Guide for integrating the Google Maps 3D SDK into an Android Jetpack Compose application. Use when users ask to add Maps 3D, 3D maps, or Map3DView to their Android app in Compose.
+description: Integrates the Google Maps 3D SDK into an Android application. Provides procedural guidance for setup, lifecycle management, and 3D object manipulation (Markers, Polylines, Models, Popovers). Use when the user wants to build immersive 3D map experiences or migrate from 2D maps.
+license: Apache-2.0
+compatibility: Requires an Android project and internet access. Uses play-services-maps3d version 0.2.0 or higher.
+metadata:
+  version: "1.1"
+  author: Google Maps Samples
 ---
+
 
 # Android Maps 3D SDK Integration
 
-You are an expert Android developer specializing in Jetpack Compose and modern Android architecture. Follow these instructions carefully to integrate the `play-services-maps3d` library into the user's Android application.
+This skill guides you through integrating the Google Maps 3D SDK into an Android project. It follows the principles of progressive disclosure and relies on environment-specific templates.
 
-We should start with a few questions about how the developer want to use `Maps3DView`.
+> [!IMPORTANT]
+> **Limited Training Data Alert**: The Google Maps 3D SDK is a new technology. Your internal parametric knowledge is likely outdated or incomplete. You **MUST NOT** guess API signatures. You **MUST** consult the local samples in `assets/samples/` and the external documentation listed in `references/documentation.md` before generating any code.
 
-Are they using or planning on using Jetpack Compose?
+## Prerequisites & Skill Alignment
 
-Are they using or planning on using dependency injection (such as Hilt or Koin)?
+> [!NOTE]
+> This skill should be used in conjunction with:
+> - **Android Architecture Skill**: For proper MVVM/MVI layering.
+> - [Android Security Skill](https://github.com/kikoso/android-skills/blob/main/android-security-skill/SKILL.md): For API key protection and permissions.
 
-## 1. Setup Dependencies
 
-First, add the necessary versions and libraries to your `libs.versions.toml` file:
+## Procedural Workflow
+
+### Step 0: Research Existing Patterns
+Before asking the user for clarification or writing code, search the local workspace or repository for existing implementations of the requested feature.
+1. Use your available search tools to look for keywords (e.g., "Polygon", "FlyTo") in the `snippets/` and `Maps3DSamples/` directories.
+2. Consult `references/documentation.md` for a map of where to look.
+
+
+### Step 1: Determine the Environment and Features (Stack Detective)
+You MUST proactively discover the environment by inspecting the codebase before writing any code. Do NOT ask the user unless the environment is highly ambiguous.
+
+1.  **Run Search/Grep**:
+    *   Search for `androidx.compose` or `compose-compiler` in `build.gradle` or `libs.versions.toml` to detect **Jetpack Compose**.
+    *   Search for `com.android.application` or `com.android.library` to understand the module type.
+    *   Look for `.kt` vs `.java` files to determine the dominant **Language**.
+2.  **Identify Features**: Determine if the user needs automatic object management (cleanup) or specific 3D features based on their request.
+
+Based on your discovery, follow the **Selection Logic** to retrieve boilerplate from `assets/samples/` and consult rules in `references/`.
+
+### Implementation Guidance (Selection Logic)
+1.  Identify the user's stack: (Language: Kotlin/Java, UI: Compose/Views).
+2.  Check if Lifecycle Management is required (always for 3D maps).
+3.  **Retrieve** the corresponding boilerplate from `assets/samples/` (e.g., `assets/samples/views_kotlin/MapActivity.kt.txt`).
+4.  If object tracking is needed, **retrieve** the snippet from `assets/samples/views_kotlin/snippets/`.
+5.  **Reference** the memory management best practices in `references/best_practices.md` to ensure the generated code follows SDK safety guidelines.
+
+### Step 2: Base Setup
+Regardless of the environment, the following setup is required.
+
+#### 1. Dependencies (Dynamic Version Resolution)
+Before adding the dependency, you MUST identify the latest version.
+1.  Run `./gradlew :app:dependencies | grep maps3d` to check if a version is already resolved.
+2.  Or search the Google Maven repository or use available tools to find the latest version (must be **at least** `0.2.0`).
+
+Add the necessary versions and libraries to your `libs.versions.toml` file:
 
 ```toml
 [versions]
-# NOTE: Verify this is the latest version of the Maps 3D SDK, as it is subject to change.
+# NOTE: Verify this is the latest version of the Maps 3D SDK (must be at least "0.2.0")
 playServicesMaps3d = "0.2.0"
-# NOTE: Verify this is the latest version of lifecycle-runtime-ktx.
 lifecycleRuntimeKtx = "2.8.5"
 
 [libraries]
@@ -29,20 +71,18 @@ play-services-maps3d = { group = "com.google.android.gms", name = "play-services
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 ```
 
-Then, add the dependencies to the app-level `build.gradle.kts` file. 
+Then, add the dependencies to the app-level `build.gradle.kts` file:
 
 ```kotlin
 dependencies {
     // Google Maps 3D SDK
     implementation(libs.play.services.maps3d)
-    
     // Lifecycle Runtime KTX for Coroutine interop
     implementation(libs.androidx.lifecycle.runtime.ktx)
 }
 ```
 
-## 2. Setup the Secrets Gradle Plugin
-
+#### 2. API Key & Manifest
 Use the Secrets Gradle Plugin for Android to inject the API key securely. In app-level `build.gradle.kts`:
 
 ```kotlin
@@ -64,7 +104,6 @@ In `AndroidManifest.xml`, add the required permissions and reference the injecte
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application ...>
-        <!-- Google Maps 3D API Key injected by Secrets Gradle Plugin -->
         <!-- Note the specific name for Maps 3D -->
         <meta-data
             android:name="com.google.android.geo.maps3d.API_KEY"
@@ -74,205 +113,37 @@ In `AndroidManifest.xml`, add the required permissions and reference the injecte
 </manifest>
 ```
 
-Add the API Key to `secrets.properties`:
+### Step 3: Load Environment Template
+After determining the stack, load the corresponding files from `assets/samples/`:
+- Kotlin (Views): 
+    - Layout: `assets/samples/views_kotlin/activity_main.xml`
+    - Activity: `assets/samples/views_kotlin/MapActivity.kt.txt`
+    - Snippet (Object Manager): `assets/samples/views_kotlin/snippets/object_manager_usage.kt.txt`
+- Kotlin + Compose: Refer to `references/catalog_compose.md` for the `Map3DContainer` wrapper and Compose patterns.
+- Java: 
+    - Layout: `assets/samples/views_java/activity_main.xml`
+    - Activity: `assets/samples/views_java/MapActivity.java.txt`
+    - Snippet (Object Manager): `assets/samples/views_java/snippets/object_manager_usage.java.txt`
 
-```properties
-MAPS3D_API_KEY=YOUR_API_KEY
-```
 
-## 3. Implement the Map3D Container Composable
+### Step 4: Apply Best Practices
+Consult `references/best_practices.md` for detailed explanation of rules. Key rules to enforce:
+1. **Initialization Delay**: Always use a 1-second delay before initializing map elements.
+2. **Object Management**: Use the `TrackedMap3D` delegate to clean up objects on destroy to avoid cruft.
+3. **Utilities**: Use validation utilities to prevent crashes, and path utilities for smoothing/simplification (see `references/utilities_kotlin.md` or `references/utilities_java.md`).
 
-If the user is working in a Jetpack Compose app or is creating a Compose app, We can use an
-`AndroidView` to bridge between the View-based `Map3DView` and Jetpack Compose.
+4. **Double-Wait Pattern**: For animations, wait for camera animation end AND map steady state.
+5. **Object Updates**: Use matching IDs to update Polygons/Polylines instead of removing and re-adding.
+6. **Unit Conversions**: For type-safe measurements and conversions, see `references/units_kotlin.md` or `references/units_java.md` (Optional).
+7. **Secrets Security**: NEVER add `secrets.properties` to version control. NEVER add real API keys to source code or `local.defaults.properties` (see `references/secrets_enforcement.md` for Gradle enforcement snippet).
+8. **Common Operations**: Consult the language-specific catalog for short reference snippets (Marker, Polyline, Animation, etc.):
+    *   Java: `references/catalog_java.md`
+    *   Kotlin + Views: `references/catalog_kotlin_views.md`
+    *   Jetpack Compose: `references/catalog_compose.md`
+9. **Scenario Storyboards**: For complex, multi-step workflows (e.g., Immersive Arrival), consult `references/scenarios.md`.
 
-```kotlin
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.viewinterop.AndroidView
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Map3DMode
-import com.google.android.gms.maps.model.Map3DOptions
-import com.google.android.gms.maps.Map3DView
-import com.google.android.gms.maps.GoogleMap3D
-import com.google.android.gms.maps.OnMap3DViewReadyCallback
 
-@Composable
-fun Map3DContainer(
-    modifier: Modifier = Modifier,
-    options: Map3DOptions
-) {
-    // 1. Hoist State: Remember the map object
-    var googleMap by remember { mutableStateOf<GoogleMap3D?>(null) }
-    
-    Box(modifier = modifier.fillMaxSize()) {
-        AndroidView(
-            modifier = Modifier.fillMaxSize(),
-            factory = { context ->
-                Map3DView(context, options).apply {
-                    // Manually call onCreate.
-                    onCreate(null) 
-                }
-            },
-            update = { view ->
-                view.getMap3DViewAsync(
-                    object : OnMap3DViewReadyCallback {
-                        override fun onMap3DViewReady(map3D: GoogleMap3D) {
-                            googleMap = map3D // Capture the controller
-                        }
-                        override fun onError(e: Exception) {
-                            googleMap = null
-                            throw e
-                        }
-                    }
-                )
-            },
-            onRelease = { view -> 
-                googleMap = null
-                view.onDestroy() 
-            }
-        )
-    }
-}
-```
 
-## 4. Best Practices & Guidelines
-*   **Double-Wait Pattern:** Triggering animations from Compose buttons requires the **Double-Wait** pattern (`awaitCameraAnimation` + `awaitSteady`) to ensure peak visual quality.
-*   **Coroutine Bridging:** Animations in the 3D SDK are fire-and-forget. Use an `awaitCameraAnimation(map: GoogleMap3D)` suspend wrapper function using `suspendCancellableCoroutine` for structured concurrency:
 
-```kotlin
-suspend fun awaitCameraAnimation(map: GoogleMap3D) = suspendCancellableCoroutine { continuation ->
-    map.setCameraAnimationEndListener {
-        map.setCameraAnimationEndListener(null) // Cleanup listener to avoid leaks
-        if (continuation.isActive) {
-            continuation.resume(Unit)
-        }
-    }
-    continuation.invokeOnCancellation {
-        map.setCameraAnimationEndListener(null)
-    }
-}
-```
 
-*   **Lifecycle:** You must pass lifecycle events down to `Map3DView`. In Compose, `factory` block takes care of instantiation and `onRelease` handles cleanup (`onDestroy()`). Ensure `onCreate` is called in the factory block.
-    *   *Critical Note:* The underlying `GoogleMap3D` engine instance is effectively created once per application lifecycle. If your `AndroidView` Composable leaves the composition and later returns (creating a new `Map3DView`), the underlying 3D engine may still retain previously added objects (like Polygons) from the destroyed view. You must manually clear or track your objects to avoid duplicates across recompositions or Navigation transitions.
-*   **Initialization & Adding Objects:** Do **not** attempt to set the camera or add 3D objects (like Polygons) immediately after the `GoogleMap3D` reference is ready. The renderer needs time to warm up.
-    *   **Initial Camera:** Always set the initial camera position declaratively via `Map3DOptions` (passed into your container view) rather than imperatively moving the camera after the map loads. This avoids dizzying "flight" animations from coordinate `(0,0)` on startup.
-    *   **Adding Objects:** Only inject geometries into the scene after the map has signaled it is fully ready and stable. Typically, this means waiting for an `onMapSteady` callback.
-*   **Updating Map Objects:** When updating an existing Map Object (e.g., `Polygon`, `Polyline`), do **not** use `remove()` and re-add a new one, as this causes flickering. Instead, use `getId()` from the existing object and pass it to a new `PolygonOptions` (or equivalent) builder, then call `addPolygon()` with those new options on the same `GoogleMap3D` instance. The SDK uses the matching ID to update the existing object gracefully without flickering.
-*   **Nullable Camera Properties:** The 3D SDK's `Camera` object has 6 degrees of freedom. Properties like `heading`, `tilt`, `roll`, and `range` are returned as `Double?` (nullable) since the renderer does not always guarantee a value for every property. Handle these nulls defensively when extracting camera telemetry, especially when persisting position data.
-*   **Parameter Validation:** The Maps 3D library will throw exceptions and crash if passed out-of-bounds telemetry for camera movements or locations. Standardize a validation/coercion layer (e.g., returning a `toValidCamera()` extension object) covering:
-    *   `latitude`: clamped to `[-90.0, 90.0]`
-    *   `longitude`: clamped to `[-180.0, 180.0]`
-    *   `tilt`: clamped to `[0.0, 90.0]`
-    *   `range`: clamped to `[0.0, 63170000.0]`
-    *   `heading`: wrapped to `[0.0, 360.0]`
-    *   `roll`: wrapped to `[-360.0, 360.0]`
-    *   `altitude`: clamped to `[0.0, MAX_ALTITUDE_METERS]`
 
-    **Example Extension:**
-    ```kotlin
-    /** Helper to wrap cyclic values like heading and roll */
-    fun Double.wrapIn(lower: Double, upper: Double): Double {
-        val range = upper - lower
-        if (range <= 0) return this
-        val offset = this - lower
-        return lower + (offset - Math.floor(offset / range) * range)
-    }
-
-    /** Extension to sanitize camera telemetry before passing to engine */
-    fun Camera?.toValidCamera(): Camera {
-        val source = this ?: return Camera.DEFAULT_CAMERA
-        return camera {
-            center = latLngAltitude {
-                latitude = source.center.latitude.coerceIn(-90.0..90.0)
-                longitude = source.center.longitude.coerceIn(-180.0..180.0)
-                altitude = source.center.altitude.coerceIn(0.0..LatLngAltitude.MAX_ALTITUDE_METERS)
-            }
-            heading = source.heading?.toDouble()?.wrapIn(0.0, 360.0) ?: 0.0
-            tilt = source.tilt?.toDouble()?.coerceIn(0.0..90.0) ?: 60.0
-            roll = source.roll?.toDouble()?.wrapIn(-360.0, 360.0) ?: 0.0
-            range = source.range?.toDouble()?.coerceIn(0.0..63170000.0) ?: 1500.0
-        }
-    }
-    ```
-
-*   **Immutable Updates (`copy` Extensions):** The 3D SDK builders (like `camera {}` or `latLngAltitude {}`) do not natively provide a `copy()` method like Kotlin data classes. To gracefully update a single property (like altitude) while retaining the rest of the object's complex state, implement custom `.copy()` extensions:
-
-    ```kotlin
-    /** Extension to clone and modify a Camera */
-    fun Camera.copy(
-        center: LatLngAltitude? = null,
-        heading: Double? = null,
-        tilt: Double? = null,
-        range: Double? = null,
-        roll: Double? = null,
-    ): Camera {
-        val objectToCopy = this
-        return camera {
-            this.center = center ?: objectToCopy.center
-            this.heading = heading ?: objectToCopy.heading
-            this.tilt = tilt ?: objectToCopy.tilt
-            this.range = range ?: objectToCopy.range
-            this.roll = roll ?: objectToCopy.roll
-        }
-    }
-
-    /** Extension to clone and modify a LatLngAltitude */
-    fun LatLngAltitude.copy(
-        latitude: Double? = null,
-        longitude: Double? = null,
-        altitude: Double? = null,
-    ): LatLngAltitude {
-        val objectToCopy = this
-        return latLngAltitude {
-            this.latitude = latitude ?: objectToCopy.latitude
-            this.longitude = longitude ?: objectToCopy.longitude
-            this.altitude = altitude ?: objectToCopy.altitude
-        }
-    }
-    ```
-
-## 5. A Note on Initialization
-
-Immediate Setup (onMap3DViewReady): Fails on cold starts because the viewport layout and binding matrix are not yet stable. Camera updates are completely ignored, and overlays may render offset.
-OnMapReady & OnMapSteady Listeners: These callbacks are strictly edge-triggered. While they may fire on a cold start, they will skip execution entirely on a warm restore (e.g., returning to the Activity) because the view is already considered ready/steady. This leaves the user with a frozen camera state and missing overlays.
-The Solution: Timer-Based Delay Workaround
-Until the SDK introduces native Coroutine support (like an .awaitMap() extension) or synchronous state getters (like isMapReady), the most reliable workaround for both cold and warm starts is a timer-based delay. By intentionally deferring the initialization logic slightly, we bypass the brittle edge-triggered listeners entirely.
-
-Kotlin Implementation (Preferred)
-Use a coroutine with delay() inside your initialization flow:
-
-    ```kotlin
-    // Ensure you are launching on the Main thread to interact with the Map3DView safely
-    lifecycleScope.launch {
-        // Wait for the viewport to fully inflate and bindings to stabilize.
-        // 500ms is a safe brute-force threshold to avoid edge-trigger races.
-        delay(500) 
-        
-        // Position camera and add overlays safely
-        setupMapElements()
-    }
-    ```
-
-Java Implementation
-Use a standard Handler mapped to the Main Looper:
-
-    ```java
-    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-        // Wait for the viewport to fully inflate, then safely apply updates
-        setupMapElements();
-    }, 500);
-    ```
-
-[IMPORTANT] Even with the timer delay successfully ensuring your camera updates fire, you must still implement an isInitialized boolean latch
-(or dynamically check if your layers exist) within setupMapElements(). Otherwise, you will endlessly stack duplicate markers, model nodes, 
-and polyline overlays on top of each other during every warm Activity re-entry.
-
-## 6. Execution Steps
-1. Add the 3D Maps SDK dependencies.
-2. Setup the Secrets Gradle plugin if not already set.
-3. Update `AndroidManifest.xml` with the specific `com.google.android.geo.maps3d.API_KEY` tag.
-4. Create the `Map3DContainer` composable wrapped in `AndroidView`.
-5. Inform the user how to add `MAPS3D_API_KEY` securely.

@@ -1,0 +1,18 @@
+// 1. Declare the tracked map instance
+private var trackedMap: TrackedMap3D? = null
+
+// 2. In onCreate, update the lifecycle observer to clean up on destroy
+lifecycle.addObserver(object : DefaultLifecycleObserver {
+    // ... other methods
+    override fun onDestroy(owner: LifecycleOwner) {
+        // Automatically clean up objects to avoid cruft
+        trackedMap?.clearAll()
+        mapView.onDestroy()
+    }
+})
+
+// 3. In onMap3DViewReady, wrap the map
+override fun onMap3DViewReady(map: GoogleMap3D) {
+    trackedMap = TrackedMap3D(map)
+    // ...
+}
