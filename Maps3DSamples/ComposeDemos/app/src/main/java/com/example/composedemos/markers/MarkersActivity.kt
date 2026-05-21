@@ -17,6 +17,7 @@
 package com.example.composedemos.markers
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -40,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -49,9 +51,12 @@ import com.google.android.gms.maps3d.model.ImageView
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
+import com.google.android.gms.maps3d.model.CollisionBehavior
 import com.google.maps.android.compose3d.GoogleMap3D
 import com.google.maps.android.compose3d.MarkerConfig
 import com.google.maps.android.compose3d.PopoverConfig
+import com.google.maps.android.compose3d.PinConfig
+import com.google.maps.android.compose3d.GlyphConfig
 
 class MarkersActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,6 +83,7 @@ class MarkersActivity : ComponentActivity() {
 
 @Composable
 fun MarkersScreen() {
+    val context = LocalContext.current
     var isMapSteady by remember { mutableStateOf(false) }
     var popovers by remember { mutableStateOf(emptyList<PopoverConfig>()) }
 
@@ -96,12 +102,13 @@ fun MarkersScreen() {
         }
     }
 
+    // 1. Default Image-styled Marker with REQUIRED collision behavior
     val alienMarker = remember {
         MarkerConfig(
             key = "alien",
             position = latLngAltitude {
-                latitude = 44.59054845363309
-                longitude = -104.715177415273
+                latitude = 44.590548
+                longitude = -104.715177
                 altitude = 10.0
             },
             altitudeMode = AltitudeMode.RELATIVE_TO_MESH,
@@ -109,8 +116,8 @@ fun MarkersScreen() {
             label = "Devil's Tower Alien",
             isExtruded = true,
             isDrawnWhenOccluded = true,
+            collisionBehavior = CollisionBehavior.REQUIRED,
             onClick = {
-                // State-driven popover creation! No direct map manipulation.
                 popovers = listOf(
                     PopoverConfig(
                         key = "alien_popover",
@@ -124,7 +131,7 @@ fun MarkersScreen() {
                                 modifier = Modifier.padding(8.dp),
                             ) {
                                 Text(
-                                    text = "They didn't just come to sculpt mashed potatoes.",
+                                    text = "They didn't just come to sculpt mashed potatoes. 👽",
                                     modifier = Modifier.padding(16.dp),
                                     color = Color.Black,
                                 )
@@ -136,6 +143,60 @@ fun MarkersScreen() {
         )
     }
 
+    // 2. Custom Styled Red Pin with Cyan Icon Glyph and OPTIONAL collision behavior
+    val redPinMarker = remember {
+        MarkerConfig(
+            key = "styled_red_pin",
+            position = latLngAltitude {
+                latitude = 44.5902
+                longitude = -104.7148
+                altitude = 50.0
+            },
+            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND,
+            label = "Custom Color Pin",
+            isExtruded = true,
+            isDrawnWhenOccluded = true,
+            collisionBehavior = CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY,
+            pinConfig = PinConfig(
+                backgroundColor = android.graphics.Color.RED,
+                borderColor = android.graphics.Color.WHITE,
+                glyph = GlyphConfig.Color(android.graphics.Color.CYAN)
+            ),
+            onClick = {
+                Toast.makeText(context, "Clicked Styled Red Pin!", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
+    // 3. Custom Styled Yellow Pin with Text Glyph and OPTIONAL collision behavior
+    val yellowTextPinMarker = remember {
+        MarkerConfig(
+            key = "styled_text_pin",
+            position = latLngAltitude {
+                latitude = 44.5895
+                longitude = -104.7160
+                altitude = 50.0
+            },
+            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND,
+            label = "Custom Text Pin",
+            isExtruded = true,
+            isDrawnWhenOccluded = true,
+            collisionBehavior = CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY,
+            pinConfig = PinConfig(
+                backgroundColor = android.graphics.Color.YELLOW,
+                borderColor = android.graphics.Color.BLUE,
+                glyph = GlyphConfig.Text("WY\n⛰️", android.graphics.Color.RED)
+            ),
+            onClick = {
+                Toast.makeText(context, "Clicked Wyoming Text Pin!", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
+    val allMarkers = remember(alienMarker, redPinMarker, yellowTextPinMarker) {
+        listOf(alienMarker, redPinMarker, yellowTextPinMarker)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -145,7 +206,7 @@ fun MarkersScreen() {
         GoogleMap3D(
             camera = devilsTowerCamera,
             mapMode = Map3DMode.HYBRID,
-            markers = listOf(alienMarker),
+            markers = allMarkers,
             popovers = popovers,
             modifier = Modifier.fillMaxSize(),
             onMapSteady = {
