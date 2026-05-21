@@ -796,7 +796,35 @@ Wire up the new buttons in `setupButtons`:
 
 Prefer **Jetpack Compose** over XML? The Maps 3D SDK is View-based, but is a perfect candidate for `AndroidView`.
 
-We have included a full reference implementation in `Map3DComposeActivity.kt` (in the solution code). Here is a complete guide to recreating it.
+> [!TIP]
+> **The Declarative Compose Wrapper Library**
+> Rather than writing raw `AndroidView` interop boilerplate and manually managing complex state arrays (markers, polygons, models) yourself, you can use the declarative **[maps3d-compose](file:///Users/dkhawk/AndroidStudioProjects/github-maps-code/android-maps3d-samples/feat-codelab/maps3d-compose)** wrapper library included in this repository!
+> 
+> With `maps3d-compose`, you get a fully managed `GoogleMap3D` Composable that handles underlying initialization lifecycle syncs, camera transitions, and subcompositions automatically:
+> 
+> ```kotlin
+> GoogleMap3D(
+>     camera = cameraState,
+>     markers = listOf(
+>         MarkerConfig(
+>             position = IOLANI_PALACE,
+>             label = "Iolani Palace",
+>             altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+>         )
+>     ),
+>     models = listOf(
+>         ModelConfig(
+>             position = WAIKIKI,
+>             url = "https://.../balloon.glb"
+>         )
+>     ),
+>     onMapReady = { googleMap3D ->
+>         // Directly control the underlying SDK instance
+>     }
+> )
+> ```
+> 
+> If you choose to construct your own interop layer, we have included a manual reference implementation in `Map3DComposeActivity.kt` (in the solution code). Below is a complete guide to recreating it step-by-step.
 
 ### 1. Configure Options
 First, define how the map should initialize.
