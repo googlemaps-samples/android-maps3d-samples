@@ -16,7 +16,7 @@ This directory contains the Kotlin samples using traditional Android Views for t
 | **Markers** | ✅ Done | [MarkersActivity.kt](src/main/java/com/example/maps3dkotlin/markers/MarkersActivity.kt) | |
 | **Camera Restrictions** | 🚧 Skeleton | [CameraRestrictionsActivity.kt](src/main/java/com/example/maps3dkotlin/camerarestrictions/CameraRestrictionsActivity.kt) | |
 | **Flight Simulator** | 🚧 Skeleton | [FlightSimulatorActivity.kt](src/main/java/com/example/maps3dkotlin/flightsimulator/FlightSimulatorActivity.kt) | |
-| **Routes API** | 🚧 Skeleton | [RoutesActivity.kt](src/main/java/com/example/maps3dkotlin/routes/RoutesActivity.kt) | |
+| **Routes API** | ✅ Done | [RoutesActivity.kt](src/main/java/com/example/maps3dkotlin/routes/RoutesActivity.kt) | |
 | **Path Following** | 🚧 Skeleton | [PathFollowingActivity.kt](src/main/java/com/example/maps3dkotlin/pathfollowing/PathFollowingActivity.kt) | |
 | **Path Styling** | 🚧 Skeleton | [PathStylingActivity.kt](src/main/java/com/example/maps3dkotlin/pathstyling/PathStylingActivity.kt) | |
 | **Animating Models** | 🚧 Skeleton | [AnimatingModelsActivity.kt](src/main/java/com/example/maps3dkotlin/animatingmodels/AnimatingModelsActivity.kt) | |
