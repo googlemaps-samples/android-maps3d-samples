@@ -197,6 +197,9 @@ Add this logic to `MainActivity.kt`:
         this@MainActivity.googleMap3D = googleMap3D
 
         lifecycleScope.launch {
+            // Defensive Delay: Wait 1 second for the WebGL layout and viewport matrix to stabilize
+            delay(1000)
+
             // Start from space!
             startFromGlobalView(googleMap3D)
             
@@ -228,6 +231,18 @@ Normally, this would mean overriding `onResume`, `onPause`, `onDestroy`, and `on
 **To avoid this messy boilerplate, we have pre-provided `Map3DLifecycleObserver.kt`.** 
 
 This useful utility class implements `DefaultLifecycleObserver`. By calling `lifecycle.addObserver(Map3DLifecycleObserver(map3DView, this))` inside `onCreate`, the map will automatically listen to your Activity's lifecycle events, keeping your UI controller clean!
+
+> **[!IMPORTANT] Good Citizenship: Scene Cleanup in `onDestroy`**
+> The underlying Maps 3D engine operates as a persistent singleton once initialized in your application process. This means that any markers, polylines, or polygons you add during your session will persist in the engine even if the Activity is destroyed and recreated (such as on screen rotation)!
+>
+> To ensure the map is clean for subsequent Activity entries, always override `onDestroy()` and purge your active assets using `clearMap()`:
+> 
+> ```kotlin
+> override fun onDestroy() {
+>     super.onDestroy()
+>     clearMap() // Purge all markers, models, and polygons
+> }
+> ```
 
 ---
 

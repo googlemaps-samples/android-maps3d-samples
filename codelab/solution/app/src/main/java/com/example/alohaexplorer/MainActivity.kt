@@ -104,6 +104,11 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         map3DView.getMap3DViewAsync(this)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        clearMap()
+    }
+
     /**
      * Called when the Map is fully loaded and ready to be used.
      * This is where we can start interacting with the `googleMap3D` object.
@@ -112,6 +117,9 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         this@MainActivity.googleMap3D = googleMap3D
 
         lifecycleScope.launch {
+            // Defensive Delay: Wait for layout and rendering matrix to stabilize on cold start
+            delay(1000)
+
             // 1.3. Start from Global View
             startFromGlobalView(googleMap3D)
             
