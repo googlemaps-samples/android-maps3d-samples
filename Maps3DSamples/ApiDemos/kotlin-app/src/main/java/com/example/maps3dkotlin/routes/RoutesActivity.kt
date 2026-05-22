@@ -26,6 +26,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.maps3d.common.toHeading
 import com.example.maps3d.common.RouteEngine
+import com.example.maps3d.common.OahuRouteData
 import com.example.maps3dcommon.R
 import com.example.maps3dkotlin.BuildConfig
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
@@ -215,78 +216,69 @@ class RoutesActivity : SampleBaseActivity() {
      */
     private suspend fun loadAndRenderRoute(googleMap3D: GoogleMap3D) {
         val apiKey = BuildConfig.MAPS3D_API_KEY
-        if (apiKey.isEmpty() || apiKey.contains("YOUR_API_KEY")) {
-            withContext(Dispatchers.Main) {
-                Toast.makeText(
-                    this@RoutesActivity,
-                    "API Key is missing or invalid. Cannot fetch route.",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-            return
-        }
-
-        // Waypoints corresponding to standard Honolulu coordinate locations
         val origin = LatLng(21.307043, -157.858984)
         val destination = LatLng(21.390177, -157.719454)
+        var decoded: List<LatLng>
 
         try {
-            val routeData = routeRepository.fetchRoute(apiKey, origin, destination)
-
-            // CPU-heavy decoding of standard Google encoded polyline format
-            val decoded = PolyUtil.decode(routeData.encodedPolyline)
-
-            withContext(Dispatchers.Main) {
-                decodedRoute = decoded
-                cumulativeDistances = RouteEngine.calculateCumulativeDistances(decoded)
-                totalDistance = cumulativeDistances.last()
-
-                // 1. Draw the blue Polyline representational trail
-                routePolyline = googleMap3D.addPolyline(polylineOptions {
-                    path = decoded.map { latLngAltitude { latitude = it.latitude; longitude = it.longitude; altitude = 0.0 } }
-                    strokeColor = Color.BLUE
-                    strokeWidth = 10.0
-                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                    zIndex = 5
-                })
-
-                // 2. Place the 3D model of the Red Car at starting coordinate
-                vehicleModel = googleMap3D.addModel(modelOptions {
-                    id = "vehicle_car"
-                    position = latLngAltitude {
-                        latitude = decoded.first().latitude
-                        longitude = decoded.first().longitude
-                        altitude = 25.0 // Hover altitude above terrain
-                    }
-                    altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-                    orientation = orientation {
-                        heading = 0.0
-                        tilt = -90.0
-                        roll = 0.0
-                    }
-                    url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
-                    scale = vector3D {
-                        x = 50.0
-                        y = 50.0
-                        z = 50.0
-                    }
-                })
-
-                // Position camera directly behind the starting model position
-                updateVehiclePositionAndCamera()
-                
-                // Auto-play to start
-                togglePlayback(true)
+            if (apiKey.isEmpty() || apiKey.contains("YOUR_API_KEY")) {
+                throw Exception("Invalid or missing API Key")
             }
+            val routeData = routeRepository.fetchRoute(apiKey, origin, destination)
+            decoded = PolyUtil.decode(routeData.encodedPolyline)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to fetch/draw route", e)
+            Log.w(TAG, "Routes API fetch failed: ${e.localizedMessage}. Falling back to pre-baked Oahu mountain route.")
+            decoded = OahuRouteData.FALLBACK_ROUTE
             withContext(Dispatchers.Main) {
                 Toast.makeText(
                     this@RoutesActivity,
-                    "Error loading route details: ${e.localizedMessage}",
+                    "Offline: Using local Oahu fallback route",
                     Toast.LENGTH_LONG
                 ).show()
             }
+        }
+
+        withContext(Dispatchers.Main) {
+            decodedRoute = decoded
+            cumulativeDistances = RouteEngine.calculateCumulativeDistances(decoded)
+            totalDistance = cumulativeDistances.last()
+
+            // 1. Draw the blue Polyline representational trail
+            routePolyline = googleMap3D.addPolyline(polylineOptions {
+                path = decoded.map { latLngAltitude { latitude = it.latitude; longitude = it.longitude; altitude = 0.0 } }
+                strokeColor = Color.BLUE
+                strokeWidth = 10.0
+                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                zIndex = 5
+            })
+
+            // 2. Place the 3D model of the Red Car at starting coordinate
+            vehicleModel = googleMap3D.addModel(modelOptions {
+                id = "vehicle_car"
+                position = latLngAltitude {
+                    latitude = decoded.first().latitude
+                    longitude = decoded.first().longitude
+                    altitude = 25.0 // Hover altitude above terrain
+                }
+                altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+                orientation = orientation {
+                    heading = 0.0
+                    tilt = -90.0
+                    roll = 0.0
+                }
+                url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
+                scale = vector3D {
+                    x = 50.0
+                    y = 50.0
+                    z = 50.0
+                }
+            })
+
+            // Position camera directly behind the starting model position
+            updateVehiclePositionAndCamera()
+            
+            // Auto-play to start
+            togglePlayback(true)
         }
     }
 

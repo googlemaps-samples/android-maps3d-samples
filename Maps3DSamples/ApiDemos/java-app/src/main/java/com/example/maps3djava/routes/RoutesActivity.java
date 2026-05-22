@@ -32,6 +32,7 @@ import androidx.core.view.WindowCompat;
 
 import com.example.maps3d.common.PositionAndHeading;
 import com.example.maps3d.common.RouteEngine;
+import com.example.maps3d.common.OahuRouteData;
 import com.example.maps3dcommon.R;
 import com.example.maps3djava.BuildConfig;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
@@ -226,65 +227,63 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
 
     private void loadAndRenderRouteAsync(GoogleMap3D googleMap3D) {
         String apiKey = BuildConfig.MAPS3D_API_KEY;
-        if (apiKey.isEmpty() || apiKey.contains("YOUR_API_KEY")) {
-            Toast.makeText(this, "API Key is missing or invalid. Cannot fetch route.", Toast.LENGTH_LONG).show();
-            return;
-        }
-
         LatLng origin = new LatLng(21.307043, -157.858984);
         LatLng destination = new LatLng(21.390177, -157.719454);
 
-        routeFetchFuture = executorService.submit(routeRepository.fetchRouteCallable(apiKey, origin, destination));
         executorService.execute(() -> {
+            List<LatLng> decoded;
             try {
+                if (apiKey.isEmpty() || apiKey.contains("YOUR_API_KEY")) {
+                    throw new Exception("Invalid or missing API Key");
+                }
+                routeFetchFuture = executorService.submit(routeRepository.fetchRouteCallable(apiKey, origin, destination));
                 RouteData routeData = routeFetchFuture.get();
-                
-                // Decode route coords in worker thread (CPU-heavy)
-                List<LatLng> decoded = PolyUtil.decode(routeData.getEncodedPolyline());
-
-                // Update UI elements back on standard Main loop thread
-                mainHandler.post(() -> {
-                    decodedRoute = decoded;
-                    cumulativeDistances = RouteEngine.calculateCumulativeDistances(decoded);
-                    totalDistance = cumulativeDistances[cumulativeDistances.length - 1];
-
-                    // 1. Draw the blue route polyline
-                    List<LatLngAltitude> linePath = new ArrayList<>();
-                    for (LatLng point : decoded) {
-                        linePath.add(new LatLngAltitude(point.latitude, point.longitude, 0.0));
-                    }
-
-                    PolylineOptions polyOptions = new PolylineOptions();
-                    polyOptions.setPath(linePath);
-                    polyOptions.setStrokeColor(Color.BLUE);
-                    polyOptions.setStrokeWidth(10.0);
-                    polyOptions.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
-                    polyOptions.setZIndex(5);
-                    routePolyline = googleMap3D.addPolyline(polyOptions);
-
-                    // 2. Load the 3D Car model
-                    ModelOptions modelOpts = new ModelOptions();
-                    modelOpts.setId("vehicle_car_java");
-                    modelOpts.setPosition(new LatLngAltitude(decoded.get(0).latitude, decoded.get(0).longitude, 25.0));
-                    modelOpts.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
-                    modelOpts.setOrientation(new Orientation(0.0, -90.0, 0.0));
-                    modelOpts.setUrl("https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb");
-                    modelOpts.setScale(new Vector3D(50.0, 50.0, 50.0));
-                    vehicleModel = googleMap3D.addModel(modelOpts);
-
-                    updateVehiclePositionAndCamera();
-
-                    // Trigger play automatically once map is populated
-                    togglePlayback(true);
-                });
+                decoded = PolyUtil.decode(routeData.getEncodedPolyline());
             } catch (Exception e) {
-                Log.e(getTAG(), "Failed to load or decode Honolulu route details", e);
+                Log.w(getTAG(), "Routes API fetch failed (" + e.getLocalizedMessage() + "). Falling back to pre-baked Oahu mountain route.");
+                decoded = OahuRouteData.getFALLBACK_ROUTE();
                 mainHandler.post(() -> Toast.makeText(
                         RoutesActivity.this,
-                        "Failed to load route details: " + e.getLocalizedMessage(),
+                        "Offline: Using local Oahu fallback route",
                         Toast.LENGTH_LONG
                 ).show());
             }
+
+            final List<LatLng> finalDecoded = decoded;
+            mainHandler.post(() -> {
+                decodedRoute = finalDecoded;
+                cumulativeDistances = RouteEngine.calculateCumulativeDistances(finalDecoded);
+                totalDistance = cumulativeDistances[cumulativeDistances.length - 1];
+
+                // 1. Draw the blue route polyline
+                List<LatLngAltitude> linePath = new ArrayList<>();
+                for (LatLng point : finalDecoded) {
+                    linePath.add(new LatLngAltitude(point.latitude, point.longitude, 0.0));
+                }
+
+                PolylineOptions polyOptions = new PolylineOptions();
+                polyOptions.setPath(linePath);
+                polyOptions.setStrokeColor(Color.BLUE);
+                polyOptions.setStrokeWidth(10.0);
+                polyOptions.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
+                polyOptions.setZIndex(5);
+                routePolyline = googleMap3D.addPolyline(polyOptions);
+
+                // 2. Load the 3D Car model
+                ModelOptions modelOpts = new ModelOptions();
+                modelOpts.setId("vehicle_car_java");
+                modelOpts.setPosition(new LatLngAltitude(finalDecoded.get(0).latitude, finalDecoded.get(0).longitude, 25.0));
+                modelOpts.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
+                modelOpts.setOrientation(new Orientation(0.0, -90.0, 0.0));
+                modelOpts.setUrl("https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb");
+                modelOpts.setScale(new Vector3D(50.0, 50.0, 50.0));
+                vehicleModel = googleMap3D.addModel(modelOpts);
+
+                updateVehiclePositionAndCamera();
+
+                // Trigger play automatically once map is populated
+                togglePlayback(true);
+            });
         });
     }
 
