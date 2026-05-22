@@ -118,7 +118,6 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
     // Background Executors
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    private Future<RouteData> routeFetchFuture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -241,8 +240,7 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
                 if (apiKey.isEmpty() || apiKey.contains("YOUR_API_KEY")) {
                     throw new Exception("Invalid or missing API Key");
                 }
-                routeFetchFuture = executorService.submit(routeRepository.fetchRouteCallable(apiKey, origin, destination));
-                RouteData routeData = routeFetchFuture.get();
+                RouteData routeData = routeRepository.fetchRouteCallable(apiKey, origin, destination).call();
                 decoded = PolyUtil.decode(routeData.getEncodedPolyline());
             } catch (Exception e) {
                 Log.w(getTAG(), "Routes API fetch failed (" + e.getLocalizedMessage() + "). Falling back to pre-baked Oahu mountain route.");
