@@ -342,6 +342,8 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
                 30.0
         );
 
+        Log.d("RoutesActivityDebug", "Java Tick: elapsed = " + elapsedDistance + "m / " + totalDistance + "m, pos = " + posAndHeading.getPosition());
+
         // 1. Update Model position and rotation
         if (vehicleModel != null) {
             vehicleModel.setPosition(new LatLngAltitude(

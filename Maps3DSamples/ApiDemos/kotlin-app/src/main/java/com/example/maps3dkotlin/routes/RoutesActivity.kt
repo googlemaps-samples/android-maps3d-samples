@@ -332,13 +332,13 @@ class RoutesActivity : SampleBaseActivity() {
         val route = decodedRoute
         if (route.isEmpty() || totalDistance <= 0.0) return
 
-        // O(log N) search and linear interpolation
         val posAndHeading = RouteEngine.calculatePositionAndHeading(
             route,
             cumulativeDistances,
             elapsedDistance,
-            lookaheadDistance = 30.0
+            30.0
         )
+        Log.d("RoutesActivityDebug", "Kotlin Tick: elapsed = " + elapsedDistance + "m / " + totalDistance + "m, pos = " + posAndHeading.position)
 
         // Update the Model coordinates
         vehicleModel?.apply {
