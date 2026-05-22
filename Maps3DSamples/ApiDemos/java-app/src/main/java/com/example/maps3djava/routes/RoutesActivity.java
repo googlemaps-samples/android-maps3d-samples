@@ -344,18 +344,16 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
 
         Log.d("RoutesActivityDebug", "Java Tick: elapsed = " + elapsedDistance + "m / " + totalDistance + "m, pos = " + posAndHeading.getPosition());
 
-        // 1. Update Model position and rotation
-        if (vehicleModel != null) {
-            vehicleModel.setPosition(new LatLngAltitude(
-                    posAndHeading.getPosition().latitude,
-                    posAndHeading.getPosition().longitude,
-                    25.0
-            ));
-            vehicleModel.setOrientation(new Orientation(
-                    posAndHeading.getHeading(),
-                    -90.0,
-                    0.0
-            ));
+        // 1. Upsert Model position and rotation on every tick using the same ID
+        if (googleMap3D != null) {
+            ModelOptions modelOpts = new ModelOptions();
+            modelOpts.setId("vehicle_car_java");
+            modelOpts.setPosition(new LatLngAltitude(posAndHeading.getPosition().latitude, posAndHeading.getPosition().longitude, 25.0));
+            modelOpts.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
+            modelOpts.setOrientation(new Orientation(posAndHeading.getHeading(), -90.0, 0.0));
+            modelOpts.setUrl("https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb");
+            modelOpts.setScale(new Vector3D(50.0, 50.0, 50.0));
+            vehicleModel = googleMap3D.addModel(modelOpts);
         }
 
         // 2. Update Camera center and bearing

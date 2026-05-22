@@ -340,17 +340,27 @@ class RoutesActivity : SampleBaseActivity() {
         )
         Log.d("RoutesActivityDebug", "Kotlin Tick: elapsed = " + elapsedDistance + "m / " + totalDistance + "m, pos = " + posAndHeading.position)
 
-        // Update the Model coordinates
-        vehicleModel?.apply {
-            setPosition(latLngAltitude {
-                latitude = posAndHeading.position.latitude
-                longitude = posAndHeading.position.longitude
-                altitude = 25.0 // Keep consistent vehicle altitude hover
-            })
-            setOrientation(orientation {
-                heading = posAndHeading.heading.toDouble()
-                tilt = -90.0
-                roll = 0.0
+        // Upsert Model position and rotation on every tick using the same ID
+        googleMap3D?.let { map ->
+            vehicleModel = map.addModel(modelOptions {
+                id = "vehicle_car"
+                position = latLngAltitude {
+                    latitude = posAndHeading.position.latitude
+                    longitude = posAndHeading.position.longitude
+                    altitude = 25.0 // Keep consistent vehicle altitude hover
+                }
+                altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+                orientation = orientation {
+                    heading = posAndHeading.heading.toDouble()
+                    tilt = -90.0
+                    roll = 0.0
+                }
+                url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/red_car.glb"
+                scale = vector3D {
+                    x = 50.0
+                    y = 50.0
+                    z = 50.0
+                }
             })
         }
 
