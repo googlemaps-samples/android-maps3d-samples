@@ -113,6 +113,11 @@ class RoutesActivity : SampleBaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_routes)
 
+        // Re-bind map3DView to the new active instance in activity_routes.xml and forward lifecycle
+        map3DView = findViewById(R.id.map3dView)
+        map3DView.onCreate(savedInstanceState)
+        map3DView.getMap3DViewAsync(this)
+
         // Override toolbar back action
         findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.top_bar).apply {
             title = getString(R.string.feature_title_routes_api)

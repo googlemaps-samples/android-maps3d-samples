@@ -126,6 +126,11 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_routes);
 
+        // Re-bind map3DView to the new active instance in activity_routes.xml and forward lifecycle
+        map3DView = findViewById(R.id.map3dView);
+        map3DView.onCreate(savedInstanceState);
+        map3DView.getMap3DViewAsync(this);
+
         // Configure custom toolbar
         MaterialToolbar toolbar = findViewById(R.id.top_bar);
         toolbar.setTitle(getString(R.string.feature_title_routes_api));
