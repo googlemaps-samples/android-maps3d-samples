@@ -7,16 +7,16 @@ This directory contains the Kotlin samples using traditional Android Views for t
 | Feature | Status | Source Code | Screenshot |
 | :--- | :--- | :--- | :--- |
 | **Basic Map** | ✅ Done | [HelloMapActivity.kt](src/main/java/com/example/maps3dkotlin/hellomap/HelloMapActivity.kt) | <img src="screenshots/hello_map_screenshot.png" alt="Screenshot" width="121"/> |
-| **Polylines** | ✅ Done | [PolylinesActivity.kt](src/main/java/com/example/maps3dkotlin/polylines/PolylinesActivity.kt) | |
+| **Polylines** | ✅ Done | [PolylinesActivity.kt](src/main/java/com/example/maps3dkotlin/polylines/PolylinesActivity.kt) | <img src="screenshots/polylines_screenshot.png" alt="Screenshot" width="121"/> |
 | **Map Interactions** | ✅ Done | [MapInteractionsActivity.kt](src/main/java/com/example/maps3dkotlin/mapinteractions/MapInteractionsActivity.kt) | <img src="screenshots/map_interactions_screenshot.png" alt="Screenshot" width="121"/> |
-| **Popovers** | ✅ Done | [PopoversActivity.kt](src/main/java/com/example/maps3dkotlin/popovers/PopoversActivity.kt) | |
+| **Popovers** | ✅ Done | [PopoversActivity.kt](src/main/java/com/example/maps3dkotlin/popovers/PopoversActivity.kt) | <img src="screenshots/popovers_screenshot.png" alt="Screenshot" width="121"/> |
 | **Camera Controls** | ✅ Done | [CameraControlsActivity.kt](src/main/java/com/example/maps3dkotlin/cameracontrols/CameraControlsActivity.kt) | <img src="screenshots/camera_controls_screenshot.png" alt="Screenshot" width="121"/> |
-| **Polygons** | ✅ Done | [PolygonsActivity.kt](src/main/java/com/example/maps3dkotlin/polygons/PolygonsActivity.kt) | |
-| **Models** | ✅ Done | [ModelsActivity.kt](src/main/java/com/example/maps3dkotlin/models/ModelsActivity.kt) | |
+| **Polygons** | ✅ Done | [PolygonsActivity.kt](src/main/java/com/example/maps3dkotlin/polygons/PolygonsActivity.kt) | <img src="screenshots/polygons_screenshot.png" alt="Screenshot" width="121"/> |
+| **Models** | ✅ Done | [ModelsActivity.kt](src/main/java/com/example/maps3dkotlin/models/ModelsActivity.kt) | <img src="screenshots/models_screenshot.png" alt="Screenshot" width="121"/> |
 | **Markers** | ✅ Done | [MarkersActivity.kt](src/main/java/com/example/maps3dkotlin/markers/MarkersActivity.kt) | |
 | **Camera Restrictions** | 🚧 Skeleton | [CameraRestrictionsActivity.kt](src/main/java/com/example/maps3dkotlin/camerarestrictions/CameraRestrictionsActivity.kt) | |
 | **Flight Simulator** | 🚧 Skeleton | [FlightSimulatorActivity.kt](src/main/java/com/example/maps3dkotlin/flightsimulator/FlightSimulatorActivity.kt) | |
-| **Routes API** | ✅ Done | [RoutesActivity.kt](src/main/java/com/example/maps3dkotlin/routes/RoutesActivity.kt) | |
+| **Routes API** | ✅ Done | [RoutesActivity.kt](src/main/java/com/example/maps3dkotlin/routes/RoutesActivity.kt) | <img src="screenshots/routes_screenshot.png" alt="Screenshot" width="121"/> |
 | **Path Following** | 🚧 Skeleton | [PathFollowingActivity.kt](src/main/java/com/example/maps3dkotlin/pathfollowing/PathFollowingActivity.kt) | |
 | **Path Styling** | 🚧 Skeleton | [PathStylingActivity.kt](src/main/java/com/example/maps3dkotlin/pathstyling/PathStylingActivity.kt) | |
 | **Animating Models** | 🚧 Skeleton | [AnimatingModelsActivity.kt](src/main/java/com/example/maps3dkotlin/animatingmodels/AnimatingModelsActivity.kt) | |

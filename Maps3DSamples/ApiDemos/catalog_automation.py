@@ -68,6 +68,7 @@ def main():
         "PolygonsVisualTest": "polygons_screenshot.png",
         "ModelsVisualTest": "models_screenshot.png",
         "MarkersVisualTest": "markers_screenshot.png",
+        "RoutesVisualTest": "routes_screenshot.png",
     }
     
     filename = filename_mapping.get(test_class, f"{test_class.lower()}_screenshot.png")
@@ -134,6 +135,7 @@ def main():
         "PolygonsVisualTest": "Polygons",
         "ModelsVisualTest": "Models",
         "MarkersVisualTest": "Markers",
+        "RoutesVisualTest": "Routes API",
     }
     
     feature_name = mapping.get(test_class)

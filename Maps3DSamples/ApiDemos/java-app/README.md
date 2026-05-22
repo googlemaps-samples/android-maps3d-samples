@@ -16,7 +16,7 @@ This directory contains the Java samples using traditional Android Views for the
 | **Markers** | ✅ Done | [MarkersActivity.java](src/main/java/com/example/maps3djava/markers/MarkersActivity.java) | |
 | **Camera Restrictions** | 🚧 Skeleton | [CameraRestrictionsActivity.java](src/main/java/com/example/maps3djava/camerarestrictions/CameraRestrictionsActivity.java) | |
 | **Flight Simulator** | 🚧 Skeleton | [FlightSimulatorActivity.java](src/main/java/com/example/maps3djava/flightsimulator/FlightSimulatorActivity.java) | |
-| **Routes API** | ✅ Done | [RoutesActivity.java](src/main/java/com/example/maps3djava/routes/RoutesActivity.java) | |
+| **Routes API** | ✅ Done | [RoutesActivity.java](src/main/java/com/example/maps3djava/routes/RoutesActivity.java) | <img src="screenshots/routes_screenshot.png" alt="Screenshot" width="121"/> |
 | **Path Following** | 🚧 Skeleton | [PathFollowingActivity.java](src/main/java/com/example/maps3djava/pathfollowing/PathFollowingActivity.java) | |
 | **Path Styling** | 🚧 Skeleton | [PathStylingActivity.java](src/main/java/com/example/maps3djava/pathstyling/PathStylingActivity.java) | |
 | **Animating Models** | 🚧 Skeleton | [AnimatingModelsActivity.java](src/main/java/com/example/maps3djava/animatingmodels/AnimatingModelsActivity.java) | |
