@@ -143,5 +143,6 @@ tasks.register<Exec>("installAndLaunch") {
     description = "Installs and launches the demo app."
     group = "install"
     dependsOn("installDebug")
-    commandLine("adb", "shell", "am", "start", "-n", "com.example.snippets.java/.JavaSnippetsActivity")
+    // Retrieve the absolute path of adb from the Android extension to avoid reliance on system PATH.
+    commandLine(android.adbExecutable.absolutePath, "shell", "am", "start", "-n", "com.example.snippets.java/.JavaSnippetsActivity")
 }
