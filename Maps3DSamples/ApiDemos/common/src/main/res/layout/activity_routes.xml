@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:map3d="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/map_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/top_bar"
+        style="@style/Widget.MaterialComponents.Toolbar.Primary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="@string/feature_title_routes_api"
+        app:titleTextColor="?attr/colorOnPrimary"
+        android:fitsSystemWindows="true"
+        />
+
+    <com.google.android.gms.maps3d.Map3DView
+        android:id="@+id/map3dView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/control_panel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/top_bar"
+        map3d:centerLat="21.307043"
+        map3d:centerLng="-157.858984"
+        map3d:centerAlt="10"
+        map3d:heading="38"
+        map3d:tilt="45"
+        map3d:range="3000"
+        map3d:mode="satellite"
+        />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/control_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardElevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/map3dView"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:orientation="vertical"
+            >
+
+            <!-- Playback Control Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                >
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_play_pause"
+                    style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:icon="@drawable/play_arrow_24px"
+                    android:contentDescription="Play or pause route animation"
+                    />
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/progress_slider"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:valueFrom="0.0"
+                    android:valueTo="1.0"
+                    android:value="0.0"
+                    app:labelBehavior="gone"
+                    />
+
+            </LinearLayout>
+
+            <!-- Camera Range / Altitude Control -->
+            <TextView
+                android:id="@+id/range_slider_label"
+                style="@style/TextAppearance.Material3.LabelMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Camera Altitude: 1500m"
+                />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/range_slider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="200.0"
+                android:valueTo="5000.0"
+                android:value="1500.0"
+                app:labelBehavior="gone"
+                />
+
+            <!-- Animation Speed Control -->
+            <TextView
+                android:id="@+id/speed_slider_label"
+                style="@style/TextAppearance.Material3.LabelMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Vehicle Speed: 150m/s"
+                />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/speed_slider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="10.0"
+                android:valueTo="500.0"
+                android:value="150.0"
+                app:labelBehavior="gone"
+                />
+
+            <!-- Camera Heading Offset Control -->
+            <TextView
+                android:id="@+id/heading_slider_label"
+                style="@style/TextAppearance.Material3.LabelMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Camera Yaw Offset: 0°"
+                />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/heading_slider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="-180.0"
+                android:valueTo="180.0"
+                android:value="0.0"
+                app:labelBehavior="gone"
+                />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

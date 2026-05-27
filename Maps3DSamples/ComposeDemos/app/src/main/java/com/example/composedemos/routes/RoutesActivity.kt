@@ -270,7 +270,7 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
 
     // 2. The Engine Flow
     val trackingFlow = remember(routeFlow) {
-        RouteEngine.getRouteTrackingFlow(routeFlow, progressFlow, 1000.0)
+        RouteEngine.getRouteTrackingFlow(routeFlow, progressFlow, 30.0)
     }
 
     // 3. Collect the output state

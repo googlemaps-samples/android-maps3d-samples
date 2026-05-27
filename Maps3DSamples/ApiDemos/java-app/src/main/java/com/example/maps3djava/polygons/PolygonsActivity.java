@@ -107,7 +107,7 @@ public class PolygonsActivity extends SampleBaseActivity {
                 new LatLngAltitude(
                         DENVER_LATITUDE,
                         DENVER_LONGITUDE,
-                        UnitsKt.getMeters(1.0)
+                        UnitsKt.getMiles(1.0)
 
                 ),
                 -68.0,
@@ -130,10 +130,37 @@ public class PolygonsActivity extends SampleBaseActivity {
         return options;
     }).collect(Collectors.toList());
 
+    private boolean isInitialized = false;
+
     @Override
     public void onMap3DViewReady(GoogleMap3D googleMap3D) {
         super.onMap3DViewReady(googleMap3D);
+
+        googleMap3D.setOnMapReadyListener((map) -> {
+            googleMap3D.setOnMapReadyListener(null);
+            initializeMap(googleMap3D);
+        });
+
+        // Workaround for bug or glitch when adding shapes too early.
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                initializeMap(googleMap3D);
+            }
+        }, 2000);
+    }
+
+    private void initializeMap(GoogleMap3D googleMap3D) {
+        if (isInitialized) return;
+        isInitialized = true;
+
+        googleMap3D.setCamera(getInitialCamera());
         googleMap3D.setMapMode(Map3DMode.HYBRID);
+
+        initializePolygons(googleMap3D);
+    }
+
+    private void initializePolygons(GoogleMap3D googleMap3D) {
 
         // Add extruded polygons to the map. The returned list of polygons can be used to remove them at a later time.
         // The addPolygon method returns a Polygon object, not PolygonOptions
@@ -155,7 +182,7 @@ public class PolygonsActivity extends SampleBaseActivity {
         private static final double DENVER_LATITUDE = 39.748477;
         private static final double DENVER_LONGITUDE = -104.947575;
 
-        private static final double museumAltitude = UnitsKt.getMeters(1.0);
+        private static final double museumAltitude = UnitsKt.getMiles(1.0);
 
         private static final List<LatLngAltitude> museumBaseFace = Arrays.stream(
                         ("39.74812392425406, -104.94414971628434\n" +

@@ -185,5 +185,6 @@ tasks.register<Exec>("installAndLaunch") {
     description = "Installs the debug APK and launches the main activity."
     group = "application"
     dependsOn("installDebug")
-    commandLine("adb", "shell", "am", "start", "-n", "com.example.placesuikit3d/com.example.placesuikit3d.MainActivity")
+    // Retrieve the absolute path of adb from the Android extension to avoid reliance on system PATH.
+    commandLine(android.adbExecutable.absolutePath, "shell", "am", "start", "-n", "com.example.placesuikit3d/com.example.placesuikit3d.MainActivity")
 }

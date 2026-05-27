@@ -104,6 +104,105 @@
 
 
 
+
+        <activity
+            android:name=".camerarestrictions.CameraRestrictionsActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_camera_restrictions"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".flightsimulator.FlightSimulatorActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_flight_simulator"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".routes.RoutesActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_routes_api"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".pathfollowing.PathFollowingActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_path_following"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".pathstyling.PathStylingActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_path_styling"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".animatingmodels.AnimatingModelsActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_animating_models"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".placesearch.PlaceSearchActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_place_search"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".placeautocomplete.PlaceAutocompleteActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_place_autocomplete"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".placedetails.PlaceDetailsActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_place_details"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".advancedcameraanimation.AdvancedCameraAnimationActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_advanced_camera_animation"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".datavisualization.DataVisualizationActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_data_visualization"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".cloudstyling.CloudStylingActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_cloud_styling"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".roadmapmode.RoadmapModeActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_roadmap_mode"
+            android:exported="true"
+            />
+
+        <activity
+            android:name=".fieldofview.FieldOfViewActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_field_of_view"
+            android:exported="true"
+            />
+
     </application>
 
 </manifest>

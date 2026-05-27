@@ -62,6 +62,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.commit
+import kotlinx.coroutines.delay
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.composedemos.R
@@ -75,7 +76,6 @@ import com.google.android.libraries.places.widget.PlaceLoadListener
 import com.google.android.libraries.places.widget.model.Orientation
 import com.google.maps.android.compose3d.GoogleMap3D
 import com.google.maps.android.compose3d.utils.toValidCamera
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -102,48 +102,28 @@ class PlaceDetailsViewModel : ViewModel() {
         Landmark(
             id = "ChIJfXOTtWbsa4cRmW07qJRB6_8",
             name = "The Flatirons",
-            location = latLngAltitude {
-                latitude = 39.9880
-                longitude = -105.2930
-                altitude = 2100.0
-            },
+            location = latLngAltitude { latitude = 39.9880; longitude = -105.2930; altitude = 2100.0 }
         ),
         Landmark(
             id = "ChIJwd_EEkfsa4cRqy6eShKXFXY",
             name = "Chautauqua Park",
-            location = latLngAltitude {
-                latitude = 39.9989
-                longitude = -105.2828
-                altitude = 1750.0
-            },
+            location = latLngAltitude { latitude = 39.9989; longitude = -105.2828; altitude = 1750.0 }
         ),
         Landmark(
             id = "ChIJiTEGLibsa4cRepH7ZMFEcJ8",
             name = "Pearl Street Mall",
-            location = latLngAltitude {
-                latitude = 40.0177
-                longitude = -105.2819
-                altitude = 1620.0
-            },
+            location = latLngAltitude { latitude = 40.0177; longitude = -105.2819; altitude = 1620.0 }
         ),
         Landmark(
             id = "ChIJwR6cajTsa4cR2TH0qKTVKAM",
             name = "University of Colorado Boulder",
-            location = latLngAltitude {
-                latitude = 40.0076
-                longitude = -105.2659
-                altitude = 1650.0
-            },
+            location = latLngAltitude { latitude = 40.0076; longitude = -105.2659; altitude = 1650.0 }
         ),
         Landmark(
             id = "ChIJAfFnzszva4cR04sAt0lSm1g",
             name = "Boulder Reservoir",
-            location = latLngAltitude {
-                latitude = 40.0780
-                longitude = -105.2220
-                altitude = 1580.0
-            },
-        ),
+            location = latLngAltitude { latitude = 40.0780; longitude = -105.2220; altitude = 1580.0 }
+        )
     )
 
     private val _placeId = MutableStateFlow<String?>(null)
@@ -167,13 +147,11 @@ class PlaceDetailsViewModel : ViewModel() {
 }
 
 class PlaceDetailsActivity : FragmentActivity() {
-    companion object {
-        private const val TAG = "PlaceDetailsActivity"
-    }
+    private val TAG = "PlaceDetailsActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        
         // Hide system tray (immersive mode)
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
@@ -183,10 +161,10 @@ class PlaceDetailsActivity : FragmentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background,
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     val viewModel: PlaceDetailsViewModel = viewModel()
-
+                    
                     // Handle Intent extra for non-UI state injection (testing)
                     LaunchedEffect(Unit) {
                         intent.getStringExtra("place_name")?.let { name ->
@@ -197,7 +175,7 @@ class PlaceDetailsActivity : FragmentActivity() {
                             }
                         }
                     }
-
+                    
                     MainScreen(viewModel)
                 }
             }
@@ -212,8 +190,8 @@ class PlaceDetailsActivity : FragmentActivity() {
         val scope = rememberCoroutineScope()
         val scaffoldState = rememberBottomSheetScaffoldState(
             bottomSheetState = rememberStandardBottomSheetState(
-                initialValue = SheetValue.PartiallyExpanded,
-            ),
+                initialValue = SheetValue.PartiallyExpanded
+            )
         )
         val sheetPeekHeight = 120.dp
         val cameraState by viewModel.cameraState.collectAsState()
@@ -227,7 +205,7 @@ class PlaceDetailsActivity : FragmentActivity() {
 
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter,
+            contentAlignment = Alignment.BottomCenter
         ) {
             BottomSheetScaffold(
                 scaffoldState = scaffoldState,
@@ -242,9 +220,9 @@ class PlaceDetailsActivity : FragmentActivity() {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
                         },
-                        modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp),
+                        modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp)
                     )
-                },
+                }
             ) { _ ->
                 Box(modifier = Modifier.fillMaxSize()) {
                     GoogleMap3D(
@@ -254,8 +232,10 @@ class PlaceDetailsActivity : FragmentActivity() {
                         onPlaceClick = { placeId ->
                             Log.d(TAG, "Place clicked: placeId=$placeId")
                             viewModel.setSelectedPlaceId(placeId)
-                        },
+                        }
                     )
+
+                    
                 }
             }
 
@@ -266,7 +246,7 @@ class PlaceDetailsActivity : FragmentActivity() {
                     onDismiss = { viewModel.setSelectedPlaceId(null) },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = sheetPeekHeight + 16.dp, start = 16.dp, end = 16.dp),
+                        .padding(bottom = sheetPeekHeight + 16.dp, start = 16.dp, end = 16.dp)
                 )
             }
         }
@@ -276,7 +256,7 @@ class PlaceDetailsActivity : FragmentActivity() {
     fun PlaceDetailsOverlay(
         placeId: String,
         onDismiss: () -> Unit,
-        modifier: Modifier = Modifier,
+        modifier: Modifier = Modifier
     ) {
         val containerId = remember { View.generateViewId() }
 
@@ -292,17 +272,17 @@ class PlaceDetailsActivity : FragmentActivity() {
             modifier = modifier
                 .widthIn(max = 600.dp)
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium),
+                .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
         ) {
             AndroidView(
                 factory = { ctx ->
                     FragmentContainerView(ctx).apply {
                         id = containerId
-
+                        
                         val newFragment = PlaceDetailsCompactFragment.newInstance(
                             PlaceDetailsCompactFragment.ALL_CONTENT,
                             Orientation.VERTICAL,
-                            R.style.BoulderNatureHippieTheme, // Use our custom theme!
+                            R.style.BoulderNatureHippieTheme // Use our custom theme!
                         ).apply {
                             setPlaceLoadListener(object : PlaceLoadListener {
                                 override fun onSuccess(place: Place) {
@@ -314,15 +294,15 @@ class PlaceDetailsActivity : FragmentActivity() {
                                 }
                             })
                         }
-
+                        
                         supportFragmentManager.commit {
                             replace(containerId, newFragment)
                         }
-
+                        
                         post { newFragment.loadWithPlaceId(placeId) }
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             )
 
             FloatingActionButton(
@@ -330,11 +310,11 @@ class PlaceDetailsActivity : FragmentActivity() {
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp),
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Dismiss",
+                    contentDescription = "Dismiss"
                 )
             }
         }
@@ -349,4 +329,6 @@ class PlaceDetailsActivity : FragmentActivity() {
             }
         }
     }
+
+    
 }
