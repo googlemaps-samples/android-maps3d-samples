@@ -32,6 +32,9 @@ class Maps3DPlacesApplication : Application() {
     }
 
     private fun initializePlaces() {
+        if (BuildConfig.IS_CI) {
+            return
+        }
         val apiKey = BuildConfig.PLACES_API_KEY
 
         if (apiKey == null || apiKey.isBlank() || apiKey == "DEFAULT_API_KEY") {
@@ -58,6 +61,9 @@ class Maps3DPlacesApplication : Application() {
      * incorrectly configured, and a RuntimeException is thrown.
      */
     private fun checkApiKey() {
+        if (BuildConfig.IS_CI) {
+            return
+        }
         try {
             val appInfo =
                 packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
