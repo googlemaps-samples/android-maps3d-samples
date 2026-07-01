@@ -89,7 +89,12 @@ As a reference, you can view the [Gemini CLI documentation](https://geminicli.co
 Alternatively, use the `gradlew build` command within a sample's directory to build the project directly or download an APK
 under [releases](https://github.com/googlemaps/android-maps3d-samples/releases) (if available for the specific sample).
 
+## Migration
+
+If you are upgrading from an older version of the SDK, please refer to the [Migration Guide](MIGRATION_GUIDE.md) for details on breaking changes and how to update your codebase.
+
 ## Contributing
+
 
 Contributions are welcome and encouraged! If you'd like to contribute, send us a [pull request] and refer to our [code of conduct] and [contributing guide].
 

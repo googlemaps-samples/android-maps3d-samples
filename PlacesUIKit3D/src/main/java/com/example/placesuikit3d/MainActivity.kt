@@ -196,10 +196,11 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
         
         val map3DView = remember {
-            com.google.android.gms.maps3d.Map3DView(context).apply {
+            com.google.android.gms.maps3d.Map3DView(context, com.google.android.gms.maps3d.Map3DInitConfig.create()).apply {
                 getMap3DViewAsync(this@MainActivity)
             }
         }
+
 
         androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
             val observer = LifecycleEventObserver { _, event ->

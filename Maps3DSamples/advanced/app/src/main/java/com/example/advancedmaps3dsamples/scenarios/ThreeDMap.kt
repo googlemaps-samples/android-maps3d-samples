@@ -21,13 +21,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.Map3DOptions
+import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 
 @Composable
 internal fun ThreeDMap(
-  options: Map3DOptions,
+  options: Map3DInitConfig,
   viewModel: ScenariosViewModel,
   modifier: Modifier = Modifier,
 ) {
@@ -39,7 +39,8 @@ internal fun ThreeDMap(
   AndroidView(
     modifier = modifier.testTag("map3d_view"),
     factory = { context ->
-      val map3dView = Map3DView(context = context, options = options)
+      val map3dView = Map3DView(context = context, config = options)
+
       map3dView.onCreate(null)
       
       map3dView.getMap3DViewAsync(

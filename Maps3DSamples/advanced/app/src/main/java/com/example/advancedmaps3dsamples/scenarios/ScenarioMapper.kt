@@ -22,7 +22,7 @@ import com.example.advancedmaps3dsamples.utils.toRoll
 import com.example.advancedmaps3dsamples.utils.toTilt
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.model.PolygonOptions
-import com.google.android.gms.maps3d.Map3DOptions
+import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.CollisionBehavior
@@ -189,15 +189,14 @@ fun String.toAnimation(): List<AnimationStep> {
     }
 }
 
-fun String.toMaps3DOptions(): Map3DOptions {
+fun String.toMaps3DInitConfig(): Map3DInitConfig {
     var camera: Camera? = null
     var mode: Int = Map3DMode.SATELLITE
 
     val optionsString = this.trim().trimEnd(';')
     if (optionsString.isBlank()) {
-        Log.w(TAG, "Empty initialState string provided for Map3DOptions")
-        // Return default options
-        return Map3DOptions(defaultUiDisabled = true)
+        Log.w(TAG, "Empty initialState string provided for Map3DInitConfig")
+        return Map3DInitConfig.create()
     }
 
     optionsString.split(";").forEach { option ->
@@ -220,29 +219,25 @@ fun String.toMaps3DOptions(): Map3DOptions {
         }
     }
 
-    // Use defaults if camera is not specified in the string
     val defaultCameraPos = latLngAltitude {
         latitude = 0.0
         longitude = 0.0
         altitude = 10_000_000.0
     }
 
-    return Map3DOptions(
-        defaultUiDisabled = true,
+    return Map3DInitConfig.create().copy(
         centerLat = camera?.center?.latitude ?: defaultCameraPos.latitude,
         centerLng = camera?.center?.longitude ?: defaultCameraPos.longitude,
         centerAlt = camera?.center?.altitude ?: defaultCameraPos.altitude,
         heading = camera?.heading ?: 0.0,
-        tilt = camera?.tilt ?: 0.0, // Default tilt 0 for initial state
+        tilt = camera?.tilt ?: 0.0,
         roll = camera?.roll ?: 0.0,
-        range = camera?.range ?: 10_000_000.0, // Default range wide view
+        range = camera?.range ?: 10_000_000.0,
         minHeading = 0.0,
         maxHeading = 360.0,
         minTilt = 0.0,
         maxTilt = 90.0,
-        bounds = null,
         mapMode = mode,
-        mapId = null,
     )
 }
 
