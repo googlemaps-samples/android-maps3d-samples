@@ -94,7 +94,7 @@ import com.example.advancedmaps3dsamples.utils.toHeading
 import com.example.advancedmaps3dsamples.utils.toValidCamera
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.Map3DOptions
+import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.AltitudeMode
@@ -335,7 +335,7 @@ private fun Map3DViewport(
 ) {
     val context = LocalContext.current
     AndroidView(modifier = Modifier.fillMaxSize().testTag("map3d_view"), factory = {
-        val options = Map3DOptions(
+        val options = Map3DInitConfig.create(
             centerLat = 21.350,
             centerLng = -157.800,
             centerAlt = 0.0,

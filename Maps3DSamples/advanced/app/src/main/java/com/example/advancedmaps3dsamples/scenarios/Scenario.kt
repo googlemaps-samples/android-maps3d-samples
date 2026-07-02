@@ -16,7 +16,7 @@ package com.example.advancedmaps3dsamples.scenarios
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.google.android.gms.maps3d.Map3DOptions
+import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.MarkerOptions
 import com.google.android.gms.maps3d.model.ModelOptions // Import ModelOptions
@@ -28,7 +28,7 @@ import com.google.android.gms.maps3d.model.latLngAltitude
 data class Scenario(
   val name: String,
   val titleId: Int,
-  val mapsOptions: Map3DOptions,
+  val mapsConfig: Map3DInitConfig,
   val animationSteps: List<AnimationStep> = emptyList(),
   val markers: List<MarkerOptions> = emptyList(),
   val models: List<ModelOptions> = emptyList(), // Add models property
@@ -38,8 +38,8 @@ data class Scenario(
   @Composable fun getTitle() = stringResource(titleId)
 
   fun reset(viewModel: ScenariosViewModel) {
-    viewModel.setCamera(mapsOptions.toCamera()) // Set initial camera
-    viewModel.setMapMode(mapsOptions.mapMode)
+    viewModel.setCamera(mapsConfig.toCamera()) // Set initial camera
+    viewModel.setMapMode(mapsConfig.mapMode)
 
     viewModel.clearObjects()
 
@@ -74,7 +74,7 @@ fun createScenario(
   return Scenario(
     name = name,
     titleId = titleId,
-    mapsOptions = initialState.toMaps3DOptions(),
+    mapsConfig = initialState.toMaps3DInitConfig(),
     animationSteps = animationString.toAnimation(),
     markers = markers.toMarkers(),
     models = models.toModels(),
@@ -83,7 +83,7 @@ fun createScenario(
   )
 }
 
-fun Map3DOptions.toCamera(): Camera {
+fun Map3DInitConfig.toCamera(): Camera {
   val options = this
   return camera {
     center = latLngAltitude {

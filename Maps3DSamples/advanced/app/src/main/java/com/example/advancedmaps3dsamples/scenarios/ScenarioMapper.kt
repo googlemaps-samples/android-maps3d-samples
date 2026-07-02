@@ -22,7 +22,7 @@ import com.example.advancedmaps3dsamples.utils.toRoll
 import com.example.advancedmaps3dsamples.utils.toTilt
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.model.PolygonOptions
-import com.google.android.gms.maps3d.Map3DOptions
+import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.CollisionBehavior
@@ -189,15 +189,15 @@ fun String.toAnimation(): List<AnimationStep> {
     }
 }
 
-fun String.toMaps3DOptions(): Map3DOptions {
+fun String.toMaps3DInitConfig(): Map3DInitConfig {
     var camera: Camera? = null
     var mode: Int = Map3DMode.SATELLITE
 
     val optionsString = this.trim().trimEnd(';')
     if (optionsString.isBlank()) {
-        Log.w(TAG, "Empty initialState string provided for Map3DOptions")
+        Log.w(TAG, "Empty initialState string provided for Map3DInitConfig")
         // Return default options
-        return Map3DOptions(defaultUiDisabled = true)
+        return Map3DInitConfig.create()
     }
 
     optionsString.split(";").forEach { option ->
@@ -227,8 +227,7 @@ fun String.toMaps3DOptions(): Map3DOptions {
         altitude = 10_000_000.0
     }
 
-    return Map3DOptions(
-        defaultUiDisabled = true,
+    return Map3DInitConfig.create(
         centerLat = camera?.center?.latitude ?: defaultCameraPos.latitude,
         centerLng = camera?.center?.longitude ?: defaultCameraPos.longitude,
         centerAlt = camera?.center?.altitude ?: defaultCameraPos.altitude,

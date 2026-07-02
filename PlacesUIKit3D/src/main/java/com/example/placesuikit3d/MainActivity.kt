@@ -67,6 +67,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
+import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
@@ -196,7 +197,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
         
         val map3DView = remember {
-            com.google.android.gms.maps3d.Map3DView(context).apply {
+            com.google.android.gms.maps3d.Map3DView(context, Map3DInitConfig.create()).apply {
                 getMap3DViewAsync(this@MainActivity)
             }
         }

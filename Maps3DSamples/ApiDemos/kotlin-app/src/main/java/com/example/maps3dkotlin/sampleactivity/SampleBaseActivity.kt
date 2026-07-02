@@ -235,8 +235,8 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         Log.d(TAG, "onMap3DViewReady called")
         Log.d(TAG, "Setting initial camera: " + initialCamera.toCameraString())
         // Wire up the standardized listener
-        googleMap3D.setOnMapReadyListener {
-            Log.w(TAG, "on map ready listener")
+        googleMap3D.setOnMapReadyListener { sceneReadiness->
+            Log.w(TAG, "on map ready listener $sceneReadiness")
             googleMap3D.setOnMapReadyListener(null)
             onMapReady(googleMap3D)
         }

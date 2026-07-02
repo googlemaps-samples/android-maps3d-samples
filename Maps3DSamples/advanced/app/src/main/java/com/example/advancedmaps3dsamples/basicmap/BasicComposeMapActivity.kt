@@ -18,7 +18,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
 import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.Map3DOptions
+import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 
@@ -51,8 +51,8 @@ class BasicComposeMapActivity : ComponentActivity() {
                     // Composable enters the composition. Without `remember`, a new Map3DView would
                     // be created on every recomposition, causing severe performance issues and losing state.
                     val map3DView = remember {
-                        // Map3DOptions allows us to set the initial camera position and orientation.
-                        val options = Map3DOptions(
+                        // Map3DInitConfig allows us to set the initial camera position and orientation.
+                        val options = Map3DInitConfig.create(
                             centerLat = 21.350,
                             centerLng = -157.800,
                             centerAlt = 0.0,

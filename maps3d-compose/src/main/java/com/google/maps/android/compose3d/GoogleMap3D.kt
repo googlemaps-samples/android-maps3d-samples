@@ -24,7 +24,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.Map3DOptions
+import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.Camera
@@ -69,7 +69,7 @@ fun GoogleMap3D(
     popovers: List<PopoverConfig> = emptyList(),
     cameraRestriction: CameraRestriction? = null,
     @Map3DMode mapMode: Int = Map3DMode.SATELLITE,
-    options: Map3DOptions = Map3DOptions(),
+    options: Map3DInitConfig = Map3DInitConfig.create(),
     onMapReady: (GoogleMap3D) -> Unit = {},
     onMapSteady: () -> Unit = {},
     onMapClick: ((LatLngAltitude) -> Unit)? = null,
