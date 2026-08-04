@@ -81,7 +81,7 @@ fun WhiskeyCompass(
     cardinalLabelInterval: Int = 45,
     cardinalLabelTextStyle: TextStyle = MaterialTheme.typography.labelMedium.copy(
         fontWeight = FontWeight.Bold,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     ),
     cardinalLabelVerticalOffset: Dp = 4.dp,
 
@@ -158,7 +158,7 @@ fun WhiskeyCompass(
                                 )
 
                                 if (showCardinalLabels && measuredCardinalLabels.containsKey(
-                                        degreeInRepetition
+                                        degreeInRepetition,
                                     )
                                 ) {
                                     val measuredText =
@@ -183,13 +183,15 @@ fun WhiskeyCompass(
                             }
 
                             if (showDegreeLabels && degreeInRepetition % degreeLabelInterval == 0) {
-                                val tickBottomY = tickCenterY + (if (isMajorTickEquivalent) {
-                                    majorTickHeightPx
-                                } else if (isMinorTickEquivalent) {
-                                    minorTickHeightPx
-                                } else {
-                                    0f
-                                }) / 2f
+                                val tickBottomY = tickCenterY + (
+                                    if (isMajorTickEquivalent) {
+                                        majorTickHeightPx
+                                    } else if (isMinorTickEquivalent) {
+                                        minorTickHeightPx
+                                    } else {
+                                        0f
+                                    }
+                                    ) / 2f
                                 val labelText = degreeInRepetition.toString()
                                 val measuredText =
                                     textMeasurer.measure(labelText, style = degreeLabelTextStyle)
@@ -246,7 +248,7 @@ private fun FlatWhiskeyCompassPreview() {
         Text(
             "Default Flat Compass Strip",
             color = Color.White,
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
         )
         WhiskeyCompass(
             heading = 45f,
@@ -259,7 +261,7 @@ private fun FlatWhiskeyCompassPreview() {
         Text(
             "Customized Labels & Ticks",
             color = Color.White,
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
         )
         WhiskeyCompass(
             heading = 123f,
@@ -273,7 +275,7 @@ private fun FlatWhiskeyCompassPreview() {
             degreeLabelTextStyle = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF81D4FA)),
             cardinalLabelTextStyle = MaterialTheme.typography.labelLarge.copy(
                 color = Color.White,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             ),
             majorTickHeight = 30.dp,
             minorTickHeight = 18.dp,
@@ -286,7 +288,7 @@ private fun FlatWhiskeyCompassPreview() {
         Text(
             "No Cardinal Labels",
             color = Color.White,
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
         )
         WhiskeyCompass(
             heading = 210f,

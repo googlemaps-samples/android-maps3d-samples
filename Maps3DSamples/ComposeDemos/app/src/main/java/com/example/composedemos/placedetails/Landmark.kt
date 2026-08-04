@@ -28,5 +28,5 @@ import com.google.android.gms.maps3d.model.LatLngAltitude
 data class Landmark(
     val id: String,
     val name: String,
-    val location: LatLngAltitude
+    val location: LatLngAltitude,
 )

@@ -132,21 +132,19 @@ object SnippetRegistry {
         return groups
     }
 
-    private fun createInstance(clazz: Class<*>, context: Context, map: TrackedMap3D, scope: CoroutineScope): Any {
-        return try {
-            clazz.getConstructor(Context::class.java, TrackedMap3D::class.java, CoroutineScope::class.java).newInstance(context, map, scope)
+    private fun createInstance(clazz: Class<*>, context: Context, map: TrackedMap3D, scope: CoroutineScope): Any = try {
+        clazz.getConstructor(Context::class.java, TrackedMap3D::class.java, CoroutineScope::class.java).newInstance(context, map, scope)
+    } catch (e: Exception) {
+        try {
+            clazz.getConstructor(TrackedMap3D::class.java, CoroutineScope::class.java).newInstance(map, scope)
         } catch (e: Exception) {
             try {
-                clazz.getConstructor(TrackedMap3D::class.java, CoroutineScope::class.java).newInstance(map, scope)
+                clazz.getConstructor(Context::class.java, TrackedMap3D::class.java).newInstance(context, map)
             } catch (e: Exception) {
                 try {
-                    clazz.getConstructor(Context::class.java, TrackedMap3D::class.java).newInstance(context, map)
+                    clazz.getConstructor(TrackedMap3D::class.java).newInstance(map)
                 } catch (e: Exception) {
-                    try {
-                        clazz.getConstructor(TrackedMap3D::class.java).newInstance(map)
-                    } catch (e: Exception) {
-                        clazz.getConstructor().newInstance()
-                    }
+                    clazz.getConstructor().newInstance()
                 }
             }
         }

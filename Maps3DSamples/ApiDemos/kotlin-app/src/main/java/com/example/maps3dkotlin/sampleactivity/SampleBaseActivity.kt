@@ -24,6 +24,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.example.maps3d.common.DEFAULT_CAMERA
 import com.example.maps3d.common.toCameraString
 import com.example.maps3d.common.toValidCamera
@@ -220,7 +223,8 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
 
     @CallSuper
     protected open fun onMapReady(googleMap3D: GoogleMap3D) {
-        // Guarded by caller in onMap3DViewReady
+        if (isMapInitialized) return
+        isMapInitialized = true
         Log.d(TAG, "onMapReady called (guaranteed once)")
         googleMap3D.setCamera(initialCamera)
     }
@@ -234,6 +238,12 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         googleMap3D.setOnMapReadyListener {
             Log.w(TAG, "on map ready listener")
             googleMap3D.setOnMapReadyListener(null)
+            onMapReady(googleMap3D)
+        }
+
+        // Workaround for bug where onMapReady is not called on reused instances.
+        lifecycleScope.launch {
+            delay(2000)
             onMapReady(googleMap3D)
         }
     }

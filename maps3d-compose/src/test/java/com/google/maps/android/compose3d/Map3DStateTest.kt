@@ -33,29 +33,37 @@ class Map3DStateTest {
     fun testSyncModelsUpdatesInsteadOfRecreating() {
         val map = mockk<GoogleMap3D>(relaxed = true)
         val model = mockk<Model>(relaxed = true)
-        
+
         val state = Map3DState()
-        
+
         val config1 = ModelConfig(
-            key = "test", 
-            url = "url1", 
-            position = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
+            key = "test",
+            url = "url1",
+            position = latLngAltitude {
+                latitude = 0.0
+                longitude = 0.0
+                altitude = 0.0
+            },
         )
         val config2 = ModelConfig(
-            key = "test", 
-            url = "url1", 
-            position = latLngAltitude { latitude = 1.0; longitude = 1.0; altitude = 0.0 }
+            key = "test",
+            url = "url1",
+            position = latLngAltitude {
+                latitude = 1.0
+                longitude = 1.0
+                altitude = 0.0
+            },
         ) // changed position!
-        
+
         // Mock map.addModel to return our mocked model
         every { map.addModel(any()) } returns model
-        
+
         // First sync adds it
         state.syncModels(map, listOf(config1))
-        
+
         // Second sync with changed config
         state.syncModels(map, listOf(config2))
-        
+
         // Verify that model.remove() was NOT called!
         verify(exactly = 0) { model.remove() }
         // And verify that map.addModel was called twice (once for add, once for update!)

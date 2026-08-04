@@ -94,7 +94,6 @@ class Map3DState {
         return marker
     }
 
-
     /**
      * Synchronizes the polylines on the map with the provided list of configurations.
      */

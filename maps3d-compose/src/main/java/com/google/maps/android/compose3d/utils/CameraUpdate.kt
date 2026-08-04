@@ -61,25 +61,17 @@ sealed class CameraUpdate {
     }
 }
 
-fun FlyToOptions.toCameraUpdate(): CameraUpdate {
-    return CameraUpdate.FlyTo(this.toValidFlyToOptions())
-}
+fun FlyToOptions.toCameraUpdate(): CameraUpdate = CameraUpdate.FlyTo(this.toValidFlyToOptions())
 
-fun FlyAroundOptions.toCameraUpdate(): CameraUpdate {
-    return CameraUpdate.FlyAround(this.toValidFlyAroundOptions())
-}
+fun FlyAroundOptions.toCameraUpdate(): CameraUpdate = CameraUpdate.FlyAround(this.toValidFlyAroundOptions())
 
-fun FlyToOptions.toValidFlyToOptions(): FlyToOptions {
-    return this.copy(
-        endCamera = this.endCamera.toValidCamera(),
-    )
-}
+fun FlyToOptions.toValidFlyToOptions(): FlyToOptions = this.copy(
+    endCamera = this.endCamera.toValidCamera(),
+)
 
-fun FlyAroundOptions.toValidFlyAroundOptions(): FlyAroundOptions {
-    return this.copy(
-        center = this.center.toValidCamera(),
-    )
-}
+fun FlyAroundOptions.toValidFlyAroundOptions(): FlyAroundOptions = this.copy(
+    center = this.center.toValidCamera(),
+)
 
 /**
  * Suspends the coroutine until the camera update animation is finished.

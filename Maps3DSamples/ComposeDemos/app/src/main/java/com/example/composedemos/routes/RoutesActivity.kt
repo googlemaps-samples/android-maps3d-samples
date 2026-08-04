@@ -92,7 +92,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.delay
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.composedemos.BuildConfig
 import com.example.composedemos.R
@@ -112,6 +111,7 @@ import com.google.maps.android.compose3d.PopoverConfig
 import com.google.maps.android.compose3d.utils.haversineDistance
 import com.google.maps.android.compose3d.utils.toHeading
 import com.google.maps.android.compose3d.utils.toValidCamera
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
@@ -130,7 +130,7 @@ sealed interface RouteTracker {
         val scale: Double,
         val tilt: Double,
         val hoverAltitude: Double,
-        val headingOffset: Double
+        val headingOffset: Double,
     ) : RouteTracker
 
     data object RedCar : Model(
@@ -139,7 +139,7 @@ sealed interface RouteTracker {
         scale = 50.0,
         tilt = -90.0,
         hoverAltitude = 25.0,
-        headingOffset = 0.0
+        headingOffset = 0.0,
     )
 
     data object BananaCar : Model(
@@ -148,7 +148,7 @@ sealed interface RouteTracker {
         scale = 0.12,
         tilt = -90.0,
         hoverAltitude = 25.0,
-        headingOffset = 180.0
+        headingOffset = 180.0,
     )
 }
 
@@ -244,7 +244,7 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
         if (uiState is RouteUiState.Success) {
             val state = uiState as RouteUiState.Success
             routeFlow.value = state.decodedPolyline
-            
+
             // Calculate total distance for progress calculation
             val rawPath = state.decodedPolyline
             if (rawPath.size >= 2) {
@@ -260,17 +260,23 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
             polylines = listOf(
                 PolylineConfig(
                     key = "route_line",
-                    points = state.decodedPolyline.map { latLngAltitude { latitude = it.latitude; longitude = it.longitude; altitude = 0.0 } },
+                    points = state.decodedPolyline.map {
+                        latLngAltitude {
+                            latitude = it.latitude
+                            longitude = it.longitude
+                            altitude = 0.0
+                        }
+                    },
                     color = android.graphics.Color.BLUE,
-                    width = 10f
-                )
+                    width = 10f,
+                ),
             )
         }
     }
 
     // 2. The Engine Flow
     val trackingFlow = remember(routeFlow) {
-        RouteEngine.getRouteTrackingFlow(routeFlow, progressFlow, 1000.0)
+        RouteEngine.getRouteTrackingFlow(routeFlow, progressFlow, 30.0)
     }
 
     // 3. Collect the output state
@@ -298,38 +304,46 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
             key = "red_car",
             url = RouteTracker.RedCar.url,
             position = if (currentTracker == RouteTracker.RedCar && positionAndHeading.position.latitude != 0.0) {
-                latLngAltitude { 
+                latLngAltitude {
                     latitude = positionAndHeading.position.latitude
                     longitude = positionAndHeading.position.longitude
-                    altitude = RouteTracker.RedCar.hoverAltitude 
+                    altitude = RouteTracker.RedCar.hoverAltitude
                 }
             } else {
-                latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
+                latLngAltitude {
+                    latitude = 0.0
+                    longitude = 0.0
+                    altitude = 0.0
+                }
             },
             altitudeMode = if (currentTracker == RouteTracker.RedCar) AltitudeMode.RELATIVE_TO_GROUND else AltitudeMode.ABSOLUTE,
             scale = if (currentTracker == RouteTracker.RedCar) ModelScale.Uniform(RouteTracker.RedCar.scale.toFloat()) else ModelScale.Uniform(0.001f),
             heading = if (currentTracker == RouteTracker.RedCar) positionAndHeading.heading.toDouble() else 0.0,
             tilt = if (currentTracker == RouteTracker.RedCar) RouteTracker.RedCar.tilt else 0.0,
-            roll = 0.0
+            roll = 0.0,
         )
 
         val bananaCarConfig = ModelConfig(
             key = "banana_car",
             url = RouteTracker.BananaCar.url,
             position = if (currentTracker == RouteTracker.BananaCar && positionAndHeading.position.latitude != 0.0) {
-                latLngAltitude { 
+                latLngAltitude {
                     latitude = positionAndHeading.position.latitude
                     longitude = positionAndHeading.position.longitude
-                    altitude = RouteTracker.BananaCar.hoverAltitude 
+                    altitude = RouteTracker.BananaCar.hoverAltitude
                 }
             } else {
-                latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
+                latLngAltitude {
+                    latitude = 0.0
+                    longitude = 0.0
+                    altitude = 0.0
+                }
             },
             altitudeMode = if (currentTracker == RouteTracker.BananaCar) AltitudeMode.RELATIVE_TO_GROUND else AltitudeMode.ABSOLUTE,
             scale = if (currentTracker == RouteTracker.BananaCar) ModelScale.Uniform(RouteTracker.BananaCar.scale.toFloat()) else ModelScale.Uniform(0.001f),
             heading = if (currentTracker == RouteTracker.BananaCar) positionAndHeading.heading.toDouble() else 0.0,
             tilt = if (currentTracker == RouteTracker.BananaCar) RouteTracker.BananaCar.tilt else 0.0,
-            roll = 0.0
+            roll = 0.0,
         )
 
         listOf(redCarConfig, bananaCarConfig)
@@ -347,8 +361,8 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                         altitude = 0.0
                     },
                     altitudeMode = AltitudeMode.CLAMP_TO_GROUND,
-                    styleView = ImageView(R.drawable.car)
-                )
+                    styleView = ImageView(R.drawable.car),
+                ),
             )
         } else {
             emptyList()
@@ -365,7 +379,7 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                 lastFrameTime = frameTime
                 val deltaDistance = baseSpeedMps * (dtMs / 1000.0).toFloat()
                 elapsedDistance += deltaDistance
-                
+
                 if (elapsedDistance >= totalDistance) {
                     elapsedDistance = totalDistance
                     isPlaying = false
@@ -396,7 +410,7 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
             modifier = Modifier.fillMaxSize(),
             onCameraChanged = { camera ->
                 cameraFlow.tryEmit(camera)
-            }
+            },
         )
 
         // Custom Translucent Top Bar
@@ -405,17 +419,17 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
                 .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = "Routes API",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
 
                 IconButton(onClick = {
@@ -432,7 +446,7 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                             RouteTracker.BananaCar -> Icons.Default.Star
                         },
                         contentDescription = "Toggle Tracker Style",
-                        tint = MaterialTheme.colorScheme.onSurface
+                        tint = MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }
@@ -457,7 +471,8 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                     cameraState = initialCamera // Reset camera
                     elapsedDistance = 0f
                     progressFlow.value = 0f
-                })
+                },
+            )
         }
 
         // Loading/Error Overlays
@@ -472,30 +487,31 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                 baseSpeedMps = baseSpeedMps,
                 onBaseSpeedChange = { baseSpeedMps = it },
                 cameraHeadingOffset = cameraHeadingOffset,
-                onCameraHeadingChange = { cameraHeadingOffset = it })
+                onCameraHeadingChange = { cameraHeadingOffset = it },
+            )
         }
 
         // Dialogs
         if (displayWarning) {
-            SecurityWarningDialog(
-                onDismiss = {
-                    displayWarning = false
-                    sharedPrefs.edit { putInt("warning_count", warningCount + 1) }
-                })
+            SecurityWarningDialog(onDismiss = {
+                displayWarning = false
+                sharedPrefs.edit { putInt("warning_count", warningCount + 1) }
+            })
         }
     }
 }
 
 @Composable
 private fun BoxScope.StandardControlsOverlay(
-    uiState: RouteUiState, onFlyClicked: () -> Unit
+    uiState: RouteUiState,
+    onFlyClicked: () -> Unit,
 ) {
     Button(
         onClick = onFlyClicked,
         enabled = uiState is RouteUiState.Success,
         modifier = Modifier
             .align(Alignment.BottomCenter)
-            .padding(32.dp)
+            .padding(32.dp),
     ) {
         Text("Fly Along")
     }
@@ -508,7 +524,7 @@ private fun BoxScope.PlaybackControlsOverlay(
     elapsedDistance: Float,
     onElapsedDistanceChange: (Float) -> Unit,
     totalDistance: Float,
-    onExitFlyMode: () -> Unit
+    onExitFlyMode: () -> Unit,
 ) {
     Surface(
         modifier = Modifier
@@ -518,15 +534,16 @@ private fun BoxScope.PlaybackControlsOverlay(
             .fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceVariant,
-        tonalElevation = 4.dp
+        tonalElevation = 4.dp,
     ) {
         Row(
-            modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = { onIsPlayingChange(!isPlaying) }) {
                 Icon(
                     imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = "Play/Pause"
+                    contentDescription = "Play/Pause",
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -550,17 +567,21 @@ private fun BoxScope.PlaybackControlsOverlay(
 private fun BoxScope.StateStatusOverlay(uiState: RouteUiState) {
     when (uiState) {
         is RouteUiState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+
         is RouteUiState.Error -> {
-            Box(modifier = Modifier
-                .align(Alignment.Center)
-                .padding(32.dp)) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(32.dp),
+            ) {
                 Text(
                     text = uiState.message,
                     color = MaterialTheme.colorScheme.error,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
         }
+
         else -> { /* Do nothing */ }
     }
 }
@@ -573,7 +594,7 @@ private fun BoxScope.CameraControlsOverlay(
     baseSpeedMps: Float,
     onBaseSpeedChange: (Float) -> Unit,
     cameraHeadingOffset: Float,
-    onCameraHeadingChange: (Float) -> Unit
+    onCameraHeadingChange: (Float) -> Unit,
 ) {
     FadingVerticalSlider(
         value = cameraRange,
@@ -581,7 +602,7 @@ private fun BoxScope.CameraControlsOverlay(
         valueRange = 200f..10000f,
         modifier = Modifier
             .align(Alignment.CenterEnd)
-            .padding(end = 16.dp)
+            .padding(end = 16.dp),
     )
 
     FadingVerticalSlider(
@@ -591,7 +612,7 @@ private fun BoxScope.CameraControlsOverlay(
         drawCenterDeadZone = true,
         modifier = Modifier
             .align(Alignment.CenterStart)
-            .padding(start = 16.dp)
+            .padding(start = 16.dp),
     )
 
     if (flyModeActive) {
@@ -601,7 +622,7 @@ private fun BoxScope.CameraControlsOverlay(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 48.dp)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp),
         )
     }
 }
@@ -613,12 +634,15 @@ private fun SecurityWarningDialog(onDismiss: () -> Unit) {
         icon = { Icon(Icons.Filled.Warning, contentDescription = null) },
         title = { Text("Security Warning") },
         text = { Text("This sample makes a direct REST API call from a mobile client to the Google Maps Routes API. In a production application, doing this exposes your API key to malicious extraction.\n\nAlways proxy your Routes API requests through a secure backend server!") },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("I Understand") } })
+        confirmButton = { TextButton(onClick = onDismiss) { Text("I Understand") } },
+    )
 }
 
 @Composable
 private fun FadingThumbWheel(
-    value: Float, onValueChange: (Float) -> Unit, modifier: Modifier = Modifier
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val currentValue by rememberUpdatedState(value)
     val currentOnValueChange by rememberUpdatedState(onValueChange)
@@ -635,7 +659,7 @@ private fun FadingThumbWheel(
     val sliderAlpha by animateFloatAsState(
         targetValue = if (isSliderActive) 0.9f else 0.3f,
         animationSpec = tween(durationMillis = 500),
-        label = "sliderAlpha"
+        label = "sliderAlpha",
     )
 
     Box(
@@ -664,21 +688,23 @@ private fun FadingThumbWheel(
                         while (wrapped <= -180f) wrapped += 360f
                         localValue = wrapped
                         currentOnValueChange(localValue)
-                    })
-            }) {
+                    },
+                )
+            },
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             repeat(11) {
                 Box(
                     modifier = Modifier
                         .width(2.dp)
                         .height(12.dp)
-                        .background(Color.White.copy(alpha = 0.4f))
+                        .background(Color.White.copy(alpha = 0.4f)),
                 )
             }
         }
@@ -688,7 +714,7 @@ private fun FadingThumbWheel(
                 .align(Alignment.Center)
                 .width(4.dp)
                 .height(24.dp)
-                .background(Color.Red, RoundedCornerShape(2.dp))
+                .background(Color.Red, RoundedCornerShape(2.dp)),
         )
 
         Text(
@@ -697,7 +723,7 @@ private fun FadingThumbWheel(
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 2.dp)
+                .padding(bottom = 2.dp),
         )
     }
 }
@@ -708,7 +734,7 @@ private fun FadingVerticalSlider(
     onValueChange: (Float) -> Unit,
     valueRange: ClosedFloatingPointRange<Float>,
     modifier: Modifier = Modifier,
-    drawCenterDeadZone: Boolean = false
+    drawCenterDeadZone: Boolean = false,
 ) {
     var sliderInteractionTime by androidx.compose.runtime.remember { mutableLongStateOf(System.currentTimeMillis()) }
     var isSliderActive by androidx.compose.runtime.remember { mutableStateOf(true) }
@@ -722,7 +748,7 @@ private fun FadingVerticalSlider(
     val sliderAlpha by animateFloatAsState(
         targetValue = if (isSliderActive) 0.9f else 0.3f,
         animationSpec = tween(durationMillis = 500),
-        label = "sliderAlpha"
+        label = "sliderAlpha",
     )
 
     Box(
@@ -737,7 +763,8 @@ private fun FadingVerticalSlider(
                         sliderInteractionTime = System.currentTimeMillis()
                     }
                 }
-            }) {
+            },
+    ) {
         Slider(
             value = value,
             onValueChange = onValueChange,
@@ -749,7 +776,8 @@ private fun FadingVerticalSlider(
                     rotationZ = 270f
                     transformOrigin = TransformOrigin(0.5f, 0.5f)
                 }
-                .align(Alignment.Center))
+                .align(Alignment.Center),
+        )
 
         if (drawCenterDeadZone) {
             Box(
@@ -757,7 +785,7 @@ private fun FadingVerticalSlider(
                     .align(Alignment.Center)
                     .requiredWidth(16.dp)
                     .requiredHeight(4.dp)
-                    .background(Color.White, shape = CircleShape)
+                    .background(Color.White, shape = CircleShape),
             )
         }
     }

@@ -29,10 +29,10 @@ import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.CameraRestriction
+import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.maps.android.compose3d.utils.toValidCamera
 import com.google.maps.android.compose3d.utils.toValidCameraRestriction
-import com.google.android.gms.maps3d.model.LatLngAltitude
 
 /**
  * A declarative Compose wrapper for the Google Maps 3D SDK [Map3DView].
@@ -120,9 +120,7 @@ fun GoogleMap3D(
                     }
                 }
 
-                override fun onError(error: Exception) {
-                    throw error
-                }
+                override fun onError(error: Exception): Unit = throw error
             })
 
             map3dView

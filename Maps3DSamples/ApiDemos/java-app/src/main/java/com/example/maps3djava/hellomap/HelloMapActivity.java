@@ -28,16 +28,20 @@ import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.Map3DView;
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback;
 import com.example.maps3dcommon.R;
+import com.google.android.gms.maps3d.OnMapReadyListener;
+import com.google.android.gms.maps3d.model.Camera;
+import com.google.android.gms.maps3d.model.LatLngAltitude;
 
 /**
  * `HelloMapActivity` is an Android activity that demonstrates the usage of the `Map3DView`.  This
  * is close the minimal activity.  It inflates the `activity_hello_map.xml` layout file and
  * demonstrates how to initialize the `Map3DView` and get a `GoogleMap3D` reference.
  */
-public class HelloMapActivity extends Activity implements OnMap3DViewReadyCallback {
+public class HelloMapActivity extends Activity implements OnMap3DViewReadyCallback, OnMapReadyListener {
     private final String TAG = this.getClass().getSimpleName();
     private Map3DView map3DView;
     private GoogleMap3D googleMap3D = null;
+    private boolean isInitialized = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +80,35 @@ public class HelloMapActivity extends Activity implements OnMap3DViewReadyCallba
     @Override
     public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
         this.googleMap3D = googleMap3D;
+
+        googleMap3D.setOnMapReadyListener(this);
+
+        // Workaround for bug where onMapReady is not called on reused instances.
+        // Call initialization after a short delay.
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                initializeMap();
+            }
+        }, 2000);
+    }
+
+    @Override
+    public void onMapReady(double v) {
+        initializeMap();
+    }
+
+    private void initializeMap() {
+        if (googleMap3D == null || isInitialized) return;
+        
+        isInitialized = true;
+        
+        Log.i(TAG, "Initializing map position to Delicate Arch");
+        
+        LatLngAltitude center = new LatLngAltitude(38.743502, -109.499374, 1467.0);
+        Camera camera = new Camera(center, 349.6, 58.1, 0.0, 138.2);
+        
+        googleMap3D.setCamera(camera);
     }
 
     @Override
