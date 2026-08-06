@@ -32,7 +32,7 @@ class MainActivityTest {
         field.isAccessible = true
         val samples = field.get(activity) as List<*>
 
-        assertThat(samples).hasSize(8)
+        assertThat(samples).hasSize(22)
         
         // Extract the activityClass from each Sample object
         val sampleClasses = samples.map { 

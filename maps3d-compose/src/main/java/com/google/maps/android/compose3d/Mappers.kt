@@ -70,6 +70,7 @@ fun ModelConfig.toModelOptions(overrideId: String? = null) = modelOptions {
             y = s.value.toDouble()
             z = s.value.toDouble()
         }
+
         is ModelScale.PerAxis -> vector3D {
             x = s.x.toDouble()
             y = s.y.toDouble()

@@ -16,16 +16,18 @@
 
 package com.example.maps3dkotlin.mapinteractions
 
+import android.os.Bundle
+import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.example.maps3dcommon.R
 
 class MapInteractionsActivity : SampleBaseActivity() {
     override val TAG = this::class.java.simpleName
@@ -40,6 +42,20 @@ class MapInteractionsActivity : SampleBaseActivity() {
         range = 3757.0
     }
 
+    private lateinit var clickedInfoText: TextView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        setContentView(R.layout.activity_map_interactions)
+
+        map3DView = findViewById(R.id.map3dView)
+        map3DView.onCreate(savedInstanceState)
+        map3DView.getMap3DViewAsync(this)
+
+        clickedInfoText = findViewById(R.id.clicked_info_text)
+    }
+
     override fun onMapReady(googleMap3D: GoogleMap3D) {
         super.onMapReady(googleMap3D)
         googleMap3D.setMapMode(Map3DMode.HYBRID)
@@ -47,11 +63,14 @@ class MapInteractionsActivity : SampleBaseActivity() {
         // Listeners for map clicks. We use lifecycleScope to ensure coroutines are cancelled when the activity is destroyed.
         lifecycleScope.launch {
             googleMap3D.setMap3DClickListener { location, placeId ->
-                if (placeId != null) {
-                    showToast("Clicked on place with ID: $placeId")
+                val message = if (placeId != null) {
+                    "Clicked Place ID: $placeId"
                 } else {
-                    showToast("Clicked on location: $location")
+                    "Clicked Location: ${location.latitude}, ${location.longitude}"
                 }
+                clickedInfoText.text = message
+                clickedInfoText.contentDescription = message
+                showToast(message)
             }
         }
     }

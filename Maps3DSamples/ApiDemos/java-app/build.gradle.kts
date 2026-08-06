@@ -37,10 +37,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        if (isCI) {
-            manifestPlaceholders["MAPS3D_API_KEY"] = "DEFAULT_API_KEY"
-            manifestPlaceholders["PLACES_API_KEY"] = "DEFAULT_API_KEY"
-        }
+        manifestPlaceholders["MAPS3D_API_KEY"] = "DEFAULT_API_KEY"
+        manifestPlaceholders["PLACES_API_KEY"] = "DEFAULT_API_KEY"
 
         buildConfigField("Boolean", "IS_CI", "${isCI}")
     }
@@ -94,6 +92,8 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(project(":Maps3DSamples:ApiDemos:common"))
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(project(":visual-testing"))
+    androidTestImplementation(libs.androidx.uiautomator)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.google.truth)
@@ -114,5 +114,6 @@ tasks.register<Exec>("installAndLaunch") {
     description = "Installs and launches the demo app."
     group = "install"
     dependsOn("installDebug")
-    commandLine("adb", "shell", "am", "start", "-n", "com.example.maps3djava/.mainactivity.MainActivity")
+    // Retrieve the absolute path of adb from the Android extension to avoid reliance on system PATH.
+    commandLine(android.adbExecutable.absolutePath, "shell", "am", "start", "-n", "com.example.maps3djava/.mainactivity.MainActivity")
 }

@@ -22,7 +22,7 @@ import com.google.android.libraries.places.api.Places
 class ComposeDemosApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        
+
         // Initialize Places SDK
         if (!Places.isInitialized()) {
             Places.initializeWithNewPlacesApiEnabled(applicationContext, BuildConfig.MAPS3D_API_KEY)

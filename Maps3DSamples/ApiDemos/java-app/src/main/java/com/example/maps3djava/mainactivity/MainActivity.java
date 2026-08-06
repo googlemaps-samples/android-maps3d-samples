@@ -37,6 +37,20 @@ import com.example.maps3djava.markers.MarkersActivity;
 import com.example.maps3djava.models.ModelsActivity;
 import com.example.maps3djava.polygons.PolygonsActivity;
 import com.example.maps3djava.polylines.PolylinesActivity;
+import com.example.maps3djava.camerarestrictions.CameraRestrictionsActivity;
+import com.example.maps3djava.flightsimulator.FlightSimulatorActivity;
+import com.example.maps3djava.routes.RoutesActivity;
+import com.example.maps3djava.pathfollowing.PathFollowingActivity;
+import com.example.maps3djava.pathstyling.PathStylingActivity;
+import com.example.maps3djava.animatingmodels.AnimatingModelsActivity;
+import com.example.maps3djava.placesearch.PlaceSearchActivity;
+import com.example.maps3djava.placeautocomplete.PlaceAutocompleteActivity;
+import com.example.maps3djava.placedetails.PlaceDetailsActivity;
+import com.example.maps3djava.advancedcameraanimation.AdvancedCameraAnimationActivity;
+import com.example.maps3djava.datavisualization.DataVisualizationActivity;
+import com.example.maps3djava.cloudstyling.CloudStylingActivity;
+import com.example.maps3djava.roadmapmode.RoadmapModeActivity;
+import com.example.maps3djava.fieldofview.FieldOfViewActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.LinkedHashMap;
@@ -53,6 +67,20 @@ public class MainActivity extends AppCompatActivity {
         put(R.string.feature_title_3d_models, ModelsActivity.class);
         put(R.string.feature_title_popovers, com.example.maps3djava.popovers.PopoversActivity.class);
         put(R.string.feature_title_map_interactions, com.example.maps3djava.mapinteractions.MapInteractionsActivity.class);
+        put(R.string.feature_title_camera_restrictions, CameraRestrictionsActivity.class);
+        put(R.string.feature_title_flight_simulator, FlightSimulatorActivity.class);
+        put(R.string.feature_title_routes_api, RoutesActivity.class);
+        put(R.string.feature_title_path_following, PathFollowingActivity.class);
+        put(R.string.feature_title_path_styling, PathStylingActivity.class);
+        put(R.string.feature_title_animating_models, AnimatingModelsActivity.class);
+        put(R.string.feature_title_place_search, PlaceSearchActivity.class);
+        put(R.string.feature_title_place_autocomplete, PlaceAutocompleteActivity.class);
+        put(R.string.feature_title_place_details, PlaceDetailsActivity.class);
+        put(R.string.feature_title_advanced_camera_animation, AdvancedCameraAnimationActivity.class);
+        put(R.string.feature_title_data_visualization, DataVisualizationActivity.class);
+        put(R.string.feature_title_cloud_styling, CloudStylingActivity.class);
+        put(R.string.feature_title_roadmap_mode, RoadmapModeActivity.class);
+        put(R.string.feature_title_field_of_view, FieldOfViewActivity.class);
     }};
 
     @Override

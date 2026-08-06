@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.combine
 
 data class PositionAndHeading(
     val position: LatLng,
-    val heading: Float
+    val heading: Float,
 )
 
 object RouteEngine {
@@ -33,13 +33,13 @@ object RouteEngine {
         route: List<LatLng>,
         cumulativeDistances: DoubleArray,
         distance: Double,
-        lookaheadDistance: Double
+        lookaheadDistance: Double,
     ): PositionAndHeading {
         val targetPos = GeoMathUtils.getInterpolatedPoint(distance, route, cumulativeDistances)
-        
+
         // Calculate lookahead position for heading
         val lookaheadPos = GeoMathUtils.getInterpolatedPoint(distance + lookaheadDistance, route, cumulativeDistances)
-        
+
         val heading = if (targetPos == lookaheadPos && distance > 0.0) {
             // If at the end, look back 1 meter to determine heading
             val prevPos = GeoMathUtils.getInterpolatedPoint(distance - 1.0, route, cumulativeDistances)
@@ -47,17 +47,17 @@ object RouteEngine {
         } else {
             calculateHeading(targetPos, lookaheadPos).toFloat()
         }
-        
+
         return PositionAndHeading(targetPos, heading)
     }
 
     fun getRouteTrackingFlow(
         routeFlow: Flow<List<LatLng>>,
         progressFlow: Flow<Float>,
-        lookaheadDistance: Double = 1000.0
+        lookaheadDistance: Double = 1000.0,
     ): Flow<PositionAndHeading> = combine(routeFlow, progressFlow) { route, progress ->
         if (route.size < 2) return@combine PositionAndHeading(LatLng(0.0, 0.0), 0f)
-        
+
         val cumulativeDistances = DoubleArray(route.size)
         cumulativeDistances[0] = 0.0
         for (i in 1 until route.size) {
@@ -65,7 +65,7 @@ object RouteEngine {
         }
         val totalDistance = cumulativeDistances.last()
         val distance = totalDistance * progress.toDouble()
-        
+
         calculatePositionAndHeading(route, cumulativeDistances, distance, lookaheadDistance)
     }
 }

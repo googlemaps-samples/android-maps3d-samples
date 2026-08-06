@@ -46,15 +46,15 @@ class PlaceDetailsVisualTest : BaseVisualTest() {
             // 1. Wait for the map to load (using fixed delay as steady callback can be flaky)
             println("Waiting 2 seconds for map to load...")
             delay(2000)
-            
+
             // 3. Wait for the Place Details fragment to load content (network call)
             println("Waiting for Place Details to load...")
             delay(15000)
-            
+
             // 4. Capture screenshot
             val screenshotBitmap = captureScreenshot("place_details_screenshot.png")
             delay(2000) // Wait for file to be fully written
-            
+
             // 5. Verify with Gemini - Stricter Prompt!
             val prompt = """
                 The screen should show a 3D map in the background.
@@ -63,7 +63,7 @@ class PlaceDetailsVisualTest : BaseVisualTest() {
                 If you can see the text "Flatirons" in the card, reply with YES.
                 If the card is missing, blank, still loading, or shows a different place, reply with NO followed by a detailed description of what is visible on the screen and in the card area.
             """.trimIndent()
-            
+
             val geminiResponse = helper.analyzeImage(screenshotBitmap, prompt, geminiApiKey)
             println("Gemini result: ${geminiResponse?.trim()}")
             assertTrue("Gemini verification failed: $geminiResponse", geminiResponse?.trim()?.contains("YES", ignoreCase = true) == true)

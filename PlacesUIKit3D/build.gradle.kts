@@ -44,7 +44,7 @@ android {
     namespace = "com.example.placesuikit3d"
     // `compileSdk` specifies the Android API level the app is compiled against.
     // Using a recent version allows us to use the latest Android features.
-    compileSdk = 36
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         // `applicationId` is the unique identifier for the app on the Google Play Store and on the device.
@@ -185,5 +185,6 @@ tasks.register<Exec>("installAndLaunch") {
     description = "Installs the debug APK and launches the main activity."
     group = "application"
     dependsOn("installDebug")
-    commandLine("adb", "shell", "am", "start", "-n", "com.example.placesuikit3d/com.example.placesuikit3d.MainActivity")
+    // Retrieve the absolute path of adb from the Android extension to avoid reliance on system PATH.
+    commandLine(android.adbExecutable.absolutePath, "shell", "am", "start", "-n", "com.example.placesuikit3d/com.example.placesuikit3d.MainActivity")
 }

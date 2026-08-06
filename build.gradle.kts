@@ -31,45 +31,66 @@ if (!isCI) {
     val requestedTasks = gradle.startParameter.taskNames
 
     if (requestedTasks.isEmpty() && !secretsFile.exists()) {
-        // It's likely an IDE sync if no tasks are specified, so just issue a warning.
         println("Warning: secrets.properties not found. Gradle sync may succeed, but building/running the app will fail.")
     } else if (requestedTasks.isNotEmpty()) {
-        val buildTaskKeywords = setOf("build", "install", "assemble")
-        val testTaskKeywords = setOf("test", "report", "lint")
+        // List of application / demo modules that require API keys to run
+        val appModules = setOf(
+            "ApiDemos:java-app",
+            "ApiDemos:kotlin-app",
+            "ComposeDemos:app",
+            "advanced:app",
+            "maps3d-compose-demo",
+            "snippets:java-app",
+            "snippets:kotlin-app"
+        )
 
-        val isBuildTask = requestedTasks.any { name ->
-            buildTaskKeywords.any { kw -> name.contains(kw, ignoreCase = true) }
+        // Check if any requested task builds or installs an application APK
+        val isAppBuildTask = requestedTasks.any { name ->
+            val n = name.lowercase()
+            val isBuildOrInstall = n.contains("build") || n.contains("assemble") || n.contains("install") || n.contains("bundle")
+            val isRootTask = !name.contains(":") // Root assemble/install builds all sample apps
+            val isAppModuleTask = appModules.any { mod -> name.contains(mod, ignoreCase = true) }
+            isBuildOrInstall && (isRootTask || isAppModuleTask)
         }
+
         val isTestTask = requestedTasks.any { name ->
-            testTaskKeywords.any { kw -> name.contains(kw, ignoreCase = true) }
-        }
-        val isDebugTask = requestedTasks.any { task ->
-            task.contains("Debug", ignoreCase = true) || task.contains("installAndLaunch", ignoreCase = true)
+            val n = name.lowercase()
+            n.contains("test") || n.contains("lint")
         }
 
-        if (isBuildTask && !isTestTask && isDebugTask) {
+        if (isAppBuildTask && !isTestTask) {
             val defaultsFile = file("local.defaults.properties")
             val requiredKeysMessage = if (defaultsFile.exists()) {
                 defaultsFile.readText()
             } else {
-                "MAPS3D_API_KEY=<YOUR_API_KEY>\nPLACES_API_KEY=<YOUR_API_KEY>"
+                "MAPS3D_API_KEY=<YOUR_API_KEY>\nMAPS_API_KEY=<YOUR_API_KEY>\nPLACES_API_KEY=<YOUR_API_KEY>"
             }
 
             if (!secretsFile.exists()) {
-                throw GradleException("secrets.properties file not found. Please create a 'secrets.properties' file in the root project directory with the following content:\n\n$requiredKeysMessage")
+                throw GradleException("secrets.properties file not found. Please create a 'secrets.properties' file (or symlink to /usr/local/google/home/dkhawk/git/gmp-github/secrets.properties) in the root project directory with valid Google API keys:\n\n$requiredKeysMessage")
             }
 
             val secrets = Properties()
             secretsFile.inputStream().use { secrets.load(it) }
-            val mapsApiKey = secrets.getProperty("MAPS3D_API_KEY")
+            val maps3dApiKey = secrets.getProperty("MAPS3D_API_KEY")
+            val mapsApiKey = secrets.getProperty("MAPS_API_KEY") ?: maps3dApiKey
             val placesApiKey = secrets.getProperty("PLACES_API_KEY")
 
-            if (mapsApiKey.isNullOrBlank() || !mapsApiKey.matches(Regex("^AIza[a-zA-Z0-9_-]{35}$"))) {
-                throw GradleException("Invalid or missing MAPS3D_API_KEY in secrets.properties. Please provide a valid Google Maps API key (starts with 'AIza').")
+            fun isValidKey(key: String?): Boolean {
+                return !key.isNullOrBlank() &&
+                    !key.startsWith("DEFAULT_") &&
+                    !key.startsWith("<YOUR_") &&
+                    key.matches(Regex("^AIza[a-zA-Z0-9_-]{35}$"))
             }
 
-            if (placesApiKey.isNullOrBlank() || !placesApiKey.matches(Regex("^AIza[a-zA-Z0-9_-]{35}$"))) {
-                throw GradleException("Invalid or missing PLACES_API_KEY in secrets.properties. Please provide a valid Google Places API key (starts with 'AIza').")
+            if (!isValidKey(maps3dApiKey)) {
+                throw GradleException("Invalid or missing MAPS3D_API_KEY in secrets.properties ('$maps3dApiKey'). Please provide a valid Google Maps API key starting with 'AIza'.")
+            }
+            if (!isValidKey(mapsApiKey)) {
+                throw GradleException("Invalid or missing MAPS_API_KEY in secrets.properties ('$mapsApiKey'). Please provide a valid Google Maps API key starting with 'AIza'.")
+            }
+            if (!isValidKey(placesApiKey)) {
+                throw GradleException("Invalid or missing PLACES_API_KEY in secrets.properties ('$placesApiKey'). Please provide a valid Google Places API key starting with 'AIza'.")
             }
         }
     }

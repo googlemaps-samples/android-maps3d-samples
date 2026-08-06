@@ -75,9 +75,7 @@ class CameraControlsActivityTest : OnMap3DViewReadyCallback {
         mapReadyLatch.await(5, TimeUnit.SECONDS)
 
         // Let the initial animation finish
-        CoroutineScope(Dispatchers.Main).launch {
-            delay(2.seconds)
-        }
+        Thread.sleep(3000)
     }
 
     @After
@@ -138,6 +136,17 @@ class CameraControlsActivityTest : OnMap3DViewReadyCallback {
 
     @Test
     fun testFlyAround() {
+        // Wait for the initial camera to settle at NYC
+        val steadyLatch = CountDownLatch(1)
+        scenario.onActivity {
+            googleMap?.setOnMapSteadyListener { isSteady ->
+                if (isSteady) {
+                    steadyLatch.countDown()
+                }
+            }
+        }
+        steadyLatch.await(8, TimeUnit.SECONDS)
+
         // Click the "Fly Around" button.
         onView(withId(R.id.fly_around)).perform(click())
 
