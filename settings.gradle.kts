@@ -30,13 +30,7 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        val useLocalMaven = providers.gradleProperty("use_local_maven")
-            .getOrElse("false")
-            .toBoolean()
-
-        if (useLocalMaven) {
-            mavenLocal()
-        }
+        mavenLocal()
         google()
         mavenCentral()
     }

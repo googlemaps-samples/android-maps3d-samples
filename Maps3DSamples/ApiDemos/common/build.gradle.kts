@@ -50,12 +50,12 @@ android {
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
 }
@@ -80,7 +80,7 @@ dependencies {
 
     api(libs.play.services.base) // "com.google.android.gms:play-services-base:18.10.0"
     api(libs.play.services.maps3d) // "com.google.android.gms:play-services-maps3d:0.2.2"
-    api(libs.maps.utils.ktx)
+    api(libs.android.maps.utils)
 }
 
 jacoco {

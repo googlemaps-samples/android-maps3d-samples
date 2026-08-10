@@ -319,10 +319,7 @@ fun FlyAroundOptions.copy(
     }
 }
 
-fun FlyToOptions.copy(
-    endCamera: Camera? = null,
-    durationInMillis: Long? = null,
-): FlyToOptions {
+fun FlyToOptions.copy(endCamera: Camera? = null, durationInMillis: Long? = null): FlyToOptions {
     val objectToCopy = this
 
     return flyToOptions {
