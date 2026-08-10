@@ -16,7 +16,6 @@ package com.example.advancedmaps3dsamples.scenarios
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.google.android.gms.maps3d.GoogleMap3D
 
 @Composable
 fun ScenarioScreen(
@@ -26,7 +25,7 @@ fun ScenarioScreen(
 ) {
     ThreeDMap(
       modifier = modifier,
-      options = scenario.mapsOptions,
+      mapsConfig = scenario.mapsConfig,
       viewModel = viewModel,
     )
 }

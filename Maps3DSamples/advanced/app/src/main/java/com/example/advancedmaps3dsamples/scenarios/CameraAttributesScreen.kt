@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.advancedmaps3dsamples.utils.wrapIn
-import com.google.android.gms.maps3d.GoogleMap3D
 
 private val headingSliderRange = -180f..180f
 private val tiltSliderRange = 0f..90f
@@ -71,7 +70,7 @@ fun CameraControlDemoScreen(
     Column(modifier = Modifier.fillMaxSize()) {
       ThreeDMap(
         modifier = Modifier.fillMaxWidth().weight(1f),
-        options = scenario.mapsOptions,
+        mapsConfig = scenario.mapsConfig,
         viewModel = viewModel,
       )
       Spacer(modifier = Modifier.height(16.dp))

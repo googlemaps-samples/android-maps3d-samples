@@ -67,6 +67,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
+import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
@@ -196,7 +197,27 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
         
         val map3DView = remember {
-            com.google.android.gms.maps3d.Map3DView(context).apply {
+            val config = Map3DInitConfig.create(
+                centerLat = 39.982129291022446,
+                centerLng = -105.30156359691158,
+                centerAlt = 2483.51,
+                heading = 26.0,
+                tilt = 67.0,
+                roll = 0.0,
+                range = 4000.0,
+                minAltitude = 0.0,
+                maxAltitude = 1000000.0,
+                minHeading = 0.0,
+                maxHeading = 360.0,
+                minTilt = 0.0,
+                maxTilt = 90.0,
+                bounds = null,
+                mapMode = Map3DMode.HYBRID,
+                mapId = null,
+                language = java.util.Locale.getDefault().language,
+                region = java.util.Locale.getDefault().country
+            )
+            com.google.android.gms.maps3d.Map3DView(context, config).apply {
                 getMap3DViewAsync(this@MainActivity)
             }
         }
@@ -358,7 +379,9 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         googleMap3D.setMap3DClickListener { _, placeId ->
             Log.e(TAG, "Map clicked: placeId=$placeId")
             if (!placeId.isNullOrEmpty()) {
-                viewModel.setSelectedPlaceId(placeId)
+                runOnUiThread {
+                    viewModel.setSelectedPlaceId(placeId)
+                }
             }
         }
 

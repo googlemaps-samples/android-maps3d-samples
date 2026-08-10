@@ -16,13 +16,13 @@ package com.example.advancedmaps3dsamples.scenarios
 
 import android.graphics.Color
 import android.util.Log
+import androidx.core.graphics.toColorInt
 import com.example.advancedmaps3dsamples.utils.toHeading
 import com.example.advancedmaps3dsamples.utils.toRange
 import com.example.advancedmaps3dsamples.utils.toRoll
 import com.example.advancedmaps3dsamples.utils.toTilt
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps3d.model.PolygonOptions
-import com.google.android.gms.maps3d.Map3DOptions
+import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.CollisionBehavior
@@ -33,6 +33,7 @@ import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.MarkerOptions
 import com.google.android.gms.maps3d.model.ModelOptions
+import com.google.android.gms.maps3d.model.PolygonOptions
 import com.google.android.gms.maps3d.model.PolylineOptions
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyAroundOptions
@@ -45,8 +46,8 @@ import com.google.android.gms.maps3d.model.polygonOptions
 import com.google.android.gms.maps3d.model.polylineOptions
 import com.google.android.gms.maps3d.model.vector3D
 import com.google.maps.android.ktx.utils.toLatLngList
+import java.util.Locale
 import java.util.UUID
-import androidx.core.graphics.toColorInt
 
 private const val TAG = "ScenarioMapper"
 
@@ -189,34 +190,30 @@ fun String.toAnimation(): List<AnimationStep> {
     }
 }
 
-fun String.toMaps3DOptions(): Map3DOptions {
+fun String.toMaps3DInitConfig(): Map3DInitConfig {
     var camera: Camera? = null
     var mode: Int = Map3DMode.SATELLITE
 
     val optionsString = this.trim().trimEnd(';')
-    if (optionsString.isBlank()) {
-        Log.w(TAG, "Empty initialState string provided for Map3DOptions")
-        // Return default options
-        return Map3DOptions(defaultUiDisabled = true)
-    }
+    if (optionsString.isNotBlank()) {
+        optionsString.split(";").forEach { option ->
+            val trimmedOption = option.trim()
+            if (trimmedOption.contains('=')) {
+                val (label, value) = trimmedOption.split("=", limit = 2)
+                when (label.trim().lowercase()) {
+                    "mode" -> {
+                        mode = value.trim().toMap3DMode()
+                    }
 
-    optionsString.split(";").forEach { option ->
-        val trimmedOption = option.trim()
-        if (trimmedOption.contains('=')) {
-            val (label, value) = trimmedOption.split("=", limit = 2)
-            when (label.trim().lowercase()) {
-                "mode" -> {
-                    mode = value.trim().toMap3DMode()
+                    "camera" -> {
+                        camera = value.trim().toCamera()
+                    }
+
+                    else -> Log.w(TAG, "Unsupported Map3DOption key: $label")
                 }
-
-                "camera" -> {
-                    camera = value.trim().toCamera()
-                }
-
-                else -> Log.w(TAG, "Unsupported Map3DOption key: $label")
+            } else {
+                Log.w(TAG, "Ignoring invalid Map3DOption format: $option")
             }
-        } else {
-            Log.w(TAG, "Ignoring invalid Map3DOption format: $option")
         }
     }
 
@@ -227,8 +224,7 @@ fun String.toMaps3DOptions(): Map3DOptions {
         altitude = 10_000_000.0
     }
 
-    return Map3DOptions(
-        defaultUiDisabled = true,
+    return Map3DInitConfig.create(
         centerLat = camera?.center?.latitude ?: defaultCameraPos.latitude,
         centerLng = camera?.center?.longitude ?: defaultCameraPos.longitude,
         centerAlt = camera?.center?.altitude ?: defaultCameraPos.altitude,
@@ -243,6 +239,10 @@ fun String.toMaps3DOptions(): Map3DOptions {
         bounds = null,
         mapMode = mode,
         mapId = null,
+        minAltitude = 0.0,
+        maxAltitude = 1000000.0,
+        language = Locale.getDefault().language,
+        region = Locale.getDefault().country
     )
 }
 
