@@ -15,11 +15,17 @@
 package com.example.advancedmaps3dsamples.scenarios
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.Map3DView
@@ -31,23 +37,22 @@ internal fun ThreeDMap(
   viewModel: ScenariosViewModel,
   modifier: Modifier = Modifier,
 ) {
+  val context = LocalContext.current
+  val lifecycleOwner = LocalLifecycleOwner.current
+
   // Use rememberUpdatedState to avoid capturing stale callbacks if they change
   val currentOnMapSteadyChange by rememberUpdatedState { isSteady: Boolean ->
     viewModel.onMapSteadyChange(isSteady)
   }
 
-  AndroidView(
-    modifier = modifier.testTag("map3d_view"),
-    factory = { context ->
-      val map3dView = Map3DView(context = context, config = mapsConfig)
-      map3dView.onCreate(null)
-      
-      map3dView.getMap3DViewAsync(
+  val map3dView = remember(mapsConfig) {
+    Map3DView(context = context, config = mapsConfig).apply {
+      getMap3DViewAsync(
         object : OnMap3DViewReadyCallback {
           override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
             viewModel.setGoogleMap3D(googleMap3D)
             googleMap3D.setOnMapSteadyListener { isSceneSteady ->
-                currentOnMapSteadyChange(isSceneSteady)
+              currentOnMapSteadyChange(isSceneSteady)
             }
           }
 
@@ -56,14 +61,31 @@ internal fun ThreeDMap(
           }
         }
       )
-      
-      map3dView
-    },
-    update = { _ ->
-      // No-op, updates are handled via viewModel and imperative calls on the stored instance
-    },
+    }
+  }
+
+  DisposableEffect(lifecycleOwner, map3dView) {
+    val observer = LifecycleEventObserver { _, event ->
+      when (event) {
+        Lifecycle.Event.ON_CREATE -> map3dView.onCreate(null)
+        Lifecycle.Event.ON_RESUME -> map3dView.onResume()
+        Lifecycle.Event.ON_PAUSE -> map3dView.onPause()
+        Lifecycle.Event.ON_DESTROY -> map3dView.onDestroy()
+        else -> {}
+      }
+    }
+    lifecycleOwner.lifecycle.addObserver(observer)
+    onDispose {
+      lifecycleOwner.lifecycle.removeObserver(observer)
+      viewModel.releaseGoogleMap3D()
+    }
+  }
+
+  AndroidView(
+    modifier = modifier.testTag("map3d_view"),
+    factory = { map3dView },
+    update = { _ -> },
     onRelease = { _ ->
-      // Clean up resources if needed
       viewModel.releaseGoogleMap3D()
     },
     onReset = { _ -> },

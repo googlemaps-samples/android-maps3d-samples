@@ -195,29 +195,25 @@ fun String.toMaps3DInitConfig(): Map3DInitConfig {
     var mode: Int = Map3DMode.SATELLITE
 
     val optionsString = this.trim().trimEnd(';')
-    if (optionsString.isBlank()) {
-        Log.w(TAG, "Empty initialState string provided for Map3DInitConfig")
-        // Return default options
-        return Map3DInitConfig.create()
-    }
+    if (optionsString.isNotBlank()) {
+        optionsString.split(";").forEach { option ->
+            val trimmedOption = option.trim()
+            if (trimmedOption.contains('=')) {
+                val (label, value) = trimmedOption.split("=", limit = 2)
+                when (label.trim().lowercase()) {
+                    "mode" -> {
+                        mode = value.trim().toMap3DMode()
+                    }
 
-    optionsString.split(";").forEach { option ->
-        val trimmedOption = option.trim()
-        if (trimmedOption.contains('=')) {
-            val (label, value) = trimmedOption.split("=", limit = 2)
-            when (label.trim().lowercase()) {
-                "mode" -> {
-                    mode = value.trim().toMap3DMode()
+                    "camera" -> {
+                        camera = value.trim().toCamera()
+                    }
+
+                    else -> Log.w(TAG, "Unsupported Map3DOption key: $label")
                 }
-
-                "camera" -> {
-                    camera = value.trim().toCamera()
-                }
-
-                else -> Log.w(TAG, "Unsupported Map3DOption key: $label")
+            } else {
+                Log.w(TAG, "Ignoring invalid Map3DOption format: $option")
             }
-        } else {
-            Log.w(TAG, "Ignoring invalid Map3DOption format: $option")
         }
     }
 
