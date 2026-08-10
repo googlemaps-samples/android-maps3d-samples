@@ -80,14 +80,16 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.edit
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.advancedmaps3dsamples.BuildConfig
 import com.example.advancedmaps3dsamples.R
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
+import com.example.advancedmaps3dsamples.utils.GeoMathUtils
 import com.example.advancedmaps3dsamples.utils.calculateHeading
 import com.example.advancedmaps3dsamples.utils.haversineDistance
 import com.example.advancedmaps3dsamples.utils.toHeading
@@ -99,6 +101,7 @@ import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.ImageView
+import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.Polyline
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
@@ -106,13 +109,12 @@ import com.google.android.gms.maps3d.model.markerOptions
 import com.google.android.gms.maps3d.model.modelOptions
 import com.google.android.gms.maps3d.model.orientation
 import com.google.android.gms.maps3d.model.polylineOptions
-import com.example.advancedmaps3dsamples.utils.GeoMathUtils
 import com.google.android.gms.maps3d.model.vector3D
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
-import androidx.core.content.edit
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 
 sealed interface RouteTracker {
     val name: String
@@ -340,7 +342,20 @@ private fun Map3DViewport(
             centerLng = -157.800,
             centerAlt = 0.0,
             tilt = 60.0,
-            range = 25000.0
+            range = 25000.0,
+            heading = 45.0,
+            roll = 0.0,
+            minAltitude = 0.0,
+            maxAltitude = 1000000.0,
+            minHeading = 0.0,
+            maxHeading = 360.0,
+            minTilt = 0.0,
+            maxTilt = 90.0,
+            bounds = null,
+            mapMode = Map3DMode.HYBRID,
+            mapId = null,
+            language = Locale.getDefault().language,
+            region = Locale.getDefault().country
         )
         val view = Map3DView(context, options)
         view.onCreate(null)

@@ -16,12 +16,12 @@ package com.example.advancedmaps3dsamples.scenarios
 
 import android.graphics.Color
 import android.util.Log
+import androidx.core.graphics.toColorInt
 import com.example.advancedmaps3dsamples.utils.toHeading
 import com.example.advancedmaps3dsamples.utils.toRange
 import com.example.advancedmaps3dsamples.utils.toRoll
 import com.example.advancedmaps3dsamples.utils.toTilt
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps3d.model.PolygonOptions
 import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
@@ -33,6 +33,7 @@ import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.MarkerOptions
 import com.google.android.gms.maps3d.model.ModelOptions
+import com.google.android.gms.maps3d.model.PolygonOptions
 import com.google.android.gms.maps3d.model.PolylineOptions
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyAroundOptions
@@ -45,8 +46,8 @@ import com.google.android.gms.maps3d.model.polygonOptions
 import com.google.android.gms.maps3d.model.polylineOptions
 import com.google.android.gms.maps3d.model.vector3D
 import com.google.maps.android.ktx.utils.toLatLngList
+import java.util.Locale
 import java.util.UUID
-import androidx.core.graphics.toColorInt
 
 private const val TAG = "ScenarioMapper"
 
@@ -242,6 +243,10 @@ fun String.toMaps3DInitConfig(): Map3DInitConfig {
         bounds = null,
         mapMode = mode,
         mapId = null,
+        minAltitude = 0.0,
+        maxAltitude = 1000000.0,
+        language = Locale.getDefault().language,
+        region = Locale.getDefault().country
     )
 }
 
