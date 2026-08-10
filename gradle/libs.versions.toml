@@ -5,13 +5,13 @@ targetSdk = "36"
 
 core = "1.7.0"
 json = "20260522"
-robolectric = "4.16.1"
+robolectric = "4.17"
 
 activityCompose = "1.13.0"
 agp = "9.2.1"
-appcompat = "1.7.1"
-composeBom = "2026.06.01"
-coreKtx = "1.19.0"
+appcompat = "1.8.0"
+composeBom = "2026.09.00"
+coreKtx = "1.19.1"
 desugar_jdk_libs = "2.1.5"
 espressoCore = "3.7.0"
 junit = "4.13.2"
@@ -23,7 +23,7 @@ material = "1.14.0"
 playServicesBase = "18.10.0"
 playServicesMaps3d = "0.2.2"
 places = "5.3.0"
-placesCompose = "0.2.1"
+placesCompose = "0.3.0"
 secretsGradlePlugin = "2.0.1"
 truth = "1.4.5"
 uiautomator = "2.4.0"
@@ -31,10 +31,10 @@ spotless = "8.9.0"
 
 kotlinxDatetime = "0.8.0"
 kotlinxSerialization = "1.11.0"
-ktor = "3.5.2"
+ktor = "3.6.0"
 hilt = "2.60.1"
 ksp = "2.3.6"
-mapsUtilsKtx = "6.3.0"
+mapsUtils = "6.0.0"
 androidx-core-ktx = "1.8.9"
 androidxArchCoreTesting = "2.2.0"
 kotlinxCoroutines = "1.8.0"
@@ -83,7 +83,8 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
-maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version.ref = "mapsUtilsKtx" }
+android-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "mapsUtils" }
+android-maps-utils-core = { module = "com.google.maps.android:android-maps-utils-core", version.ref = "mapsUtils" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 
 [plugins]

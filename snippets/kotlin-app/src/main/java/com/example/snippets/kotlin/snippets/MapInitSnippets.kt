@@ -50,7 +50,8 @@ class MapInitSnippets {
     @Suppress("unused")
     @SnippetItem(
         title = "2. Add Map to AndroidView",
-        description = "Shows how to add a Map3DView to an AndroidView which bridges to Jetpack Compose.",
+        description = "Shows how to add a Map3DView to an AndroidView which bridges to " +
+            "Jetpack Compose.",
     )
     fun BasicMap3D() {
         AndroidView(

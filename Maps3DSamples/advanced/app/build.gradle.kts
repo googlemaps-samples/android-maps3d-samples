@@ -104,7 +104,7 @@ dependencies {
     testImplementation(libs.google.truth)
 
     // Google Maps Utils for the polyline decoder
-    implementation(libs.maps.utils.ktx)
+    implementation(libs.android.maps.utils)
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)

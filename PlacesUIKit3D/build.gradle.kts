@@ -153,7 +153,7 @@ dependencies {
     implementation(libs.play.services.maps3d) // The core SDK for embedding 3D Google Maps.
     implementation(libs.places) // The SDK for the Places UI Kit (PlaceDetails fragments).
     implementation(libs.places.compose) // Official Places Compose autocomplete UI kit.
-    implementation(libs.maps.utils.ktx) // Google Maps Utils for polyline decoding and other utilities.
+    implementation(libs.android.maps.utils) // Google Maps Utils for polyline decoding and other utilities.
 
     // --- Dependency Injection ---
     // Hilt is used for managing dependencies and object lifecycles.
