@@ -99,7 +99,8 @@ class PopoverSnippets(private val context: Context, private val map: TrackedMap3
     @Suppress("unused")
     @SnippetItem(
         title = "2. Configured",
-        description = "Adds an 'Info' popover anchored to a marker with auto-close enabled and auto-pan disabled.",
+        description = "Adds an 'Info' popover anchored to a marker with auto-close enabled and " +
+            "auto-pan disabled.",
     )
     fun addConfiguredPopover() {
         // [START maps_android_3d_popover_options_kt]

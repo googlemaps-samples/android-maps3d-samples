@@ -56,7 +56,8 @@ class CameraControlSnippets(
     @Suppress("unused")
     @SnippetItem(
         title = "1. Fly To",
-        description = "Animates the camera to a specific position with a tilt and heading over 5 seconds.",
+        description = "Animates the camera to a specific position with a tilt and heading over " +
+            "5 seconds.",
     )
     fun flyCameraToPosition() {
         // [START maps_android_3d_camera_fly_to_kt]
