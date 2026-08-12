@@ -74,7 +74,6 @@
     <string name="snapshot_camera">Snapshot</string>
     <string name="stop_camera">Stop camera animations</string>
 
-
     <!--
     Distance in feet, formatted to 0 decimal places.
     For example, 1234.56 feet will be formatted as "1,235 ft".
@@ -127,4 +126,8 @@
     <string name="vehicle_speed_format">Vehicle Speed: %1$dm/s</string>
     <string name="camera_yaw_offset_format">Camera Yaw Offset: %1$d°</string>
     <string name="routes_offline_fallback">Offline: Using local Oahu fallback route</string>
+    <string name="map_mode">Map Mode</string>
+    <string name="roadmap">Roadmap</string>
+    <string name="hybrid">Hybrid</string>
+    <string name="satellite">Satellite</string>
 </resources>

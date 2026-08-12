@@ -16,14 +16,74 @@
 
 package com.example.maps3dkotlin.roadmapmode
 
+import android.os.Bundle
+import android.view.ViewGroup
+import android.widget.RadioGroup
 import com.example.maps3dcommon.R
-import com.example.maps3dkotlin.common.BaseSkeletonActivity
+import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps3d.GoogleMap3D
+import com.google.android.gms.maps3d.model.Camera
+import com.google.android.gms.maps3d.model.Map3DMode
+import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.latLngAltitude
+import com.google.android.material.appbar.MaterialToolbar
 
 /**
- * Skeleton activity for RoadmapModeActivity.
+ * Showcases 3D Roadmap mode in Google Maps 3D SDK focused on San Francisco.
+ *
+ * Features:
+ * - Switching between ROADMAP (Vector 3D Buildings & Street Layout), HYBRID, and SATELLITE modes.
  */
-class RoadmapModeActivity : BaseSkeletonActivity() {
-    override fun getTitleResId(): Int {
-        return R.string.feature_title_roadmap_mode
+class RoadmapModeActivity : SampleBaseActivity() {
+
+    override val TAG = "RoadmapModeActivity"
+
+    override val initialCamera: Camera
+        get() = camera {
+            center = latLngAltitude {
+                latitude = SF_LOCATION.latitude
+                longitude = SF_LOCATION.longitude
+                altitude = 250.0
+            }
+            heading = 45.0
+            tilt = 65.0
+            roll = 0.0
+            range = 800.0
+        }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Inflate roadmap control panel overlay into map container managed by SampleBaseActivity
+        findViewById<ViewGroup>(R.id.map_container)?.let { container ->
+            layoutInflater.inflate(R.layout.control_panel_roadmap_mode, container, true)
+        }
+
+        findViewById<MaterialToolbar>(R.id.top_bar)?.apply {
+            title = "3D Roadmap Mode"
+            setNavigationOnClickListener { finish() }
+        }
+
+        findViewById<RadioGroup>(R.id.rg_map_mode)?.setOnCheckedChangeListener { _, checkedId ->
+            googleMap3D?.let { map ->
+                when (checkedId) {
+                    R.id.rb_roadmap -> map.setMapMode(Map3DMode.ROADMAP)
+                    R.id.rb_hybrid -> map.setMapMode(Map3DMode.HYBRID)
+                    R.id.rb_satellite -> map.setMapMode(Map3DMode.SATELLITE)
+                }
+            }
+        }
+    }
+
+    override fun onMapReady(googleMap3D: GoogleMap3D) {
+        super.onMapReady(googleMap3D)
+        googleMap3D.setMapMode(Map3DMode.ROADMAP)
+        googleMap3D.setCamera(initialCamera)
+    }
+
+    companion object {
+        // San Francisco Financial District
+        val SF_LOCATION = LatLng(37.7915, -122.4010)
     }
 }

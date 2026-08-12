@@ -69,7 +69,9 @@ fun CameraControlDemoScreen(
   Box(modifier = modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
       ThreeDMap(
-        modifier = Modifier.fillMaxWidth().weight(1f),
+        modifier = Modifier
+          .fillMaxWidth()
+          .weight(1f),
         mapsConfig = scenario.mapsConfig,
         viewModel = viewModel,
       )
