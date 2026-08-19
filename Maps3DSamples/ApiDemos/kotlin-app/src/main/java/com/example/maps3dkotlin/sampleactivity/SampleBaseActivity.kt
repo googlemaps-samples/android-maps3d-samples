@@ -241,7 +241,7 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
             onMapReady(googleMap3D)
         }
 
-        // Workaround for bug where onMapReady is not called on reused instances.
+        // Ensure onMapReady triggers even on delayed or reused fragments.
         lifecycleScope.launch {
             delay(2000)
             onMapReady(googleMap3D)

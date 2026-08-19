@@ -64,7 +64,7 @@ class RoadmapModeActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     RoadmapModeScreen()
                 }
@@ -94,7 +94,7 @@ fun RoadmapModeScreen() {
                 heading = 45.0
                 tilt = 65.0
                 range = 800.0
-            }
+            },
         )
     }
 
@@ -102,7 +102,7 @@ fun RoadmapModeScreen() {
         GoogleMap3D(
             camera = currentCameraState,
             mapMode = selectedMapMode,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         )
 
         Card(
@@ -112,17 +112,17 @@ fun RoadmapModeScreen() {
                 .padding(12.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp)
+                    .padding(12.dp),
             ) {
                 Text(
                     text = "Map Mode",
                     style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -130,12 +130,12 @@ fun RoadmapModeScreen() {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val modes = listOf(
                         Map3DMode.ROADMAP to "Roadmap",
                         Map3DMode.HYBRID to "Hybrid",
-                        Map3DMode.SATELLITE to "Satellite"
+                        Map3DMode.SATELLITE to "Satellite",
                     )
 
                     modes.forEach { (modeValue, modeTitle) ->
@@ -144,19 +144,19 @@ fun RoadmapModeScreen() {
                                 .selectable(
                                     selected = (selectedMapMode == modeValue),
                                     onClick = { selectedMapMode = modeValue },
-                                    role = Role.RadioButton
+                                    role = Role.RadioButton,
                                 )
                                 .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             RadioButton(
                                 selected = (selectedMapMode == modeValue),
-                                onClick = null
+                                onClick = null,
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = modeTitle,
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyMedium,
                             )
                         }
                     }

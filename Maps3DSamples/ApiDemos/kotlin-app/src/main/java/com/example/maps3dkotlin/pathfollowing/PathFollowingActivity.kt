@@ -41,6 +41,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import android.view.Choreographer
+import android.view.MotionEvent
+import androidx.cardview.widget.CardView
 
 /**
  * Advanced sample demonstrating ground-level path following in Kotlin.
@@ -69,6 +72,24 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
   private lateinit var tiltSliderLabel: TextView
   private lateinit var speedSlider: Slider
   private lateinit var speedSliderLabel: TextView
+
+  private var controlsCard: CardView? = null
+  private var fadeOutJob: Job? = null
+
+  override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+    if (ev.action == MotionEvent.ACTION_DOWN || ev.action == MotionEvent.ACTION_MOVE) {
+      controlsCard?.let { card ->
+        card.animate().alpha(1.0f).setDuration(150).start()
+        fadeOutJob?.cancel()
+        fadeOutJob = lifecycleScope.launch {
+          delay(3000L)
+          card.animate().alpha(0.2f).setDuration(500).start()
+        }
+      }
+    }
+    return super.dispatchTouchEvent(ev)
+  }
+
 
   // Control parameters
   private var cameraRange = 300.0
@@ -140,6 +161,12 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
   }
 
   private fun initViews() {
+    controlsCard = findViewById(R.id.controls_card)
+    fadeOutJob = lifecycleScope.launch {
+      delay(3000L)
+      controlsCard?.animate()?.alpha(0.2f)?.setDuration(500)?.start()
+    }
+
     rgEnvironment = findViewById(R.id.rg_environment)
     btnPlayPause = findViewById(R.id.btn_play_pause)
     progressSlider = findViewById(R.id.progress_slider)
@@ -297,26 +324,37 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     isPlaying = true
     btnPlayPause.setIconResource(R.drawable.pause_24px)
 
-    animationJob = lifecycleScope.launch(Dispatchers.Default) {
-      val frameDurationMs = 16L
-      while (isPlaying) {
-        val stepDistance = followSpeedMps * (frameDurationMs / 1000.0)
+    val frameCallback = object : Choreographer.FrameCallback {
+      private var lastTimeNanos = 0L
+
+      override fun doFrame(frameTimeNanos: Long) {
+        if (!isPlaying) return
+
+        if (lastTimeNanos == 0L) {
+          lastTimeNanos = frameTimeNanos
+          Choreographer.getInstance().postFrameCallback(this)
+          return
+        }
+
+        val dt = (frameTimeNanos - lastTimeNanos) / 1_000_000_000.0
+        lastTimeNanos = frameTimeNanos
+
+        val stepDistance = followSpeedMps * dt
         elapsedDistance += stepDistance
 
         if (elapsedDistance >= totalDistance) {
           elapsedDistance = 0.0
         }
 
-        lifecycleScope.launch(Dispatchers.Main) {
-          if (!isUserScrubbing) {
-            progressSlider.value = (elapsedDistance / totalDistance).toFloat().coerceIn(0f, 1f)
-          }
-          updateCameraPositionForDistance(elapsedDistance)
+        if (!isUserScrubbing) {
+          progressSlider.value = (elapsedDistance / totalDistance).toFloat().coerceIn(0f, 1f)
         }
+        updateCameraPositionForDistance(elapsedDistance)
 
-        delay(frameDurationMs)
+        Choreographer.getInstance().postFrameCallback(this)
       }
     }
+    Choreographer.getInstance().postFrameCallback(frameCallback)
   }
 
   private fun pauseAnimation() {

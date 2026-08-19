@@ -69,7 +69,7 @@ class FieldOfViewActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     FieldOfViewScreen()
                 }
@@ -135,7 +135,7 @@ fun FieldOfViewScreen() {
             camera = cameraState,
             mapMode = Map3DMode.SATELLITE,
             onMapReady = { mapInstance = it },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         )
 
         Card(
@@ -145,18 +145,18 @@ fun FieldOfViewScreen() {
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(16.dp),
             ) {
                 Text(
                     text = "Field of View: ${fovValue.toInt()}°",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -165,7 +165,7 @@ fun FieldOfViewScreen() {
                     value = fovValue,
                     onValueChange = { updateCameraFov(it) },
                     valueRange = 15.0f..120.0f,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -174,20 +174,20 @@ fun FieldOfViewScreen() {
                     text = "FOV Presets:",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     val presets = listOf(
                         20.0f to "20° Tele",
                         45.0f to "45° Standard",
                         90.0f to "90° Wide",
-                        120.0f to "120° Ultra"
+                        120.0f to "120° Ultra",
                     )
 
                     presets.forEach { (presetFov, label) ->
@@ -200,15 +200,15 @@ fun FieldOfViewScreen() {
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                    contentColor = MaterialTheme.colorScheme.onPrimary,
                                 ),
-                                contentPadding = ButtonDefaults.ContentPadding
+                                contentPadding = ButtonDefaults.ContentPadding,
                             ) {
                                 Text(
                                     text = label,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    maxLines = 1
+                                    maxLines = 1,
                                 )
                             }
                         } else {
@@ -217,14 +217,14 @@ fun FieldOfViewScreen() {
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.primary
+                                    contentColor = MaterialTheme.colorScheme.primary,
                                 ),
-                                contentPadding = ButtonDefaults.ContentPadding
+                                contentPadding = ButtonDefaults.ContentPadding,
                             ) {
                                 Text(
                                     text = label,
                                     fontSize = 11.sp,
-                                    maxLines = 1
+                                    maxLines = 1,
                                 )
                             }
                         }

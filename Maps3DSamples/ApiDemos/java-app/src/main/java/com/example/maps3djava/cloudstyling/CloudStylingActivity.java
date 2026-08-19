@@ -16,88 +16,15 @@
 
 package com.example.maps3djava.cloudstyling;
 
-import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
-
-import android.os.Bundle;
-import android.widget.RadioGroup;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import com.example.maps3dcommon.R;
-import com.example.maps3djava.sampleactivity.SampleBaseActivity;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps3d.GoogleMap3D;
-import com.google.android.gms.maps3d.model.Camera;
-import com.google.android.gms.maps3d.model.LatLngAltitude;
-import com.google.android.gms.maps3d.model.Map3DMode;
-import com.google.android.material.appbar.MaterialToolbar;
+import com.example.maps3djava.common.BaseSkeletonActivity;
 
 /**
- * Showcases **Cloud-Based Map Styling** in Google Maps 3D SDK (Java implementation). Uses
- * standalone layout [R.layout.activity_cloud_styling] with declarative custom Map ID.
+ * Skeleton activity for CloudStylingActivity.
  */
-public class CloudStylingActivity extends SampleBaseActivity {
-
-  public static final LatLng SF_LOCATION = new LatLng(37.7915, -122.4010);
-
-  private int currentMapMode = Map3DMode.ROADMAP;
-
-  @NonNull
-  @Override
-  public String getTAG() {
-    return getClass().getSimpleName();
-  }
-
-  @NonNull
-  @Override
-  public Camera getInitialCamera() {
-    return toValidCamera(new Camera(
-        new LatLngAltitude(SF_LOCATION.latitude, SF_LOCATION.longitude, 250.0),
-        45.0,
-        65.0,
-        0.0,
-        800.0
-    ));
-  }
-
-  @Override
-  protected void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    // Set dedicated standalone layout with declarative mapId="9a35234a36da44d2c47bf626"
-    setContentView(R.layout.activity_cloud_styling);
-
-    MaterialToolbar topBar = findViewById(R.id.top_bar);
-    if (topBar != null) {
-      topBar.setTitle(R.string.feature_title_cloud_styling);
-      topBar.setNavigationOnClickListener(v -> finish());
+public class CloudStylingActivity extends BaseSkeletonActivity {
+    @Override
+    protected int getTitleResId() {
+        return R.string.feature_title_cloud_styling;
     }
-
-    map3DView = findViewById(R.id.map3dView);
-    if (map3DView != null) {
-      map3DView.onCreate(savedInstanceState);
-      map3DView.getMap3DViewAsync(this);
-    }
-
-    RadioGroup rgMapMode = findViewById(R.id.rg_map_mode);
-    if (rgMapMode != null) {
-      rgMapMode.setOnCheckedChangeListener((group, checkedId) -> {
-        int newMode = Map3DMode.ROADMAP;
-        if (checkedId == R.id.rb_hybrid) {
-          newMode = Map3DMode.HYBRID;
-        } else if (checkedId == R.id.rb_satellite) {
-          newMode = Map3DMode.SATELLITE;
-        }
-        currentMapMode = newMode;
-        if (googleMap3D != null) {
-          googleMap3D.setMapMode(newMode);
-        }
-      });
-    }
-  }
-
-  @Override
-  public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
-    super.onMap3DViewReady(googleMap3D);
-    googleMap3D.setMapMode(currentMapMode);
-  }
 }

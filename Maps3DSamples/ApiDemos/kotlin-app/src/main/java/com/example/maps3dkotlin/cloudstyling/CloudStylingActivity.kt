@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,75 +16,14 @@
 
 package com.example.maps3dkotlin.cloudstyling
 
-import android.os.Bundle
-import android.widget.RadioGroup
-import androidx.activity.enableEdgeToEdge
-import com.example.maps3d.common.toValidCamera
 import com.example.maps3dcommon.R
-import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.Map3DView
-import com.google.android.gms.maps3d.model.Camera
-import com.google.android.gms.maps3d.model.Map3DMode
-import com.google.android.gms.maps3d.model.camera
-import com.google.android.gms.maps3d.model.latLngAltitude
-import com.google.android.material.appbar.MaterialToolbar
+import com.example.maps3dkotlin.common.BaseSkeletonActivity
 
 /**
- * Showcases **Cloud-Based Map Styling** in Google Maps 3D SDK.
- * Uses standalone layout [R.layout.activity_cloud_styling] with declarative custom Map ID.
+ * Skeleton activity for CloudStylingActivity.
  */
-class CloudStylingActivity : SampleBaseActivity() {
-
-    override val TAG: String = this::class.java.simpleName
-
-    override val initialCamera: Camera = camera {
-        center = latLngAltitude {
-            latitude = SF_LOCATION.latitude
-            longitude = SF_LOCATION.longitude
-            altitude = 250.0
-        }
-        heading = 45.0
-        tilt = 65.0
-        range = 800.0
-    }.toValidCamera()
-
-    @Map3DMode
-    private var currentMapMode: Int = Map3DMode.ROADMAP
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_cloud_styling)
-
-        findViewById<MaterialToolbar>(R.id.top_bar)?.apply {
-            title = getString(R.string.feature_title_cloud_styling)
-            setNavigationOnClickListener { finish() }
-        }
-
-        map3DView = findViewById<Map3DView>(R.id.map3dView).apply {
-            onCreate(savedInstanceState)
-            getMap3DViewAsync(this@CloudStylingActivity)
-        }
-
-        findViewById<RadioGroup>(R.id.rg_map_mode)?.setOnCheckedChangeListener { _, checkedId ->
-            val newMode = when (checkedId) {
-                R.id.rb_hybrid -> Map3DMode.HYBRID
-                R.id.rb_satellite -> Map3DMode.SATELLITE
-                else -> Map3DMode.ROADMAP
-            }
-            currentMapMode = newMode
-            googleMap3D?.setMapMode(newMode)
-        }
-    }
-
-    override fun onMapReady(googleMap3D: GoogleMap3D) {
-        super.onMapReady(googleMap3D)
-        googleMap3D.setMapMode(currentMapMode)
-    }
-
-    companion object {
-        val SF_LOCATION = LatLng(37.7915, -122.4010)
+class CloudStylingActivity : BaseSkeletonActivity() {
+    override fun getTitleResId(): Int {
+        return R.string.feature_title_cloud_styling
     }
 }

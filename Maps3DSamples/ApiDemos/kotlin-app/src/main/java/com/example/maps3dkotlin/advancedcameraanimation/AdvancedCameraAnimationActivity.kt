@@ -176,7 +176,11 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
     }
 
     /**
-     * Upserts the 3D Airplane Model with standard model orientation tilt (-90.0).
+     * Updates the 3D Airplane Model's position and orientation on the map.
+     * Note: Calling `map.addModel(opts)` continuously with the same `id` string
+     * is the recommended approach for dynamically updating a model's location.
+     *
+     * Remote URLs: Models should be hosted and loaded via external URL.
      */
     private fun updateAirplaneModel(targetLatLng: LatLng, planeHeadingDeg: Double) {
         googleMap3D?.let { map ->
@@ -303,6 +307,10 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
     /**
      * Frame Dispatcher Animation Loop.
      * High-speed flight animation (400 m/s) stopping cleanly at destination.
+     * 
+     * For the most visually uniform cinematic sweeping motion, we recommend using
+     * `Choreographer.FrameCallback` to sync our delta-time interpolation directly 
+     * to the hardware display frames.
      */
     private fun runFrameDispatcherLoop() {
         stopTour()
@@ -311,18 +319,22 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
 
         val totalDistance = cumulativeDistances.last().coerceAtLeast(1.0)
         val flightSpeedMps = 400.0 // Fast 400 m/s high-speed flight
-        val handler = android.os.Handler(android.os.Looper.getMainLooper())
 
-        val frameRunnable = object : Runnable {
+        val frameCallback = object : android.view.Choreographer.FrameCallback {
+            private var lastTimeNanos = 0L
             private var elapsedDistance = 0.0
-            private var lastTime = System.currentTimeMillis()
 
-            override fun run() {
+            override fun doFrame(frameTimeNanos: Long) {
                 if (!isPlaying) return
 
-                val now = System.currentTimeMillis()
-                val dt = (now - lastTime) / 1000.0
-                lastTime = now
+                if (lastTimeNanos == 0L) {
+                    lastTimeNanos = frameTimeNanos
+                    android.view.Choreographer.getInstance().postFrameCallback(this)
+                    return
+                }
+
+                val dt = (frameTimeNanos - lastTimeNanos) / 1_000_000_000.0
+                lastTimeNanos = frameTimeNanos
 
                 elapsedDistance += flightSpeedMps * dt
 
@@ -375,10 +387,10 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
                 }
                 googleMap3D?.setCamera(updatedCam)
 
-                handler.postDelayed(this, 16)
+                android.view.Choreographer.getInstance().postFrameCallback(this)
             }
         }
-        handler.post(frameRunnable)
+        android.view.Choreographer.getInstance().postFrameCallback(frameCallback)
     }
 
     /**
