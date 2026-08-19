@@ -50,9 +50,8 @@ class FieldOfViewVisualTest : BaseVisualTest() {
       // Wait for the activity to be displayed in the foreground
       uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
 
-      // Wait 15 seconds for map tiles to render and optical dolly zoom view to settle
-      println("Waiting 15 seconds for 3D Field of View perspective rendering...")
-      delay(15000.milliseconds)
+      // Wait for map tiles to render and optical dolly zoom view to settle
+      waitForMapRendering(15)
 
       // Capture high-resolution screenshot of the active 3D map scene
       val screenshotBitmap = captureScreenshot("field_of_view_screenshot.png")

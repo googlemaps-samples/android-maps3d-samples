@@ -51,13 +51,8 @@ public class DataVisualizationVisualTest extends BaseVisualTest {
         // Wait for the activity to be displayed in the foreground
         uiDevice.wait(Until.hasObject(By.pkg(context.getPackageName()).depth(0)), 10000);
 
-        // Wait 15 seconds for map tiles to load, 3D flood polygon to extrude, and UI controls to settle
-        System.out.println("Waiting 15 seconds for 3D Data Visualization rendering...");
-        try {
-            Thread.sleep(15000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // Wait for map tiles to load, 3D flood polygon to extrude, and UI controls to settle
+        waitForMapRendering(15);
 
         // Capture high-resolution screenshot of the active 3D map scene
         Bitmap screenshotBitmap = captureScreenshot("data_visualization_screenshot.png");

@@ -241,6 +241,13 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
             onMapReady(googleMap3D)
         }
 
+        // Mark map view as steady when rendering stabilizes for automated visual tests
+        googleMap3D.setOnMapSteadyListener { isSceneSteady ->
+            if (isSceneSteady) {
+                map3DView.contentDescription = "MapSteady"
+            }
+        }
+
         // Ensure onMapReady triggers even on delayed or reused fragments.
         lifecycleScope.launch {
             delay(2000)

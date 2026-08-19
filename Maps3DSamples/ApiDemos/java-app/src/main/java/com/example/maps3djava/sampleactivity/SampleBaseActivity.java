@@ -184,6 +184,13 @@ public abstract class SampleBaseActivity extends Activity implements OnMap3DView
 
         googleMap3D.setCamera(getInitialCamera());
 
+        // Mark map view as steady when rendering stabilizes for automated visual tests
+        googleMap3D.setOnMapSteadyListener(isSceneSteady -> {
+            if (isSceneSteady && map3DView != null) {
+                map3DView.setContentDescription("MapSteady");
+            }
+        });
+
         // Initialize and set the camera changed listener
         cameraChangedListener = cameraPosition -> {
         };

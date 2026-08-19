@@ -50,9 +50,8 @@ class AdvancedCameraAnimationVisualTest : BaseVisualTest() {
       // Wait for the activity to be displayed in the foreground
       uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
 
-      // Wait 15 seconds for map tiles to load, 3D airplane model to stream, and camera flight animation to settle
-      println("Waiting 15 seconds for map rendering and 3D airplane camera tour...")
-      delay(15000.milliseconds)
+      // Wait for map tiles to load, 3D airplane model to stream, and camera flight animation to settle
+      waitForMapRendering(15)
 
       // Capture high-resolution screenshot of the active 3D map scene
       val screenshotBitmap = captureScreenshot("advanced_camera_animation_screenshot.png")

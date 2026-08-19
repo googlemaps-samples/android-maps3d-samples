@@ -74,12 +74,10 @@ abstract class BaseVisualTest {
      * @param timeoutSeconds The maximum time to wait in seconds.
      */
     protected fun waitForMapRendering(timeoutSeconds: Long = 30) {
-        // Fallback to sleep since View-based samples do not set "MapSteady" content description.
-        println("Sleeping for $timeoutSeconds seconds to allow map to render...")
-        try {
-            Thread.sleep(timeoutSeconds * 1000)
-        } catch (e: InterruptedException) {
-            Thread.currentThread().interrupt()
+        android.util.Log.i("BaseVisualTest", "Waiting up to ${timeoutSeconds}s for map to become steady...")
+        val steady = uiDevice.wait(Until.hasObject(By.desc("MapSteady")), timeoutSeconds * 1000)
+        if (!steady) {
+            android.util.Log.w("BaseVisualTest", "Map did not report MapSteady within ${timeoutSeconds}s; proceeding with capture.")
         }
     }
 }

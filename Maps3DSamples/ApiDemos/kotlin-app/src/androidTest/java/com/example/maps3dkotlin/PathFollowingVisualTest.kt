@@ -50,9 +50,8 @@ class PathFollowingVisualTest : BaseVisualTest() {
       // Wait for the activity to be displayed in the foreground
       uiDevice.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), 10000)
 
-      // Wait 15 seconds for map tiles to load, ground polyline to render, and path animation to initialize
-      println("Waiting 15 seconds for map rendering and path navigation...")
-      delay(15000.milliseconds)
+      // Wait for map tiles to load, ground polyline to render, and path animation to initialize
+      waitForMapRendering(15)
 
       // Capture high-resolution screenshot of the active 3D map scene
       val screenshotBitmap = captureScreenshot("path_following_screenshot.png")

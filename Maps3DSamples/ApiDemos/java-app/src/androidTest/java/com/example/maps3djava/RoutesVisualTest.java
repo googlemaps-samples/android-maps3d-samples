@@ -51,13 +51,8 @@ public class RoutesVisualTest extends BaseVisualTest {
         // Wait for the activity to be displayed in the foreground
         uiDevice.wait(Until.hasObject(By.pkg(context.getPackageName()).depth(0)), 10000);
 
-        // Wait 15 seconds for map tiles to load, route coordinates to fetch, and the vehicle model to start animating
-        System.out.println("Waiting 15 seconds for map rendering and vehicle animation...");
-        try {
-            Thread.sleep(15000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // Wait for map tiles to load, route coordinates to fetch, and the vehicle model to start animating
+        waitForMapRendering(15);
 
         // Capture high-resolution screenshot of the active 3D map scene
         Bitmap screenshotBitmap = captureScreenshot("routes_screenshot.png");
