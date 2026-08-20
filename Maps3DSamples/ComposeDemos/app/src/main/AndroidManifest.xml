@@ -59,10 +59,9 @@
         <activity android:name=".placedetails.PlaceDetailsActivity" android:exported="true" android:label="Place Details" android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
         <activity android:name=".advancedcameraanimation.AdvancedCameraAnimationActivity" android:exported="true" android:label="Advanced Camera Animation" />
         <activity android:name=".datavisualization.DataVisualizationActivity" android:exported="true" android:label="Data Visualization" />
-
+        <activity android:name=".cloudstyling.CloudStylingActivity" android:exported="true" android:label="Cloud Map Styling" />
         <activity android:name=".roadmapmode.RoadmapModeActivity" android:exported="true" android:label="Roadmap Mode" />
         <activity android:name=".fieldofview.FieldOfViewActivity" android:exported="true" android:label="Field Of View" />
-        <activity android:name=".cloudstyling.CloudStylingActivity" android:exported="true" android:label="Cloud Map Styling" />
 
     </application>
 
