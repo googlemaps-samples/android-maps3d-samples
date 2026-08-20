@@ -85,7 +85,11 @@ class Map3DState {
         }
     }
 
-    private fun createMarker(map: GoogleMap3D, config: MarkerConfig, overrideId: String? = null): Marker? {
+    private fun createMarker(
+        map: GoogleMap3D,
+        config: MarkerConfig,
+        overrideId: String? = null,
+    ): Marker? {
         val marker = map.addMarker(config.toMarkerOptions(overrideId))
         config.onClick?.let { callback ->
             marker?.setClickListener {
@@ -129,7 +133,11 @@ class Map3DState {
         }
     }
 
-    private fun createPolyline(map: GoogleMap3D, config: PolylineConfig, overrideId: String? = null): Polyline {
+    private fun createPolyline(
+        map: GoogleMap3D,
+        config: PolylineConfig,
+        overrideId: String? = null,
+    ): Polyline {
         val polyline = map.addPolyline(config.toPolylineOptions(overrideId))
         config.onClick?.let { callback ->
             polyline.setClickListener {
@@ -173,7 +181,11 @@ class Map3DState {
         }
     }
 
-    private fun createPolygon(map: GoogleMap3D, config: PolygonConfig, overrideId: String? = null): Polygon {
+    private fun createPolygon(
+        map: GoogleMap3D,
+        config: PolygonConfig,
+        overrideId: String? = null,
+    ): Polygon {
         val polygon = map.addPolygon(config.toPolygonOptions(overrideId))
         config.onClick?.let { callback ->
             polygon.setClickListener {
@@ -220,7 +232,11 @@ class Map3DState {
         }
     }
 
-    private fun createModel(map: GoogleMap3D, config: ModelConfig, overrideId: String? = null): Model {
+    private fun createModel(
+        map: GoogleMap3D,
+        config: ModelConfig,
+        overrideId: String? = null,
+    ): Model {
         val model = map.addModel(config.toModelOptions(overrideId))
         config.onClick?.let { callback ->
             model.setClickListener {

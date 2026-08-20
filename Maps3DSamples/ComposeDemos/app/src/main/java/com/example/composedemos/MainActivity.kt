@@ -207,6 +207,11 @@ fun CatalogScreen() {
                 context.startActivity(Intent(context, FieldOfViewActivity::class.java))
             }
         }
+        item {
+            SampleItem("Cloud Map Styling") {
+                context.startActivity(Intent(context, CloudStylingActivity::class.java))
+            }
+        }
     }
 }
 
