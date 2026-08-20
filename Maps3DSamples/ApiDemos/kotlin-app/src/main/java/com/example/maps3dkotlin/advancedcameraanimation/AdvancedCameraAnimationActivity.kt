@@ -38,12 +38,32 @@ import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.maps.android.SphericalUtil
+import kotlin.coroutines.resume
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.time.Duration.Companion.milliseconds
+
+/**
+ * Suspends until the 3D map camera animation completes using [com.google.android.gms.maps3d.OnCameraAnimationEndListener].
+ */
+private suspend fun GoogleMap3D.awaitFlyCameraTo(options: FlyToOptions) =
+    suspendCancellableCoroutine { continuation ->
+        setCameraAnimationEndListener {
+            setCameraAnimationEndListener(null)
+            if (continuation.isActive) {
+                continuation.resume(Unit)
+            }
+        }
+        flyCameraTo(options)
+        continuation.invokeOnCancellation {
+            setCameraAnimationEndListener(null)
+            stopCameraAnimation()
+        }
+    }
 
 enum class AnimationApproach {
     SIMPLE_FLY_TO,
@@ -225,9 +245,11 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
             tilt = 65.0
             range = 600.0
         }
-        googleMap3D?.flyCameraTo(FlyToOptions(targetCam, 1500L))
-        isPlaying = false
-        updatePlayPauseButtonState()
+        tourJob = lifecycleScope.launch(Dispatchers.Main) {
+            googleMap3D?.awaitFlyCameraTo(FlyToOptions(targetCam, 1500L))
+            isPlaying = false
+            updatePlayPauseButtonState()
+        }
     }
 
     /**
@@ -258,8 +280,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
                             range = step.targetRange
                         }
                         updateAirplaneModel(step.targetCenter, step.targetHeading + 180.0)
-                        googleMap3D?.flyCameraTo(FlyToOptions(targetCam, step.durationMs))
-                        delay(step.durationMs.milliseconds)
+                        googleMap3D?.awaitFlyCameraTo(FlyToOptions(targetCam, step.durationMs))
                     }
 
                     is CameraKeyframe.DwellPause -> {
@@ -440,6 +461,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         restartJob = null
         tourJob?.cancel()
         tourJob = null
+        googleMap3D?.setCameraAnimationEndListener(null)
         googleMap3D?.stopCameraAnimation()
     }
 

@@ -75,7 +75,26 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
+
+/**
+ * Suspends until the 3D map camera animation completes using [com.google.android.gms.maps3d.OnCameraAnimationEndListener].
+ */
+private suspend fun com.google.android.gms.maps3d.GoogleMap3D.awaitFlyCameraTo(options: FlyToOptions) = suspendCancellableCoroutine { continuation ->
+    setCameraAnimationEndListener {
+        setCameraAnimationEndListener(null)
+        if (continuation.isActive) {
+            continuation.resume(Unit)
+        }
+    }
+    flyCameraTo(options)
+    continuation.invokeOnCancellation {
+        setCameraAnimationEndListener(null)
+        stopCameraAnimation()
+    }
+}
 
 enum class AnimationApproach(val title: String) {
     SIMPLE_FLY_TO("1. SDK Simple flyTo (Native Transition)"),
@@ -285,6 +304,7 @@ fun AdvancedCameraAnimationScreen() {
         tourJob = null
         restartJob?.cancel()
         restartJob = null
+        mapInstance?.setCameraAnimationEndListener(null)
         mapInstance?.stopCameraAnimation()
     }
 
@@ -311,8 +331,10 @@ fun AdvancedCameraAnimationScreen() {
             tilt = 65.0
             range = 600.0
         }
-        mapInstance?.flyCameraTo(FlyToOptions(targetCam, 1500L))
-        isPlaying = false
+        tourJob = scope.launch(Dispatchers.Main) {
+            mapInstance?.awaitFlyCameraTo(FlyToOptions(targetCam, 1500L))
+            isPlaying = false
+        }
     }
 
     fun runKeyframeTour() {
@@ -342,8 +364,7 @@ fun AdvancedCameraAnimationScreen() {
                             altitude = 200.0
                         }
                         planeHeading = normalizeHeading(step.targetHeading + 180.0)
-                        mapInstance?.flyCameraTo(FlyToOptions(targetCam, step.durationMs))
-                        delay(step.durationMs.milliseconds)
+                        mapInstance?.awaitFlyCameraTo(FlyToOptions(targetCam, step.durationMs))
                     }
 
                     is CameraKeyframe.DwellPause -> {
