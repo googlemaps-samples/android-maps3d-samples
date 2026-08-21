@@ -131,6 +131,7 @@
     <string name="reset">Reset</string>
 
     <!-- Roadmap Mode strings -->
+    <string name="map_mode_controls_title">3D Map Mode Controls</string>
     <string name="map_mode">Map Mode</string>
     <string name="roadmap">Roadmap</string>
     <string name="hybrid">Hybrid</string>
