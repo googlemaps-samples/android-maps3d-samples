@@ -31,95 +31,142 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp"
         android:orientation="vertical"
         >
 
-        <TextView
-            android:id="@+id/fov_slider_label"
-            style="@style/TextAppearance.Material3.LabelLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Field of View: 45°"
-            android:textStyle="bold"
-            />
-
-        <com.google.android.material.slider.Slider
-            android:id="@+id/fov_slider"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:valueFrom="15.0"
-            android:valueTo="120.0"
-            android:value="45.0"
-            />
-
-        <TextView
-            style="@style/TextAppearance.Material3.LabelMedium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="FOV Presets:"
-            android:textStyle="bold"
-            />
-
+        <!-- Card Header with title and collapse/expand button -->
         <LinearLayout
+            android:id="@+id/card_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="4dp"
             >
 
-            <Button
-                android:id="@+id/btn_fov_telephoto"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+            <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="20° Tele"
-                android:textSize="10sp"
-                android:paddingStart="2dp"
-                android:paddingEnd="2dp"
+                android:text="@string/fov_controls_title"
+                style="@style/TextAppearance.Material3.TitleSmall"
+                android:textStyle="bold"
                 />
 
-            <Button
-                android:id="@+id/btn_fov_standard"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_collapse"
+                style="?attr/materialIconButtonStyle"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="0dp"
+                app:icon="@drawable/expand_more_24px"
+                app:iconSize="20dp"
+                app:iconTint="?attr/colorOnSurfaceVariant"
+                android:contentDescription="@string/collapse_controls"
+                />
+        </LinearLayout>
+
+        <!-- Collapsible Content Section -->
+        <LinearLayout
+            android:id="@+id/card_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="12dp"
+            >
+
+            <TextView
+                android:id="@+id/fov_slider_label"
+                style="@style/TextAppearance.Material3.LabelLarge"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="2dp"
-                android:layout_marginEnd="2dp"
-                android:text="45° Standard"
-                android:textSize="10sp"
-                android:paddingStart="2dp"
-                android:paddingEnd="2dp"
+                android:text="@string/fov_default_label"
+                android:textStyle="bold"
                 />
 
-            <Button
-                android:id="@+id/btn_fov_wide"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
+            <com.google.android.material.slider.Slider
+                android:id="@+id/fov_slider"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="2dp"
-                android:text="90° Wide"
-                android:textSize="10sp"
-                android:paddingStart="2dp"
-                android:paddingEnd="2dp"
+                android:layout_marginTop="4dp"
+                android:valueFrom="15.0"
+                android:valueTo="120.0"
+                android:value="45.0"
                 />
 
-            <Button
-                android:id="@+id/btn_fov_ultrawide"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
+            <TextView
+                style="@style/TextAppearance.Material3.LabelMedium"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="120° Ultra"
-                android:textSize="10sp"
-                android:paddingStart="2dp"
-                android:paddingEnd="2dp"
+                android:layout_marginTop="4dp"
+                android:text="@string/fov_presets"
+                android:textStyle="bold"
                 />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp"
+                >
+
+                <Button
+                    android:id="@+id/btn_fov_telephoto"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/fov_telephoto"
+                    android:textSize="10sp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    />
+
+                <Button
+                    android:id="@+id/btn_fov_standard"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="2dp"
+                    android:text="@string/fov_standard"
+                    android:textSize="10sp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    />
+
+                <Button
+                    android:id="@+id/btn_fov_wide"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="2dp"
+                    android:text="@string/fov_wide"
+                    android:textSize="10sp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    />
+
+                <Button
+                    android:id="@+id/btn_fov_ultrawide"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/fov_ultrawide"
+                    android:textSize="10sp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    />
+            </LinearLayout>
+
         </LinearLayout>
 
     </LinearLayout>

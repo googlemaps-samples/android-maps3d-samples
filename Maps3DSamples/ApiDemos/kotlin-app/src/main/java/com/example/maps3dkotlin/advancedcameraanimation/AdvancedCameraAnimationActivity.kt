@@ -19,7 +19,6 @@ package com.example.maps3dkotlin.advancedcameraanimation
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.RadioGroup
 import androidx.lifecycle.lifecycleScope
 import com.example.maps3d.common.RouteEngine
 import com.example.maps3dcommon.R
@@ -150,16 +149,6 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         findViewById<MaterialToolbar>(R.id.top_bar)?.apply {
             title = "Advanced Camera Animation"
             setNavigationOnClickListener { finish() }
-        }
-
-        findViewById<RadioGroup>(R.id.rg_approach)?.setOnCheckedChangeListener { _, checkedId ->
-            selectedApproach = when (checkedId) {
-                R.id.rb_simple_flyto -> AnimationApproach.SIMPLE_FLY_TO
-                R.id.rb_keyframe_tour -> AnimationApproach.KEYFRAME_TOUR
-                R.id.rb_orbit_spin -> AnimationApproach.ORBIT_360_SPIN
-                else -> AnimationApproach.DISPATCHER_FRAME_LOOP
-            }
-            resetAndRestartTour()
         }
 
         findViewById<Button>(R.id.btn_reset)?.setOnClickListener {

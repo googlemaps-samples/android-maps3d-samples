@@ -181,15 +181,23 @@
     <string name="play_or_pause_animation">Play or pause animation</string>
 
     <!-- Data Visualization strings -->
+    <string name="data_visualization_controls_title">Flood Simulation Controls</string>
     <string name="flood_elevation_format">Flood Elevation: +%1$.1f m (%2$.1f ft)</string>
-    <string name="flood_hazard_badge_format">🚨 Flood Hazard (+%1$.0fm)</string>
-    <string name="flood_safe_badge">✅ Normal Tide Level</string>
+    <string name="flood_default_elevation">Flood Elevation: +10.0 m (32.8 ft)</string>
+    <string name="flood_risk_baseline">🌊 Baseline Tide</string>
+    <string name="flood_risk_minor">⚠️ Minor Inundation</string>
+    <string name="flood_risk_moderate">🌊 Moderate Flooding</string>
+    <string name="flood_risk_storm_surge">🚨 Storm Surge (Cat 3)</string>
+    <string name="flood_risk_extreme">⛔ Extreme Inundation</string>
     <string name="continuous_tide_simulation">Continuous Tide Simulation:</string>
     <string name="start_simulation">▶ Start Simulation</string>
     <string name="stop_simulation">⏹ Stop Simulation</string>
+    <string name="flood_toast_format">San Francisco Waterfront - Water Level: +%1$.1f m</string>
 
     <!-- Field of View strings -->
+    <string name="fov_controls_title">Field of View Controls</string>
     <string name="field_of_view_format">Field of View: %1$d°</string>
+    <string name="fov_default_label">Field of View: 45°</string>
     <string name="fov_presets">FOV Presets:</string>
     <string name="fov_telephoto">20° Tele</string>
     <string name="fov_standard">45° Standard</string>
