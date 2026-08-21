@@ -121,6 +121,8 @@
     <string name="content_description_fly_nyc">Fly to NYC</string>
 
     <!-- Routes API sample strings -->
+    <string name="routes_controls_title">Route Simulation Controls</string>
+    <string name="route_loading">Route is still loading…</string>
     <string name="play_or_pause_route_animation">Play or pause route animation</string>
     <string name="camera_altitude_format">Camera Altitude: %1$dm</string>
     <string name="vehicle_speed_format">Vehicle Speed: %1$dm/s</string>
