@@ -343,7 +343,13 @@ public class DataVisualizationActivity extends SampleBaseActivity {
         path.add(new LatLngAltitude(coord[0], coord[1], currentFloodHeightMeters));
       }
 
-      // Configure volumetric extruded polygon options
+      // Volumetric 3D Polygon Extrusion Technique:
+      // 1. AltitudeMode.ABSOLUTE: Water elevation represents true Mean Sea Level (MSL).
+      //    Unlike RELATIVE_TO_GROUND, ABSOLUTE ensures a flat, uniform horizontal water plane.
+      // 2. setExtruded(true): Instructs the 3D rendering engine to drop vertical skirt walls
+      //    from the polygon vertices down to the ground terrain mesh, forming a 3D volumetric water body.
+      // 3. setId(POLYGON_ID): Re-using a stable ID upserts the existing polygon in place,
+      //    eliminating render flickering during rapid slider or animation updates.
       PolygonOptions options = new PolygonOptions();
       options.setId(POLYGON_ID);
       options.setPath(path);

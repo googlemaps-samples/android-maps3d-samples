@@ -282,6 +282,13 @@ class RoutesActivity : SampleBaseActivity() {
 
   // --- Collapsible UI Transitions ---
 
+  /**
+   * Collapses the control card to reveal more of the 3D map scene.
+   *
+   * Note on TransitionManager: Using TransitionManager.beginDelayedTransition automatically
+   * animates the parent CardView height changes smoothly while preserving system navigation bar
+   * insets on edge-to-edge layouts, avoiding visual bottom-clipping.
+   */
   private fun collapseControls() {
     val card = controlsCard ?: return
     val content = cardContent ?: return
@@ -369,7 +376,8 @@ class RoutesActivity : SampleBaseActivity() {
       cumulativeDistances = RouteEngine.calculateCumulativeDistances(decoded)
       totalDistance = cumulativeDistances.last()
 
-      // 1. Draw the blue Polyline representational trail
+      // 1. Draw the blue Polyline representational trail using CLAMP_TO_GROUND so it
+      // conforms directly to the 3D photorealistic terrain mesh without clipping into hills.
       routePolyline =
           googleMap3D.addPolyline(
               polylineOptions {
@@ -387,7 +395,10 @@ class RoutesActivity : SampleBaseActivity() {
                 zIndex = 5
               })
 
-      // 2. Place the 3D model of the Red Car at starting coordinate
+      // 2. Place the 3D model of the Red Car (.glb) at starting coordinate.
+      // Note on glTF Orientation: Pitch is set to -90.0 degrees because standard glTF assets
+      // use +Y up, requiring a -90 degree pitch adjustment to align the vehicle body horizontally
+      // with the tangent plane of the Earth surface.
       vehicleModel =
           googleMap3D.addModel(
               modelOptions {
@@ -424,7 +435,9 @@ class RoutesActivity : SampleBaseActivity() {
           var lastTime = System.currentTimeMillis()
           while (isPlaying && totalDistance > 0.0) {
             val now = System.currentTimeMillis()
-            val dt = (now - lastTime) / 1000.0 // Delta time in seconds
+            // Delta-time (dt) integration: Scale motion by actual elapsed seconds to ensure
+            // consistent travel speed across 60Hz, 90Hz, and 120Hz display refresh rates.
+            val dt = (now - lastTime) / 1000.0
             lastTime = now
 
             elapsedDistance += vehicleSpeedMps * dt

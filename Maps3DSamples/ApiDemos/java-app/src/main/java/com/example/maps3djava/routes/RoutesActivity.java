@@ -323,6 +323,13 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
 
   // --- Collapsible UI Transitions ---
 
+  /**
+   * Collapses the control card to reveal more of the 3D map scene.
+   *
+   * Note on TransitionManager: Using TransitionManager.beginDelayedTransition automatically
+   * animates the parent CardView height changes smoothly while preserving system navigation bar
+   * insets on edge-to-edge layouts, avoiding visual bottom-clipping.
+   */
   private void collapseControls() {
     if (controlsCard == null || cardContent == null || isCollapsed) return;
     isCollapsed = true;
@@ -420,7 +427,8 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
                 cumulativeDistances = RouteEngine.calculateCumulativeDistances(finalDecoded);
                 totalDistance = cumulativeDistances[cumulativeDistances.length - 1];
 
-                // 1. Draw the blue route polyline
+                // 1. Draw the blue route polyline using CLAMP_TO_GROUND so it drapes naturally
+                // over the 3D terrain mesh and elevations without floating or clipping into hills.
                 List<LatLngAltitude> linePath = new ArrayList<>();
                 for (LatLng point : finalDecoded) {
                   linePath.add(new LatLngAltitude(point.latitude, point.longitude, 0.0));
@@ -434,7 +442,10 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
                 polyOptions.setZIndex(5);
                 routePolyline = googleMap3D.addPolyline(polyOptions);
 
-                // 2. Load the 3D Car model
+                // 2. Load the 3D Car model (.glb).
+                // Note on glTF Orientation: Pitch is set to -90.0 degrees because standard glTF
+                // models use a +Y up coordinate system, requiring a -90 degree pitch adjustment
+                // to align the car body horizontally with the tangent plane of the Earth surface.
                 ModelOptions modelOpts = new ModelOptions();
                 modelOpts.setId("vehicle_car_java");
                 modelOpts.setPosition(
@@ -465,7 +476,10 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
           if (!isPlaying || totalDistance <= 0.0) return;
 
           long now = System.currentTimeMillis();
-          double dt = (now - lastTime) / 1000.0; // Delta time in seconds
+          // Delta-time (dt) integration: Multiply velocity by actual elapsed wall-clock seconds.
+          // This guarantees consistent movement speed regardless of whether the device displays
+          // at 60Hz, 90Hz, or 120Hz refresh rates.
+          double dt = (now - lastTime) / 1000.0;
           lastTime = now;
 
           elapsedDistance += vehicleSpeedMps * dt;

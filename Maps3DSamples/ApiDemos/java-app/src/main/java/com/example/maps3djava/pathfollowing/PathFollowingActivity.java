@@ -537,12 +537,17 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
       progressCoordinates.add(new LatLngAltitude(startPt.latitude, startPt.longitude, progressAltitude));
     }
 
+    // Dual-Polyline Rendering Technique:
+    // We render two layered polylines to clearly visualize completed vs. remaining route:
+    // 1. Base Static Polyline: A wider (#4285F4 blue, 16dp) static path at ZIndex=1.
+    // 2. Traversed Progress Polyline: A narrower (#9C27B0 purple, 8dp) line at ZIndex=2.
+    // We also apply a slight vertical altitude bias (+0.2m) to prevent 3D depth buffer z-fighting.
     PolylineOptions progressOptions = new PolylineOptions();
-    progressOptions.setId(PROGRESS_POLYLINE_ID); // Same ID every time to eliminate flickering
+    progressOptions.setId(PROGRESS_POLYLINE_ID); // Fixed ID upserts in place to eliminate flickering
     progressOptions.setPath(progressCoordinates);
     progressOptions.setStrokeColor(Color.parseColor("#9C27B0")); // Progress line: purple
     progressOptions.setStrokeWidth(8.0); // Progress line: narrower
-    progressOptions.setZIndex(2); // Progress line: higher z-index
+    progressOptions.setZIndex(2); // Progress line: higher z-index on top of static route
     progressOptions.setAltitudeMode(pathAltitudeMode);
 
     progressPolyline = googleMap3D.addPolyline(progressOptions);
@@ -617,6 +622,10 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
     LatLng currentLatLng = SphericalUtil.interpolate(p1, p2, fraction);
     double bearing = SphericalUtil.computeHeading(p1, p2);
 
+    // Kinematic Heading Smoothing (Exponential Moving Average):
+    // Sharp polyline bends can produce disorienting camera jerks. We compute the shortest
+    // angular difference wrapped to [-180, 180] and apply an exponential low-pass filter (12% lerp)
+    // to smoothly turn the camera around street corners and mountain switchbacks.
     double targetHeadingRaw = toHeading(bearing + headingOffset);
     double targetHeading;
     if (currentHeading == null || isUserScrubbing || !isPlaying) {

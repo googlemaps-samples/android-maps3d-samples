@@ -247,6 +247,13 @@ class DataVisualizationActivity : SampleBaseActivity() {
         }
       }
 
+      // Volumetric 3D Polygon Extrusion Technique:
+      // 1. AltitudeMode.ABSOLUTE: Water elevation represents true Mean Sea Level (MSL).
+      //    Unlike RELATIVE_TO_GROUND, ABSOLUTE ensures a flat, uniform horizontal water plane.
+      // 2. extruded = true: Instructs the 3D rendering engine to drop vertical skirt walls
+      //    from the polygon vertices down to the ground terrain mesh, forming a 3D volumetric water body.
+      // 3. id = POLYGON_ID: Re-using a stable ID upserts the existing polygon in place,
+      //    eliminating render flickering during rapid slider or animation updates.
       val options = polygonOptions {
         id = POLYGON_ID
         this.path = path
