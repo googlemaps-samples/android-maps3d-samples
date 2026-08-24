@@ -36,57 +36,29 @@
         >
 
         <TextView
-            style="@style/TextAppearance.Material3.LabelLarge"
+            style="@style/TextAppearance.Material3.TitleMedium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Select Animation Approach:"
+            android:text="@string/aerial_tour_title"
             android:textStyle="bold"
             />
 
-        <RadioGroup
-            android:id="@+id/rg_approach"
+        <TextView
+            android:id="@+id/tv_tour_status"
+            style="@style/TextAppearance.Material3.BodyMedium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_marginTop="4dp"
-            >
-
-            <RadioButton
-                android:id="@+id/rb_simple_flyto"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="1. SDK Simple flyTo (Native Transition)"
-                />
-
-            <RadioButton
-                android:id="@+id/rb_keyframe_tour"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="2. Keyframe Queue (Multi-step Camera Tour)"
-                />
-
-            <RadioButton
-                android:id="@+id/rb_dispatcher_loop"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="3. Frame Dispatcher (Chase Cam + 3D Airplane)"
-                />
-
-            <RadioButton
-                android:id="@+id/rb_orbit_spin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="4. 360° Orbit Spin (Continuous Orbital Camera)"
-                />
-        </RadioGroup>
+            android:text="@string/aerial_tour_status_idle"
+            android:textColor="?android:attr/textColorSecondary"
+            />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="end"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             >
 
             <Button
@@ -94,7 +66,7 @@
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Reset"
+                android:text="@string/reset"
                 android:layout_marginEnd="8dp"
                 />
 
@@ -103,7 +75,7 @@
                 style="@style/Widget.Material3.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Play"
+                android:text="@string/play"
                 />
         </LinearLayout>
 

@@ -22,10 +22,12 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.MotionEvent;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.view.WindowCompat;
 import com.example.maps3dcommon.R;
 import com.google.android.gms.maps.model.LatLng;
@@ -43,13 +45,14 @@ import com.google.maps.android.SphericalUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Advanced sample demonstrating ground-level path following in Java.
  *
  * Features: - Urban vs Rural ground-level paths - Real-time camera controls via sliders: Range,
  * Ground Altitude, Heading Offset, Tilt, Follow Speed - Smooth Handler-based frame animation along
- * the route
+ * the route - Contracting and fading polyline playback visualization
  */
 public class PathFollowingActivity extends AppCompatActivity implements OnMap3DViewReadyCallback {
 
@@ -91,6 +94,9 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
 
   // View Bindings
   private RadioGroup rgEnvironment;
+  private RadioGroup rgAltitudeMode;
+  private Slider pathAltitudeSlider;
+  private TextView pathAltitudeSliderLabel;
   private MaterialButton btnPlayPause;
   private Slider progressSlider;
   private Slider rangeSlider;
@@ -110,6 +116,8 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
   private double headingOffset = 0.0;
   private double cameraTilt = 70.0;
   private double followSpeedMps = 30.0;
+  private @AltitudeMode int pathAltitudeMode = AltitudeMode.CLAMP_TO_GROUND;
+  private double pathAltitudeOffset = 0.5;
 
   // Path state
   private List<LatLng> currentPath = URBAN_PATH;
@@ -119,9 +127,83 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
   private boolean isPlaying = false;
   private boolean isUserScrubbing = false;
 
-  private Polyline pathPolyline = null;
+  // Polyline IDs
+  private static final String STATIC_ROUTE_POLYLINE_ID = "path_following_static_route";
+  private static final String PROGRESS_POLYLINE_ID = "path_following_progress_route";
+
+  private Polyline staticRoutePolyline = null;
+  private Polyline progressPolyline = null;
   private final Handler handler = new Handler(Looper.getMainLooper());
   private Runnable animationRunnable;
+
+  private CardView controlsCard;
+  private android.view.View cardHeader;
+  private MaterialButton btnCollapse;
+  private boolean isCollapsed = false;
+
+  private final Handler fadeHandler = new Handler(Looper.getMainLooper());
+  private final Runnable fadeOutRunnable = () -> {
+    if (controlsCard != null && !isCollapsed) {
+      controlsCard.animate()
+          .alpha(0.8f) // Subtle fade when idle
+          .setDuration(400)
+          .start();
+    }
+  };
+
+  private void collapseControls() {
+    if (controlsCard == null) {
+      return;
+    }
+    isCollapsed = true;
+    fadeHandler.removeCallbacks(fadeOutRunnable);
+    if (btnCollapse != null) {
+      btnCollapse.setIconResource(R.drawable.expand_less_24px);
+      btnCollapse.setContentDescription(getString(R.string.expand_controls));
+    }
+    int headerHeight = (cardHeader != null && cardHeader.getHeight() > 0)
+        ? cardHeader.getHeight()
+        : (int) (48 * getResources().getDisplayMetrics().density);
+    float targetTranslationY = Math.max(0, controlsCard.getHeight() - headerHeight);
+    controlsCard.animate()
+        .translationY(targetTranslationY)
+        .alpha(0.9f)
+        .setDuration(300)
+        .start();
+  }
+
+  private void expandControls() {
+    if (controlsCard == null) {
+      return;
+    }
+    isCollapsed = false;
+    if (btnCollapse != null) {
+      btnCollapse.setIconResource(R.drawable.expand_more_24px);
+      btnCollapse.setContentDescription(getString(R.string.collapse_controls));
+    }
+    controlsCard.animate()
+        .translationY(0f)
+        .alpha(1.0f)
+        .setDuration(250)
+        .start();
+    fadeHandler.removeCallbacks(fadeOutRunnable);
+    fadeHandler.postDelayed(fadeOutRunnable, 3000L);
+  }
+
+  @Override
+  public boolean dispatchTouchEvent(MotionEvent ev) {
+    if (ev.getAction() == MotionEvent.ACTION_DOWN || ev.getAction() == MotionEvent.ACTION_MOVE) {
+      if (controlsCard != null && !isCollapsed) {
+        controlsCard.animate()
+            .alpha(1.0f)
+            .setDuration(150)
+            .start();
+        fadeHandler.removeCallbacks(fadeOutRunnable);
+        fadeHandler.postDelayed(fadeOutRunnable, 3000L);
+      }
+    }
+    return super.dispatchTouchEvent(ev);
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -154,9 +236,14 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
   protected void onDestroy() {
     super.onDestroy();
     pauseAnimation();
-    if (pathPolyline != null) {
-      pathPolyline.remove();
-      pathPolyline = null;
+    fadeHandler.removeCallbacks(fadeOutRunnable);
+    if (staticRoutePolyline != null) {
+      staticRoutePolyline.remove();
+      staticRoutePolyline = null;
+    }
+    if (progressPolyline != null) {
+      progressPolyline.remove();
+      progressPolyline = null;
     }
     map3DView.onDestroy();
   }
@@ -174,7 +261,34 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
   }
 
   private void initViews() {
+    controlsCard = findViewById(R.id.controls_card);
+    cardHeader = findViewById(R.id.card_header);
+    btnCollapse = findViewById(R.id.btn_collapse);
+
+    if (btnCollapse != null) {
+      btnCollapse.setOnClickListener(v -> {
+        if (isCollapsed) {
+          expandControls();
+        } else {
+          collapseControls();
+        }
+      });
+    }
+
+    if (cardHeader != null) {
+      cardHeader.setOnClickListener(v -> {
+        if (isCollapsed) {
+          expandControls();
+        }
+      });
+    }
+
+    fadeHandler.postDelayed(fadeOutRunnable, 3000L);
+
     rgEnvironment = findViewById(R.id.rg_environment);
+    rgAltitudeMode = findViewById(R.id.rg_altitude_mode);
+    pathAltitudeSlider = findViewById(R.id.path_altitude_slider);
+    pathAltitudeSliderLabel = findViewById(R.id.path_altitude_slider_label);
     btnPlayPause = findViewById(R.id.btn_play_pause);
     progressSlider = findViewById(R.id.progress_slider);
 
@@ -189,6 +303,8 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
     speedSlider = findViewById(R.id.speed_slider);
     speedSliderLabel = findViewById(R.id.speed_slider_label);
 
+    updateControlLabels();
+
     // Radio group environment selection
     rgEnvironment.setOnCheckedChangeListener((group, checkedId) -> {
       if (checkedId == R.id.rb_urban) {
@@ -198,6 +314,30 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
         altitudeSlider.setValueTo(2000.0f);
         switchEnvironment(RURAL_PATH);
       }
+    });
+
+    // Radio group altitude mode selection
+    rgAltitudeMode.setOnCheckedChangeListener((group, checkedId) -> {
+      if (checkedId == R.id.rb_relative_to_ground) {
+        pathAltitudeMode = AltitudeMode.RELATIVE_TO_GROUND;
+      } else if (checkedId == R.id.rb_clamp_to_ground) {
+        pathAltitudeMode = AltitudeMode.CLAMP_TO_GROUND;
+      } else if (checkedId == R.id.rb_relative_to_mesh) {
+        pathAltitudeMode = AltitudeMode.RELATIVE_TO_MESH;
+      } else if (checkedId == R.id.rb_absolute) {
+        pathAltitudeMode = AltitudeMode.ABSOLUTE;
+      }
+      drawStaticRoutePolyline();
+      updateCameraPositionForDistance(elapsedDistance);
+    });
+
+    // Path height slider (relative altitude)
+    pathAltitudeSlider.addOnChangeListener((slider, value, fromUser) -> {
+      pathAltitudeOffset = value;
+      pathAltitudeSliderLabel.setText(
+          getString(R.string.path_height_format, pathAltitudeOffset));
+      drawStaticRoutePolyline();
+      updateCameraPositionForDistance(elapsedDistance);
     });
 
     // Play/Pause button
@@ -232,32 +372,45 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
     // Sliders listeners
     rangeSlider.addOnChangeListener((slider, value, fromUser) -> {
       cameraRange = value;
-      rangeSliderLabel.setText(String.format("Camera Range: %dm", (int) cameraRange));
+      rangeSliderLabel.setText(getString(R.string.camera_range_format, (int) cameraRange));
       updateCameraPositionForDistance(elapsedDistance);
     });
 
     altitudeSlider.addOnChangeListener((slider, value, fromUser) -> {
       groundAltitude = value;
-      altitudeSliderLabel.setText(String.format("Ground Altitude: %dm", (int) groundAltitude));
+      altitudeSliderLabel.setText(getString(R.string.ground_altitude_format, (int) groundAltitude));
       updateCameraPositionForDistance(elapsedDistance);
     });
 
     headingSlider.addOnChangeListener((slider, value, fromUser) -> {
       headingOffset = value;
-      headingSliderLabel.setText(String.format("Heading Offset: %d°", (int) headingOffset));
+      headingSliderLabel.setText(getString(R.string.heading_offset_format, (int) headingOffset));
       updateCameraPositionForDistance(elapsedDistance);
     });
 
     tiltSlider.addOnChangeListener((slider, value, fromUser) -> {
       cameraTilt = value;
-      tiltSliderLabel.setText(String.format("Camera Tilt: %d°", (int) cameraTilt));
+      tiltSliderLabel.setText(getString(R.string.camera_tilt_format, (int) cameraTilt));
       updateCameraPositionForDistance(elapsedDistance);
     });
 
     speedSlider.addOnChangeListener((slider, value, fromUser) -> {
       followSpeedMps = value;
-      speedSliderLabel.setText(String.format("Follow Speed: %d m/s", (int) followSpeedMps));
+      speedSliderLabel.setText(getString(R.string.follow_speed_format, (int) followSpeedMps));
     });
+  }
+
+  private void updateControlLabels() {
+    pathAltitudeSliderLabel.setText(
+        getString(R.string.path_height_format, pathAltitudeOffset));
+    rangeSliderLabel.setText(getString(R.string.camera_range_format, (int) cameraRange));
+    altitudeSliderLabel.setText(
+        getString(R.string.ground_altitude_format, (int) groundAltitude));
+    headingSliderLabel.setText(
+        getString(R.string.heading_offset_format, (int) headingOffset));
+    tiltSliderLabel.setText(getString(R.string.camera_tilt_format, (int) cameraTilt));
+    speedSliderLabel.setText(
+        getString(R.string.follow_speed_format, (int) followSpeedMps));
   }
 
   @Override
@@ -265,8 +418,11 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
     this.googleMap3D = googleMap3D;
     googleMap3D.setOnMapReadyListener((map) -> {
       googleMap3D.setOnMapReadyListener(null);
-      drawPathPolyline();
-      updateCameraPositionForDistance(0.0);
+      runOnUiThread(() -> {
+        drawPathPolylines();
+        updateCameraPositionForDistance(0.0);
+        startAnimation();
+      });
     });
   }
 
@@ -285,9 +441,9 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
       rangeSlider.setValue(450f);
       altitudeSlider.setValue(40f);
       tiltSlider.setValue(75f);
-      rangeSliderLabel.setText("Camera Range: 450m");
-      altitudeSliderLabel.setText("Ground Altitude: 40m");
-      tiltSliderLabel.setText("Camera Tilt: 75°");
+      rangeSliderLabel.setText(getString(R.string.camera_range_format, 450));
+      altitudeSliderLabel.setText(getString(R.string.ground_altitude_format, 40));
+      tiltSliderLabel.setText(getString(R.string.camera_tilt_format, 75));
     } else {
       cameraRange = 300.0;
       groundAltitude = 20.0;
@@ -295,13 +451,13 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
       rangeSlider.setValue(300f);
       altitudeSlider.setValue(20f);
       tiltSlider.setValue(70f);
-      rangeSliderLabel.setText("Camera Range: 300m");
-      altitudeSliderLabel.setText("Ground Altitude: 20m");
-      tiltSliderLabel.setText("Camera Tilt: 70°");
+      rangeSliderLabel.setText(getString(R.string.camera_range_format, 300));
+      altitudeSliderLabel.setText(getString(R.string.ground_altitude_format, 20));
+      tiltSliderLabel.setText(getString(R.string.camera_tilt_format, 70));
     }
 
     loadPathData(path);
-    drawPathPolyline();
+    drawPathPolylines();
     updateCameraPositionForDistance(0.0);
   }
 
@@ -317,26 +473,84 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
     }
   }
 
-  private void drawPathPolyline() {
-    if (googleMap3D == null) {
+  private void drawPathPolylines() {
+    drawStaticRoutePolyline();
+    if (!currentPath.isEmpty()) {
+      updateProgressPolyline(elapsedDistance, currentPath.get(0), 0);
+    }
+  }
+
+  private void drawStaticRoutePolyline() {
+    if (googleMap3D == null || currentPath.isEmpty()) {
       return;
     }
-    if (pathPolyline != null) {
-      pathPolyline.remove();
+
+    double pathAltitude = (pathAltitudeMode == AltitudeMode.CLAMP_TO_GROUND)
+        ? 0.0
+        : pathAltitudeOffset;
+    if (pathAltitudeMode == AltitudeMode.ABSOLUTE) {
+      pathAltitude = (currentPath.equals(RURAL_PATH)) ? 40.0 : 15.0;
     }
 
-    List<LatLngAltitude> vertices = new ArrayList<>();
+    List<LatLngAltitude> staticVertices = new ArrayList<>();
     for (LatLng latLng : currentPath) {
-      vertices.add(new LatLngAltitude(latLng.latitude, latLng.longitude, 5.0));
+      staticVertices.add(new LatLngAltitude(latLng.latitude, latLng.longitude, pathAltitude));
     }
 
-    PolylineOptions polyOptions = new PolylineOptions();
-    polyOptions.setPath(vertices);
-    polyOptions.setStrokeColor(Color.parseColor("#4285F4"));
-    polyOptions.setStrokeWidth(10.0);
-    polyOptions.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND);
+    PolylineOptions staticOptions = new PolylineOptions();
+    staticOptions.setId(STATIC_ROUTE_POLYLINE_ID); // Fixed ID prevents flickering and updates in place
+    staticOptions.setPath(staticVertices);
+    staticOptions.setStrokeColor(Color.parseColor("#4285F4")); // Route line: blue
+    staticOptions.setStrokeWidth(16.0); // Route line: wider
+    staticOptions.setZIndex(1); // Route line: lower z-index
+    staticOptions.setAltitudeMode(pathAltitudeMode);
 
-    pathPolyline = googleMap3D.addPolyline(polyOptions);
+    staticRoutePolyline = googleMap3D.addPolyline(staticOptions);
+  }
+
+  private void updateProgressPolyline(double dist, LatLng currentLatLng, int index) {
+    if (googleMap3D == null || currentPath.isEmpty() || totalDistance <= 0.0) {
+      return;
+    }
+
+    double pathAltitude = (pathAltitudeMode == AltitudeMode.CLAMP_TO_GROUND)
+        ? 0.0
+        : pathAltitudeOffset;
+    if (pathAltitudeMode == AltitudeMode.ABSOLUTE) {
+      pathAltitude = (currentPath.equals(RURAL_PATH)) ? 40.0 : 15.0;
+    }
+
+    double progressAltitude = pathAltitude + 0.2;
+
+    // Build traversed route from start to current position
+    List<LatLngAltitude> progressCoordinates = new ArrayList<>();
+    for (int i = 0; i <= index && i < currentPath.size(); i++) {
+      LatLng pt = currentPath.get(i);
+      progressCoordinates.add(new LatLngAltitude(pt.latitude, pt.longitude, progressAltitude));
+    }
+    progressCoordinates.add(
+        new LatLngAltitude(currentLatLng.latitude, currentLatLng.longitude, progressAltitude));
+
+    // Polyline requires at least 2 vertices
+    if (progressCoordinates.size() < 2) {
+      LatLng startPt = currentPath.get(0);
+      progressCoordinates.add(new LatLngAltitude(startPt.latitude, startPt.longitude, progressAltitude));
+    }
+
+    // Dual-Polyline Rendering Technique:
+    // We render two layered polylines to clearly visualize completed vs. remaining route:
+    // 1. Base Static Polyline: A wider (#4285F4 blue, 16dp) static path at ZIndex=1.
+    // 2. Traversed Progress Polyline: A narrower (#9C27B0 purple, 8dp) line at ZIndex=2.
+    // We also apply a slight vertical altitude bias (+0.2m) to prevent 3D depth buffer z-fighting.
+    PolylineOptions progressOptions = new PolylineOptions();
+    progressOptions.setId(PROGRESS_POLYLINE_ID); // Fixed ID upserts in place to eliminate flickering
+    progressOptions.setPath(progressCoordinates);
+    progressOptions.setStrokeColor(Color.parseColor("#9C27B0")); // Progress line: purple
+    progressOptions.setStrokeWidth(8.0); // Progress line: narrower
+    progressOptions.setZIndex(2); // Progress line: higher z-index on top of static route
+    progressOptions.setAltitudeMode(pathAltitudeMode);
+
+    progressPolyline = googleMap3D.addPolyline(progressOptions);
   }
 
   private void startAnimation() {
@@ -348,13 +562,21 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
 
     final long frameDurationMs = 16L;
     animationRunnable = new Runnable() {
+      private long lastTime = System.currentTimeMillis();
+
       @Override
       public void run() {
         if (!isPlaying) {
           return;
         }
 
-        double stepDistance = followSpeedMps * (frameDurationMs / 1000.0);
+        long now = System.currentTimeMillis();
+        // Delta-time (dt) integration: Scale motion by actual elapsed seconds to ensure
+        // consistent travel speed across 60Hz, 90Hz, and 120Hz display refresh rates.
+        double dt = (now - lastTime) / 1000.0;
+        lastTime = now;
+
+        double stepDistance = followSpeedMps * dt;
         elapsedDistance += stepDistance;
 
         if (elapsedDistance >= totalDistance) {
@@ -408,6 +630,10 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
     LatLng currentLatLng = SphericalUtil.interpolate(p1, p2, fraction);
     double bearing = SphericalUtil.computeHeading(p1, p2);
 
+    // Kinematic Heading Smoothing (Exponential Moving Average):
+    // Sharp polyline bends can produce disorienting camera jerks. We compute the shortest
+    // angular difference wrapped to [-180, 180] and apply an exponential low-pass filter (12% lerp)
+    // to smoothly turn the camera around street corners and mountain switchbacks.
     double targetHeadingRaw = toHeading(bearing + headingOffset);
     double targetHeading;
     if (currentHeading == null || isUserScrubbing || !isPlaying) {
@@ -433,5 +659,6 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
     );
 
     googleMap3D.setCamera(newCamera);
+    updateProgressPolyline(dist, currentLatLng, index);
   }
 }

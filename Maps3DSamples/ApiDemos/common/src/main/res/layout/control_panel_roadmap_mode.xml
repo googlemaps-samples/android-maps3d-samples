@@ -31,52 +31,91 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp"
         android:orientation="vertical"
         >
 
-        <TextView
-            style="@style/TextAppearance.Material3.LabelLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/map_mode"
-            android:textStyle="bold"
-            />
-
-        <RadioGroup
-            android:id="@+id/rg_map_mode"
+        <!-- Card Header with title and collapse/expand button -->
+        <LinearLayout
+            android:id="@+id/card_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginTop="8dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="4dp"
             >
 
-            <RadioButton
-                android:id="@+id/rb_roadmap"
+            <TextView
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="@string/roadmap"
+                android:layout_weight="1"
+                android:text="@string/map_mode_controls_title"
+                style="@style/TextAppearance.Material3.TitleSmall"
+                android:textStyle="bold"
                 />
 
-            <RadioButton
-                android:id="@+id/rb_hybrid"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="@string/hybrid"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_collapse"
+                style="?attr/materialIconButtonStyle"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="0dp"
+                app:icon="@drawable/expand_more_24px"
+                app:iconSize="20dp"
+                app:iconTint="?attr/colorOnSurfaceVariant"
+                android:contentDescription="@string/collapse_controls"
                 />
+        </LinearLayout>
 
-            <RadioButton
-                android:id="@+id/rb_satellite"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+        <!-- Collapsible Content Section -->
+        <LinearLayout
+            android:id="@+id/card_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="12dp"
+            >
+
+            <RadioGroup
+                android:id="@+id/rg_map_mode"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/satellite"
-                />
-        </RadioGroup>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp"
+                >
+
+                <RadioButton
+                    android:id="@+id/rb_roadmap"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/roadmap"
+                    />
+
+                <RadioButton
+                    android:id="@+id/rb_hybrid"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/hybrid"
+                    />
+
+                <RadioButton
+                    android:id="@+id/rb_satellite"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/satellite"
+                    />
+            </RadioGroup>
+
+        </LinearLayout>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>
