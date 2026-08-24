@@ -22,6 +22,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.transition.TransitionManager;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -249,7 +250,10 @@ public class DataVisualizationActivity extends SampleBaseActivity {
    * Collapses the control card downward, leaving only the title header visible.
    */
   private void collapseControls() {
-    if (controlsCard == null) {
+    if (controlsCard == null || cardContent == null) {
+      return;
+    }
+    if (isCollapsed) {
       return;
     }
     isCollapsed = true;
@@ -258,24 +262,18 @@ public class DataVisualizationActivity extends SampleBaseActivity {
       btnCollapse.setIconResource(R.drawable.expand_less_24px);
       btnCollapse.setContentDescription(getString(R.string.expand_controls));
     }
-    int headerHeight = (cardHeader != null && cardHeader.getHeight() > 0)
-        ? cardHeader.getHeight()
-        : (int) (48 * getResources().getDisplayMetrics().density);
-    float targetTranslationY = (cardContent != null && cardContent.getHeight() > 0)
-        ? cardContent.getHeight()
-        : Math.max(0, controlsCard.getHeight() - headerHeight);
-    controlsCard.animate()
-        .translationY(targetTranslationY)
-        .alpha(0.9f)
-        .setDuration(300)
-        .start();
+    TransitionManager.beginDelayedTransition(controlsCard);
+    cardContent.setVisibility(View.GONE);
   }
 
   /**
    * Expands the control card back to its full height.
    */
   private void expandControls() {
-    if (controlsCard == null) {
+    if (controlsCard == null || cardContent == null) {
+      return;
+    }
+    if (!isCollapsed) {
       return;
     }
     isCollapsed = false;
@@ -283,11 +281,9 @@ public class DataVisualizationActivity extends SampleBaseActivity {
       btnCollapse.setIconResource(R.drawable.expand_more_24px);
       btnCollapse.setContentDescription(getString(R.string.collapse_controls));
     }
-    controlsCard.animate()
-        .translationY(0f)
-        .alpha(1.0f)
-        .setDuration(250)
-        .start();
+    TransitionManager.beginDelayedTransition(controlsCard);
+    cardContent.setVisibility(View.VISIBLE);
+
     fadeHandler.removeCallbacks(fadeOutRunnable);
     fadeHandler.postDelayed(fadeOutRunnable, 3000L);
   }
@@ -467,7 +463,14 @@ public class DataVisualizationActivity extends SampleBaseActivity {
     }
   }
 
-  // --- Teardown ---
+  // --- Lifecycle Teardown ---
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    stopSimulation();
+    fadeHandler.removeCallbacks(fadeOutRunnable);
+  }
 
   @Override
   protected void onDestroy() {

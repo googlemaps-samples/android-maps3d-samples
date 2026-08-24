@@ -199,45 +199,50 @@ public class AdvancedCameraAnimationActivity extends SampleBaseActivity {
     updateAirplaneModel(GOLDEN_GATE_BRIDGE, planeHeading + 180.0);
   }
 
+  private final Map3DAnimator.Listener animatorListener =
+      new Map3DAnimator.Listener() {
+        @Override
+        public void onStepStarted(int index, @NonNull KeyframeStep step) {
+          Log.d(getTAG(), "Keyframe Step " + (index + 1) + " started: " + step.getTitle());
+          if (tvTourStatus != null && tourAnimator != null) {
+            tvTourStatus.setText(
+                getString(
+                    R.string.aerial_tour_status_running,
+                    index + 1,
+                    tourAnimator.getSteps().size(),
+                    step.getTitle()));
+          }
+        }
+
+        @Override
+        public void onStepCompleted(int index, @NonNull KeyframeStep step) {
+          Log.d(getTAG(), "Keyframe Step " + (index + 1) + " completed: " + step.getTitle());
+        }
+
+        @Override
+        public void onAnimationFinished() {
+          Log.d(getTAG(), "Aerial tour completed successfully.");
+          isPlaying = false;
+          updatePlayPauseButtonState();
+          if (tvTourStatus != null) {
+            tvTourStatus.setText(R.string.aerial_tour_status_finished);
+          }
+        }
+      };
+
   private void startOrResumeTour() {
-    if (tourAnimator == null) {
-      tourAnimator = buildTourAnimator();
-    }
     isPlaying = true;
     updatePlayPauseButtonState();
 
     if (googleMap3D != null) {
-      tourAnimator.start(
-          googleMap3D,
-          new Map3DAnimator.Listener() {
-            @Override
-            public void onStepStarted(int index, @NonNull KeyframeStep step) {
-              Log.d(getTAG(), "Keyframe Step " + (index + 1) + " started: " + step.getTitle());
-              if (tvTourStatus != null) {
-                tvTourStatus.setText(
-                    getString(
-                        R.string.aerial_tour_status_running,
-                        index + 1,
-                        tourAnimator.getSteps().size(),
-                        step.getTitle()));
-              }
-            }
-
-            @Override
-            public void onStepCompleted(int index, @NonNull KeyframeStep step) {
-              Log.d(getTAG(), "Keyframe Step " + (index + 1) + " completed: " + step.getTitle());
-            }
-
-            @Override
-            public void onAnimationFinished() {
-              Log.d(getTAG(), "Aerial tour completed successfully.");
-              isPlaying = false;
-              updatePlayPauseButtonState();
-              if (tvTourStatus != null) {
-                tvTourStatus.setText(R.string.aerial_tour_status_finished);
-              }
-            }
-          });
+      if (tourAnimator == null) {
+        tourAnimator = buildTourAnimator();
+        tourAnimator.start(googleMap3D, animatorListener);
+      } else if (tourAnimator.getCurrentStepIndex() < tourAnimator.getSteps().size()) {
+        tourAnimator.resume();
+      } else {
+        tourAnimator.start(googleMap3D, animatorListener);
+      }
     }
   }
 

@@ -509,10 +509,18 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
     val frameDurationMs = 16L
     animationRunnable = object : Runnable {
+      private var lastTime = System.currentTimeMillis()
+
       override fun run() {
         if (!isPlaying) return
 
-        val stepDistance = followSpeedMps * (frameDurationMs / 1000.0)
+        val now = System.currentTimeMillis()
+        // Delta-time (dt) integration: Scale motion by actual elapsed seconds to ensure
+        // consistent travel speed across 60Hz, 90Hz, and 120Hz display refresh rates.
+        val dt = (now - lastTime) / 1000.0
+        lastTime = now
+
+        val stepDistance = followSpeedMps * dt
         elapsedDistance += stepDistance
 
         if (elapsedDistance >= totalDistance) {

@@ -562,13 +562,21 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
 
     final long frameDurationMs = 16L;
     animationRunnable = new Runnable() {
+      private long lastTime = System.currentTimeMillis();
+
       @Override
       public void run() {
         if (!isPlaying) {
           return;
         }
 
-        double stepDistance = followSpeedMps * (frameDurationMs / 1000.0);
+        long now = System.currentTimeMillis();
+        // Delta-time (dt) integration: Scale motion by actual elapsed seconds to ensure
+        // consistent travel speed across 60Hz, 90Hz, and 120Hz display refresh rates.
+        double dt = (now - lastTime) / 1000.0;
+        lastTime = now;
+
+        double stepDistance = followSpeedMps * dt;
         elapsedDistance += stepDistance;
 
         if (elapsedDistance >= totalDistance) {

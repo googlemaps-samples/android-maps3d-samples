@@ -20,6 +20,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.transition.TransitionManager
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -75,6 +76,7 @@ class DataVisualizationActivity : SampleBaseActivity() {
 
   private var controlsCard: CardView? = null
   private var cardHeader: View? = null
+  private var cardContent: View? = null
   private var btnCollapse: MaterialButton? = null
   private lateinit var floodDepthLabel: TextView
   private lateinit var floodRiskBadge: TextView
@@ -121,6 +123,7 @@ class DataVisualizationActivity : SampleBaseActivity() {
   private fun initViews() {
     controlsCard = findViewById(R.id.control_panel)
     cardHeader = findViewById(R.id.card_header)
+    cardContent = findViewById(R.id.card_content)
     btnCollapse = findViewById(R.id.btn_collapse)
 
     floodDepthLabel = findViewById(R.id.tv_flood_depth_label)
@@ -164,40 +167,27 @@ class DataVisualizationActivity : SampleBaseActivity() {
 
   private fun collapseControls() {
     val card = controlsCard ?: return
+    val content = cardContent ?: return
+    if (isCollapsed) return
     isCollapsed = true
     fadeHandler.removeCallbacks(fadeOutRunnable)
     btnCollapse?.setIconResource(R.drawable.expand_less_24px)
     btnCollapse?.contentDescription = getString(R.string.expand_controls)
 
-    val content = findViewById<View>(R.id.card_content)
-    val headerHeight = if (cardHeader != null && cardHeader!!.height > 0) {
-      cardHeader!!.height
-    } else {
-      (48 * resources.displayMetrics.density).toInt()
-    }
-    val targetTranslationY = if (content != null && content.height > 0) {
-      content.height.toFloat()
-    } else {
-      (card.height - headerHeight).coerceAtLeast(0).toFloat()
-    }
-    card.animate()
-      .translationY(targetTranslationY)
-      .alpha(0.9f)
-      .setDuration(300)
-      .start()
+    TransitionManager.beginDelayedTransition(card)
+    content.visibility = View.GONE
   }
 
   private fun expandControls() {
     val card = controlsCard ?: return
+    val content = cardContent ?: return
+    if (!isCollapsed) return
     isCollapsed = false
     btnCollapse?.setIconResource(R.drawable.expand_more_24px)
     btnCollapse?.contentDescription = getString(R.string.collapse_controls)
 
-    card.animate()
-      .translationY(0f)
-      .alpha(1.0f)
-      .setDuration(250)
-      .start()
+    TransitionManager.beginDelayedTransition(card)
+    content.visibility = View.VISIBLE
 
     fadeHandler.removeCallbacks(fadeOutRunnable)
     fadeHandler.postDelayed(fadeOutRunnable, 3000L)
@@ -266,7 +256,7 @@ class DataVisualizationActivity : SampleBaseActivity() {
         geodesic = false
       }
 
-      floodPolygon = map.addPolygon(options)?.apply {
+      floodPolygon = map.addPolygon(options).apply {
         setClickListener {
           runOnUiThread {
             Toast.makeText(
@@ -346,6 +336,12 @@ class DataVisualizationActivity : SampleBaseActivity() {
     simulationJob?.cancel()
     simulationJob = null
     btnAnimateFlood.setText(R.string.start_simulation)
+  }
+
+  override fun onPause() {
+    super.onPause()
+    stopSimulation()
+    fadeHandler.removeCallbacks(fadeOutRunnable)
   }
 
   override fun onDestroy() {
