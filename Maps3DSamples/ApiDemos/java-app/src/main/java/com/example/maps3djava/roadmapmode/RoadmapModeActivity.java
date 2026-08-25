@@ -150,7 +150,7 @@ public class RoadmapModeActivity extends SampleBaseActivity {
   private void initViews() {
     controlsCard = findViewById(R.id.control_panel);
     cardHeader = findViewById(R.id.card_header);
-    cardContent = findViewById(R.id.card_content);
+    cardContent = findViewById(R.id.rg_map_mode);
     btnCollapse = findViewById(R.id.btn_collapse);
     rgMapMode = findViewById(R.id.rg_map_mode);
 
