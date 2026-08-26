@@ -18,6 +18,7 @@ package com.example.maps3dkotlin.datavisualization
 
 import android.graphics.Color
 import android.os.Bundle
+import androidx.core.graphics.toColorInt
 import android.os.Handler
 import android.os.Looper
 import android.transition.TransitionManager
@@ -278,32 +279,32 @@ class DataVisualizationActivity : SampleBaseActivity() {
     when {
       currentFloodHeightMeters <= 2.0 -> {
         floodRiskBadge.setText(R.string.flood_risk_baseline)
-        floodRiskBadge.setTextColor(Color.parseColor("#008800"))
-        floodRiskBadge.setBackgroundColor(Color.parseColor("#2000AA00"))
+        floodRiskBadge.setTextColor("#008800".toColorInt())
+        floodRiskBadge.setBackgroundColor("#2000AA00".toColorInt())
       }
 
       currentFloodHeightMeters <= 8.0 -> {
         floodRiskBadge.setText(R.string.flood_risk_minor)
-        floodRiskBadge.setTextColor(Color.parseColor("#BB7700"))
-        floodRiskBadge.setBackgroundColor(Color.parseColor("#20FFAA00"))
+        floodRiskBadge.setTextColor("#BB7700".toColorInt())
+        floodRiskBadge.setBackgroundColor("#20FFAA00".toColorInt())
       }
 
       currentFloodHeightMeters <= 20.0 -> {
         floodRiskBadge.setText(R.string.flood_risk_moderate)
-        floodRiskBadge.setTextColor(Color.parseColor("#0077CC"))
-        floodRiskBadge.setBackgroundColor(Color.parseColor("#200088FF"))
+        floodRiskBadge.setTextColor("#0077CC".toColorInt())
+        floodRiskBadge.setBackgroundColor("#200088FF".toColorInt())
       }
 
       currentFloodHeightMeters <= 35.0 -> {
         floodRiskBadge.setText(R.string.flood_risk_storm_surge)
-        floodRiskBadge.setTextColor(Color.parseColor("#DD4400"))
-        floodRiskBadge.setBackgroundColor(Color.parseColor("#25FF5500"))
+        floodRiskBadge.setTextColor("#DD4400".toColorInt())
+        floodRiskBadge.setBackgroundColor("#25FF5500".toColorInt())
       }
 
       else -> {
         floodRiskBadge.setText(R.string.flood_risk_extreme)
-        floodRiskBadge.setTextColor(Color.parseColor("#CC0000"))
-        floodRiskBadge.setBackgroundColor(Color.parseColor("#25FF0000"))
+        floodRiskBadge.setTextColor("#CC0000".toColorInt())
+        floodRiskBadge.setBackgroundColor("#25FF0000".toColorInt())
       }
     }
   }

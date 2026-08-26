@@ -122,7 +122,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/fov_telephoto"
-                    android:textSize="10sp"
+                    android:textSize="11sp"
                     android:paddingStart="2dp"
                     android:paddingEnd="2dp"
                     />
@@ -136,7 +136,7 @@
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="2dp"
                     android:text="@string/fov_standard"
-                    android:textSize="10sp"
+                    android:textSize="11sp"
                     android:paddingStart="2dp"
                     android:paddingEnd="2dp"
                     />
@@ -149,7 +149,7 @@
                     android:layout_weight="1"
                     android:layout_marginEnd="2dp"
                     android:text="@string/fov_wide"
-                    android:textSize="10sp"
+                    android:textSize="11sp"
                     android:paddingStart="2dp"
                     android:paddingEnd="2dp"
                     />
@@ -161,7 +161,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/fov_ultrawide"
-                    android:textSize="10sp"
+                    android:textSize="11sp"
                     android:paddingStart="2dp"
                     android:paddingEnd="2dp"
                     />

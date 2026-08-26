@@ -16,8 +16,8 @@
 
 package com.example.maps3dkotlin.pathfollowing
 
-import android.graphics.Color
 import android.os.Bundle
+import androidx.core.graphics.toColorInt
 import android.os.Handler
 import android.os.Looper
 import android.view.MotionEvent
@@ -447,7 +447,7 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     val staticOptions = PolylineOptions().apply {
       id = STATIC_ROUTE_POLYLINE_ID
       path = staticVertices
-      strokeColor = Color.parseColor("#4285F4") // Wide blue route
+      strokeColor = "#4285F4".toColorInt() // Wide blue route
       strokeWidth = 16.0
       zIndex = 1
       altitudeMode = pathAltitudeMode
@@ -493,7 +493,7 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     val progressOptions = PolylineOptions().apply {
       id = PROGRESS_POLYLINE_ID
       path = progressCoordinates
-      strokeColor = Color.parseColor("#9C27B0") // Narrow purple progress
+      strokeColor = "#9C27B0".toColorInt() // Narrow purple progress
       strokeWidth = 8.0
       zIndex = 2
       altitudeMode = pathAltitudeMode
