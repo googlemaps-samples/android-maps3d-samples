@@ -372,9 +372,17 @@ fun PathFollowingScreen() {
     }
 
     // Dynamic Camera Altitude
+    val p1Cam = currentPath.getOrElse(currentWaypointIndex.coerceAtMost(currentPath.size - 1)) { currentPath.first() }
+    val p2Cam = if (currentWaypointIndex < currentPath.size - 1) currentPath[currentWaypointIndex + 1] else p1Cam
+    val segStartDistCam = cumulativeDistances.getOrElse(currentWaypointIndex) { 0.0 }
+    val segEndDistCam = cumulativeDistances.getOrElse(currentWaypointIndex + 1) { totalDistance }
+    val segLenCam = segEndDistCam - segStartDistCam
+    val fractionCam = if (segLenCam > 0) ((elapsedDistance - segStartDistCam) / segLenCam).coerceIn(0.0, 1.0) else 0.0
+    val interpAltCam = p1Cam.altitude + fractionCam * (p2Cam.altitude - p1Cam.altitude)
+
     val cameraTargetAltitude = if (selectedAltitudeMode.mode == AltitudeMode.ABSOLUTE) {
         val baseAlt = if (currentPath == PathFollowingActivity.RURAL_PATH) 45.0 else 50.0
-        baseAlt + groundAltitude
+        baseAlt + interpAltCam + groundAltitude
     } else {
         groundAltitude.toDouble()
     }
@@ -404,13 +412,13 @@ fun PathFollowingScreen() {
         pathAltitudeOffset,
         drawsOccludedSegments,
     ) {
-        val pathAltitude = when (selectedAltitudeMode.mode) {
-            AltitudeMode.CLAMP_TO_GROUND -> 0.0
-            AltitudeMode.ABSOLUTE -> if (currentPath == PathFollowingActivity.RURAL_PATH) 45.0 + pathAltitudeOffset else 50.0 + pathAltitudeOffset
-            else -> pathAltitudeOffset.toDouble()
-        }
         val staticVertices = currentPath.map { pt ->
-            LatLngAltitude(pt.latitude, pt.longitude, pathAltitude)
+            val vertexAltitude = when (selectedAltitudeMode.mode) {
+                AltitudeMode.CLAMP_TO_GROUND -> 0.0
+                AltitudeMode.ABSOLUTE -> pt.altitude + (if (currentPath == PathFollowingActivity.RURAL_PATH) 45.0 else 50.0) + pathAltitudeOffset
+                else -> pt.altitude + pathAltitudeOffset.toDouble()
+            }
+            LatLngAltitude(pt.latitude, pt.longitude, vertexAltitude)
         }
         PolylineConfig(
             key = "path_following_static_route",
@@ -431,25 +439,32 @@ fun PathFollowingScreen() {
         pathAltitudeOffset,
         drawsOccludedSegments,
         totalDistance,
+        elapsedDistance,
     ) {
         if (currentPath.isEmpty() || totalDistance <= 0.0) return@remember null
-
-        val pathAltitude = when (selectedAltitudeMode.mode) {
-            AltitudeMode.CLAMP_TO_GROUND -> 0.0
-            AltitudeMode.ABSOLUTE -> if (currentPath == PathFollowingActivity.RURAL_PATH) 45.0 + pathAltitudeOffset else 50.0 + pathAltitudeOffset
-            else -> pathAltitudeOffset.toDouble()
-        }
-
-        val progressAltitude = if (selectedAltitudeMode.mode == AltitudeMode.CLAMP_TO_GROUND) {
-            0.0
-        } else {
-            pathAltitude + 0.4
-        }
 
         val progressCoordinates = ArrayList<LatLngAltitude>()
         for (i in 0..currentWaypointIndex.coerceAtMost(currentPath.size - 1)) {
             val pt = currentPath[i]
-            progressCoordinates.add(LatLngAltitude(pt.latitude, pt.longitude, progressAltitude))
+            val vertexAltitude = when (selectedAltitudeMode.mode) {
+                AltitudeMode.CLAMP_TO_GROUND -> 0.0
+                AltitudeMode.ABSOLUTE -> pt.altitude + (if (currentPath == PathFollowingActivity.RURAL_PATH) 45.0 else 50.0) + pathAltitudeOffset + 0.4
+                else -> pt.altitude + pathAltitudeOffset.toDouble() + 0.4
+            }
+            progressCoordinates.add(LatLngAltitude(pt.latitude, pt.longitude, vertexAltitude))
+        }
+
+        val p1 = currentPath[currentWaypointIndex.coerceAtMost(currentPath.size - 1)]
+        val p2 = if (currentWaypointIndex < currentPath.size - 1) currentPath[currentWaypointIndex + 1] else p1
+        val segStartDist = cumulativeDistances.getOrElse(currentWaypointIndex) { 0.0 }
+        val segEndDist = cumulativeDistances.getOrElse(currentWaypointIndex + 1) { totalDistance }
+        val segLen = segEndDist - segStartDist
+        val fraction = if (segLen > 0) ((elapsedDistance - segStartDist) / segLen).coerceIn(0.0, 1.0) else 0.0
+        val interpAlt = p1.altitude + fraction * (p2.altitude - p1.altitude)
+        val progressAltitude = when (selectedAltitudeMode.mode) {
+            AltitudeMode.CLAMP_TO_GROUND -> 0.0
+            AltitudeMode.ABSOLUTE -> interpAlt + (if (currentPath == PathFollowingActivity.RURAL_PATH) 45.0 else 50.0) + pathAltitudeOffset + 0.4
+            else -> interpAlt + pathAltitudeOffset.toDouble() + 0.4
         }
 
         val lastWaypoint = currentPath[currentWaypointIndex.coerceAtMost(currentPath.size - 1)]
@@ -463,10 +478,15 @@ fun PathFollowingScreen() {
 
         if (progressCoordinates.size < 2 && currentPath.size >= 2) {
             val p0 = LatLng(currentPath[0].latitude, currentPath[0].longitude)
-            val p1 = LatLng(currentPath[1].latitude, currentPath[1].longitude)
-            val tinyForward = SphericalUtil.interpolate(p0, p1, 0.005)
+            val p1Lat = LatLng(currentPath[1].latitude, currentPath[1].longitude)
+            val tinyForward = SphericalUtil.interpolate(p0, p1Lat, 0.005)
+            val startAlt = when (selectedAltitudeMode.mode) {
+                AltitudeMode.CLAMP_TO_GROUND -> 0.0
+                AltitudeMode.ABSOLUTE -> currentPath[0].altitude + (if (currentPath == PathFollowingActivity.RURAL_PATH) 45.0 else 50.0) + pathAltitudeOffset + 0.4
+                else -> currentPath[0].altitude + pathAltitudeOffset.toDouble() + 0.4
+            }
             progressCoordinates.add(
-                LatLngAltitude(tinyForward.latitude, tinyForward.longitude, progressAltitude),
+                LatLngAltitude(tinyForward.latitude, tinyForward.longitude, startAlt),
             )
         }
 

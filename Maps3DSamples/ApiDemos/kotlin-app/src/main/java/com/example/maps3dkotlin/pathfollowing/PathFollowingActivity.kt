@@ -162,11 +162,13 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private var isPlaying = false
     private var isUserScrubbing = false
 
-    // Polylines
+    // Polyline handles
     private var staticRoutePolyline: Polyline? = null
     private var progressPolyline: Polyline? = null
-    private val animationHandler = Handler(Looper.getMainLooper())
+
+    // Animation Loop
     private var animationRunnable: Runnable? = null
+    private val animationHandler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -216,13 +218,13 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
         this.googleMap3D = googleMap3D
         googleMap3D.setOnMapReadyListener {
-            googleMap3D.setOnMapReadyListener(null)
-            runOnUiThread {
-                drawPathPolylines()
-                updateCameraPositionForDistance(0.0)
-                startAnimation()
-            }
+            drawPathPolylines()
+            updateCameraPositionForDistance(0.0)
         }
+
+        // Schedule auto-fade for idle control panel after initial display
+        fadeHandler.removeCallbacks(fadeOutRunnable)
+        fadeHandler.postDelayed(fadeOutRunnable, 3000L)
     }
 
     private fun initViews() {
@@ -241,18 +243,18 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         cardHeader?.setOnClickListener {
             if (isCollapsed) {
                 expandControls()
+            } else {
+                collapseControls()
             }
         }
 
-        fadeHandler.postDelayed(fadeOutRunnable, 3000L)
-
         rgEnvironment = findViewById(R.id.rg_environment)
         rgAltitudeMode = findViewById(R.id.rg_altitude_mode)
+        switchDrawsOccludedSegments = findViewById(R.id.switch_draws_occluded_segments)
         pathAltitudeSlider = findViewById(R.id.path_altitude_slider)
         pathAltitudeSliderLabel = findViewById(R.id.path_altitude_slider_label)
         btnPlayPause = findViewById(R.id.btn_play_pause)
         progressSlider = findViewById(R.id.progress_slider)
-
         rangeSlider = findViewById(R.id.range_slider)
         rangeSliderLabel = findViewById(R.id.range_slider_label)
         altitudeSlider = findViewById(R.id.altitude_slider)
@@ -264,26 +266,18 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         speedSlider = findViewById(R.id.speed_slider)
         speedSliderLabel = findViewById(R.id.speed_slider_label)
 
-        updateControlLabels()
-
-        // Radio group environment selection
+        // Environment toggle
         rgEnvironment.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
-                R.id.rb_urban -> {
-                    altitudeSlider.valueTo = 200.0f
-                    switchEnvironment(URBAN_PATH)
-                }
-
-                R.id.rb_rural -> {
-                    altitudeSlider.valueTo = 2000.0f
-                    switchEnvironment(RURAL_PATH)
-                }
+                R.id.rb_urban -> switchEnvironment(URBAN_PATH)
+                R.id.rb_rural -> switchEnvironment(RURAL_PATH)
             }
         }
 
-        // Radio group altitude mode selection
+        // Altitude mode toggle
         rgAltitudeMode.setOnCheckedChangeListener { _, checkedId ->
             pathAltitudeMode = when (checkedId) {
+                R.id.rb_clamp_to_ground -> AltitudeMode.CLAMP_TO_GROUND
                 R.id.rb_relative_to_ground -> AltitudeMode.RELATIVE_TO_GROUND
                 R.id.rb_relative_to_mesh -> AltitudeMode.RELATIVE_TO_MESH
                 R.id.rb_absolute -> AltitudeMode.ABSOLUTE
@@ -298,7 +292,6 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         }
 
         // Draw occluded segments toggle
-        switchDrawsOccludedSegments = findViewById(R.id.switch_draws_occluded_segments)
         switchDrawsOccludedSegments.isChecked = drawsOccludedSegments
         switchDrawsOccludedSegments.setOnCheckedChangeListener { _, isChecked ->
             drawsOccludedSegments = isChecked
@@ -310,7 +303,7 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             updateCameraPositionForDistance(elapsedDistance)
         }
 
-        // Path height slider (relative altitude)
+        // Path height slider (0.0m - 10.0m)
         pathAltitudeSlider.addOnChangeListener { _, value, _ ->
             pathAltitudeOffset = value.toDouble()
             pathAltitudeSliderLabel.text =
@@ -332,14 +325,7 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             }
         }
 
-        // Progress slider scrubbing
-        progressSlider.addOnChangeListener { _, value, fromUser ->
-            if (fromUser) {
-                isUserScrubbing = true
-                elapsedDistance = totalDistance * value.toDouble()
-                updateCameraPositionForDistance(elapsedDistance)
-            }
-        }
+        // Progress scrub slider
         progressSlider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
             override fun onStartTrackingTouch(slider: Slider) {
                 isUserScrubbing = true
@@ -347,16 +333,26 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
             override fun onStopTrackingTouch(slider: Slider) {
                 isUserScrubbing = false
+                elapsedDistance = totalDistance * slider.value.toDouble()
+                updateCameraPositionForDistance(elapsedDistance)
             }
         })
 
-        // Sliders listeners
+        progressSlider.addOnChangeListener { _, value, fromUser ->
+            if (fromUser) {
+                elapsedDistance = totalDistance * value.toDouble()
+                updateCameraPositionForDistance(elapsedDistance)
+            }
+        }
+
+        // Camera Range Slider (50m - 1000m)
         rangeSlider.addOnChangeListener { _, value, _ ->
             cameraRange = value.toDouble()
             rangeSliderLabel.text = getString(R.string.camera_range_format, cameraRange.toInt())
             updateCameraPositionForDistance(elapsedDistance)
         }
 
+        // Ground Altitude Slider (2m - 200m)
         altitudeSlider.addOnChangeListener { _, value, _ ->
             groundAltitude = value.toDouble()
             altitudeSliderLabel.text =
@@ -364,37 +360,25 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             updateCameraPositionForDistance(elapsedDistance)
         }
 
+        // Heading Offset Slider (-180° - +180°)
         headingSlider.addOnChangeListener { _, value, _ ->
             headingOffset = value.toDouble()
-            headingSliderLabel.text =
-                getString(R.string.heading_offset_format, headingOffset.toInt())
+            headingSliderLabel.text = getString(R.string.heading_offset_format, headingOffset.toInt())
             updateCameraPositionForDistance(elapsedDistance)
         }
 
+        // Camera Tilt Slider (0° - 85°)
         tiltSlider.addOnChangeListener { _, value, _ ->
             cameraTilt = value.toDouble()
             tiltSliderLabel.text = getString(R.string.camera_tilt_format, cameraTilt.toInt())
             updateCameraPositionForDistance(elapsedDistance)
         }
 
+        // Follow Speed Slider (5 m/s - 100 m/s)
         speedSlider.addOnChangeListener { _, value, _ ->
             followSpeedMps = value.toDouble()
-            speedSliderLabel.text =
-                getString(R.string.follow_speed_format, followSpeedMps.toInt())
+            speedSliderLabel.text = getString(R.string.follow_speed_format, followSpeedMps.toInt())
         }
-    }
-
-    private fun updateControlLabels() {
-        pathAltitudeSliderLabel.text =
-            getString(R.string.path_height_format, pathAltitudeOffset)
-        rangeSliderLabel.text = getString(R.string.camera_range_format, cameraRange.toInt())
-        altitudeSliderLabel.text =
-            getString(R.string.ground_altitude_format, groundAltitude.toInt())
-        headingSliderLabel.text =
-            getString(R.string.heading_offset_format, headingOffset.toInt())
-        tiltSliderLabel.text = getString(R.string.camera_tilt_format, cameraTilt.toInt())
-        speedSliderLabel.text =
-            getString(R.string.follow_speed_format, followSpeedMps.toInt())
     }
 
     private var currentHeading: Double? = null
@@ -413,23 +397,23 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             cameraRange = 450.0
             groundAltitude = 40.0
             cameraTilt = 75.0
-            rangeSlider.value = 450f
+            altitudeSlider.valueTo = 2000f
             altitudeSlider.value = 40f
+            rangeSlider.value = 450f
             tiltSlider.value = 75f
-            rangeSliderLabel.text = getString(R.string.camera_range_format, 450)
-            altitudeSliderLabel.text = getString(R.string.ground_altitude_format, 40)
-            tiltSliderLabel.text = getString(R.string.camera_tilt_format, 75)
         } else {
             cameraRange = 300.0
             groundAltitude = 20.0
             cameraTilt = 70.0
-            rangeSlider.value = 300f
+            altitudeSlider.valueTo = 200f
             altitudeSlider.value = 20f
+            rangeSlider.value = 300f
             tiltSlider.value = 70f
-            rangeSliderLabel.text = getString(R.string.camera_range_format, 300)
-            altitudeSliderLabel.text = getString(R.string.ground_altitude_format, 20)
-            tiltSliderLabel.text = getString(R.string.camera_tilt_format, 70)
         }
+
+        rangeSliderLabel.text = getString(R.string.camera_range_format, cameraRange.toInt())
+        altitudeSliderLabel.text = getString(R.string.ground_altitude_format, groundAltitude.toInt())
+        tiltSliderLabel.text = getString(R.string.camera_tilt_format, cameraTilt.toInt())
 
         loadPathData(path)
         drawPathPolylines()
@@ -462,14 +446,13 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val map = googleMap3D ?: return
         if (currentPath.isEmpty()) return
 
-        val pathAltitude = when (pathAltitudeMode) {
-            AltitudeMode.CLAMP_TO_GROUND -> 0.0
-            AltitudeMode.ABSOLUTE -> if (currentPath == RURAL_PATH) 45.0 + pathAltitudeOffset else 50.0 + pathAltitudeOffset
-            else -> pathAltitudeOffset
-        }
-
         val staticVertices = currentPath.map { pt ->
-            LatLngAltitude(pt.latitude, pt.longitude, pathAltitude)
+            val vertexAltitude = when (pathAltitudeMode) {
+                AltitudeMode.CLAMP_TO_GROUND -> 0.0
+                AltitudeMode.ABSOLUTE -> pt.altitude + (if (currentPath == RURAL_PATH) 45.0 else 50.0) + pathAltitudeOffset
+                else -> pt.altitude + pathAltitudeOffset
+            }
+            LatLngAltitude(pt.latitude, pt.longitude, vertexAltitude)
         }
 
         val staticOptions = PolylineOptions().apply {
@@ -489,28 +472,33 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val map = googleMap3D ?: return
         if (currentPath.isEmpty() || totalDistance <= 0.0) return
 
-        val pathAltitude = when (pathAltitudeMode) {
-            AltitudeMode.CLAMP_TO_GROUND -> 0.0
-            AltitudeMode.ABSOLUTE -> if (currentPath == RURAL_PATH) 45.0 + pathAltitudeOffset else 50.0 + pathAltitudeOffset
-            else -> pathAltitudeOffset
-        }
-
-        val progressAltitude = if (pathAltitudeMode == AltitudeMode.CLAMP_TO_GROUND) {
-            0.0
-        } else {
-            pathAltitude + 0.4
-        }
-
         val progressCoordinates = ArrayList<LatLngAltitude>()
         for (i in 0..index.coerceAtMost(currentPath.size - 1)) {
             val pt = currentPath[i]
-            progressCoordinates.add(LatLngAltitude(pt.latitude, pt.longitude, progressAltitude))
+            val vertexAltitude = when (pathAltitudeMode) {
+                AltitudeMode.CLAMP_TO_GROUND -> 0.0
+                AltitudeMode.ABSOLUTE -> pt.altitude + (if (currentPath == RURAL_PATH) 45.0 else 50.0) + pathAltitudeOffset + 0.4
+                else -> pt.altitude + pathAltitudeOffset + 0.4
+            }
+            progressCoordinates.add(LatLngAltitude(pt.latitude, pt.longitude, vertexAltitude))
         }
 
         val lastWaypoint = currentPath[index.coerceAtMost(currentPath.size - 1)]
         val lastLatLng = LatLng(lastWaypoint.latitude, lastWaypoint.longitude)
         val distToLast = SphericalUtil.computeDistanceBetween(lastLatLng, currentLatLng)
         if (distToLast >= 0.5) {
+            val p1 = currentPath[index.coerceAtMost(currentPath.size - 1)]
+            val p2 = if (index < currentPath.size - 1) currentPath[index + 1] else p1
+            val segStartDist = cumulativeDistances.getOrElse(index) { 0.0 }
+            val segEndDist = cumulativeDistances.getOrElse(index + 1) { totalDistance }
+            val segLen = segEndDist - segStartDist
+            val fraction = if (segLen > 0) ((dist - segStartDist) / segLen).coerceIn(0.0, 1.0) else 0.0
+            val interpAlt = p1.altitude + fraction * (p2.altitude - p1.altitude)
+            val progressAltitude = when (pathAltitudeMode) {
+                AltitudeMode.CLAMP_TO_GROUND -> 0.0
+                AltitudeMode.ABSOLUTE -> interpAlt + (if (currentPath == RURAL_PATH) 45.0 else 50.0) + pathAltitudeOffset + 0.4
+                else -> interpAlt + pathAltitudeOffset + 0.4
+            }
             progressCoordinates.add(
                 LatLngAltitude(currentLatLng.latitude, currentLatLng.longitude, progressAltitude)
             )
@@ -521,8 +509,13 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 val p0 = LatLng(currentPath[0].latitude, currentPath[0].longitude)
                 val p1 = LatLng(currentPath[1].latitude, currentPath[1].longitude)
                 val tinyForward = SphericalUtil.interpolate(p0, p1, 0.005)
+                val startAlt = when (pathAltitudeMode) {
+                    AltitudeMode.CLAMP_TO_GROUND -> 0.0
+                    AltitudeMode.ABSOLUTE -> currentPath[0].altitude + (if (currentPath == RURAL_PATH) 45.0 else 50.0) + pathAltitudeOffset + 0.4
+                    else -> currentPath[0].altitude + pathAltitudeOffset + 0.4
+                }
                 progressCoordinates.add(
-                    LatLngAltitude(tinyForward.latitude, tinyForward.longitude, progressAltitude)
+                    LatLngAltitude(tinyForward.latitude, tinyForward.longitude, startAlt)
                 )
             }
         }
@@ -629,9 +622,10 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         }
         currentHeading = targetHeading
 
+        val interpAlt = p1.altitude + fraction * (p2.altitude - p1.altitude)
         val cameraTargetAltitude = if (pathAltitudeMode == AltitudeMode.ABSOLUTE) {
             val baseAlt = if (currentPath == RURAL_PATH) 45.0 else 50.0
-            baseAlt + groundAltitude
+            baseAlt + interpAlt + groundAltitude
         } else {
             groundAltitude
         }

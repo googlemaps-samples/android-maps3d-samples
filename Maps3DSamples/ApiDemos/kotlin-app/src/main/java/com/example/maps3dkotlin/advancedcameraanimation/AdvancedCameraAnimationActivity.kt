@@ -20,6 +20,7 @@ import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.RadioGroup
+import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import com.example.maps3d.common.RouteEngine
 import com.example.maps3dcommon.R
@@ -131,9 +132,11 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
     private var isPlaying = false
     private var tourJob: Job? = null
     private var restartJob: Job? = null
+    private var frameDispatcherCallback: android.view.Choreographer.FrameCallback? = null
     private var selectedApproach = AnimationApproach.DISPATCHER_FRAME_LOOP
 
     private var btnPlayPause: Button? = null
+    private var tvTourStatus: TextView? = null
 
     private val cumulativeDistances by lazy {
         RouteEngine.calculateCumulativeDistances(AIRPLANE_FLIGHT_PATH)
@@ -151,6 +154,8 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
             title = "Advanced Camera Animation"
             setNavigationOnClickListener { finish() }
         }
+
+        tvTourStatus = findViewById(R.id.tv_tour_status)
 
         findViewById<RadioGroup>(R.id.rg_animation_approach)?.setOnCheckedChangeListener { _, checkedId ->
             selectedApproach = when (checkedId) {
@@ -231,6 +236,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         stopTour()
         isPlaying = true
         updatePlayPauseButtonState()
+        tvTourStatus?.setText(R.string.approach_simple_fly_to)
 
         val targetLoc = AIRPLANE_FLIGHT_PATH.last()
         val flightHeading =
@@ -254,6 +260,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
             googleMap3D?.awaitFlyCameraTo(FlyToOptions(targetCam, 1500L))
             isPlaying = false
             updatePlayPauseButtonState()
+            tvTourStatus?.setText(R.string.aerial_tour_status_finished)
         }
     }
 
@@ -271,6 +278,12 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
 
             while (currentStepIndex < SAN_FRANCISCO_TOUR.size && isActive && isPlaying) {
                 val step = SAN_FRANCISCO_TOUR[currentStepIndex]
+                tvTourStatus?.text = getString(
+                    R.string.aerial_tour_status_running,
+                    currentStepIndex + 1,
+                    SAN_FRANCISCO_TOUR.size,
+                    step.stepTitle
+                )
 
                 when (step) {
                     is CameraKeyframe.FlyTo -> {
@@ -325,6 +338,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
                 } else {
                     isPlaying = false
                     updatePlayPauseButtonState()
+                    tvTourStatus?.setText(R.string.aerial_tour_status_finished)
                     break
                 }
             }
@@ -343,6 +357,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         stopTour()
         isPlaying = true
         updatePlayPauseButtonState()
+        tvTourStatus?.setText(R.string.approach_dispatcher_frame_loop)
 
         val totalDistance = cumulativeDistances.last().coerceAtLeast(1.0)
         val flightSpeedMps = 400.0 // Fast 400 m/s high-speed flight
@@ -389,6 +404,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
                     googleMap3D?.setCamera(finalCam)
                     isPlaying = false
                     updatePlayPauseButtonState()
+                    tvTourStatus?.setText(R.string.aerial_tour_status_finished)
                     return
                 }
 
@@ -417,6 +433,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
                 android.view.Choreographer.getInstance().postFrameCallback(this)
             }
         }
+        frameDispatcherCallback = frameCallback
         android.view.Choreographer.getInstance().postFrameCallback(frameCallback)
     }
 
@@ -427,6 +444,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         stopTour()
         isPlaying = true
         updatePlayPauseButtonState()
+        tvTourStatus?.setText(R.string.approach_orbit_360_spin)
 
         val targetCenter = AIRPLANE_FLIGHT_PATH.first()
         updateAirplaneModel(targetCenter, 105.0 + 180.0)
@@ -457,6 +475,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
             }
             isPlaying = false
             updatePlayPauseButtonState()
+            tvTourStatus?.setText(R.string.aerial_tour_status_finished)
         }
     }
 
@@ -467,6 +486,10 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         restartJob = null
         tourJob?.cancel()
         tourJob = null
+        frameDispatcherCallback?.let {
+            android.view.Choreographer.getInstance().removeFrameCallback(it)
+            frameDispatcherCallback = null
+        }
         googleMap3D?.setCameraAnimationEndListener(null)
         googleMap3D?.stopCameraAnimation()
     }
@@ -493,6 +516,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
             range = 600.0
         }
         googleMap3D?.setCamera(resetCam)
+        tvTourStatus?.setText(R.string.aerial_tour_status_idle)
 
         restartJob = lifecycleScope.launch {
             delay(300.milliseconds)
