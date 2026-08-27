@@ -153,8 +153,11 @@ public class AdvancedCameraAnimationActivity extends SampleBaseActivity {
         LatLng firstLoc = TourData.AIRPLANE_FLIGHT_PATH.get(0);
         double initialHeading = SphericalUtil.computeHeading(firstLoc, TourData.AIRPLANE_FLIGHT_PATH.get(1));
         return new Camera(
-                new LatLngAltitude(firstLoc.latitude, firstLoc.longitude, 200.0),
-                normalizeHeading(initialHeading),
+                /* center= */ new LatLngAltitude(
+                        /* latitude= */ firstLoc.latitude,
+                        /* longitude= */ firstLoc.longitude,
+                        /* altitude= */ 200.0),
+                /* heading= */ normalizeHeading(initialHeading),
                 /* tilt= */ 65.0,
                 /* roll= */ 0.0,
                 /* range= */ 600.0);
@@ -250,11 +253,19 @@ public class AdvancedCameraAnimationActivity extends SampleBaseActivity {
 
         ModelOptions opts = new ModelOptions();
         opts.setId(TourData.MODEL_ID);
-        opts.setPosition(new LatLngAltitude(targetLatLng.latitude, targetLatLng.longitude, 200.0));
+        opts.setPosition(
+                new LatLngAltitude(
+                        /* latitude= */ targetLatLng.latitude,
+                        /* longitude= */ targetLatLng.longitude,
+                        /* altitude= */ 200.0));
         opts.setAltitudeMode(AltitudeMode.ABSOLUTE);
-        opts.setOrientation(new Orientation(normalizeHeading(planeHeadingDeg), -90.0, 0.0));
+        opts.setOrientation(
+                new Orientation(
+                        /* heading= */ normalizeHeading(planeHeadingDeg),
+                        /* tilt= */ -90.0,
+                        /* roll= */ 0.0));
         opts.setUrl(TourData.PLANE_URL);
-        opts.setScale(new Vector3D(0.08, 0.08, 0.08));
+        opts.setScale(new Vector3D(/* x= */ 0.08, /* y= */ 0.08, /* z= */ 0.08));
 
         airplaneModel = googleMap3D.addModel(opts);
     }
@@ -311,7 +322,7 @@ public class AdvancedCameraAnimationActivity extends SampleBaseActivity {
                     }
                 });
 
-        googleMap3D.flyCameraTo(new FlyToOptions(targetCam, 1500L));
+        googleMap3D.flyCameraTo(new FlyToOptions(/* camera= */ targetCam, /* durationMs= */ 1500L));
     }
 
     private void startOrResumeTour() {
@@ -352,7 +363,10 @@ public class AdvancedCameraAnimationActivity extends SampleBaseActivity {
                         currentStepIndex++;
                         executeKeyframeStep(currentStepIndex);
                     });
-            googleMap3D.flyCameraTo(new FlyToOptions(flyStep.getTargetCamera(), flyStep.getDurationMs()));
+            googleMap3D.flyCameraTo(
+                    new FlyToOptions(
+                            /* camera= */ flyStep.getTargetCamera(),
+                            /* durationMs= */ flyStep.getDurationMs()));
         } else if (step instanceof JavaCameraKeyframe.DwellPause) {
             JavaCameraKeyframe.DwellPause pauseStep = (JavaCameraKeyframe.DwellPause) step;
             handler.postDelayed(
@@ -440,7 +454,10 @@ public class AdvancedCameraAnimationActivity extends SampleBaseActivity {
                             elapsedDistance = totalDistance;
                             PositionAndHeading posAndHeading =
                                     RouteEngine.calculatePositionAndHeading(
-                                            TourData.AIRPLANE_FLIGHT_PATH, cumulativeDistances, elapsedDistance, 30.0);
+                                            /* route= */ TourData.AIRPLANE_FLIGHT_PATH,
+                                            /* cumulativeDistances= */ cumulativeDistances,
+                                            /* distance= */ elapsedDistance,
+                                            /* lookaheadDistance= */ 30.0);
                             double planeHeading = posAndHeading.getHeading() + 180.0;
                             updateAirplaneModel(posAndHeading.getPosition(), planeHeading);
 
@@ -462,7 +479,10 @@ public class AdvancedCameraAnimationActivity extends SampleBaseActivity {
 
                         PositionAndHeading posAndHeading =
                                 RouteEngine.calculatePositionAndHeading(
-                                        TourData.AIRPLANE_FLIGHT_PATH, cumulativeDistances, elapsedDistance, 30.0);
+                                        /* route= */ TourData.AIRPLANE_FLIGHT_PATH,
+                                        /* cumulativeDistances= */ cumulativeDistances,
+                                        /* distance= */ elapsedDistance,
+                                        /* lookaheadDistance= */ 30.0);
 
                         double planeHeading = posAndHeading.getHeading() + 180.0;
                         updateAirplaneModel(posAndHeading.getPosition(), planeHeading);

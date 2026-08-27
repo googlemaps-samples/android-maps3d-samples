@@ -344,7 +344,11 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
         if (googleMap3D == null || currentPath.isEmpty()) return;
 
         List<LatLngAltitude> staticVertices =
-                PathEngine.buildStaticVertices(currentPath, pathAltitudeMode, getBaseAltitude(), pathAltitudeOffset);
+                PathEngine.buildStaticVertices(
+                        /* path= */ currentPath,
+                        /* altitudeMode= */ pathAltitudeMode,
+                        /* baseAltitude= */ getBaseAltitude(),
+                        /* pathAltitudeOffset= */ pathAltitudeOffset);
 
         PolylineOptions staticOptions = new PolylineOptions();
         staticOptions.setId(PathEngine.STATIC_POLYLINE_ID); // Fixed ID prevents flickering
@@ -363,14 +367,14 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
 
         List<LatLngAltitude> progressCoordinates =
                 PathEngine.buildProgressVertices(
-                        currentPath,
-                        cumulativeDistances,
-                        dist,
-                        currentLatLng,
-                        index,
-                        pathAltitudeMode,
-                        getBaseAltitude(),
-                        pathAltitudeOffset);
+                        /* path= */ currentPath,
+                        /* cumulativeDistances= */ cumulativeDistances,
+                        /* elapsedDistance= */ dist,
+                        /* currentLatLng= */ currentLatLng,
+                        /* waypointIndex= */ index,
+                        /* altitudeMode= */ pathAltitudeMode,
+                        /* baseAltitude= */ getBaseAltitude(),
+                        /* pathAltitudeOffset= */ pathAltitudeOffset);
 
         PolylineOptions progressOptions = new PolylineOptions();
         progressOptions.setId(PathEngine.PROGRESS_POLYLINE_ID);
@@ -387,28 +391,36 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
     private void updateCameraPositionForDistance(double dist) {
         if (googleMap3D == null || currentPath.isEmpty()) return;
 
-        InterpolatedPathPoint point = PathEngine.interpolatePoint(currentPath, cumulativeDistances, dist);
+        InterpolatedPathPoint point = PathEngine.interpolatePoint(
+                        /* path= */ currentPath,
+                        /* cumulativeDistances= */ cumulativeDistances,
+                        /* distance= */ dist);
         double targetHeading =
                 PathEngine.smoothHeading(
-                        point.bearing + headingOffset,
-                        currentHeading,
-                        isUserScrubbing,
-                        isPlaying,
-                        0.12);
+                        /* targetHeading= */ point.bearing + headingOffset,
+                        /* currentHeading= */ currentHeading,
+                        /* isUserScrubbing= */ isUserScrubbing,
+                        /* isPlaying= */ isPlaying,
+                        /* smoothingFactor= */ 0.12);
         currentHeading = targetHeading;
 
         double cameraTargetAltitude =
                 PathEngine.calculateCameraAltitude(
-                        pathAltitudeMode, getBaseAltitude(), point.altitude, groundAltitude);
+                        /* altitudeMode= */ pathAltitudeMode,
+                        /* baseAltitude= */ getBaseAltitude(),
+                        /* interpolatedAltitude= */ point.altitude,
+                        /* groundAltitude= */ groundAltitude);
 
         Camera newCamera =
                 new Camera(
-                        new LatLngAltitude(
-                                point.latLng.latitude, point.latLng.longitude, cameraTargetAltitude),
-                        targetHeading,
-                        cameraTilt,
+                        /* center= */ new LatLngAltitude(
+                                /* latitude= */ point.latLng.latitude,
+                                /* longitude= */ point.latLng.longitude,
+                                /* altitude= */ cameraTargetAltitude),
+                        /* heading= */ targetHeading,
+                        /* tilt= */ cameraTilt,
                         /* roll= */ 0.0,
-                        cameraRange);
+                        /* range= */ cameraRange);
 
         googleMap3D.setCamera(newCamera);
         updateProgressPolyline(dist, point.latLng, point.waypointIndex);

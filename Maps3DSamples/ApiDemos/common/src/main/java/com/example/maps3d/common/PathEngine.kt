@@ -20,7 +20,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.maps.android.SphericalUtil
-import java.util.ArrayList
 
 /**
  * Result of interpolating a position and orientation along a 3D path at a specific distance.
@@ -74,7 +73,12 @@ object PathEngine {
         distance: Double
     ): InterpolatedPathPoint {
         if (path.isEmpty()) {
-            return InterpolatedPathPoint(LatLng(0.0, 0.0), 0, 0.0, 0.0)
+            return InterpolatedPathPoint(
+                latLng = LatLng(0.0, 0.0),
+                waypointIndex = 0,
+                bearing = 0.0,
+                altitude = 0.0
+            )
         }
 
         val totalDistance = cumulativeDistances.lastOrNull() ?: 0.0
@@ -97,7 +101,12 @@ object PathEngine {
         val bearing = SphericalUtil.computeHeading(latLng1, latLng2)
         val interpAlt = p1.altitude + fraction * (p2.altitude - p1.altitude)
 
-        return InterpolatedPathPoint(currentLatLng, index, bearing, interpAlt)
+        return InterpolatedPathPoint(
+            latLng = currentLatLng,
+            waypointIndex = index,
+            bearing = bearing,
+            altitude = interpAlt
+        )
     }
 
     /**
@@ -176,7 +185,7 @@ object PathEngine {
     ): List<LatLngAltitude> {
         if (path.isEmpty()) return emptyList()
 
-        val progressCoordinates = ArrayList<LatLngAltitude>()
+        val progressCoordinates = mutableListOf<LatLngAltitude>()
         val clampedIndex = waypointIndex.coerceIn(0, path.size - 1)
 
         for (i in 0..clampedIndex) {
@@ -186,7 +195,9 @@ object PathEngine {
                 AltitudeMode.ABSOLUTE -> pt.altitude + baseAltitude + pathAltitudeOffset + 0.4
                 else -> pt.altitude + pathAltitudeOffset + 0.4
             }
-            progressCoordinates.add(LatLngAltitude(pt.latitude, pt.longitude, vertexAltitude))
+            progressCoordinates.add(
+                LatLngAltitude(pt.latitude, pt.longitude, vertexAltitude)
+            )
         }
 
         val lastWaypoint = path[clampedIndex]

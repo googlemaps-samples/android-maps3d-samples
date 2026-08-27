@@ -102,7 +102,7 @@ enum class AnimationApproach(val title: String) {
  */
 class AdvancedCameraAnimationActivity : SampleBaseActivity() {
 
-    override val TAG: String = "AdvancedCameraAnimation"
+    override val TAG = "AdvancedCameraAnimation"
 
     override val initialCamera: Camera
         get() {
@@ -392,10 +392,10 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
                 }
 
                 val posAndHeading = RouteEngine.calculatePositionAndHeading(
-                    TourData.AIRPLANE_FLIGHT_PATH,
-                    cumulativeDistances,
-                    elapsedDistance,
-                    30.0
+                    route = TourData.AIRPLANE_FLIGHT_PATH,
+                    cumulativeDistances = cumulativeDistances,
+                    distance = elapsedDistance,
+                    lookaheadDistance = 30.0
                 )
 
                 val planeHeading = posAndHeading.heading.toDouble() + 180.0
@@ -509,6 +509,11 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
 
     override fun onPause() {
         super.onPause()
+        stopTour()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
         stopTour()
     }
 }

@@ -307,7 +307,12 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val map = googleMap3D ?: return
         if (currentPath.isEmpty()) return
 
-        val vertices = PathEngine.buildStaticVertices(currentPath, pathAltitudeMode, baseAltitude, pathAltitudeOffset)
+        val vertices = PathEngine.buildStaticVertices(
+            path = currentPath,
+            altitudeMode = pathAltitudeMode,
+            baseAltitude = baseAltitude,
+            pathAltitudeOffset = pathAltitudeOffset
+        )
         val staticOptions = PolylineOptions().apply {
             id = PathEngine.STATIC_POLYLINE_ID
             path = vertices
@@ -325,14 +330,14 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         if (currentPath.isEmpty() || totalDistance <= 0.0) return
 
         val vertices = PathEngine.buildProgressVertices(
-            currentPath,
-            cumulativeDistances,
-            dist,
-            currentLatLng,
-            index,
-            pathAltitudeMode,
-            baseAltitude,
-            pathAltitudeOffset
+            path = currentPath,
+            cumulativeDistances = cumulativeDistances,
+            elapsedDistance = dist,
+            currentLatLng = currentLatLng,
+            waypointIndex = index,
+            altitudeMode = pathAltitudeMode,
+            baseAltitude = baseAltitude,
+            pathAltitudeOffset = pathAltitudeOffset
         )
 
         // In-place ID upsert updates the existing line in the 3D renderer without recreating objects
@@ -352,20 +357,24 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val map = googleMap3D ?: return
         if (currentPath.isEmpty()) return
 
-        val point = PathEngine.interpolatePoint(currentPath, cumulativeDistances, dist)
+        val point = PathEngine.interpolatePoint(
+            path = currentPath,
+            cumulativeDistances = cumulativeDistances,
+            distance = dist
+        )
         val targetHeading = PathEngine.smoothHeading(
-            point.bearing + headingOffset,
-            currentHeading,
-            isUserScrubbing,
-            isPlaying
+            targetHeading = point.bearing + headingOffset,
+            currentHeading = currentHeading,
+            isUserScrubbing = isUserScrubbing,
+            isPlaying = isPlaying
         )
         currentHeading = targetHeading
 
         val cameraTargetAltitude = PathEngine.calculateCameraAltitude(
-            pathAltitudeMode,
-            baseAltitude,
-            point.altitude,
-            groundAltitude
+            altitudeMode = pathAltitudeMode,
+            baseAltitude = baseAltitude,
+            interpolatedAltitude = point.altitude,
+            groundAltitude = groundAltitude
         )
 
         val newCamera = camera {

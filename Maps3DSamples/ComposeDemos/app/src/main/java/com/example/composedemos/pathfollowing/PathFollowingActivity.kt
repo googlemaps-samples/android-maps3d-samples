@@ -58,6 +58,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -79,6 +80,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.maps3d.common.PathData
 import com.example.maps3d.common.PathEngine
 import com.example.maps3dcommon.R
@@ -146,10 +150,23 @@ fun PathFollowingScreen() {
     var currentHeading by remember { mutableStateOf<Double?>(null) }
 
     val cumulativeDistances = remember(currentPath) {
-        PathEngine.calculateCumulativeDistances(currentPath)
+        PathEngine.calculateCumulativeDistances(path = currentPath)
     }
     val totalDistance = cumulativeDistances.lastOrNull() ?: 0.0
     val baseAltitude = if (currentPath == PathData.RURAL_PATH) 45.0 else 50.0
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_PAUSE) {
+                isPlaying = false
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     // Frame animation loop with delta-time integration
     LaunchedEffect(isPlaying, totalDistance, followSpeedMps) {
@@ -178,7 +195,7 @@ fun PathFollowingScreen() {
 
     // Interpolate camera and position
     val interpPoint = remember(currentPath, cumulativeDistances, elapsedDistance) {
-        PathEngine.interpolatePoint(currentPath, cumulativeDistances, elapsedDistance)
+        PathEngine.interpolatePoint(path = currentPath, cumulativeDistances = cumulativeDistances, distance = elapsedDistance)
     }
 
     val targetHeading = remember(interpPoint.bearing, headingOffset, currentHeading, isUserScrubbing, isPlaying) {
@@ -217,7 +234,12 @@ fun PathFollowingScreen() {
 
     // Dual-Polyline Configurations
     val staticPolylineConfig = remember(currentPath, selectedAltitudeMode, pathAltitudeOffset, drawsOccludedSegments, baseAltitude) {
-        val vertices = PathEngine.buildStaticVertices(currentPath, selectedAltitudeMode.mode, baseAltitude, pathAltitudeOffset.toDouble())
+        val vertices = PathEngine.buildStaticVertices(
+            path = currentPath,
+            altitudeMode = selectedAltitudeMode.mode,
+            baseAltitude = baseAltitude,
+            pathAltitudeOffset = pathAltitudeOffset.toDouble(),
+        )
         PolylineConfig(
             key = PathEngine.STATIC_POLYLINE_ID,
             points = vertices,
