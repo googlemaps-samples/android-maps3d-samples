@@ -26,7 +26,7 @@ import com.google.maps.android.SphericalUtil
  *
  * @property latLng The interpolated 2D geographic coordinate.
  * @property waypointIndex The zero-based index of the segment start waypoint.
- * @property bearing The raw compass bearing (degrees) of the current route segment.
+ * @property bearing The forward-looking tangent compass bearing (degrees).
  * @property altitude The interpolated elevation in meters along the route segment.
  */
 data class InterpolatedPathPoint(
@@ -64,13 +64,47 @@ object PathEngine {
     }
 
     /**
-     * Finds the interpolated geographic position, segment bearing, and elevation at a target distance.
+     * Helper to interpolate 2D LatLng position at any distance along the route.
      */
     @JvmStatic
-    fun interpolatePoint(
+    fun getInterpolatedLatLng(
         path: List<LatLngAltitude>,
         cumulativeDistances: DoubleArray,
         distance: Double
+    ): LatLng {
+        if (path.isEmpty()) return LatLng(0.0, 0.0)
+        val totalDistance = cumulativeDistances.lastOrNull() ?: 0.0
+        if (distance <= 0.0) return LatLng(path.first().latitude, path.first().longitude)
+        if (distance >= totalDistance) return LatLng(path.last().latitude, path.last().longitude)
+
+        var index = 0
+        while (index < cumulativeDistances.size - 1 && cumulativeDistances[index + 1] < distance) {
+            index++
+        }
+
+        val p1 = path[index]
+        val p2 = if (index < path.size - 1) path[index + 1] else p1
+        val d1 = cumulativeDistances[index]
+        val d2 = cumulativeDistances.getOrElse(index + 1) { totalDistance }
+        val segLen = d2 - d1
+        val fraction = if (segLen > 0) ((distance - d1) / segLen).coerceIn(0.0, 1.0) else 0.0
+
+        val latLng1 = LatLng(p1.latitude, p1.longitude)
+        val latLng2 = LatLng(p2.latitude, p2.longitude)
+        return SphericalUtil.interpolate(latLng1, latLng2, fraction)
+    }
+
+    /**
+     * Finds the interpolated geographic position, smooth forward lookahead bearing,
+     * and elevation at a target distance.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun interpolatePoint(
+        path: List<LatLngAltitude>,
+        cumulativeDistances: DoubleArray,
+        distance: Double,
+        lookaheadDistance: Double = 25.0
     ): InterpolatedPathPoint {
         if (path.isEmpty()) {
             return InterpolatedPathPoint(
@@ -98,13 +132,30 @@ object PathEngine {
         val latLng1 = LatLng(p1.latitude, p1.longitude)
         val latLng2 = LatLng(p2.latitude, p2.longitude)
         val currentLatLng = SphericalUtil.interpolate(latLng1, latLng2, fraction)
-        val bearing = SphericalUtil.computeHeading(latLng1, latLng2)
         val interpAlt = p1.altitude + fraction * (p2.altitude - p1.altitude)
+
+        // Smooth forward lookahead tangent heading calculation
+        val targetLookaheadDist = (distance + lookaheadDistance).coerceAtMost(totalDistance)
+        val lookaheadPos = getInterpolatedLatLng(path, cumulativeDistances, targetLookaheadDist)
+
+        val bearing = if (targetLookaheadDist > distance && currentLatLng != lookaheadPos) {
+            SphericalUtil.computeHeading(currentLatLng, lookaheadPos)
+        } else if (distance > 1.0) {
+            val prevPos = getInterpolatedLatLng(path, cumulativeDistances, distance - 1.0)
+            SphericalUtil.computeHeading(prevPos, currentLatLng)
+        } else if (path.size >= 2) {
+            SphericalUtil.computeHeading(
+                LatLng(path[0].latitude, path[0].longitude),
+                LatLng(path[1].latitude, path[1].longitude)
+            )
+        } else {
+            0.0
+        }
 
         return InterpolatedPathPoint(
             latLng = currentLatLng,
             waypointIndex = index,
-            bearing = bearing,
+            bearing = (bearing + 360.0) % 360.0,
             altitude = interpAlt
         )
     }

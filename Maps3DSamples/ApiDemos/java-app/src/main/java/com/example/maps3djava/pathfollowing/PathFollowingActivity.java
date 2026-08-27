@@ -20,6 +20,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RadioGroup;
@@ -113,8 +114,7 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
     private Polyline progressPolyline;
 
     // Animation & auto-fade handlers
-    private Runnable animationRunnable;
-    private final Handler animationHandler = new Handler(Looper.getMainLooper());
+    private Choreographer.FrameCallback frameCallback;
     private final Handler fadeHandler = new Handler(Looper.getMainLooper());
     private final Runnable fadeOutRunnable =
             () -> {
@@ -431,18 +431,22 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
         isPlaying = true;
         btnPlayPause.setIconResource(R.drawable.pause_24px);
 
-        long frameDurationMs = 16L;
-        animationRunnable =
-                new Runnable() {
-                    private long lastTime = System.currentTimeMillis();
+        frameCallback =
+                new Choreographer.FrameCallback() {
+                    private long lastTimeNanos = 0L;
 
                     @Override
-                    public void run() {
+                    public void doFrame(long frameTimeNanos) {
                         if (!isPlaying) return;
 
-                        long now = System.currentTimeMillis();
-                        double dt = (now - lastTime) / 1000.0;
-                        lastTime = now;
+                        if (lastTimeNanos == 0L) {
+                            lastTimeNanos = frameTimeNanos;
+                            Choreographer.getInstance().postFrameCallback(this);
+                            return;
+                        }
+
+                        double dt = (frameTimeNanos - lastTimeNanos) / 1_000_000_000.0;
+                        lastTimeNanos = frameTimeNanos;
 
                         double stepDistance = followSpeedMps * dt;
                         elapsedDistance += stepDistance;
@@ -457,18 +461,18 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
                         }
 
                         updateCameraPositionForDistance(elapsedDistance);
-                        animationHandler.postDelayed(this, frameDurationMs);
+                        Choreographer.getInstance().postFrameCallback(this);
                     }
                 };
-        animationHandler.post(animationRunnable);
+        Choreographer.getInstance().postFrameCallback(frameCallback);
     }
 
     private void pauseAnimation() {
         isPlaying = false;
         btnPlayPause.setIconResource(R.drawable.play_arrow_24px);
-        if (animationRunnable != null) {
-            animationHandler.removeCallbacks(animationRunnable);
-            animationRunnable = null;
+        if (frameCallback != null) {
+            Choreographer.getInstance().removeFrameCallback(frameCallback);
+            frameCallback = null;
         }
     }
 

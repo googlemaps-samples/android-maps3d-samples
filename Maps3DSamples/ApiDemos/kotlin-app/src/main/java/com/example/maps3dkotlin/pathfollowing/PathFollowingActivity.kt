@@ -19,6 +19,7 @@ package com.example.maps3dkotlin.pathfollowing
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.Choreographer
 import android.view.MotionEvent
 import android.view.View
 import android.widget.RadioGroup
@@ -110,8 +111,7 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private var progressPolyline: Polyline? = null
 
     // Animation & auto-fade handlers
-    private var animationRunnable: Runnable? = null
-    private val animationHandler = Handler(Looper.getMainLooper())
+    private var frameCallback: Choreographer.FrameCallback? = null
     private val fadeHandler = Handler(Looper.getMainLooper())
     private val fadeOutRunnable = Runnable {
         if (controlsCard != null && !isCollapsed) {
@@ -397,16 +397,19 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         isPlaying = true
         btnPlayPause.setIconResource(R.drawable.pause_24px)
 
-        val frameDurationMs = 16L
-        animationRunnable = object : Runnable {
-            private var lastTime = System.currentTimeMillis()
-
-            override fun run() {
+        var lastTimeNanos = 0L
+        frameCallback = object : Choreographer.FrameCallback {
+            override fun doFrame(frameTimeNanos: Long) {
                 if (!isPlaying) return
 
-                val now = System.currentTimeMillis()
-                val dt = (now - lastTime) / 1000.0
-                lastTime = now
+                if (lastTimeNanos == 0L) {
+                    lastTimeNanos = frameTimeNanos
+                    Choreographer.getInstance().postFrameCallback(this)
+                    return
+                }
+
+                val dt = (frameTimeNanos - lastTimeNanos) / 1_000_000_000.0
+                lastTimeNanos = frameTimeNanos
 
                 elapsedDistance += followSpeedMps * dt
                 if (elapsedDistance >= totalDistance) {
@@ -414,22 +417,23 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 }
 
                 if (!isUserScrubbing && totalDistance > 0) {
-                    progressSlider.value = (elapsedDistance / totalDistance).toFloat().coerceIn(0f, 1f)
+                    val progressRatio = (elapsedDistance / totalDistance).toFloat().coerceIn(0f, 1f)
+                    progressSlider.value = progressRatio
                 }
 
                 updateCameraPositionForDistance(elapsedDistance)
-                animationHandler.postDelayed(this, frameDurationMs)
+                Choreographer.getInstance().postFrameCallback(this)
             }
         }
-        animationHandler.post(animationRunnable!!)
+        Choreographer.getInstance().postFrameCallback(frameCallback!!)
     }
 
     private fun pauseAnimation() {
         isPlaying = false
         btnPlayPause.setIconResource(R.drawable.play_arrow_24px)
-        animationRunnable?.let {
-            animationHandler.removeCallbacks(it)
-            animationRunnable = null
+        frameCallback?.let {
+            Choreographer.getInstance().removeFrameCallback(it)
+            frameCallback = null
         }
     }
 
