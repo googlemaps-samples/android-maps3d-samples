@@ -17,12 +17,15 @@
 package com.example.maps3dkotlin.advancedcameraanimation
 
 import android.os.Bundle
+import android.view.Choreographer
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
+import com.example.maps3d.common.CameraKeyframe
 import com.example.maps3d.common.RouteEngine
+import com.example.maps3d.common.TourData
 import com.example.maps3dcommon.R
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps.model.LatLng
@@ -66,55 +69,45 @@ private suspend fun GoogleMap3D.awaitFlyCameraTo(options: FlyToOptions) =
         }
     }
 
-enum class AnimationApproach {
-    SIMPLE_FLY_TO,
-    KEYFRAME_TOUR,
-    DISPATCHER_FRAME_LOOP,
-    ORBIT_360_SPIN
+/**
+ * Normalizes heading angles into standard compass range [0.0, 360.0).
+ */
+private fun normalizeHeading(deg: Double): Double = (deg % 360.0 + 360.0) % 360.0
+
+/**
+ * Performs shortest-arc spherical angular interpolation between two headings.
+ */
+private fun interpolateAngle(start: Double, end: Double, fraction: Double): Double {
+    var diff = (end - start) % 360.0
+    if (diff > 180.0) diff -= 360.0
+    if (diff < -180.0) diff += 360.0
+    return normalizeHeading(start + diff * fraction)
 }
 
-sealed interface CameraKeyframe {
-    val stepTitle: String
-    val stepDescription: String
-
-    data class FlyTo(
-        override val stepTitle: String,
-        override val stepDescription: String,
-        val targetCenter: LatLng,
-        val targetAltitude: Double,
-        val targetHeading: Double,
-        val targetTilt: Double,
-        val targetRange: Double,
-        val durationMs: Long = 2500L,
-    ) : CameraKeyframe
-
-    data class DwellPause(
-        override val stepTitle: String,
-        override val stepDescription: String,
-        val durationMs: Long = 1500L,
-    ) : CameraKeyframe
-
-    data class OrbitAround(
-        override val stepTitle: String,
-        override val stepDescription: String,
-        val center: LatLng,
-        val altitude: Double,
-        val range: Double,
-        val tilt: Double,
-        val startHeading: Double,
-        val endHeading: Double,
-        val durationMs: Long = 4000L,
-    ) : CameraKeyframe
+enum class AnimationApproach(val title: String) {
+    SIMPLE_FLY_TO("1. SDK Simple flyTo (Native Transition)"),
+    KEYFRAME_TOUR("2. Scripted Keyframe Queue (Multi-Stage Tour)"),
+    DISPATCHER_FRAME_LOOP("3. High-Speed Flight (Display Sync Choreographer)"),
+    ORBIT_360_SPIN("4. Orbital Spin (Continuous 360° Rotation)"),
 }
 
+/**
+ * Advanced Camera Animation demonstrating cinematic 3D camera controls and 3D airplane model tracking.
+ *
+ * Animation Approaches:
+ * 1. Simple flyTo: Native SDK camera transition.
+ * 2. Keyframe Queue Tour: Multi-stage sequenced tour (fly-to, dwell pause, 360° landmark orbit).
+ * 3. Frame Dispatcher Loop: High-speed flight synced directly to hardware display refresh rate via Choreographer.
+ * 4. 360° Orbital Spin: Continuous circular inspection around landmarks.
+ */
 class AdvancedCameraAnimationActivity : SampleBaseActivity() {
 
-    override val TAG = "AdvancedCameraAnimation"
+    override val TAG: String = "AdvancedCameraAnimation"
 
     override val initialCamera: Camera
         get() {
-            val firstLoc = AIRPLANE_FLIGHT_PATH.first()
-            val initialHeading = SphericalUtil.computeHeading(firstLoc, AIRPLANE_FLIGHT_PATH[1])
+            val firstLoc = TourData.AIRPLANE_FLIGHT_PATH.first()
+            val initialHeading = SphericalUtil.computeHeading(firstLoc, TourData.AIRPLANE_FLIGHT_PATH[1])
             return camera {
                 center = latLngAltitude {
                     latitude = firstLoc.latitude
@@ -132,14 +125,14 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
     private var isPlaying = false
     private var tourJob: Job? = null
     private var restartJob: Job? = null
-    private var frameDispatcherCallback: android.view.Choreographer.FrameCallback? = null
+    private var frameDispatcherCallback: Choreographer.FrameCallback? = null
     private var selectedApproach = AnimationApproach.DISPATCHER_FRAME_LOOP
 
     private var btnPlayPause: Button? = null
     private var tvTourStatus: TextView? = null
 
     private val cumulativeDistances by lazy {
-        RouteEngine.calculateCumulativeDistances(AIRPLANE_FLIGHT_PATH)
+        RouteEngine.calculateCumulativeDistances(TourData.AIRPLANE_FLIGHT_PATH)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -174,11 +167,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
 
         btnPlayPause = findViewById(R.id.btn_play_pause)
         btnPlayPause?.setOnClickListener {
-            if (isPlaying) {
-                stopTour()
-            } else {
-                startSelectedApproach()
-            }
+            if (isPlaying) stopTour() else startSelectedApproach()
         }
     }
 
@@ -189,12 +178,12 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
         super.onMap3DViewReady(googleMap3D)
 
-        // Instantiate 3D Airplane Model on map at initial start position
-        val startLoc = AIRPLANE_FLIGHT_PATH.first()
-        val initialHeading = SphericalUtil.computeHeading(startLoc, AIRPLANE_FLIGHT_PATH[1])
+        // Position 3D Airplane Model at route origin
+        val startLoc = TourData.AIRPLANE_FLIGHT_PATH.first()
+        val initialHeading = SphericalUtil.computeHeading(startLoc, TourData.AIRPLANE_FLIGHT_PATH[1])
         updateAirplaneModel(startLoc, initialHeading + 180.0)
 
-        // Auto-start smooth flight animation after 1 second delay
+        // Auto-start animation after initial map load
         restartJob = lifecycleScope.launch {
             delay(1000L.milliseconds)
             startSelectedApproach()
@@ -202,20 +191,17 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
     }
 
     /**
-     * Updates the 3D Airplane Model's position and orientation on the map.
-     * Note: Calling `map.addModel(opts)` continuously with the same `id` string
-     * is the recommended approach for dynamically updating a model's location.
-     *
-     * Remote URLs: Models should be hosted and loaded via external URL.
+     * Updates the 3D Airplane Model position and orientation on the map.
+     * In-place ID upserting avoids tearing or recreation overhead.
      */
     private fun updateAirplaneModel(targetLatLng: LatLng, planeHeadingDeg: Double) {
         googleMap3D?.let { map ->
             val opts = ModelOptions().apply {
-                id = MODEL_ID
+                id = TourData.MODEL_ID
                 position = LatLngAltitude(targetLatLng.latitude, targetLatLng.longitude, 200.0)
                 altitudeMode = AltitudeMode.ABSOLUTE
                 orientation = Orientation(normalizeHeading(planeHeadingDeg), -90.0, 0.0)
-                url = PLANE_URL
+                url = TourData.PLANE_URL
                 scale = Vector3D(0.08, 0.08, 0.08)
             }
             airplaneModel = map.addModel(opts)
@@ -232,18 +218,20 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         }
     }
 
+    /**
+     * Option 1: Simple flyTo animation directly to destination.
+     */
     private fun runSimpleFlyTo() {
         stopTour()
         isPlaying = true
         updatePlayPauseButtonState()
         tvTourStatus?.setText(R.string.approach_simple_fly_to)
 
-        val targetLoc = AIRPLANE_FLIGHT_PATH.last()
-        val flightHeading =
-            SphericalUtil.computeHeading(
-                AIRPLANE_FLIGHT_PATH[AIRPLANE_FLIGHT_PATH.size - 2],
-                targetLoc
-            )
+        val targetLoc = TourData.AIRPLANE_FLIGHT_PATH.last()
+        val flightHeading = SphericalUtil.computeHeading(
+            TourData.AIRPLANE_FLIGHT_PATH[TourData.AIRPLANE_FLIGHT_PATH.size - 2],
+            targetLoc
+        )
         updateAirplaneModel(targetLoc, flightHeading + 180.0)
 
         val targetCam = camera {
@@ -265,7 +253,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
     }
 
     /**
-     * Executes multi-step keyframe queue tour smoothly stage by stage.
+     * Option 2: Executes multi-step keyframe queue tour smoothly stage by stage.
      */
     private fun startOrResumeTour() {
         stopTour()
@@ -276,12 +264,12 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         tourJob = lifecycleScope.launch(Dispatchers.Main) {
             val frameDurationMs = 16L
 
-            while (currentStepIndex < SAN_FRANCISCO_TOUR.size && isActive && isPlaying) {
-                val step = SAN_FRANCISCO_TOUR[currentStepIndex]
+            while (currentStepIndex < TourData.SAN_FRANCISCO_TOUR.size && isActive && isPlaying) {
+                val step = TourData.SAN_FRANCISCO_TOUR[currentStepIndex]
                 tvTourStatus?.text = getString(
                     R.string.aerial_tour_status_running,
                     currentStepIndex + 1,
-                    SAN_FRANCISCO_TOUR.size,
+                    TourData.SAN_FRANCISCO_TOUR.size,
                     step.stepTitle
                 )
 
@@ -310,8 +298,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
                         for (frame in 0..totalFrames) {
                             if (!isActive || !isPlaying) break
                             val t = frame.toDouble() / totalFrames
-                            val orbitHeading =
-                                interpolateAngle(step.startHeading, step.endHeading, t)
+                            val orbitHeading = interpolateAngle(step.startHeading, step.endHeading, t)
 
                             val updatedCam = camera {
                                 center = latLngAltitude {
@@ -333,7 +320,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
 
                 if (!isActive || !isPlaying) break
 
-                if (currentStepIndex < SAN_FRANCISCO_TOUR.size - 1) {
+                if (currentStepIndex < TourData.SAN_FRANCISCO_TOUR.size - 1) {
                     currentStepIndex++
                 } else {
                     isPlaying = false
@@ -346,12 +333,8 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
     }
 
     /**
-     * Frame Dispatcher Animation Loop.
-     * High-speed flight animation (400 m/s) stopping cleanly at destination.
-     *
-     * For the most visually uniform cinematic sweeping motion, we recommend using
-     * `Choreographer.FrameCallback` to sync our delta-time interpolation directly
-     * to the hardware display frames.
+     * Option 3: Frame Dispatcher Animation Loop.
+     * High-speed flight animation (400 m/s) synced to hardware display frames via Choreographer.
      */
     private fun runFrameDispatcherLoop() {
         stopTour()
@@ -360,9 +343,9 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         tvTourStatus?.setText(R.string.approach_dispatcher_frame_loop)
 
         val totalDistance = cumulativeDistances.last().coerceAtLeast(1.0)
-        val flightSpeedMps = 400.0 // Fast 400 m/s high-speed flight
+        val flightSpeedMps = 400.0
 
-        val frameCallback = object : android.view.Choreographer.FrameCallback {
+        val frameCallback = object : Choreographer.FrameCallback {
             private var lastTimeNanos = 0L
             private var elapsedDistance = 0.0
 
@@ -371,7 +354,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
 
                 if (lastTimeNanos == 0L) {
                     lastTimeNanos = frameTimeNanos
-                    android.view.Choreographer.getInstance().postFrameCallback(this)
+                    Choreographer.getInstance().postFrameCallback(this)
                     return
                 }
 
@@ -383,7 +366,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
                 if (elapsedDistance >= totalDistance) {
                     elapsedDistance = totalDistance
                     val posAndHeading = RouteEngine.calculatePositionAndHeading(
-                        AIRPLANE_FLIGHT_PATH,
+                        TourData.AIRPLANE_FLIGHT_PATH,
                         cumulativeDistances,
                         elapsedDistance,
                         30.0
@@ -409,7 +392,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
                 }
 
                 val posAndHeading = RouteEngine.calculatePositionAndHeading(
-                    AIRPLANE_FLIGHT_PATH,
+                    TourData.AIRPLANE_FLIGHT_PATH,
                     cumulativeDistances,
                     elapsedDistance,
                     30.0
@@ -430,11 +413,11 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
                 }
                 googleMap3D?.setCamera(updatedCam)
 
-                android.view.Choreographer.getInstance().postFrameCallback(this)
+                Choreographer.getInstance().postFrameCallback(this)
             }
         }
         frameDispatcherCallback = frameCallback
-        android.view.Choreographer.getInstance().postFrameCallback(frameCallback)
+        Choreographer.getInstance().postFrameCallback(frameCallback)
     }
 
     /**
@@ -446,7 +429,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         updatePlayPauseButtonState()
         tvTourStatus?.setText(R.string.approach_orbit_360_spin)
 
-        val targetCenter = AIRPLANE_FLIGHT_PATH.first()
+        val targetCenter = TourData.AIRPLANE_FLIGHT_PATH.first()
         updateAirplaneModel(targetCenter, 105.0 + 180.0)
 
         tourJob = lifecycleScope.launch(Dispatchers.Main) {
@@ -487,7 +470,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         tourJob?.cancel()
         tourJob = null
         frameDispatcherCallback?.let {
-            android.view.Choreographer.getInstance().removeFrameCallback(it)
+            Choreographer.getInstance().removeFrameCallback(it)
             frameDispatcherCallback = null
         }
         googleMap3D?.setCameraAnimationEndListener(null)
@@ -501,8 +484,8 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         stopTour()
         currentStepIndex = 0
 
-        val startLoc = AIRPLANE_FLIGHT_PATH.first()
-        val initialHeading = SphericalUtil.computeHeading(startLoc, AIRPLANE_FLIGHT_PATH[1])
+        val startLoc = TourData.AIRPLANE_FLIGHT_PATH.first()
+        val initialHeading = SphericalUtil.computeHeading(startLoc, TourData.AIRPLANE_FLIGHT_PATH[1])
         updateAirplaneModel(startLoc, initialHeading + 180.0)
 
         val resetCam = camera {
@@ -527,81 +510,5 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
     override fun onPause() {
         super.onPause()
         stopTour()
-    }
-
-    companion object {
-        private const val MODEL_ID = "airplane_model"
-        private const val PLANE_URL =
-            "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb"
-
-        val SAN_FRANCISCO_TOUR = listOf(
-            CameraKeyframe.FlyTo(
-                stepTitle = "1. Golden Gate Bridge Flight",
-                stepDescription = "3D Airplane flight over Golden Gate Bridge",
-                targetCenter = LatLng(37.8199, -122.4783),
-                targetAltitude = 200.0,
-                targetHeading = 105.0,
-                targetTilt = 65.0,
-                targetRange = 600.0,
-                durationMs = 2500L
-            ),
-            CameraKeyframe.DwellPause(
-                stepTitle = "2. Mid-Air Observation",
-                stepDescription = "Dwell pause observing 3D airplane over Golden Gate",
-                durationMs = 1500L
-            ),
-            CameraKeyframe.OrbitAround(
-                stepTitle = "3. Golden Gate 360° Orbit",
-                stepDescription = "360° orbital camera spin around flying airplane",
-                center = LatLng(37.8199, -122.4783),
-                altitude = 200.0,
-                range = 600.0,
-                tilt = 65.0,
-                startHeading = 105.0,
-                endHeading = 465.0,
-                durationMs = 4000L
-            ),
-            CameraKeyframe.FlyTo(
-                stepTitle = "4. Transit to Coit Tower",
-                stepDescription = "Airplane flight to Coit Tower Landmark",
-                targetCenter = LatLng(37.8024, -122.4058),
-                targetAltitude = 200.0,
-                targetHeading = 105.0,
-                targetTilt = 65.0,
-                targetRange = 600.0,
-                durationMs = 3000L
-            )
-        )
-
-        // 15 Fine-Grained Waypoints on the direct route from Golden Gate Bridge to Coit Tower
-        val AIRPLANE_FLIGHT_PATH = listOf(
-            LatLng(37.8199, -122.4783), // 1. Golden Gate Bridge (Source)
-            LatLng(37.8188, -122.4735), // 2. Fort Point / Presidio Overlook
-            LatLng(37.8175, -122.4685), // 3. Crissy Field West
-            LatLng(37.8160, -122.4635), // 4. Crissy Field East
-            LatLng(37.8145, -122.4585), // 5. Marina Green West
-            LatLng(37.8130, -122.4530), // 6. Marina District Center
-            LatLng(37.8115, -122.4475), // 7. Fort Mason West
-            LatLng(37.8100, -122.4420), // 8. Fort Mason Heights
-            LatLng(37.8085, -122.4365), // 9. Aquatic Park Cove
-            LatLng(37.8070, -122.4310), // 10. Fisherman's Wharf West
-            LatLng(37.8058, -122.4250), // 11. Fisherman's Wharf Center
-            LatLng(37.8048, -122.4195), // 12. Pier 39 Promenade
-            LatLng(37.8038, -122.4140), // 13. Embarcadero North
-            LatLng(37.8030, -122.4090), // 14. Telegraph Hill Slopes
-            LatLng(37.8024, -122.4058)  // 15. Coit Tower (Destination)
-        )
-
-        private fun normalizeHeading(headingDeg: Double): Double {
-            val normalized = headingDeg % 360.0
-            return if (normalized < 0.0) normalized + 360.0 else normalized
-        }
-
-        private fun interpolateAngle(start: Double, end: Double, fraction: Double): Double {
-            var diff = (end - start) % 360.0
-            if (diff > 180.0) diff -= 360.0
-            if (diff < -180.0) diff += 360.0
-            return (start + diff * fraction + 360.0) % 360.0
-        }
     }
 }

@@ -45,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,13 +53,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import com.example.composedemos.routes.RouteEngine
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.maps3d.common.CameraKeyframe
+import com.example.maps3d.common.RouteEngine
+import com.example.maps3d.common.TourData
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
@@ -103,40 +106,6 @@ enum class AnimationApproach(val title: String) {
     ORBIT_360_SPIN("4. 360° Orbit Spin (Continuous Orbital Camera)"),
 }
 
-sealed interface CameraKeyframe {
-    val stepTitle: String
-    val stepDescription: String
-
-    data class FlyTo(
-        override val stepTitle: String,
-        override val stepDescription: String,
-        val targetCenter: LatLng,
-        val targetAltitude: Double,
-        val targetHeading: Double,
-        val targetTilt: Double,
-        val targetRange: Double,
-        val durationMs: Long = 2500L,
-    ) : CameraKeyframe
-
-    data class DwellPause(
-        override val stepTitle: String,
-        override val stepDescription: String,
-        val durationMs: Long = 1500L,
-    ) : CameraKeyframe
-
-    data class OrbitAround(
-        override val stepTitle: String,
-        override val stepDescription: String,
-        val center: LatLng,
-        val altitude: Double,
-        val range: Double,
-        val tilt: Double,
-        val startHeading: Double,
-        val endHeading: Double,
-        val durationMs: Long = 4000L,
-    ) : CameraKeyframe
-}
-
 class AdvancedCameraAnimationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -154,111 +123,51 @@ class AdvancedCameraAnimationActivity : ComponentActivity() {
     }
 
     companion object {
-        val SAN_FRANCISCO_TOUR = listOf(
-            CameraKeyframe.FlyTo(
-                stepTitle = "1. Golden Gate Bridge Flight",
-                stepDescription = "3D Airplane flight over Golden Gate Bridge",
-                targetCenter = LatLng(37.8199, -122.4783),
-                targetAltitude = 200.0,
-                targetHeading = 105.0,
-                targetTilt = 65.0,
-                targetRange = 600.0,
-                durationMs = 2500L,
-            ),
-            CameraKeyframe.DwellPause(
-                stepTitle = "2. Mid-Air Observation",
-                stepDescription = "Dwell pause observing 3D airplane over Golden Gate",
-                durationMs = 1500L,
-            ),
-            CameraKeyframe.OrbitAround(
-                stepTitle = "3. Golden Gate 360° Orbit",
-                stepDescription = "360° orbital camera spin around flying airplane",
-                center = LatLng(37.8199, -122.4783),
-                altitude = 200.0,
-                range = 600.0,
-                tilt = 65.0,
-                startHeading = 105.0,
-                endHeading = 465.0,
-                durationMs = 4000L,
-            ),
-            CameraKeyframe.FlyTo(
-                stepTitle = "4. Transit to Coit Tower",
-                stepDescription = "Airplane flight to Coit Tower Landmark",
-                targetCenter = LatLng(37.8024, -122.4058),
-                targetAltitude = 200.0,
-                targetHeading = 105.0,
-                targetTilt = 65.0,
-                targetRange = 600.0,
-                durationMs = 3000L,
-            ),
-        )
-
-        // 15 Fine-Grained Waypoints on the direct route from Golden Gate Bridge to Coit Tower
-        val AIRPLANE_FLIGHT_PATH = listOf(
-            LatLng(37.8199, -122.4783), // 1. Golden Gate Bridge (Source)
-            LatLng(37.8188, -122.4735), // 2. Fort Point / Presidio Overlook
-            LatLng(37.8175, -122.4685), // 3. Crissy Field West
-            LatLng(37.8160, -122.4635), // 4. Crissy Field East
-            LatLng(37.8145, -122.4585), // 5. Marina Green West
-            LatLng(37.8130, -122.4530), // 6. Marina District Center
-            LatLng(37.8115, -122.4475), // 7. Fort Mason West
-            LatLng(37.8100, -122.4420), // 8. Fort Mason Heights
-            LatLng(37.8085, -122.4365), // 9. Aquatic Park Cove
-            LatLng(37.8070, -122.4310), // 10. Fisherman's Wharf West
-            LatLng(37.8058, -122.4250), // 11. Fisherman's Wharf Center
-            LatLng(37.8048, -122.4195), // 12. Pier 39 Promenade
-            LatLng(37.8038, -122.4140), // 13. Embarcadero North
-            LatLng(37.8030, -122.4090), // 14. Telegraph Hill Slopes
-            LatLng(37.8024, -122.4058), // 15. Coit Tower (Destination)
-        )
+        val SAN_FRANCISCO_TOUR = TourData.SAN_FRANCISCO_TOUR
+        val AIRPLANE_FLIGHT_PATH = TourData.AIRPLANE_FLIGHT_PATH
     }
 }
 
 @Composable
 fun AdvancedCameraAnimationScreen() {
-    val tourSequence = AdvancedCameraAnimationActivity.SAN_FRANCISCO_TOUR
-    val flightPath = AdvancedCameraAnimationActivity.AIRPLANE_FLIGHT_PATH
-    val scope = rememberCoroutineScope()
-
-    var mapInstance by remember { mutableStateOf<GoogleMap3D?>(null) }
-    var selectedApproach by remember { mutableStateOf(AnimationApproach.DISPATCHER_FRAME_LOOP) }
-
-    val initialStep = tourSequence.first() as CameraKeyframe.FlyTo
-    var currentCameraState by remember {
-        mutableStateOf(
-            camera {
-                center = latLngAltitude {
-                    latitude = initialStep.targetCenter.latitude
-                    longitude = initialStep.targetCenter.longitude
-                    altitude = initialStep.targetAltitude
-                }
-                heading = 105.0
-                tilt = initialStep.targetTilt
-                range = initialStep.targetRange
-            },
-        )
+    val tourSequence = TourData.SAN_FRANCISCO_TOUR
+    val flightPath = TourData.AIRPLANE_FLIGHT_PATH
+    val cumulativeDistances = remember(flightPath) {
+        RouteEngine.calculateCumulativeDistances(flightPath)
     }
 
+    var selectedApproach by remember { mutableStateOf(AnimationApproach.DISPATCHER_FRAME_LOOP) }
+    var currentStepIndex by remember { mutableIntStateOf(0) }
+    var isPlaying by remember { mutableStateOf(false) }
+
+    var mapInstance by remember { mutableStateOf<com.google.android.gms.maps3d.GoogleMap3D?>(null) }
+    val scope = rememberCoroutineScope()
+
+    var tourJob by remember { mutableStateOf<Job?>(null) }
+    var restartJob by remember { mutableStateOf<Job?>(null) }
+
     var planePosition by remember {
+        val start = flightPath.first()
         mutableStateOf(
             latLngAltitude {
-                latitude = flightPath.first().latitude
-                longitude = flightPath.first().longitude
+                latitude = start.latitude
+                longitude = start.longitude
                 altitude = 200.0
             },
         )
     }
+
     var planeHeading by remember {
-        val rawH = SphericalUtil.computeHeading(flightPath.first(), flightPath[1])
-        mutableStateOf(normalizeHeading(rawH + 180.0))
+        val h = SphericalUtil.computeHeading(flightPath.first(), flightPath[1])
+        mutableDoubleStateOf(normalizeHeading(h + 180.0))
     }
 
     val activeModels = remember(planePosition, planeHeading) {
         listOf(
             ModelConfig(
-                key = "airplane_model",
+                key = TourData.MODEL_ID,
                 position = planePosition,
-                url = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb",
+                url = TourData.PLANE_URL,
                 altitudeMode = AltitudeMode.ABSOLUTE,
                 scale = ModelScale.Uniform(0.08f),
                 heading = planeHeading,
@@ -268,19 +177,27 @@ fun AdvancedCameraAnimationScreen() {
         )
     }
 
-    var currentStepIndex by remember { mutableIntStateOf(0) }
-    var isPlaying by remember { mutableStateOf(false) }
-    var tourJob by remember { mutableStateOf<Job?>(null) }
-    var restartJob by remember { mutableStateOf<Job?>(null) }
-
-    val cumulativeDistances: DoubleArray = remember(flightPath) {
-        RouteEngine.calculateCumulativeDistances(flightPath)
+    var currentCameraState by remember {
+        val firstLoc = flightPath.first()
+        val initialHeading = SphericalUtil.computeHeading(firstLoc, flightPath[1])
+        mutableStateOf(
+            camera {
+                center = latLngAltitude {
+                    latitude = firstLoc.latitude
+                    longitude = firstLoc.longitude
+                    altitude = 200.0
+                }
+                heading = normalizeHeading(initialHeading)
+                tilt = 65.0
+                range = 600.0
+            },
+        )
     }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_PAUSE || event == Lifecycle.Event.ON_STOP) {
+            if (event == Lifecycle.Event.ON_PAUSE) {
                 isPlaying = false
                 tourJob?.cancel()
                 tourJob = null
@@ -292,9 +209,6 @@ fun AdvancedCameraAnimationScreen() {
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
-            tourJob?.cancel()
-            restartJob?.cancel()
-            mapInstance?.stopCameraAnimation()
         }
     }
 
@@ -313,7 +227,11 @@ fun AdvancedCameraAnimationScreen() {
         isPlaying = true
 
         val targetLoc = flightPath.last()
-        val flightHeading = SphericalUtil.computeHeading(flightPath[flightPath.size - 2], targetLoc)
+        val flightHeading = SphericalUtil.computeHeading(
+            flightPath[flightPath.size - 2],
+            targetLoc,
+        )
+
         planePosition = latLngAltitude {
             latitude = targetLoc.latitude
             longitude = targetLoc.longitude
@@ -331,6 +249,7 @@ fun AdvancedCameraAnimationScreen() {
             tilt = 65.0
             range = 600.0
         }
+
         tourJob = scope.launch(Dispatchers.Main) {
             mapInstance?.awaitFlyCameraTo(FlyToOptions(targetCam, 1500L))
             isPlaying = false
@@ -344,9 +263,9 @@ fun AdvancedCameraAnimationScreen() {
 
         tourJob = scope.launch(Dispatchers.Main) {
             val frameDurationMs = 16L
+
             while (currentStepIndex < tourSequence.size && isActive && isPlaying) {
-                val step = tourSequence[currentStepIndex]
-                when (step) {
+                when (val step = tourSequence[currentStepIndex]) {
                     is CameraKeyframe.FlyTo -> {
                         val targetCam = camera {
                             center = latLngAltitude {
@@ -358,12 +277,14 @@ fun AdvancedCameraAnimationScreen() {
                             tilt = step.targetTilt
                             range = step.targetRange
                         }
+
                         planePosition = latLngAltitude {
                             latitude = step.targetCenter.latitude
                             longitude = step.targetCenter.longitude
                             altitude = 200.0
                         }
                         planeHeading = normalizeHeading(step.targetHeading + 180.0)
+
                         mapInstance?.awaitFlyCameraTo(FlyToOptions(targetCam, step.durationMs))
                     }
 
@@ -372,8 +293,14 @@ fun AdvancedCameraAnimationScreen() {
                     }
 
                     is CameraKeyframe.OrbitAround -> {
-                        val totalMs = step.durationMs
+                        planePosition = latLngAltitude {
+                            latitude = step.center.latitude
+                            longitude = step.center.longitude
+                            altitude = 200.0
+                        }
                         val startTimeMs = SystemClock.uptimeMillis()
+                        val totalMs = step.durationMs
+
                         while (isActive && isPlaying) {
                             val elapsedMs = SystemClock.uptimeMillis() - startTimeMs
                             if (elapsedMs > totalMs) break
@@ -381,7 +308,8 @@ fun AdvancedCameraAnimationScreen() {
                             val t = (elapsedMs.toDouble() / totalMs).coerceIn(0.0, 1.0)
                             val orbitHeading = interpolateAngle(step.startHeading, step.endHeading, t)
 
-                            val updatedCam = camera {
+                            planeHeading = normalizeHeading(orbitHeading + 180.0)
+                            currentCameraState = camera {
                                 center = latLngAltitude {
                                     latitude = step.center.latitude
                                     longitude = step.center.longitude
@@ -391,15 +319,7 @@ fun AdvancedCameraAnimationScreen() {
                                 tilt = step.tilt
                                 range = step.range
                             }
-
-                            planePosition = latLngAltitude {
-                                latitude = step.center.latitude
-                                longitude = step.center.longitude
-                                altitude = 200.0
-                            }
-                            planeHeading = normalizeHeading(orbitHeading + 180.0)
-                            currentCameraState = updatedCam
-                            delay(16L) // Keeps dispatch rhythm steady
+                            delay(frameDurationMs.milliseconds)
                         }
                     }
                 }
@@ -420,34 +340,35 @@ fun AdvancedCameraAnimationScreen() {
         stopTour()
         isPlaying = true
 
-        tourJob = scope.launch(Dispatchers.Main) {
-            val totalDistance = cumulativeDistances.last().coerceAtLeast(1.0)
-            val flightSpeedMps = 400.0
-            var elapsedDistance = 0.0
-            var lastTime = System.currentTimeMillis()
+        val totalDist = cumulativeDistances.last().coerceAtLeast(1.0)
+        val flightSpeedMps = 400.0
 
-            while (isPlaying && isActive) {
-                val now = System.currentTimeMillis()
-                val dt = (now - lastTime) / 1000.0
-                lastTime = now
+        tourJob = scope.launch(Dispatchers.Main) {
+            var lastTimeMs = SystemClock.uptimeMillis()
+            var elapsedDistance = 0.0
+
+            while (isActive && isPlaying) {
+                val nowMs = SystemClock.uptimeMillis()
+                val dt = (nowMs - lastTimeMs) / 1000.0
+                lastTimeMs = nowMs
 
                 elapsedDistance += flightSpeedMps * dt
 
-                if (elapsedDistance >= totalDistance) {
-                    elapsedDistance = totalDistance
+                if (elapsedDistance >= totalDist) {
+                    elapsedDistance = totalDist
                     val posAndHeading = RouteEngine.calculatePositionAndHeading(
                         flightPath,
                         cumulativeDistances,
                         elapsedDistance,
                         30.0,
                     )
-                    val planeH = posAndHeading.heading.toDouble() + 180.0
                     planePosition = latLngAltitude {
                         latitude = posAndHeading.position.latitude
                         longitude = posAndHeading.position.longitude
                         altitude = 200.0
                     }
-                    planeHeading = normalizeHeading(planeH)
+                    planeHeading = normalizeHeading(posAndHeading.heading.toDouble() + 180.0)
+
                     currentCameraState = camera {
                         center = latLngAltitude {
                             latitude = posAndHeading.position.latitude
@@ -468,13 +389,13 @@ fun AdvancedCameraAnimationScreen() {
                     elapsedDistance,
                     30.0,
                 )
-                val planeH = posAndHeading.heading.toDouble() + 180.0
+
                 planePosition = latLngAltitude {
                     latitude = posAndHeading.position.latitude
                     longitude = posAndHeading.position.longitude
                     altitude = 200.0
                 }
-                planeHeading = normalizeHeading(planeH)
+                planeHeading = normalizeHeading(posAndHeading.heading.toDouble() + 180.0)
 
                 currentCameraState = camera {
                     center = latLngAltitude {
@@ -486,6 +407,7 @@ fun AdvancedCameraAnimationScreen() {
                     tilt = 65.0
                     range = 600.0
                 }
+
                 delay(16.milliseconds)
             }
         }

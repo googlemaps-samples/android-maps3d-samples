@@ -27,7 +27,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowCompat
-import com.example.maps3d.common.toHeading
+import com.example.maps3d.common.PathData
+import com.example.maps3d.common.PathEngine
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.GoogleMap3D
@@ -42,27 +43,23 @@ import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.slider.Slider
-import com.google.maps.android.SphericalUtil
 
 /**
  * Advanced sample demonstrating ground-level path following in Kotlin.
  *
- * Features:
- * - Urban vs Rural ground-level paths
- * - Two-polyline architecture: wide blue base route (lower z-index) + narrow purple active progress route (higher z-index)
- * - In-place polyline ID updates eliminating render flickering
- * - Configurable altitude modes (Clamp to Ground default, Relative to Ground, Relative to Mesh, Absolute)
- * - Dynamic path elevation slider to eliminate z-fighting
- * - Occlusion visualization toggle (drawsOccludedSegments) rendering polylines through or behind 3D terrain and buildings
- * - Explicit collapse dialog button and smooth slide-down controls
- * - Real-time camera controls via sliders: Range, Ground Altitude, Heading Offset, Tilt, Follow Speed
+ * Key Concepts Demonstrated:
+ * 1. Dual-Polyline Architecture: Layered base route (lower z-index) and traversed progress route (higher z-index).
+ * 2. In-Place Polyline ID Updates: Stable IDs prevent render flickering during rapid real-time updates.
+ * 3. 3D Altitude Modes: Dynamic switching between Clamp to Ground, Relative, and Absolute elevation.
+ * 4. Occlusion Control: Toggling [PolylineOptions.setDrawsOccludedSegments] through terrain and buildings.
+ * 5. Kinematic Heading Smoothing: Exponential moving average low-pass filter to smooth camera cornering.
  */
 class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
     private lateinit var map3DView: Map3DView
     private var googleMap3D: GoogleMap3D? = null
 
-    // View Bindings
+    // Control panel overlay bindings
     private var controlsCard: CardView? = null
     private var cardHeader: View? = null
     private var btnCollapse: MaterialButton? = null
@@ -86,64 +83,6 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private lateinit var speedSlider: Slider
     private lateinit var speedSliderLabel: TextView
 
-    private val fadeHandler = Handler(Looper.getMainLooper())
-    private val fadeOutRunnable = Runnable {
-        if (controlsCard != null && !isCollapsed) {
-            controlsCard?.animate()
-                ?.alpha(0.8f)
-                ?.setDuration(400)
-                ?.start()
-        }
-    }
-
-    private fun collapseControls() {
-        val card = controlsCard ?: return
-        isCollapsed = true
-        fadeHandler.removeCallbacks(fadeOutRunnable)
-        btnCollapse?.setIconResource(R.drawable.expand_less_24px)
-        btnCollapse?.contentDescription = getString(R.string.expand_controls)
-
-        val headerHeight = if (cardHeader != null && cardHeader!!.height > 0) {
-            cardHeader!!.height
-        } else {
-            (48 * resources.displayMetrics.density).toInt()
-        }
-        val targetTranslationY = (card.height - headerHeight).coerceAtLeast(0).toFloat()
-        card.animate()
-            .translationY(targetTranslationY)
-            .alpha(0.9f)
-            .setDuration(300)
-            .start()
-    }
-
-    private fun expandControls() {
-        val card = controlsCard ?: return
-        isCollapsed = false
-        btnCollapse?.setIconResource(R.drawable.expand_more_24px)
-        btnCollapse?.contentDescription = getString(R.string.collapse_controls)
-        card.animate()
-            .translationY(0f)
-            .alpha(1.0f)
-            .setDuration(250)
-            .start()
-        fadeHandler.removeCallbacks(fadeOutRunnable)
-        fadeHandler.postDelayed(fadeOutRunnable, 3000L)
-    }
-
-    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        if (ev.action == MotionEvent.ACTION_DOWN || ev.action == MotionEvent.ACTION_MOVE) {
-            if (controlsCard != null && !isCollapsed) {
-                controlsCard?.animate()
-                    ?.alpha(1.0f)
-                    ?.setDuration(150)
-                    ?.start()
-                fadeHandler.removeCallbacks(fadeOutRunnable)
-                fadeHandler.postDelayed(fadeOutRunnable, 3000L)
-            }
-        }
-        return super.dispatchTouchEvent(ev)
-    }
-
     // Control parameters
     private var cameraRange = 300.0
     private var groundAltitude = 20.0
@@ -155,20 +94,30 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private var drawsOccludedSegments: Boolean = true
 
     // Path state
-    private var currentPath: List<LatLngAltitude> = URBAN_PATH
+    private var currentPath: List<LatLngAltitude> = PathData.URBAN_PATH
     private var cumulativeDistances: DoubleArray = doubleArrayOf()
     private var totalDistance: Double = 0.0
     private var elapsedDistance: Double = 0.0
     private var isPlaying = false
     private var isUserScrubbing = false
+    private var currentHeading: Double? = null
+
+    private val baseAltitude: Double
+        get() = if (currentPath == PathData.RURAL_PATH) 45.0 else 50.0
 
     // Polyline handles
     private var staticRoutePolyline: Polyline? = null
     private var progressPolyline: Polyline? = null
 
-    // Animation Loop
+    // Animation & auto-fade handlers
     private var animationRunnable: Runnable? = null
     private val animationHandler = Handler(Looper.getMainLooper())
+    private val fadeHandler = Handler(Looper.getMainLooper())
+    private val fadeOutRunnable = Runnable {
+        if (controlsCard != null && !isCollapsed) {
+            controlsCard?.animate()?.alpha(0.8f)?.setDuration(400)?.start()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -180,39 +129,7 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         map3DView.getMap3DViewAsync(this)
 
         initViews()
-        loadPathData(URBAN_PATH)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        map3DView.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        map3DView.onPause()
-        pauseAnimation()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        pauseAnimation()
-        fadeHandler.removeCallbacks(fadeOutRunnable)
-        staticRoutePolyline?.remove()
-        staticRoutePolyline = null
-        progressPolyline?.remove()
-        progressPolyline = null
-        map3DView.onDestroy()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        map3DView.onLowMemory()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        map3DView.onSaveInstanceState(outState)
+        loadPath(PathData.URBAN_PATH)
     }
 
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
@@ -222,9 +139,7 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             updateCameraPositionForDistance(0.0)
         }
 
-        // Schedule auto-fade for idle control panel after initial display
-        fadeHandler.removeCallbacks(fadeOutRunnable)
-        fadeHandler.postDelayed(fadeOutRunnable, 3000L)
+        scheduleControlsFade()
     }
 
     private fun initViews() {
@@ -232,21 +147,8 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         cardHeader = findViewById(R.id.card_header)
         btnCollapse = findViewById(R.id.btn_collapse)
 
-        btnCollapse?.setOnClickListener {
-            if (isCollapsed) {
-                expandControls()
-            } else {
-                collapseControls()
-            }
-        }
-
-        cardHeader?.setOnClickListener {
-            if (isCollapsed) {
-                expandControls()
-            } else {
-                collapseControls()
-            }
-        }
+        btnCollapse?.setOnClickListener { toggleControlsCard() }
+        cardHeader?.setOnClickListener { toggleControlsCard() }
 
         rgEnvironment = findViewById(R.id.rg_environment)
         rgAltitudeMode = findViewById(R.id.rg_altitude_mode)
@@ -266,15 +168,17 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         speedSlider = findViewById(R.id.speed_slider)
         speedSliderLabel = findViewById(R.id.speed_slider_label)
 
-        // Environment toggle
+        setupEventListeners()
+    }
+
+    private fun setupEventListeners() {
         rgEnvironment.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
-                R.id.rb_urban -> switchEnvironment(URBAN_PATH)
-                R.id.rb_rural -> switchEnvironment(RURAL_PATH)
+                R.id.rb_urban -> switchEnvironment(PathData.URBAN_PATH)
+                R.id.rb_rural -> switchEnvironment(PathData.RURAL_PATH)
             }
         }
 
-        // Altitude mode toggle
         rgAltitudeMode.setOnCheckedChangeListener { _, checkedId ->
             pathAltitudeMode = when (checkedId) {
                 R.id.rb_clamp_to_ground -> AltitudeMode.CLAMP_TO_GROUND
@@ -283,49 +187,25 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 R.id.rb_absolute -> AltitudeMode.ABSOLUTE
                 else -> AltitudeMode.CLAMP_TO_GROUND
             }
-            staticRoutePolyline?.remove()
-            staticRoutePolyline = null
-            progressPolyline?.remove()
-            progressPolyline = null
-            drawPathPolylines()
-            updateCameraPositionForDistance(elapsedDistance)
+            redrawPolylinesAndCamera()
         }
 
-        // Draw occluded segments toggle
         switchDrawsOccludedSegments.isChecked = drawsOccludedSegments
         switchDrawsOccludedSegments.setOnCheckedChangeListener { _, isChecked ->
             drawsOccludedSegments = isChecked
-            staticRoutePolyline?.remove()
-            staticRoutePolyline = null
-            progressPolyline?.remove()
-            progressPolyline = null
-            drawPathPolylines()
-            updateCameraPositionForDistance(elapsedDistance)
+            redrawPolylinesAndCamera()
         }
 
-        // Path height slider (0.0m - 10.0m)
         pathAltitudeSlider.addOnChangeListener { _, value, _ ->
             pathAltitudeOffset = value.toDouble()
-            pathAltitudeSliderLabel.text =
-                getString(R.string.path_height_format, pathAltitudeOffset)
-            staticRoutePolyline?.remove()
-            staticRoutePolyline = null
-            progressPolyline?.remove()
-            progressPolyline = null
-            drawPathPolylines()
-            updateCameraPositionForDistance(elapsedDistance)
+            pathAltitudeSliderLabel.text = getString(R.string.path_height_format, pathAltitudeOffset)
+            redrawPolylinesAndCamera()
         }
 
-        // Play/Pause button
         btnPlayPause.setOnClickListener {
-            if (isPlaying) {
-                pauseAnimation()
-            } else {
-                startAnimation()
-            }
+            if (isPlaying) pauseAnimation() else startAnimation()
         }
 
-        // Progress scrub slider
         progressSlider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
             override fun onStartTrackingTouch(slider: Slider) {
                 isUserScrubbing = true
@@ -345,55 +225,44 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             }
         }
 
-        // Camera Range Slider (50m - 1000m)
         rangeSlider.addOnChangeListener { _, value, _ ->
             cameraRange = value.toDouble()
             rangeSliderLabel.text = getString(R.string.camera_range_format, cameraRange.toInt())
             updateCameraPositionForDistance(elapsedDistance)
         }
 
-        // Ground Altitude Slider (2m - 200m)
         altitudeSlider.addOnChangeListener { _, value, _ ->
             groundAltitude = value.toDouble()
-            altitudeSliderLabel.text =
-                getString(R.string.ground_altitude_format, groundAltitude.toInt())
+            altitudeSliderLabel.text = getString(R.string.ground_altitude_format, groundAltitude.toInt())
             updateCameraPositionForDistance(elapsedDistance)
         }
 
-        // Heading Offset Slider (-180° - +180°)
         headingSlider.addOnChangeListener { _, value, _ ->
             headingOffset = value.toDouble()
             headingSliderLabel.text = getString(R.string.heading_offset_format, headingOffset.toInt())
             updateCameraPositionForDistance(elapsedDistance)
         }
 
-        // Camera Tilt Slider (0° - 85°)
         tiltSlider.addOnChangeListener { _, value, _ ->
             cameraTilt = value.toDouble()
             tiltSliderLabel.text = getString(R.string.camera_tilt_format, cameraTilt.toInt())
             updateCameraPositionForDistance(elapsedDistance)
         }
 
-        // Follow Speed Slider (5 m/s - 100 m/s)
         speedSlider.addOnChangeListener { _, value, _ ->
             followSpeedMps = value.toDouble()
             speedSliderLabel.text = getString(R.string.follow_speed_format, followSpeedMps.toInt())
         }
     }
 
-    private var currentHeading: Double? = null
-
     private fun switchEnvironment(path: List<LatLngAltitude>) {
         pauseAnimation()
         currentHeading = null
         elapsedDistance = 0.0
         progressSlider.value = 0f
-        progressPolyline?.remove()
-        progressPolyline = null
-        staticRoutePolyline?.remove()
-        staticRoutePolyline = null
+        clearPolylines()
 
-        if (path == RURAL_PATH) {
+        if (path == PathData.RURAL_PATH) {
             cameraRange = 450.0
             groundAltitude = 40.0
             cameraTilt = 75.0
@@ -415,23 +284,15 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         altitudeSliderLabel.text = getString(R.string.ground_altitude_format, groundAltitude.toInt())
         tiltSliderLabel.text = getString(R.string.camera_tilt_format, cameraTilt.toInt())
 
-        loadPathData(path)
+        loadPath(path)
         drawPathPolylines()
         updateCameraPositionForDistance(0.0)
     }
 
-    private fun loadPathData(path: List<LatLngAltitude>) {
+    private fun loadPath(path: List<LatLngAltitude>) {
         currentPath = path
-        cumulativeDistances = DoubleArray(path.size)
-        totalDistance = 0.0
-        cumulativeDistances[0] = 0.0
-        for (i in 1 until path.size) {
-            val pPrev = LatLng(path[i - 1].latitude, path[i - 1].longitude)
-            val pCurr = LatLng(path[i].latitude, path[i].longitude)
-            val dist = SphericalUtil.computeDistanceBetween(pPrev, pCurr)
-            totalDistance += dist
-            cumulativeDistances[i] = totalDistance
-        }
+        cumulativeDistances = PathEngine.calculateCumulativeDistances(path)
+        totalDistance = cumulativeDistances.lastOrNull() ?: 0.0
     }
 
     private fun drawPathPolylines() {
@@ -446,25 +307,16 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val map = googleMap3D ?: return
         if (currentPath.isEmpty()) return
 
-        val staticVertices = currentPath.map { pt ->
-            val vertexAltitude = when (pathAltitudeMode) {
-                AltitudeMode.CLAMP_TO_GROUND -> 0.0
-                AltitudeMode.ABSOLUTE -> pt.altitude + (if (currentPath == RURAL_PATH) 45.0 else 50.0) + pathAltitudeOffset
-                else -> pt.altitude + pathAltitudeOffset
-            }
-            LatLngAltitude(pt.latitude, pt.longitude, vertexAltitude)
-        }
-
+        val vertices = PathEngine.buildStaticVertices(currentPath, pathAltitudeMode, baseAltitude, pathAltitudeOffset)
         val staticOptions = PolylineOptions().apply {
-            id = STATIC_ROUTE_POLYLINE_ID
-            path = staticVertices
-            strokeColor = "#4285F4".toColorInt() // Wide blue route
+            id = PathEngine.STATIC_POLYLINE_ID
+            path = vertices
+            strokeColor = "#4285F4".toColorInt() // Wide blue route (16dp)
             strokeWidth = 16.0
             zIndex = 1
             altitudeMode = pathAltitudeMode
             drawsOccludedSegments = this@PathFollowingActivity.drawsOccludedSegments
         }
-
         staticRoutePolyline = map.addPolyline(staticOptions)
     }
 
@@ -472,70 +324,63 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val map = googleMap3D ?: return
         if (currentPath.isEmpty() || totalDistance <= 0.0) return
 
-        val progressCoordinates = ArrayList<LatLngAltitude>()
-        for (i in 0..index.coerceAtMost(currentPath.size - 1)) {
-            val pt = currentPath[i]
-            val vertexAltitude = when (pathAltitudeMode) {
-                AltitudeMode.CLAMP_TO_GROUND -> 0.0
-                AltitudeMode.ABSOLUTE -> pt.altitude + (if (currentPath == RURAL_PATH) 45.0 else 50.0) + pathAltitudeOffset + 0.4
-                else -> pt.altitude + pathAltitudeOffset + 0.4
-            }
-            progressCoordinates.add(LatLngAltitude(pt.latitude, pt.longitude, vertexAltitude))
-        }
+        val vertices = PathEngine.buildProgressVertices(
+            currentPath,
+            cumulativeDistances,
+            dist,
+            currentLatLng,
+            index,
+            pathAltitudeMode,
+            baseAltitude,
+            pathAltitudeOffset
+        )
 
-        val lastWaypoint = currentPath[index.coerceAtMost(currentPath.size - 1)]
-        val lastLatLng = LatLng(lastWaypoint.latitude, lastWaypoint.longitude)
-        val distToLast = SphericalUtil.computeDistanceBetween(lastLatLng, currentLatLng)
-        if (distToLast >= 0.5) {
-            val p1 = currentPath[index.coerceAtMost(currentPath.size - 1)]
-            val p2 = if (index < currentPath.size - 1) currentPath[index + 1] else p1
-            val segStartDist = cumulativeDistances.getOrElse(index) { 0.0 }
-            val segEndDist = cumulativeDistances.getOrElse(index + 1) { totalDistance }
-            val segLen = segEndDist - segStartDist
-            val fraction = if (segLen > 0) ((dist - segStartDist) / segLen).coerceIn(0.0, 1.0) else 0.0
-            val interpAlt = p1.altitude + fraction * (p2.altitude - p1.altitude)
-            val progressAltitude = when (pathAltitudeMode) {
-                AltitudeMode.CLAMP_TO_GROUND -> 0.0
-                AltitudeMode.ABSOLUTE -> interpAlt + (if (currentPath == RURAL_PATH) 45.0 else 50.0) + pathAltitudeOffset + 0.4
-                else -> interpAlt + pathAltitudeOffset + 0.4
-            }
-            progressCoordinates.add(
-                LatLngAltitude(currentLatLng.latitude, currentLatLng.longitude, progressAltitude)
-            )
-        }
-
-        if (progressCoordinates.size < 2) {
-            if (currentPath.size >= 2) {
-                val p0 = LatLng(currentPath[0].latitude, currentPath[0].longitude)
-                val p1 = LatLng(currentPath[1].latitude, currentPath[1].longitude)
-                val tinyForward = SphericalUtil.interpolate(p0, p1, 0.005)
-                val startAlt = when (pathAltitudeMode) {
-                    AltitudeMode.CLAMP_TO_GROUND -> 0.0
-                    AltitudeMode.ABSOLUTE -> currentPath[0].altitude + (if (currentPath == RURAL_PATH) 45.0 else 50.0) + pathAltitudeOffset + 0.4
-                    else -> currentPath[0].altitude + pathAltitudeOffset + 0.4
-                }
-                progressCoordinates.add(
-                    LatLngAltitude(tinyForward.latitude, tinyForward.longitude, startAlt)
-                )
-            }
-        }
-
-        // Dual-Polyline Rendering Technique:
-        // We render two layered polylines to clearly visualize completed vs. remaining route:
-        // 1. Base Static Polyline: A wider (#4285F4 blue, 16dp) static path at ZIndex=1.
-        // 2. Traversed Progress Polyline: A narrower (#9C27B0 purple, 8dp) line at ZIndex=2.
-        // Fixed PROGRESS_POLYLINE_ID ensures in-place upsert in Maps 3D engine without duplication.
+        // In-place ID upsert updates the existing line in the 3D renderer without recreating objects
         val progressOptions = PolylineOptions().apply {
-            id = PROGRESS_POLYLINE_ID
-            path = progressCoordinates
-            strokeColor = "#9C27B0".toColorInt() // Narrow purple progress
+            id = PathEngine.PROGRESS_POLYLINE_ID
+            path = vertices
+            strokeColor = "#9C27B0".toColorInt() // Narrow purple progress (8dp)
             strokeWidth = 8.0
             zIndex = 2
             altitudeMode = pathAltitudeMode
             drawsOccludedSegments = this@PathFollowingActivity.drawsOccludedSegments
         }
-
         progressPolyline = map.addPolyline(progressOptions)
+    }
+
+    private fun updateCameraPositionForDistance(dist: Double) {
+        val map = googleMap3D ?: return
+        if (currentPath.isEmpty()) return
+
+        val point = PathEngine.interpolatePoint(currentPath, cumulativeDistances, dist)
+        val targetHeading = PathEngine.smoothHeading(
+            point.bearing + headingOffset,
+            currentHeading,
+            isUserScrubbing,
+            isPlaying
+        )
+        currentHeading = targetHeading
+
+        val cameraTargetAltitude = PathEngine.calculateCameraAltitude(
+            pathAltitudeMode,
+            baseAltitude,
+            point.altitude,
+            groundAltitude
+        )
+
+        val newCamera = camera {
+            center = latLngAltitude {
+                latitude = point.latLng.latitude
+                longitude = point.latLng.longitude
+                altitude = cameraTargetAltitude
+            }
+            heading = targetHeading
+            tilt = cameraTilt
+            range = cameraRange
+        }
+
+        map.setCamera(newCamera)
+        updateProgressPolyline(dist, point.latLng, point.waypointIndex)
     }
 
     private fun startAnimation() {
@@ -551,21 +396,16 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 if (!isPlaying) return
 
                 val now = System.currentTimeMillis()
-                // Delta-time (dt) integration: Scale motion by actual elapsed seconds to ensure
-                // consistent travel speed across 60Hz, 90Hz, and 120Hz display refresh rates.
                 val dt = (now - lastTime) / 1000.0
                 lastTime = now
 
-                val stepDistance = followSpeedMps * dt
-                elapsedDistance += stepDistance
-
+                elapsedDistance += followSpeedMps * dt
                 if (elapsedDistance >= totalDistance) {
                     elapsedDistance = 0.0
                 }
 
                 if (!isUserScrubbing && totalDistance > 0) {
-                    val progress = (elapsedDistance / totalDistance).toFloat().coerceIn(0f, 1f)
-                    progressSlider.value = progress
+                    progressSlider.value = (elapsedDistance / totalDistance).toFloat().coerceIn(0f, 1f)
                 }
 
                 updateCameraPositionForDistance(elapsedDistance)
@@ -584,125 +424,89 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         }
     }
 
-    private fun updateCameraPositionForDistance(dist: Double) {
-        val map = googleMap3D ?: return
-        if (currentPath.isEmpty()) return
-
-        var index = 0
-        while (index < cumulativeDistances.size - 1 && cumulativeDistances[index + 1] < dist) {
-            index++
-        }
-
-        val p1 = currentPath[index]
-        val p2 = if (index < currentPath.size - 1) currentPath[index + 1] else p1
-
-        val segStartDist = cumulativeDistances[index]
-        val segEndDist =
-            if (index < cumulativeDistances.size - 1) cumulativeDistances[index + 1] else totalDistance
-        val segLen = segEndDist - segStartDist
-
-        val fraction = if (segLen > 0) ((dist - segStartDist) / segLen).coerceIn(0.0, 1.0) else 0.0
-        val latLng1 = LatLng(p1.latitude, p1.longitude)
-        val latLng2 = LatLng(p2.latitude, p2.longitude)
-        val currentLatLng = SphericalUtil.interpolate(latLng1, latLng2, fraction)
-        val bearing = SphericalUtil.computeHeading(latLng1, latLng2)
-
-        // Kinematic Heading Smoothing (Exponential Moving Average):
-        // Sharp polyline bends can produce disorienting camera jerks. We compute the shortest
-        // angular difference wrapped to [-180, 180] and apply an exponential low-pass filter (12% lerp)
-        // to smoothly turn the camera around street corners and mountain switchbacks.
-        val targetHeadingRaw = (bearing + headingOffset).toHeading()
-        val targetHeading = if (currentHeading == null || isUserScrubbing || !isPlaying) {
-            targetHeadingRaw
-        } else {
-            var diff = (targetHeadingRaw - currentHeading!!) % 360.0
-            if (diff > 180.0) diff -= 360.0
-            if (diff < -180.0) diff += 360.0
-            (currentHeading!! + diff * 0.12).toHeading()
-        }
-        currentHeading = targetHeading
-
-        val interpAlt = p1.altitude + fraction * (p2.altitude - p1.altitude)
-        val cameraTargetAltitude = if (pathAltitudeMode == AltitudeMode.ABSOLUTE) {
-            val baseAlt = if (currentPath == RURAL_PATH) 45.0 else 50.0
-            baseAlt + interpAlt + groundAltitude
-        } else {
-            groundAltitude
-        }
-
-        val newCamera = camera {
-            center = latLngAltitude {
-                latitude = currentLatLng.latitude
-                longitude = currentLatLng.longitude
-                altitude = cameraTargetAltitude
-            }
-            heading = targetHeading
-            tilt = cameraTilt
-            range = cameraRange
-        }
-
-        map.setCamera(newCamera)
-        updateProgressPolyline(dist, currentLatLng, index)
+    private fun redrawPolylinesAndCamera() {
+        clearPolylines()
+        drawPathPolylines()
+        updateCameraPositionForDistance(elapsedDistance)
     }
 
-    companion object {
-        private const val STATIC_ROUTE_POLYLINE_ID = "path_following_static_route"
-        private const val PROGRESS_POLYLINE_ID = "path_following_progress_route"
+    private fun clearPolylines() {
+        staticRoutePolyline?.remove()
+        staticRoutePolyline = null
+        progressPolyline?.remove()
+        progressPolyline = null
+    }
 
-        // Urban Path (San Francisco Downtown - Market Street Corridor with 1 to 10m altitudes)
-        val URBAN_PATH = listOf(
-            LatLngAltitude(37.79323, -122.39322, 4.2),
-            LatLngAltitude(37.79166, -122.39519, 6.7),
-            LatLngAltitude(37.79124, -122.39571, 8.1),
-            LatLngAltitude(37.79105, -122.39599, 9.5),
-            LatLngAltitude(37.78893, -122.39866, 7.3),
-            LatLngAltitude(37.78742, -122.40060, 5.0),
-            LatLngAltitude(37.78686, -122.40129, 3.4),
-            LatLngAltitude(37.78652, -122.40171, 2.1),
-            LatLngAltitude(37.78632, -122.40196, 4.6),
-            LatLngAltitude(37.78627, -122.40207, 6.2),
-            LatLngAltitude(37.78453, -122.40429, 8.9),
-            LatLngAltitude(37.78443, -122.40434, 10.0),
-            LatLngAltitude(37.78155, -122.40802, 7.8),
-            LatLngAltitude(37.78005, -122.40990, 5.4),
-            LatLngAltitude(37.77856, -122.41180, 3.1),
-            LatLngAltitude(37.77746, -122.41318, 1.8),
-            LatLngAltitude(37.77624, -122.41474, 4.0),
-            LatLngAltitude(37.77744, -122.41623, 6.5),
-            LatLngAltitude(37.77749, -122.41636, 8.7),
-            LatLngAltitude(37.77761, -122.41654, 9.8),
-            LatLngAltitude(37.77769, -122.41677, 7.2),
-            LatLngAltitude(37.77729, -122.41981, 4.9),
-            LatLngAltitude(37.77523, -122.41938, 2.6),
-            LatLngAltitude(37.77510, -122.41934, 1.2),
-            LatLngAltitude(37.77442, -122.42022, 3.5),
-            LatLngAltitude(37.77441, -122.42033, 5.8),
-            LatLngAltitude(37.77348, -122.42157, 8.4),
-            LatLngAltitude(37.77244, -122.42289, 10.0)
-        )
+    private fun toggleControlsCard() {
+        if (isCollapsed) expandControls() else collapseControls()
+    }
 
-        // Rural Path
-        val RURAL_PATH = listOf(
-            LatLngAltitude(37.254529, -122.380897, 0.0),
-            LatLngAltitude(37.255065, -122.381627, 0.0),
-            LatLngAltitude(37.257540, -122.383720, 0.0),
-            LatLngAltitude(37.261200, -122.383950, 0.0),
-            LatLngAltitude(37.264780, -122.388210, 0.0),
-            LatLngAltitude(37.268520, -122.392450, 0.0),
-            LatLngAltitude(37.272110, -122.397640, 0.0),
-            LatLngAltitude(37.276430, -122.401120, 0.0),
-            LatLngAltitude(37.280850, -122.403560, 0.0),
-            LatLngAltitude(37.286018, -122.405072, 0.0),
-            LatLngAltitude(37.291040, -122.404210, 0.0),
-            LatLngAltitude(37.295800, -122.401980, 0.0),
-            LatLngAltitude(37.300120, -122.399540, 0.0),
-            LatLngAltitude(37.304550, -122.397210, 0.0),
-            LatLngAltitude(37.309200, -122.395100, 0.0),
-            LatLngAltitude(37.313450, -122.392840, 0.0),
-            LatLngAltitude(37.317200, -122.390510, 0.0),
-            LatLngAltitude(37.320850, -122.388740, 0.0),
-            LatLngAltitude(37.323540, -122.387600, 0.0),
-            LatLngAltitude(37.325269, -122.386728, 0.0)
-        )
+    private fun collapseControls() {
+        val card = controlsCard ?: return
+        isCollapsed = true
+        fadeHandler.removeCallbacks(fadeOutRunnable)
+        btnCollapse?.setIconResource(R.drawable.expand_less_24px)
+        btnCollapse?.contentDescription = getString(R.string.expand_controls)
+
+        val headerHeight = if (cardHeader != null && cardHeader!!.height > 0) {
+            cardHeader!!.height
+        } else {
+            (48 * resources.displayMetrics.density).toInt()
+        }
+        val targetTranslationY = (card.height - headerHeight).coerceAtLeast(0).toFloat()
+        card.animate().translationY(targetTranslationY).alpha(0.9f).setDuration(300).start()
+    }
+
+    private fun expandControls() {
+        val card = controlsCard ?: return
+        isCollapsed = false
+        btnCollapse?.setIconResource(R.drawable.expand_more_24px)
+        btnCollapse?.contentDescription = getString(R.string.collapse_controls)
+        card.animate().translationY(0f).alpha(1.0f).setDuration(250).start()
+        scheduleControlsFade()
+    }
+
+    private fun scheduleControlsFade() {
+        fadeHandler.removeCallbacks(fadeOutRunnable)
+        fadeHandler.postDelayed(fadeOutRunnable, 3000L)
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.action == MotionEvent.ACTION_DOWN || ev.action == MotionEvent.ACTION_MOVE) {
+            if (controlsCard != null && !isCollapsed) {
+                controlsCard?.animate()?.alpha(1.0f)?.setDuration(150)?.start()
+                scheduleControlsFade()
+            }
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        map3DView.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        map3DView.onPause()
+        pauseAnimation()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        pauseAnimation()
+        fadeHandler.removeCallbacks(fadeOutRunnable)
+        clearPolylines()
+        map3DView.onDestroy()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        map3DView.onLowMemory()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        map3DView.onSaveInstanceState(outState)
     }
 }
