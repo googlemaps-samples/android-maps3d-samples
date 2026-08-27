@@ -179,6 +179,18 @@
                         />
                 </RadioGroup>
 
+                <!-- Draw Occluded Segments Switch -->
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switch_draws_occluded_segments"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:checked="true"
+                    android:text="@string/draws_occluded_segments"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                    android:textStyle="bold"
+                    />
+
                 <!-- Path Height (Relative Altitude) Slider -->
                 <TextView
                     android:id="@+id/path_altitude_slider_label"

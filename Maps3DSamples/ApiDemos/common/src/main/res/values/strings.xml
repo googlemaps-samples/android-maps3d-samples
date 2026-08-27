@@ -141,6 +141,11 @@
 
     <!-- Advanced Camera Animation strings -->
     <string name="aerial_tour_title">San Francisco Aerial Tour</string>
+    <string name="select_animation_approach">Select Animation Approach:</string>
+    <string name="approach_simple_fly_to">1. SDK Simple flyTo (Native Transition)</string>
+    <string name="approach_keyframe_tour">2. Declarative Keyframe Queue Tour</string>
+    <string name="approach_dispatcher_frame_loop">3. High-Rate Frame Dispatcher Loop</string>
+    <string name="approach_orbit_360_spin">4. 360-Degree Continuous Orbit Spin</string>
     <string name="aerial_tour_status_idle">Press Play to begin the multi-step aerial tour.</string>
     <string name="aerial_tour_status_running">Step %1$d of %2$d: %3$s</string>
     <string name="aerial_tour_status_finished">Tour complete. Press Reset to replay.</string>
@@ -182,6 +187,7 @@
     <string name="default_camera_tilt">Camera Tilt: 70°</string>
     <string name="default_follow_speed">Follow Speed: 30 m/s</string>
     <string name="play_or_pause_animation">Play or pause animation</string>
+    <string name="draws_occluded_segments">Draw Occluded Segments</string>
 
     <!-- Data Visualization strings -->
     <string name="data_visualization_controls_title">Flood Simulation Controls</string>

@@ -16,14 +16,16 @@
 
 package com.example.composedemos.pathfollowing
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.MotionEvent
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +38,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
@@ -45,6 +49,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -52,6 +57,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -59,11 +65,11 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -72,13 +78,27 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.maps.android.SphericalUtil
 import com.google.maps.android.compose3d.GoogleMap3D
 import com.google.maps.android.compose3d.PolylineConfig
-import kotlinx.coroutines.delay
+import com.google.maps.android.compose3d.utils.toHeading
+import kotlin.time.Duration.Companion.milliseconds
 
+/**
+ * Advanced sample demonstrating ground-level path following in Jetpack Compose.
+ *
+ * Features:
+ * - Urban vs Rural ground-level paths
+ * - Two-polyline architecture: wide blue base route (lower z-index) + narrow purple active progress route (higher z-index)
+ * - Configurable altitude modes (Clamp to Ground default, Relative to Ground, Relative to Mesh, Absolute)
+ * - Dynamic path elevation slider to eliminate z-fighting
+ * - Occlusion visualization toggle (drawsOccludedSegments) rendering polylines through or behind 3D terrain and buildings
+ * - Explicit collapsible controls card with smooth auto-fade on idle
+ * - Real-time camera controls via sliders: Range, Ground Altitude, Heading Offset, Tilt, Follow Speed
+ */
 class PathFollowingActivity : ComponentActivity() {
     val touchEventFlow = kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
@@ -111,37 +131,60 @@ class PathFollowingActivity : ComponentActivity() {
     }
 
     companion object {
-        // Urban Path (New York City - Central Park Block Circuit)
+        // Urban Path (San Francisco Downtown - Market Street Corridor with 1 to 10m altitudes)
         val URBAN_PATH = listOf(
-            LatLng(40.7783119, -73.9627630),
-            LatLng(40.7776355, -73.9611664),
-            LatLng(40.7770011, -73.9616294),
-            LatLng(40.7776743, -73.9632228),
-            LatLng(40.7783119, -73.9627630),
+            LatLngAltitude(37.79323, -122.39322, 4.2),
+            LatLngAltitude(37.79166, -122.39519, 6.7),
+            LatLngAltitude(37.79124, -122.39571, 8.1),
+            LatLngAltitude(37.79105, -122.39599, 9.5),
+            LatLngAltitude(37.78893, -122.39866, 7.3),
+            LatLngAltitude(37.78742, -122.40060, 5.0),
+            LatLngAltitude(37.78686, -122.40129, 3.4),
+            LatLngAltitude(37.78652, -122.40171, 2.1),
+            LatLngAltitude(37.78632, -122.40196, 4.6),
+            LatLngAltitude(37.78627, -122.40207, 6.2),
+            LatLngAltitude(37.78453, -122.40429, 8.9),
+            LatLngAltitude(37.78443, -122.40434, 10.0),
+            LatLngAltitude(37.78155, -122.40802, 7.8),
+            LatLngAltitude(37.78005, -122.40990, 5.4),
+            LatLngAltitude(37.77856, -122.41180, 3.1),
+            LatLngAltitude(37.77746, -122.41318, 1.8),
+            LatLngAltitude(37.77624, -122.41474, 4.0),
+            LatLngAltitude(37.77744, -122.41623, 6.5),
+            LatLngAltitude(37.77749, -122.41636, 8.7),
+            LatLngAltitude(37.77761, -122.41654, 9.8),
+            LatLngAltitude(37.77769, -122.41677, 7.2),
+            LatLngAltitude(37.77729, -122.41981, 4.9),
+            LatLngAltitude(37.77523, -122.41938, 2.6),
+            LatLngAltitude(37.77510, -122.41934, 1.2),
+            LatLngAltitude(37.77442, -122.42022, 3.5),
+            LatLngAltitude(37.77441, -122.42033, 5.8),
+            LatLngAltitude(37.77348, -122.42157, 8.4),
+            LatLngAltitude(37.77244, -122.42289, 10.0),
         )
 
-        // Rural Path
+        // Rural Path (California Coastal Highway)
         val RURAL_PATH = listOf(
-            LatLng(37.254529, -122.380897),
-            LatLng(37.255065, -122.381627),
-            LatLng(37.257540, -122.383720),
-            LatLng(37.261200, -122.383950),
-            LatLng(37.264780, -122.388210),
-            LatLng(37.268520, -122.392450),
-            LatLng(37.272110, -122.397640),
-            LatLng(37.276430, -122.401120),
-            LatLng(37.280850, -122.403560),
-            LatLng(37.286018, -122.405072),
-            LatLng(37.291040, -122.404210),
-            LatLng(37.295800, -122.401980),
-            LatLng(37.300120, -122.399540),
-            LatLng(37.304550, -122.397210),
-            LatLng(37.309200, -122.395100),
-            LatLng(37.313450, -122.392840),
-            LatLng(37.317200, -122.390510),
-            LatLng(37.320850, -122.388740),
-            LatLng(37.323540, -122.387600),
-            LatLng(37.325269, -122.386728),
+            LatLngAltitude(37.254529, -122.380897, 0.0),
+            LatLngAltitude(37.255065, -122.381627, 0.0),
+            LatLngAltitude(37.257540, -122.383720, 0.0),
+            LatLngAltitude(37.261200, -122.383950, 0.0),
+            LatLngAltitude(37.264780, -122.388210, 0.0),
+            LatLngAltitude(37.268520, -122.392450, 0.0),
+            LatLngAltitude(37.272110, -122.397640, 0.0),
+            LatLngAltitude(37.276430, -122.401120, 0.0),
+            LatLngAltitude(37.280850, -122.403560, 0.0),
+            LatLngAltitude(37.286018, -122.405072, 0.0),
+            LatLngAltitude(37.291040, -122.404210, 0.0),
+            LatLngAltitude(37.295800, -122.401980, 0.0),
+            LatLngAltitude(37.300120, -122.399540, 0.0),
+            LatLngAltitude(37.304550, -122.397210, 0.0),
+            LatLngAltitude(37.309200, -122.395100, 0.0),
+            LatLngAltitude(37.313450, -122.392840, 0.0),
+            LatLngAltitude(37.317200, -122.390510, 0.0),
+            LatLngAltitude(37.320850, -122.388740, 0.0),
+            LatLngAltitude(37.323540, -122.387600, 0.0),
+            LatLngAltitude(37.325269, -122.386728, 0.0),
         )
     }
 }
@@ -151,13 +194,21 @@ enum class EnvironmentType(val label: String) {
     RURAL("Rural"),
 }
 
+enum class AltitudeModeOption(val label: String, val mode: Int) {
+    CLAMP_TO_GROUND("Clamp to Ground", AltitudeMode.CLAMP_TO_GROUND),
+    RELATIVE_TO_GROUND("Relative to Ground", AltitudeMode.RELATIVE_TO_GROUND),
+    RELATIVE_TO_MESH("Relative to Mesh", AltitudeMode.RELATIVE_TO_MESH),
+    ABSOLUTE("Absolute", AltitudeMode.ABSOLUTE),
+}
+
 @Composable
 fun PathFollowingScreen() {
     var isMapSteady by remember { mutableStateOf(false) }
 
-    // UX Fade logic
-    val activity = LocalContext.current as PathFollowingActivity
+    // UX Fade and Collapse logic
+    val activity = LocalActivity.current as PathFollowingActivity
     var showControls by remember { mutableStateOf(true) }
+    var isCollapsed by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         activity.touchEventFlow.collect {
@@ -165,21 +216,26 @@ fun PathFollowingScreen() {
         }
     }
 
-    LaunchedEffect(showControls) {
-        if (showControls) {
-            kotlinx.coroutines.delay(3000)
+    LaunchedEffect(showControls, isCollapsed) {
+        if (showControls && !isCollapsed) {
+            kotlinx.coroutines.delay(3000.milliseconds)
             showControls = false
         }
     }
 
     val controlsAlpha by animateFloatAsState(
-        targetValue = if (showControls) 1f else 0.2f,
-        animationSpec = tween(500),
+        targetValue = if (showControls || isCollapsed) 1f else 0.8f,
+        animationSpec = tween(400),
     )
 
     // Environment Selection State
     var selectedEnv by remember { mutableStateOf(EnvironmentType.URBAN) }
     var currentPath by remember { mutableStateOf(PathFollowingActivity.URBAN_PATH) }
+
+    // Altitude Mode and Height State
+    var selectedAltitudeMode by remember { mutableStateOf(AltitudeModeOption.CLAMP_TO_GROUND) }
+    var pathAltitudeOffset by remember { mutableFloatStateOf(0.5f) }
+    var drawsOccludedSegments by remember { mutableStateOf(true) }
 
     // Path Calculations State
     val pathCalculations = remember(currentPath) {
@@ -187,7 +243,9 @@ fun PathFollowingScreen() {
         var total = 0.0
         cumulative[0] = 0.0
         for (i in 1 until currentPath.size) {
-            val dist = SphericalUtil.computeDistanceBetween(currentPath[i - 1], currentPath[i])
+            val pPrev = LatLng(currentPath[i - 1].latitude, currentPath[i - 1].longitude)
+            val pCurr = LatLng(currentPath[i].latitude, currentPath[i].longitude)
+            val dist = SphericalUtil.computeDistanceBetween(pPrev, pCurr)
             total += dist
             cumulative[i] = total
         }
@@ -201,6 +259,7 @@ fun PathFollowingScreen() {
     var progress by remember { mutableFloatStateOf(0.0f) }
     var isUserScrubbing by remember { mutableStateOf(false) }
     var elapsedDistance by remember { mutableDoubleStateOf(0.0) }
+    var currentWaypointIndex by remember { mutableIntStateOf(0) }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -223,9 +282,12 @@ fun PathFollowingScreen() {
     var followSpeedMps by remember { mutableFloatStateOf(30f) }
 
     // Interpolated Position & Heading
-    var currentLatLng by remember(currentPath) { mutableStateOf(currentPath.first()) }
+    var currentLatLng by remember(currentPath) {
+        val first = currentPath.first()
+        mutableStateOf(LatLng(first.latitude, first.longitude))
+    }
     var currentHeading by remember { mutableStateOf<Double?>(null) }
-    var targetHeading by remember { mutableDoubleStateOf(120.0) }
+    var targetHeading by remember { mutableDoubleStateOf(0.0) }
 
     // Helper to calculate position for given elapsed distance
     fun updatePositionForDistance(dist: Double) {
@@ -234,6 +296,8 @@ fun PathFollowingScreen() {
         while (index < cumulativeDistances.size - 1 && cumulativeDistances[index + 1] < dist) {
             index++
         }
+        currentWaypointIndex = index
+
         val p1 = currentPath[index]
         val p2 = if (index < currentPath.size - 1) currentPath[index + 1] else p1
 
@@ -243,17 +307,21 @@ fun PathFollowingScreen() {
         val segLen = segEndDist - segStartDist
 
         val fraction = if (segLen > 0) ((dist - segStartDist) / segLen).coerceIn(0.0, 1.0) else 0.0
-        currentLatLng = SphericalUtil.interpolate(p1, p2, fraction)
-        val bearing = SphericalUtil.computeHeading(p1, p2)
+        val latLng1 = LatLng(p1.latitude, p1.longitude)
+        val latLng2 = LatLng(p2.latitude, p2.longitude)
+        val interpolatedLatLng = SphericalUtil.interpolate(latLng1, latLng2, fraction)
+        currentLatLng = interpolatedLatLng
+        val bearing = SphericalUtil.computeHeading(latLng1, latLng2)
 
-        val targetHeadingRaw = (bearing + headingOffset + 360.0) % 360.0
+        // Kinematic Heading Smoothing (Exponential Moving Average)
+        val targetHeadingRaw = (bearing + headingOffset).toHeading()
         val computedHeading = if (currentHeading == null || isUserScrubbing || !isPlaying) {
             targetHeadingRaw
         } else {
             var diff = (targetHeadingRaw - currentHeading!!) % 360.0
             if (diff > 180.0) diff -= 360.0
             if (diff < -180.0) diff += 360.0
-            (currentHeading!! + diff * 0.12 + 360.0) % 360.0
+            (currentHeading!! + diff * 0.12).toHeading()
         }
         currentHeading = computedHeading
         targetHeading = computedHeading
@@ -303,14 +371,22 @@ fun PathFollowingScreen() {
         }
     }
 
+    // Dynamic Camera Altitude
+    val cameraTargetAltitude = if (selectedAltitudeMode.mode == AltitudeMode.ABSOLUTE) {
+        val baseAlt = if (currentPath == PathFollowingActivity.RURAL_PATH) 45.0 else 50.0
+        baseAlt + groundAltitude
+    } else {
+        groundAltitude.toDouble()
+    }
+
     // Dynamic Camera State
     val dynamicCamera =
-        remember(currentLatLng, targetHeading, cameraTilt, cameraRange, groundAltitude) {
+        remember(currentLatLng, targetHeading, cameraTilt, cameraRange, cameraTargetAltitude) {
             camera {
                 center = latLngAltitude {
                     latitude = currentLatLng.latitude
                     longitude = currentLatLng.longitude
-                    altitude = groundAltitude.toDouble()
+                    altitude = cameraTargetAltitude
                 }
                 heading = targetHeading
                 tilt = cameraTilt.toDouble()
@@ -319,21 +395,94 @@ fun PathFollowingScreen() {
             }
         }
 
-    // Polyline Config
-    val polylineConfig = remember(currentPath) {
+    // Dual-Polyline Rendering Technique:
+    // 1. Base Static Route Polyline: A wider (#4285F4 blue, 16dp) static path at ZIndex=1.
+    // 2. Traversed Progress Polyline: A narrower (#9C27B0 purple, 8dp) line at ZIndex=2.
+    val staticPolylineConfig = remember(
+        currentPath,
+        selectedAltitudeMode,
+        pathAltitudeOffset,
+        drawsOccludedSegments,
+    ) {
+        val pathAltitude = when (selectedAltitudeMode.mode) {
+            AltitudeMode.CLAMP_TO_GROUND -> 0.0
+            AltitudeMode.ABSOLUTE -> if (currentPath == PathFollowingActivity.RURAL_PATH) 45.0 + pathAltitudeOffset else 50.0 + pathAltitudeOffset
+            else -> pathAltitudeOffset.toDouble()
+        }
+        val staticVertices = currentPath.map { pt ->
+            LatLngAltitude(pt.latitude, pt.longitude, pathAltitude)
+        }
         PolylineConfig(
-            key = "path_following_polyline",
-            points = currentPath.map { latLng ->
-                latLngAltitude {
-                    latitude = latLng.latitude
-                    longitude = latLng.longitude
-                    altitude = 5.0
-                }
-            },
-            color = Color.BLUE,
-            width = 10f,
-            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND,
+            key = "path_following_static_route",
+            points = staticVertices,
+            color = "#4285F4".toColorInt(),
+            width = 16f,
+            zIndex = 1,
+            altitudeMode = selectedAltitudeMode.mode,
+            drawsOccludedSegments = drawsOccludedSegments,
         )
+    }
+
+    val progressPolylineConfig = remember(
+        currentPath,
+        currentWaypointIndex,
+        currentLatLng,
+        selectedAltitudeMode,
+        pathAltitudeOffset,
+        drawsOccludedSegments,
+        totalDistance,
+    ) {
+        if (currentPath.isEmpty() || totalDistance <= 0.0) return@remember null
+
+        val pathAltitude = when (selectedAltitudeMode.mode) {
+            AltitudeMode.CLAMP_TO_GROUND -> 0.0
+            AltitudeMode.ABSOLUTE -> if (currentPath == PathFollowingActivity.RURAL_PATH) 45.0 + pathAltitudeOffset else 50.0 + pathAltitudeOffset
+            else -> pathAltitudeOffset.toDouble()
+        }
+
+        val progressAltitude = if (selectedAltitudeMode.mode == AltitudeMode.CLAMP_TO_GROUND) {
+            0.0
+        } else {
+            pathAltitude + 0.4
+        }
+
+        val progressCoordinates = ArrayList<LatLngAltitude>()
+        for (i in 0..currentWaypointIndex.coerceAtMost(currentPath.size - 1)) {
+            val pt = currentPath[i]
+            progressCoordinates.add(LatLngAltitude(pt.latitude, pt.longitude, progressAltitude))
+        }
+
+        val lastWaypoint = currentPath[currentWaypointIndex.coerceAtMost(currentPath.size - 1)]
+        val lastLatLng = LatLng(lastWaypoint.latitude, lastWaypoint.longitude)
+        val distToLast = SphericalUtil.computeDistanceBetween(lastLatLng, currentLatLng)
+        if (distToLast >= 0.5) {
+            progressCoordinates.add(
+                LatLngAltitude(currentLatLng.latitude, currentLatLng.longitude, progressAltitude),
+            )
+        }
+
+        if (progressCoordinates.size < 2 && currentPath.size >= 2) {
+            val p0 = LatLng(currentPath[0].latitude, currentPath[0].longitude)
+            val p1 = LatLng(currentPath[1].latitude, currentPath[1].longitude)
+            val tinyForward = SphericalUtil.interpolate(p0, p1, 0.005)
+            progressCoordinates.add(
+                LatLngAltitude(tinyForward.latitude, tinyForward.longitude, progressAltitude),
+            )
+        }
+
+        PolylineConfig(
+            key = "path_following_progress_route",
+            points = progressCoordinates,
+            color = "#9C27B0".toColorInt(),
+            width = 8f,
+            zIndex = 2,
+            altitudeMode = selectedAltitudeMode.mode,
+            drawsOccludedSegments = drawsOccludedSegments,
+        )
+    }
+
+    val polylines = remember(staticPolylineConfig, progressPolylineConfig) {
+        listOfNotNull(staticPolylineConfig, progressPolylineConfig)
     }
 
     Box(
@@ -344,14 +493,14 @@ fun PathFollowingScreen() {
         // 1. Full Screen 3D Map
         GoogleMap3D(
             camera = dynamicCamera,
-            polylines = listOf(polylineConfig),
+            polylines = polylines,
             modifier = Modifier.fillMaxSize(),
             onMapSteady = {
                 isMapSteady = true
             },
         )
 
-        // 2. Control Panel Card at Bottom
+        // 2. Collapsible Control Panel Card at Bottom
         Card(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -360,146 +509,263 @@ fun PathFollowingScreen() {
                 .alpha(controlsAlpha),
         ) {
             Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .heightIn(max = 320.dp)
-                    .verticalScroll(rememberScrollState()),
+                modifier = Modifier.padding(16.dp),
             ) {
-                // Environment Selector
-                Text(
-                    text = "Path Environment:",
-                    style = MaterialTheme.typography.labelLarge,
-                )
-
+                // Header with Title and Expand / Collapse Button
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
+                        .clickable { isCollapsed = !isCollapsed },
+                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    EnvironmentType.entries.forEach { env ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .weight(1f)
-                                .selectable(
-                                    selected = (selectedEnv == env),
-                                    onClick = { switchEnvironment(env) },
-                                    role = Role.RadioButton,
-                                ),
-                        ) {
-                            RadioButton(
-                                selected = (selectedEnv == env),
-                                onClick = null,
-                            )
-                            Text(
-                                text = env.label,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(start = 4.dp),
-                            )
-                        }
-                    }
-                }
-
-                // Play / Pause and Progress Slider Row
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
+                    Text(
+                        text = "Path Following Controls",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
                     IconButton(
-                        onClick = { isPlaying = !isPlaying },
+                        onClick = { isCollapsed = !isCollapsed },
+                        modifier = Modifier.semantics {
+                            contentDescription =
+                                if (isCollapsed) "Expand Controls" else "Collapse Controls"
+                        },
                     ) {
                         Icon(
-                            imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                            contentDescription = "Play or Pause animation",
+                            imageVector = if (isCollapsed) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                            contentDescription = if (isCollapsed) "Expand Controls" else "Collapse Controls",
                         )
                     }
-
-                    Slider(
-                        value = progress,
-                        onValueChange = { newValue ->
-                            isUserScrubbing = true
-                            progress = newValue
-                            elapsedDistance = totalDistance * newValue
-                            updatePositionForDistance(elapsedDistance)
-                        },
-                        onValueChangeFinished = {
-                            isUserScrubbing = false
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .semantics { contentDescription = "Path Progress Slider" },
-                    )
                 }
 
-                // Camera Controls Sliders
-                Text(
-                    text = "Camera Range: ${cameraRange.toInt()}m",
-                    style = MaterialTheme.typography.labelMedium,
-                )
-                Slider(
-                    value = cameraRange,
-                    onValueChange = {
-                        cameraRange = it
-                        updatePositionForDistance(elapsedDistance)
-                    },
-                    valueRange = 50f..1000f,
-                    modifier = Modifier.semantics { contentDescription = "Camera Range Slider" },
-                )
+                AnimatedVisibility(visible = !isCollapsed) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 340.dp)
+                            .verticalScroll(rememberScrollState()),
+                    ) {
+                        // Environment Selector
+                        Text(
+                            text = "Path Environment:",
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 2.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            EnvironmentType.entries.forEach { env ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .selectable(
+                                            selected = (selectedEnv == env),
+                                            onClick = { switchEnvironment(env) },
+                                            role = Role.RadioButton,
+                                        ),
+                                ) {
+                                    RadioButton(
+                                        selected = (selectedEnv == env),
+                                        onClick = null,
+                                    )
+                                    Text(
+                                        text = env.label,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(start = 4.dp),
+                                    )
+                                }
+                            }
+                        }
 
-                val maxAltitude = if (selectedEnv == EnvironmentType.RURAL) 2000f else 200f
-                Text(
-                    text = "Ground Altitude: ${groundAltitude.toInt()}m",
-                    style = MaterialTheme.typography.labelMedium,
-                )
-                Slider(
-                    value = groundAltitude.coerceIn(2f, maxAltitude),
-                    onValueChange = {
-                        groundAltitude = it
-                        updatePositionForDistance(elapsedDistance)
-                    },
-                    valueRange = 2f..maxAltitude,
-                    modifier = Modifier.semantics { contentDescription = "Ground Altitude Slider" },
-                )
+                        // Altitude Mode Selector
+                        Text(
+                            text = "Altitude Mode:",
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 2.dp),
+                        ) {
+                            AltitudeModeOption.entries.forEach { opt ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .selectable(
+                                            selected = (selectedAltitudeMode == opt),
+                                            onClick = { selectedAltitudeMode = opt },
+                                            role = Role.RadioButton,
+                                        ),
+                                ) {
+                                    RadioButton(
+                                        selected = (selectedAltitudeMode == opt),
+                                        onClick = null,
+                                    )
+                                    Text(
+                                        text = opt.label,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(start = 4.dp),
+                                    )
+                                }
+                            }
+                        }
 
-                Text(
-                    text = "Heading Offset: ${headingOffset.toInt()}°",
-                    style = MaterialTheme.typography.labelMedium,
-                )
-                Slider(
-                    value = headingOffset,
-                    onValueChange = {
-                        headingOffset = it
-                        updatePositionForDistance(elapsedDistance)
-                    },
-                    valueRange = -180f..180f,
-                    modifier = Modifier.semantics { contentDescription = "Heading Offset Slider" },
-                )
+                        // Path Height Slider (Relative Altitude)
+                        Text(
+                            text = "Path Height: ${"%.1f".format(pathAltitudeOffset)}m",
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                        Slider(
+                            value = pathAltitudeOffset,
+                            onValueChange = { pathAltitudeOffset = it },
+                            valueRange = 0f..10f,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Path Height Slider"
+                            },
+                        )
 
-                Text(
-                    text = "Camera Tilt: ${cameraTilt.toInt()}°",
-                    style = MaterialTheme.typography.labelMedium,
-                )
-                Slider(
-                    value = cameraTilt,
-                    onValueChange = {
-                        cameraTilt = it
-                        updatePositionForDistance(elapsedDistance)
-                    },
-                    valueRange = 0f..85f,
-                    modifier = Modifier.semantics { contentDescription = "Camera Tilt Slider" },
-                )
+                        // Occlusion Switch
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                        ) {
+                            Text(
+                                text = "Draw Occluded Segments",
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                            Switch(
+                                checked = drawsOccludedSegments,
+                                onCheckedChange = { drawsOccludedSegments = it },
+                                modifier = Modifier.semantics {
+                                    contentDescription = "Draw Occluded Segments Switch"
+                                },
+                            )
+                        }
 
-                Text(
-                    text = "Follow Speed: ${followSpeedMps.toInt()} m/s",
-                    style = MaterialTheme.typography.labelMedium,
-                )
-                Slider(
-                    value = followSpeedMps,
-                    onValueChange = { followSpeedMps = it },
-                    valueRange = 5f..100f,
-                    modifier = Modifier.semantics { contentDescription = "Follow Speed Slider" },
-                )
+                        // Play / Pause and Progress Slider Row
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            IconButton(
+                                onClick = { isPlaying = !isPlaying },
+                            ) {
+                                Icon(
+                                    imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                                    contentDescription = if (isPlaying) "Pause animation" else "Play animation",
+                                )
+                            }
+
+                            Slider(
+                                value = progress,
+                                onValueChange = { newValue ->
+                                    isUserScrubbing = true
+                                    progress = newValue
+                                    elapsedDistance = totalDistance * newValue
+                                    updatePositionForDistance(elapsedDistance)
+                                },
+                                onValueChangeFinished = {
+                                    isUserScrubbing = false
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .semantics { contentDescription = "Path Progress Slider" },
+                            )
+                        }
+
+                        // Camera Range Slider
+                        Text(
+                            text = "Camera Range: ${cameraRange.toInt()}m",
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        Slider(
+                            value = cameraRange,
+                            onValueChange = {
+                                cameraRange = it
+                                updatePositionForDistance(elapsedDistance)
+                            },
+                            valueRange = 50f..1000f,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Camera Range Slider"
+                            },
+                        )
+
+                        // Ground Altitude Slider
+                        val maxAltitude = if (selectedEnv == EnvironmentType.RURAL) 2000f else 200f
+                        Text(
+                            text = "Ground Altitude: ${groundAltitude.toInt()}m",
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        Slider(
+                            value = groundAltitude.coerceIn(2f, maxAltitude),
+                            onValueChange = {
+                                groundAltitude = it
+                                updatePositionForDistance(elapsedDistance)
+                            },
+                            valueRange = 2f..maxAltitude,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Ground Altitude Slider"
+                            },
+                        )
+
+                        // Heading Offset Slider
+                        Text(
+                            text = "Heading Offset: ${headingOffset.toInt()}°",
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        Slider(
+                            value = headingOffset,
+                            onValueChange = {
+                                headingOffset = it
+                                updatePositionForDistance(elapsedDistance)
+                            },
+                            valueRange = -180f..180f,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Heading Offset Slider"
+                            },
+                        )
+
+                        // Camera Tilt Slider
+                        Text(
+                            text = "Camera Tilt: ${cameraTilt.toInt()}°",
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        Slider(
+                            value = cameraTilt,
+                            onValueChange = {
+                                cameraTilt = it
+                                updatePositionForDistance(elapsedDistance)
+                            },
+                            valueRange = 0f..85f,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Camera Tilt Slider"
+                            },
+                        )
+
+                        // Follow Speed Slider
+                        Text(
+                            text = "Follow Speed: ${followSpeedMps.toInt()} m/s",
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        Slider(
+                            value = followSpeedMps,
+                            onValueChange = { followSpeedMps = it },
+                            valueRange = 5f..100f,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Follow Speed Slider"
+                            },
+                        )
+                    }
+                }
             }
         }
     }

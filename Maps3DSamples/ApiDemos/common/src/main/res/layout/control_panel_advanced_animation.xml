@@ -44,6 +44,52 @@
             />
 
         <TextView
+            style="@style/TextAppearance.Material3.LabelLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/select_animation_approach"
+            android:textStyle="bold"
+            />
+
+        <RadioGroup
+            android:id="@+id/rg_animation_approach"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            >
+
+            <RadioButton
+                android:id="@+id/rb_simple_fly_to"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/approach_simple_fly_to"
+                />
+
+            <RadioButton
+                android:id="@+id/rb_keyframe_tour"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/approach_keyframe_tour"
+                />
+
+            <RadioButton
+                android:id="@+id/rb_dispatcher_frame_loop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/approach_dispatcher_frame_loop"
+                />
+
+            <RadioButton
+                android:id="@+id/rb_orbit_360_spin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/approach_orbit_360_spin"
+                />
+        </RadioGroup>
+
+        <TextView
             android:id="@+id/tv_tour_status"
             style="@style/TextAppearance.Material3.BodyMedium"
             android:layout_width="match_parent"

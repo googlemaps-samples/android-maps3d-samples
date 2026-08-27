@@ -19,6 +19,7 @@ package com.example.maps3dkotlin.advancedcameraanimation
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.RadioGroup
 import androidx.lifecycle.lifecycleScope
 import com.example.maps3d.common.RouteEngine
 import com.example.maps3dcommon.R
@@ -38,13 +39,13 @@ import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.maps.android.SphericalUtil
 import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Suspends until the 3D map camera animation completes using [com.google.android.gms.maps3d.OnCameraAnimationEndListener].
@@ -83,13 +84,13 @@ sealed interface CameraKeyframe {
         val targetHeading: Double,
         val targetTilt: Double,
         val targetRange: Double,
-        val durationMs: Long = 2500L
+        val durationMs: Long = 2500L,
     ) : CameraKeyframe
 
     data class DwellPause(
         override val stepTitle: String,
         override val stepDescription: String,
-        val durationMs: Long = 1500L
+        val durationMs: Long = 1500L,
     ) : CameraKeyframe
 
     data class OrbitAround(
@@ -101,7 +102,7 @@ sealed interface CameraKeyframe {
         val tilt: Double,
         val startHeading: Double,
         val endHeading: Double,
-        val durationMs: Long = 4000L
+        val durationMs: Long = 4000L,
     ) : CameraKeyframe
 }
 
@@ -149,6 +150,17 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         findViewById<MaterialToolbar>(R.id.top_bar)?.apply {
             title = "Advanced Camera Animation"
             setNavigationOnClickListener { finish() }
+        }
+
+        findViewById<RadioGroup>(R.id.rg_animation_approach)?.setOnCheckedChangeListener { _, checkedId ->
+            selectedApproach = when (checkedId) {
+                R.id.rb_simple_fly_to -> AnimationApproach.SIMPLE_FLY_TO
+                R.id.rb_keyframe_tour -> AnimationApproach.KEYFRAME_TOUR
+                R.id.rb_dispatcher_frame_loop -> AnimationApproach.DISPATCHER_FRAME_LOOP
+                R.id.rb_orbit_360_spin -> AnimationApproach.ORBIT_360_SPIN
+                else -> AnimationApproach.DISPATCHER_FRAME_LOOP
+            }
+            resetAndRestartTour()
         }
 
         findViewById<Button>(R.id.btn_reset)?.setOnClickListener {
@@ -221,7 +233,11 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         updatePlayPauseButtonState()
 
         val targetLoc = AIRPLANE_FLIGHT_PATH.last()
-        val flightHeading = SphericalUtil.computeHeading(AIRPLANE_FLIGHT_PATH[AIRPLANE_FLIGHT_PATH.size - 2], targetLoc)
+        val flightHeading =
+            SphericalUtil.computeHeading(
+                AIRPLANE_FLIGHT_PATH[AIRPLANE_FLIGHT_PATH.size - 2],
+                targetLoc
+            )
         updateAirplaneModel(targetLoc, flightHeading + 180.0)
 
         val targetCam = camera {
@@ -281,7 +297,8 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
                         for (frame in 0..totalFrames) {
                             if (!isActive || !isPlaying) break
                             val t = frame.toDouble() / totalFrames
-                            val orbitHeading = interpolateAngle(step.startHeading, step.endHeading, t)
+                            val orbitHeading =
+                                interpolateAngle(step.startHeading, step.endHeading, t)
 
                             val updatedCam = camera {
                                 center = latLngAltitude {
@@ -317,9 +334,9 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
     /**
      * Frame Dispatcher Animation Loop.
      * High-speed flight animation (400 m/s) stopping cleanly at destination.
-     * 
+     *
      * For the most visually uniform cinematic sweeping motion, we recommend using
-     * `Choreographer.FrameCallback` to sync our delta-time interpolation directly 
+     * `Choreographer.FrameCallback` to sync our delta-time interpolation directly
      * to the hardware display frames.
      */
     private fun runFrameDispatcherLoop() {
@@ -490,7 +507,8 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
 
     companion object {
         private const val MODEL_ID = "airplane_model"
-        private const val PLANE_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb"
+        private const val PLANE_URL =
+            "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb"
 
         val SAN_FRANCISCO_TOUR = listOf(
             CameraKeyframe.FlyTo(
