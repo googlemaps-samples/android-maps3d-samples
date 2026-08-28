@@ -141,6 +141,27 @@
 
     <!-- Advanced Camera Animation strings -->
     <string name="aerial_tour_title">San Francisco Aerial Tour</string>
+    <string name="framework_kotlin_views">Kotlin Views</string>
+    <string name="framework_java_views">Java Views</string>
+    <string name="framework_compose">Jetpack Compose</string>
+    <string name="select_animation_approach">Select Animation Approach:</string>
+    <string name="approach_simple_fly_to">1. SDK Simple flyTo</string>
+    <string name="approach_keyframe_tour">2. Keyframe Queue Tour</string>
+    <string name="approach_dispatcher_frame_loop">3. Frame Dispatcher (400 m/s)</string>
+    <string name="approach_orbit_360_spin">4. 360° Continuous Orbit</string>
+    <string name="help_dialog_advanced_animation_title">3D Camera Animation Paradigms</string>
+    <string name="help_dialog_advanced_animation_message"><![CDATA[
+<p><b>✈️ Animation Approaches:</b></p>
+<p><b>1. SDK Simple flyTo:</b> Native asynchronous camera flight transition directly to Coit Tower with automatic altitude and tilt easing.</p>
+<p><b>2. Keyframe Queue Tour:</b> Declarative 5-step sequence: Swoop FlyTo → Dwell Pause → 360° Orbit → Stationary Tracking Flight → Final FlyTo.</p>
+<p><b>3. High-Rate Frame Dispatcher:</b> Continuous 400 m/s flight synced to hardware VSYNC display frames via Choreographer.</p>
+<p><b>4. 360° Continuous Orbit:</b> Constant angular camera rotation around the Golden Gate Bridge.</p>
+<br/>
+<p><b>🎛️ Control Panel:</b></p>
+<p>• <b>Dropdown Menu:</b> Tap to select animation approach</p>
+<p>• <b>Header / Drag Handle:</b> Tap or swipe to expand/collapse panel</p>
+<p>• <b>Idle Auto-Fade:</b> Panel dims after 3.5s of inactivity</p>
+]]></string>
     <string name="aerial_tour_status_idle">Press Play to begin the multi-step aerial tour.</string>
     <string name="aerial_tour_status_running">Step %1$d of %2$d: %3$s</string>
     <string name="aerial_tour_status_finished">Tour complete. Press Reset to replay.</string>
@@ -210,4 +231,8 @@
     <string name="help_dialog_title">3D Path Following Controls</string>
     <string name="help_dialog_message">🧭 Camera Gestures:\n• Vertical Sweep (1 Finger): Adjusts camera tilt (0° to 85°)\n• Horizontal Sweep (1 Finger): Rotates camera heading orbit\n• Pinch (2 Fingers): Zooms camera in / out\n\n⚡ Speed &amp; Navigation:\n• Long Press &amp; Hold: 2x Boost (at 0.5s) → 5x Warp Speed (at 2s)\n• Double-Tap &amp; Hold Right: +5x Fast-Forward\n• Double-Tap &amp; Hold Left: -5x Rewind\n• Quick Double-Tap: Skip +/- 10% along path\n• Speed Chips (0.5x - 5x): Instant preset selection\n\n🎛️ Control Panel:\n• Swipe Up / Down or Tap Header: Expand / collapse settings panel\n• Idle Auto-Fade: Panel fades to transparent after 3.5s of inactivity</string>
     <string name="help_dialog_ok">Got It</string>
+    <!-- Simple FlyTo Sub-modes -->
+    <string name="model_animation_mode_title">3D Model Animation Mode:</string>
+    <string name="fly_to_mode_synchronized">Synchronized (High CPU)</string>
+    <string name="fly_to_mode_midpoint">Midpoint Jump (Low CPU)</string>
 </resources>

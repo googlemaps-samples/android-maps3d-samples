@@ -1,0 +1,19 @@
+<h3><font color="#4285F4">✈️ Camera Animation Paradigms</font></h3>
+<p>
+  <b>• 1. SDK Simple flyTo:</b> Native asynchronous GPU camera flight transition directly to Coit Tower with automatic altitude and tilt easing.<br/>
+  <b>• 2. Keyframe Queue:</b> Declarative chained sequence (FlyTo &rarr; Dwell Pause &rarr; 360&deg; Orbit &rarr; Final FlyTo).<br/>
+  <b>• 3. Frame Dispatcher:</b> Continuous 400 m/s flight synced to hardware VSYNC display frames via Choreographer.<br/>
+  <b>• 4. 360&deg; Continuous Orbit:</b> Constant angular camera rotation around landmark.
+</p>
+
+<h3><font color="#4285F4">🎮 3D Model Synchronization</font></h3>
+<p>
+  <b>• Synchronized Flight (High CPU):</b> Calculates continuous spherical waypoints and model heading on every frame in lockstep with the camera.<br/>
+  <b>• Midpoint Jump (Low CPU):</b> Leaves model at origin until t = T/2, then repositions to destination with near-zero CPU overhead.
+</p>
+
+<h3><font color="#4285F4">🎛️ Panel &amp; Gestures</font></h3>
+<p>
+  <b>• Swipe Up / Down or Tap Header:</b> Collapse or expand the controls panel.<br/>
+  <b>• Idle Auto-Fade:</b> Panel smoothly dims after 3.5s of inactivity to provide an unobstructed full-screen map view.
+</p>
