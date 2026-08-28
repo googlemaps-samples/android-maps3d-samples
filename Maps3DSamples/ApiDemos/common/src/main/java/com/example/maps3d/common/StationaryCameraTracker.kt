@@ -52,32 +52,31 @@ data class Cartesian3D(
 /**
  * Mathematical controller that locks the physical camera eye at a stationary 3D spatial position
  * while continuously tracking a moving entity (such as an airplane flying across San Francisco Bay).
- *
- * ### Mathematical Mechanics & Edicts of Literate Programming
+ * ### Mathematical Mechanics & Literate Formulation
  *
  * The Google Maps 3D SDK defines camera poses from the perspective of their focal center:
  * `Camera(center = target, heading = H, tilt = θ, range = R)`
  *
- * When the focal target moves from an initial location $P_0$ to a destination $P(t)$, maintaining
+ * When the focal target moves from an initial location P₀ to a destination P(t), maintaining
  * a fixed physical observation vantage point requires computing the inverse spherical parameters:
  *
  * 1. **Initial Vantage Point Derivation**:
- *    From the initial observation camera parameters $(P_0, H_0, 	heta_0, R_0)$, the physical eye is
- *    located behind the target in direction $(H_0 + 180°)$:
- *    - Horizontal Ground Distance: $D_0 = R_0 \cdot \sin(\theta_0)$
- *    - Vertical Height Above Target: $\Delta Z_0 = R_0 \cdot \cos(\theta_0)$
- *    - Fixed 3D Eye Coordinate:
- *      $$E_{\text{eye}} = - D_0 \cdot \sin(H_0)$$
- *      $$N_{\text{eye}} = - D_0 \cdot \cos(H_0)$$
- *      $$U_{\text{eye}} = P_0.\text{alt} + \Delta Z_0$$
+ *    From the initial observation camera parameters (P₀, H₀, θ₀, R₀), the physical eye is
+ *    located behind the target in direction (H₀ + 180°):
+ *    - Horizontal Ground Distance: `D₀ = R₀ * sin(θ₀)`
+ *    - Vertical Height Above Target: `ΔZ₀ = R₀ * cos(θ₀)`
+ *    - Fixed 3D Eye Coordinate in Local ENU Space:
+ *      - `E_eye = -D₀ * sin(H₀)`
+ *      - `N_eye = -D₀ * cos(H₀)`
+ *      - `U_eye = P₀.altitude + ΔZ₀`
  *
  * 2. **Target Tracking & Inverse Projection**:
- *    As the target moves to $P(t)$, its ENU position $(E_t, N_t, U_t)$ relative to $P_0$ is computed
- *    via geodesic spherical trigonometry. The line-of-sight vector from the fixed eye to the target is:
- *    $$\mathbf{V} = (E_t - E_{\text{eye}}, N_t - N_{\text{eye}}, U_t - U_{\text{eye}})$$
- *    - **Range**: $R(t) = \|\mathbf{V}\| = \sqrt{\Delta E^2 + \Delta N^2 + \Delta U^2}$
- *    - **Heading**: $H(t) = \operatorname{atan2}(\Delta E, \Delta N) \pmod{360°}$
- *    - **Tilt**: $\theta(t) = \operatorname{atan2}(\sqrt{\Delta E^2 + \Delta N^2}, U_{\text{eye}} - U_t)$
+ *    As the target moves to P(t), its ENU position (E_t, N_t, U_t) relative to P₀ is computed
+ *    via spherical trigonometry. The line-of-sight vector from the fixed eye to the target is:
+ *    `V = (E_t - E_eye, N_t - N_eye, U_t - U_eye)`
+ *    - **Range**: `R(t) = ||V|| = sqrt(ΔE² + ΔN² + ΔU²)`
+ *    - **Heading**: `H(t) = atan2(ΔE, ΔN) mod 360°`
+ *    - **Tilt**: `θ(t) = atan2(sqrt(ΔE² + ΔN²), U_eye - U_t)`
  */
 class StationaryCameraTracker(
     val referenceCenter: LatLngAltitude,
