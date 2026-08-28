@@ -145,6 +145,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
 
         findViewById<MaterialToolbar>(CommonR.id.top_bar)?.apply {
             title = getString(CommonR.string.aerial_tour_title)
+            subtitle = "Kotlin Views"
         }
 
         setupCustomControls()
@@ -162,6 +163,10 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
         rootLayout.addView(customView)
 
         controlsCard = customView.findViewById(CommonR.id.control_panel)
+        customView.findViewById<TextView>(CommonR.id.tv_framework_subtitle)?.apply {
+            text = "Kotlin Views"
+            visibility = View.VISIBLE
+        }
         headerTitleBar = customView.findViewById(CommonR.id.header_title_bar)
         btnHelp = customView.findViewById(CommonR.id.btn_help)
         btnCollapseToggle = customView.findViewById(CommonR.id.btn_collapse_toggle)
@@ -318,9 +323,15 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
 
     override fun onMapReady(googleMap3D: GoogleMap3D) {
         super.onMapReady(googleMap3D)
-        viewModel.currentState.getEntityPose(TourData.AIRPLANE_MODEL_ID)?.let { initialPose ->
-            airplaneEntity.attach(googleMap3D, initialPose)
-        }
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (!isDestroyed && !isFinishing) {
+                val targetCam = if (viewModel.currentState.selectedApproach == AnimationApproach.KEYFRAME_TOUR) TourData.OVERVIEW_CAMERA else initialCamera
+                this.googleMap3D?.setCamera(targetCam)
+                viewModel.currentState.getEntityPose(TourData.AIRPLANE_MODEL_ID)?.let { initialPose ->
+                    this.googleMap3D?.let { map -> airplaneEntity.attach(map, initialPose) }
+                }
+            }
+        }, 350L)
     }
 
     private fun resetAndRestartTour() {

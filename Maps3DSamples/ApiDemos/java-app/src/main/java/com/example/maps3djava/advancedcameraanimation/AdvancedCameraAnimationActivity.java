@@ -121,6 +121,7 @@ public class AdvancedCameraAnimationActivity extends SampleBaseActivity {
         MaterialToolbar topBar = findViewById(com.example.maps3dcommon.R.id.top_bar);
         if (topBar != null) {
             topBar.setTitle(com.example.maps3dcommon.R.string.aerial_tour_title);
+            topBar.setSubtitle(com.example.maps3dcommon.R.string.framework_java_views);
         }
 
         viewModel = new ViewModelProvider(this).get(AdvancedCameraAnimationViewModel.class);
@@ -140,6 +141,11 @@ public class AdvancedCameraAnimationActivity extends SampleBaseActivity {
         rootLayout.addView(customView);
 
         controlsCard = customView.findViewById(com.example.maps3dcommon.R.id.control_panel);
+        TextView tvFrameworkSubtitle = customView.findViewById(com.example.maps3dcommon.R.id.tv_framework_subtitle);
+        if (tvFrameworkSubtitle != null) {
+            tvFrameworkSubtitle.setText("Java Views");
+            tvFrameworkSubtitle.setVisibility(View.VISIBLE);
+        }
         LinearLayout headerTitleBar = customView.findViewById(com.example.maps3dcommon.R.id.header_title_bar);
         MaterialButton btnHelp = customView.findViewById(com.example.maps3dcommon.R.id.btn_help);
         btnCollapseToggle = customView.findViewById(com.example.maps3dcommon.R.id.btn_collapse_toggle);
@@ -240,6 +246,32 @@ public class AdvancedCameraAnimationActivity extends SampleBaseActivity {
                             : com.example.maps3dcommon.R.drawable.play_arrow_24px
             );
 
+            // Synchronize approach button label & UI
+            btnSelectApproach.setText(state.getSelectedApproach().getTitle());
+            layoutSimpleFlyToOptions.setVisibility(
+                    state.getSelectedApproach() == AnimationApproach.SIMPLE_FLY_TO ? View.VISIBLE : View.GONE
+            );
+
+            boolean isKeyframeTour = state.getSelectedApproach() == AnimationApproach.KEYFRAME_TOUR;
+            cardKeyframeTourStep.setVisibility(isKeyframeTour ? View.VISIBLE : View.GONE);
+            if (isKeyframeTour) {
+                tvKeyframeStepBadge.setText(!state.getStepTitle().isEmpty() ? state.getStepTitle() : "Step " + (state.getCurrentStepIndex() + 1) + " of " + state.getTotalSteps());
+                tvKeyframeStepDesc.setText(state.getStepDescription());
+                progressKeyframeStep.setMax(state.getTotalSteps());
+                progressKeyframeStep.setProgress(state.getCurrentStepIndex() + 1);
+            }
+
+            // Update detail explanation text
+            updateApproachUI(state.getSelectedApproach());
+
+            // Synchronize sub-mode chip selection
+            int targetSubModeChipId = (state.getSimpleFlyToMode() == SimpleFlyToMode.MIDPOINT_JUMP)
+                    ? com.example.maps3dcommon.R.id.chip_fly_to_midpoint
+                    : com.example.maps3dcommon.R.id.chip_fly_to_synchronized;
+            if (chipGroupSimpleFlyToMode.getCheckedChipId() != targetSubModeChipId) {
+                chipGroupSimpleFlyToMode.check(targetSubModeChipId);
+            }
+
             if (googleMap3D != null) {
                 if (state.getSelectedApproach() == AnimationApproach.DISPATCHER_FRAME_LOOP ||
                         state.getSelectedApproach() == AnimationApproach.ORBIT_360_SPIN) {
@@ -257,10 +289,18 @@ public class AdvancedCameraAnimationActivity extends SampleBaseActivity {
     @Override
     public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
         super.onMap3DViewReady(googleMap3D);
-        EntityPose initialPose = viewModel.getCurrentState().getEntityPose(TourData.AIRPLANE_MODEL_ID);
-        if (initialPose != null) {
-            airplaneEntity.attach(googleMap3D, initialPose);
-        }
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (!isDestroyed() && !isFinishing() && this.googleMap3D != null) {
+                Camera targetCam = (viewModel.getCurrentState().getSelectedApproach() == AnimationApproach.KEYFRAME_TOUR)
+                        ? TourData.OVERVIEW_CAMERA
+                        : getInitialCamera();
+                this.googleMap3D.setCamera(targetCam);
+                EntityPose initialPose = viewModel.getCurrentState().getEntityPose(TourData.AIRPLANE_MODEL_ID);
+                if (initialPose != null) {
+                    airplaneEntity.attach(this.googleMap3D, initialPose);
+                }
+            }
+        }, 350L);
     }
 
     private void resetAndRestartTour() {

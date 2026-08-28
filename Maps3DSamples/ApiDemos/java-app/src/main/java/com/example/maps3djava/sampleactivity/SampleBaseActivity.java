@@ -20,6 +20,8 @@ import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -182,7 +184,11 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
     public void onMap3DViewReady(GoogleMap3D googleMap3D) {
         this.googleMap3D = googleMap3D;
 
-        googleMap3D.setCamera(getInitialCamera());
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (!isDestroyed() && !isFinishing() && this.googleMap3D != null) {
+                this.googleMap3D.setCamera(getInitialCamera());
+            }
+        }, 350L);
 
         // Mark map view as steady when rendering stabilizes for automated visual tests
         googleMap3D.setOnMapSteadyListener(isSceneSteady -> {

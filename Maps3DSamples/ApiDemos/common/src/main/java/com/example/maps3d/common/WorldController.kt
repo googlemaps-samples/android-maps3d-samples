@@ -260,7 +260,7 @@ class WorldController(
                         longitude = planePose.position.longitude
                         altitude = 250.0
                     }
-                    heading = planePose.heading
+                    heading = TrajectoryFlightAnimator.normalizeHeading(planePose.heading + 180.0)
                     tilt = 65.0
                     range = 600.0
                 }

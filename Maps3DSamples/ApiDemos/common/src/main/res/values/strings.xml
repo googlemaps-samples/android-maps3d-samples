@@ -141,6 +141,9 @@
 
     <!-- Advanced Camera Animation strings -->
     <string name="aerial_tour_title">San Francisco Aerial Tour</string>
+    <string name="framework_kotlin_views">Kotlin Views</string>
+    <string name="framework_java_views">Java Views</string>
+    <string name="framework_compose">Jetpack Compose</string>
     <string name="select_animation_approach">Select Animation Approach:</string>
     <string name="approach_simple_fly_to">1. SDK Simple flyTo</string>
     <string name="approach_keyframe_tour">2. Keyframe Queue Tour</string>
