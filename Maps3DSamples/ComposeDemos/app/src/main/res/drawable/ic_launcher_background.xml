@@ -29,8 +29,8 @@
                 android:endX="108"
                 android:endY="108"
                 android:type="linear">
-                <item android:offset="0.0" android:color="#F7F5FE"/>
-                <item android:offset="1.0" android:color="#EAE4FC"/>
+                <item android:offset="0.0" android:color="#F0FAF8"/>
+                <item android:offset="1.0" android:color="#E0F4EF"/>
             </gradient>
         </aapt:attr>
     </path>
@@ -38,9 +38,9 @@
     <path
         android:pathData="M18,62 L50,78 L82,62 M26,66 L50,78 L74,66 M34,70 L50,78 L66,70"
         android:strokeWidth="1.2"
-        android:strokeColor="#257F52FF"/>
+        android:strokeColor="#2500D2B4"/>
     <path
         android:pathData="M18,62 L50,46 L82,62 M50,46 L50,78"
         android:strokeWidth="0.8"
-        android:strokeColor="#184285F4"/>
+        android:strokeColor="#183DDC84"/>
 </vector>

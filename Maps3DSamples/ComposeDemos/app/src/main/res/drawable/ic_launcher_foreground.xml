@@ -72,35 +72,29 @@
         android:pathData="M48,38 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0"/>
 
 
-    <!-- Kotlin Framework Badge (Bottom-Right) -->
+    <!-- Compose Framework Badge (Bottom-Right) -->
     <!-- Badge Drop Shadow -->
     <path
         android:fillColor="#33000000"
         android:pathData="M65,65 h28 v28 h-28 z"/>
-    <!-- Badge Background (Rounded Rectangle) -->
+    <!-- Badge Background (Compose Dark Navy) -->
     <path
-        android:fillColor="#231F20"
-        android:pathData="M66,66 h26 a3,3 0 0 1 3,3 v26 a3,3 0 0 1 -3,3 h-26 a3,3 0 0 1 -3,-3 v-26 a3,3 0 0 1 3,-3 z"/>
+        android:fillColor="#073042"
+        android:pathData="M66,66 h26 a4,4 0 0 1 4,4 v24 a4,4 0 0 1 -4,4 h-24 a4,4 0 0 1 -4,-4 v-24 a4,4 0 0 1 4,-4 z"/>
     <!-- White Border -->
     <path
-        android:pathData="M66,66 h26 a3,3 0 0 1 3,3 v26 a3,3 0 0 1 -3,3 h-26 a3,3 0 0 1 -3,-3 v-26 a3,3 0 0 1 3,-3 z"
+        android:pathData="M66,66 h26 a4,4 0 0 1 4,4 v24 a4,4 0 0 1 -4,4 h-24 a4,4 0 0 1 -4,-4 v-24 a4,4 0 0 1 4,-4 z"
         android:strokeWidth="1.5"
         android:strokeColor="#FFFFFF"/>
-    <!-- Kotlin Gradient Logo Shapes -->
-    <!-- Purple Top Triangle -->
+    <!-- Compose Logo: Outer Chevron (Cyan/Blue) & Inner Chevron (Green) -->
     <path
-        android:fillColor="#7F52FF"
-        android:pathData="M68,68 L92,68 L68,92 Z"/>
-    <!-- Pink Middle Band -->
+        android:fillColor="#4285F4"
+        android:pathData="M70,72 L78,79 L70,86 L74,86 L82,79 L74,72 Z"/>
     <path
-        android:fillColor="#C711E1"
-        android:pathData="M92,68 L80,80 L68,80 L68,68 Z"/>
-    <!-- Orange/Red Lower Triangle -->
+        android:fillColor="#3DDC84"
+        android:pathData="M88,72 L80,79 L88,86 L84,86 L76,79 L84,72 Z"/>
     <path
-        android:fillColor="#F88909"
-        android:pathData="M68,92 L92,68 L92,92 Z"/>
-    <path
-        android:fillColor="#E4485D"
-        android:pathData="M80,80 L92,68 L92,92 L68,92 Z"/>
+        android:fillColor="#00D2B4"
+        android:pathData="M78,75 L82,79 L78,83 L75,79 Z"/>
 
 </vector>
