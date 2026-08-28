@@ -182,6 +182,7 @@
     <string name="default_camera_tilt">Camera Tilt: 70°</string>
     <string name="default_follow_speed">Follow Speed: 30 m/s</string>
     <string name="play_or_pause_animation">Play or pause animation</string>
+    <string name="draws_occluded_segments">Draw Occluded Segments</string>
 
     <!-- Data Visualization strings -->
     <string name="data_visualization_controls_title">Flood Simulation Controls</string>
@@ -206,4 +207,7 @@
     <string name="fov_standard">45° Standard</string>
     <string name="fov_wide">90° Wide</string>
     <string name="fov_ultrawide">120° Ultra</string>
+    <string name="help_dialog_title">3D Path Following Controls</string>
+    <string name="help_dialog_message">🧭 Camera Gestures:\n• Vertical Sweep (1 Finger): Adjusts camera tilt (0° to 85°)\n• Horizontal Sweep (1 Finger): Rotates camera heading orbit\n• Pinch (2 Fingers): Zooms camera in / out\n\n⚡ Speed &amp; Navigation:\n• Long Press &amp; Hold: 2x Boost (at 0.5s) → 5x Warp Speed (at 2s)\n• Double-Tap &amp; Hold Right: +5x Fast-Forward\n• Double-Tap &amp; Hold Left: -5x Rewind\n• Quick Double-Tap: Skip +/- 10% along path\n• Speed Chips (0.5x - 5x): Instant preset selection\n\n🎛️ Control Panel:\n• Swipe Up / Down or Tap Header: Expand / collapse settings panel\n• Idle Auto-Fade: Panel fades to transparent after 3.5s of inactivity</string>
+    <string name="help_dialog_ok">Got It</string>
 </resources>

@@ -28,6 +28,15 @@
         android:layout_height="match_parent"
         />
 
+    <!-- Transparent Touch Gesture Overlay replacing built-in map gestures -->
+    <View
+        android:id="@+id/gesture_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true"
+        />
+
 
 
     <!-- Bottom Control Panel Card -->
@@ -48,16 +57,31 @@
             >
 
             <!-- Card Header with title and collapse/expand button -->
+            <!-- Drag Handle Affordance -->
+            <View
+                android:id="@+id/drag_handle"
+                android:layout_width="36dp"
+                android:layout_height="4dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="2dp"
+                android:background="@drawable/drag_handle_bar"
+                android:alpha="0.6"
+                />
+
             <LinearLayout
                 android:id="@+id/card_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
                 android:paddingStart="12dp"
                 android:paddingEnd="6dp"
-                android:paddingTop="6dp"
-                android:paddingBottom="2dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
                 >
 
                 <TextView
@@ -70,13 +94,123 @@
                     />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_help"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    app:icon="@drawable/help_outline_24px"
+                    app:iconTint="?attr/colorOnSurface"
+                    android:contentDescription="Help"
+                    />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_collapse"
                     style="@style/Widget.Material3.Button.IconButton"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     app:icon="@drawable/expand_more_24px"
                     app:iconTint="?attr/colorOnSurface"
                     android:contentDescription="@string/collapse_controls"
+                    />
+            </LinearLayout>
+
+            <!-- Speed Preset Chips & Playback Row (Always visible even when collapsed) -->
+            <LinearLayout
+                android:id="@+id/layout_speed_chips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                >
+
+
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chip_group_speed"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:singleSelection="true"
+                    app:selectionRequired="true"
+                    >
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_speed_05x"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.5x"
+                        />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_speed_1x"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="1x"
+                        />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_speed_2x"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="2x"
+                        />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_speed_3x"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="3x"
+                        />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_speed_5x"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="5x"
+                        />
+                </com.google.android.material.chip.ChipGroup>
+            </LinearLayout>
+
+            <!-- Persistent Play/Pause & Progress Row (Always visible even when collapsed) -->
+            <LinearLayout
+                android:id="@+id/layout_persistent_playback"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="4dp"
+                >
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_play_pause"
+                    style="@style/Widget.Material3.Button.IconButton.Filled"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    app:icon="@drawable/play_arrow_24px"
+                    android:contentDescription="@string/play_or_pause_animation"
+                    />
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/progress_slider"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:valueFrom="0.0"
+                    android:valueTo="1.0"
+                    android:value="0.0"
                     />
             </LinearLayout>
 
@@ -179,6 +313,18 @@
                         />
                 </RadioGroup>
 
+                <!-- Draw Occluded Segments Switch -->
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switch_draws_occluded_segments"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:checked="true"
+                    android:text="@string/draws_occluded_segments"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                    android:textStyle="bold"
+                    />
+
                 <!-- Path Height (Relative Altitude) Slider -->
                 <TextView
                     android:id="@+id/path_altitude_slider_label"
@@ -199,34 +345,7 @@
                     android:value="0.5"
                     />
 
-                <!-- Play / Pause and Progress Row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="4dp"
-                    >
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_play_pause"
-                        style="@style/Widget.Material3.Button.IconButton.Filled"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        app:icon="@drawable/play_arrow_24px"
-                        android:contentDescription="@string/play_or_pause_animation"
-                        />
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/progress_slider"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:valueFrom="0.0"
-                        android:valueTo="1.0"
-                        android:value="0.0"
-                        />
-                </LinearLayout>
+                
 
                 <!-- Camera Parameter Sliders -->
                 <TextView
@@ -242,8 +361,8 @@
                     android:id="@+id/range_slider"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:valueFrom="50.0"
-                    android:valueTo="1000.0"
+                    android:valueFrom="20.0"
+                    android:valueTo="5000.0"
                     android:value="300.0"
                     />
 
@@ -259,8 +378,8 @@
                     android:id="@+id/altitude_slider"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:valueFrom="5.0"
-                    android:valueTo="200.0"
+                    android:valueFrom="0.0"
+                    android:valueTo="500.0"
                     android:value="20.0"
                     />
 
