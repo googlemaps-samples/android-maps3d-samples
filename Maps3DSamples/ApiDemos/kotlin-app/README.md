@@ -17,17 +17,17 @@ This directory contains the Kotlin samples using traditional Android Views for t
 | **Camera Restrictions** | 🚧 Skeleton | [CameraRestrictionsActivity.kt](src/main/java/com/example/maps3dkotlin/camerarestrictions/CameraRestrictionsActivity.kt) | |
 | **Flight Simulator** | 🚧 Skeleton | [FlightSimulatorActivity.kt](src/main/java/com/example/maps3dkotlin/flightsimulator/FlightSimulatorActivity.kt) | |
 | **Routes API** | ✅ Done | [RoutesActivity.kt](src/main/java/com/example/maps3dkotlin/routes/RoutesActivity.kt) | <img src="screenshots/routes_screenshot.png" alt="Screenshot" width="121"/> |
-| **Path Following** | 🚧 Skeleton | [PathFollowingActivity.kt](src/main/java/com/example/maps3dkotlin/pathfollowing/PathFollowingActivity.kt) | |
+| **Path Following** | ✅ Done | [PathFollowingActivity.kt](src/main/java/com/example/maps3dkotlin/pathfollowing/PathFollowingActivity.kt) | |
 | **Path Styling** | 🚧 Skeleton | [PathStylingActivity.kt](src/main/java/com/example/maps3dkotlin/pathstyling/PathStylingActivity.kt) | |
 | **Animating Models** | 🚧 Skeleton | [AnimatingModelsActivity.kt](src/main/java/com/example/maps3dkotlin/animatingmodels/AnimatingModelsActivity.kt) | |
 | **Place Search** | 🚧 Skeleton | [PlaceSearchActivity.kt](src/main/java/com/example/maps3dkotlin/placesearch/PlaceSearchActivity.kt) | |
 | **Place Autocomplete** | 🚧 Skeleton | [PlaceAutocompleteActivity.kt](src/main/java/com/example/maps3dkotlin/placeautocomplete/PlaceAutocompleteActivity.kt) | |
 | **Place Details** | 🚧 Skeleton | [PlaceDetailsActivity.kt](src/main/java/com/example/maps3dkotlin/placedetails/PlaceDetailsActivity.kt) | |
-| **Advanced Camera Animation** | 🚧 Skeleton | [AdvancedCameraAnimationActivity.kt](src/main/java/com/example/maps3dkotlin/advancedcameraanimation/AdvancedCameraAnimationActivity.kt) | |
-| **Data Visualization** | 🚧 Skeleton | [DataVisualizationActivity.kt](src/main/java/com/example/maps3dkotlin/datavisualization/DataVisualizationActivity.kt) | |
-| **Cloud Map Styling** | 🚧 Skeleton | [CloudStylingActivity.kt](src/main/java/com/example/maps3dkotlin/cloudstyling/CloudStylingActivity.kt) | |
-| **Roadmap Mode** | 🚧 Skeleton | [RoadmapModeActivity.kt](src/main/java/com/example/maps3dkotlin/roadmapmode/RoadmapModeActivity.kt) | |
-| **Field Of View** | 🚧 Skeleton | [FieldOfViewActivity.kt](src/main/java/com/example/maps3dkotlin/fieldofview/FieldOfViewActivity.kt) | |
+| **Advanced Camera Animation** | ✅ Done | [AdvancedCameraAnimationActivity.kt](src/main/java/com/example/maps3dkotlin/advancedcameraanimation/AdvancedCameraAnimationActivity.kt) | |
+| **Data Visualization** | ✅ Done | [DataVisualizationActivity.kt](src/main/java/com/example/maps3dkotlin/datavisualization/DataVisualizationActivity.kt) | |
+| **Cloud Map Styling** | ✅ Done | [CloudStylingActivity.kt](src/main/java/com/example/maps3dkotlin/cloudstyling/CloudStylingActivity.kt) | |
+| **Roadmap Mode** | ✅ Done | [RoadmapModeActivity.kt](src/main/java/com/example/maps3dkotlin/roadmapmode/RoadmapModeActivity.kt) | |
+| **Field Of View** | ✅ Done | [FieldOfViewActivity.kt](src/main/java/com/example/maps3dkotlin/fieldofview/FieldOfViewActivity.kt) | |
 
 ---
 > [!NOTE]

@@ -15,6 +15,8 @@
 package com.example.maps3dkotlin.sampleactivity
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
@@ -226,7 +228,15 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         if (isMapInitialized) return
         isMapInitialized = true
         Log.d(TAG, "onMapReady called (guaranteed once)")
-        googleMap3D.setCamera(initialCamera)
+        // Workaround: The Maps 3D SDK onMapReady callback fires when the map object
+        // is instantiated, but the internal native rendering pipeline and layout pass may briefly
+        // override initial programmatic camera positions. A short delay ensures the native map viewport
+        // has fully stabilized before applying the initial camera position.
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (!isDestroyed && !isFinishing) {
+                this.googleMap3D?.setCamera(initialCamera)
+            }
+        }, 350L)
     }
 
     @CallSuper
@@ -241,7 +251,14 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
             onMapReady(googleMap3D)
         }
 
-        // Workaround for bug where onMapReady is not called on reused instances.
+        // Mark map view as steady when rendering stabilizes for automated visual tests
+        googleMap3D.setOnMapSteadyListener { isSceneSteady ->
+            if (isSceneSteady) {
+                map3DView.contentDescription = "MapSteady"
+            }
+        }
+
+        // Ensure onMapReady triggers even on delayed or reused fragments.
         lifecycleScope.launch {
             delay(2000)
             onMapReady(googleMap3D)

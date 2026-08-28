@@ -29,6 +29,17 @@ data class PositionAndHeading(
 )
 
 object RouteEngine {
+    fun calculateCumulativeDistances(route: List<LatLng>): DoubleArray {
+        if (route.isEmpty()) return doubleArrayOf(0.0)
+
+        val cumulativeDistances = DoubleArray(route.size)
+        cumulativeDistances[0] = 0.0
+        for (i in 1 until route.size) {
+            cumulativeDistances[i] = cumulativeDistances[i - 1] + haversineDistance(route[i - 1], route[i])
+        }
+        return cumulativeDistances
+    }
+
     fun calculatePositionAndHeading(
         route: List<LatLng>,
         cumulativeDistances: DoubleArray,
@@ -58,11 +69,7 @@ object RouteEngine {
     ): Flow<PositionAndHeading> = combine(routeFlow, progressFlow) { route, progress ->
         if (route.size < 2) return@combine PositionAndHeading(LatLng(0.0, 0.0), 0f)
 
-        val cumulativeDistances = DoubleArray(route.size)
-        cumulativeDistances[0] = 0.0
-        for (i in 1 until route.size) {
-            cumulativeDistances[i] = cumulativeDistances[i - 1] + haversineDistance(route[i - 1], route[i])
-        }
+        val cumulativeDistances = calculateCumulativeDistances(route)
         val totalDistance = cumulativeDistances.last()
         val distance = totalDistance * progress.toDouble()
 

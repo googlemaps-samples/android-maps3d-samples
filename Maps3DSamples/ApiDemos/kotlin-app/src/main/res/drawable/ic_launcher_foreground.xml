@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
- Copyright 2025 Google LLC
+ Copyright 2026 Google LLC
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -14,29 +15,92 @@
  limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
-    android:autoMirrored="true"
-    android:height="256dp"
-    android:viewportHeight="256"
-    android:viewportWidth="256"
-    android:width="256dp"
-    >
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
 
-    <path android:fillAlpha="0.5" android:fillColor="#E0E0E0" android:pathData="M40,180L128,220L216,180L128,140Z" android:strokeAlpha="0.5"/>
+    <!-- 3D Ground Shadow -->
+    <path
+        android:fillColor="#20000000"
+        android:pathData="M26,76 a22,8 0 1,0 44,0 a22,8 0 1,0 -44,0"/>
 
-    <path android:fillAlpha="0.7" android:fillColor="#F5F5F5" android:pathData="M40,170L128,210L216,170L128,130Z" android:strokeAlpha="0.7"/>
+    <!-- 3D Isometric Map Tile Base -->
+    <path
+        android:fillColor="#E1E5EA"
+        android:pathData="M24,72 L48,84 L72,72 L48,60 Z"/>
+    <path
+        android:fillColor="#CFD6DE"
+        android:pathData="M24,72 L48,84 L48,87 L24,75 Z"/>
+    <path
+        android:fillColor="#B0B9C3"
+        android:pathData="M48,84 L72,72 L72,75 L48,87 Z"/>
+    <!-- 3D Map Roads on Tile -->
+    <path
+        android:pathData="M30,75 L48,84 L66,75"
+        android:strokeWidth="2.5"
+        android:strokeColor="#FFFFFF"/>
+    <path
+        android:pathData="M40,64 L48,84 L56,64"
+        android:strokeWidth="1.8"
+        android:strokeColor="#FBBC04"/>
 
-    <path android:fillColor="#ffffff" android:pathData="M40,160L128,200L216,160L128,120Z"/>
+    <!-- Google Maps 3D Pin (Authentic Google 4-Color Palette) -->
+    <!-- Red Top & Left Arch -->
+    <path
+        android:fillColor="#EA4335"
+        android:pathData="M48,16 C35.8,16 26,25.8 26,38 C26,45.4 30.5,52.8 35.8,61.4 L48,78 C48,78 48,78 48,78 C48,78 48,78 48,78 L48,16 Z"/>
+    <!-- Yellow Right Arch -->
+    <path
+        android:fillColor="#FBBC04"
+        android:pathData="M48,16 C60.2,16 70,25.8 70,38 C70,45.4 65.5,52.8 60.2,61.4 L48,78 L48,16 Z"/>
+    <!-- Blue Left Inner Body -->
+    <path
+        android:fillColor="#4285F4"
+        android:pathData="M48,22 C39.2,22 32,29.2 32,38 C32,44 35.5,50 40,58 L48,70 L48,22 Z"/>
+    <!-- Green Right Bottom Point -->
+    <path
+        android:fillColor="#34A853"
+        android:pathData="M48,22 C56.8,22 64,29.2 64,38 C64,44 60.5,50 56,58 L48,70 L48,22 Z"/>
+    <!-- White Pin Center -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,38 m-8,0 a8,8 0 1,1 16,0 a8,8 0 1,1 -16,0"/>
+    <!-- Pin Core Depth -->
+    <path
+        android:fillColor="#1A73E8"
+        android:pathData="M48,38 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0"/>
 
-    <path android:fillAlpha="0.2" android:fillColor="#000000" android:pathData="M88,185a40,10 0,1 0,80 0a40,10 0,1 0,-80 0z" android:strokeAlpha="0.2"/>
 
-    <path android:fillColor="#EA4335" android:pathData="M128,50C100,50 80,70 80,100C80,140 128,190 128,190C128,190 176,140 176,100C176,70 156,50 128,50Z"/>
-
-    <path android:fillColor="#ffffff" android:pathData="M128,50C100,50 80,70 80,100C80,102 80.5,104 81.5,106C90,80 110,60 128,60C146,60 166,80 174.5,106C175.5,104 176,102 176,100C176,70 156,50 128,50Z"/>
-
-    <path android:fillColor="#ffffff" android:pathData="M128,100m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0"/>
-
-    <path android:fillColor="#DB4437" android:pathData="M128,100m-16,0a16,16 0,1 1,32 0a16,16 0,1 1,-32 0"/>
-
+    <!-- Kotlin Framework Badge (Bottom-Right) -->
+    <!-- Badge Drop Shadow -->
+    <path
+        android:fillColor="#33000000"
+        android:pathData="M65,65 h28 v28 h-28 z"/>
+    <!-- Badge Background (Rounded Rectangle) -->
+    <path
+        android:fillColor="#231F20"
+        android:pathData="M66,66 h26 a3,3 0 0 1 3,3 v26 a3,3 0 0 1 -3,3 h-26 a3,3 0 0 1 -3,-3 v-26 a3,3 0 0 1 3,-3 z"/>
+    <!-- White Border -->
+    <path
+        android:pathData="M66,66 h26 a3,3 0 0 1 3,3 v26 a3,3 0 0 1 -3,3 h-26 a3,3 0 0 1 -3,-3 v-26 a3,3 0 0 1 3,-3 z"
+        android:strokeWidth="1.5"
+        android:strokeColor="#FFFFFF"/>
+    <!-- Kotlin Gradient Logo Shapes -->
+    <!-- Purple Top Triangle -->
+    <path
+        android:fillColor="#7F52FF"
+        android:pathData="M68,68 L92,68 L68,92 Z"/>
+    <!-- Pink Middle Band -->
+    <path
+        android:fillColor="#C711E1"
+        android:pathData="M92,68 L80,80 L68,80 L68,68 Z"/>
+    <!-- Orange/Red Lower Triangle -->
+    <path
+        android:fillColor="#F88909"
+        android:pathData="M68,92 L92,68 L92,92 Z"/>
+    <path
+        android:fillColor="#E4485D"
+        android:pathData="M80,80 L92,68 L92,92 L68,92 Z"/>
 
 </vector>

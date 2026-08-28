@@ -1,0 +1,79 @@
+/*
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.example.maps3djava;
+
+import static org.junit.Assert.assertTrue;
+
+import android.content.Intent;
+import android.graphics.Bitmap;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.Until;
+
+import com.example.maps3djava.advancedcameraanimation.AdvancedCameraAnimationActivity;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+/**
+ * A premium visual regression test for the View-based Java Advanced Camera Animation sample.
+ *
+ * Demonstrates robust programmatic testing of 3D camera animations and glTF models by launching the Java-based
+ * [AdvancedCameraAnimationActivity], waiting for 3D map tiles, the 3D airplane glTF model, and camera tour approaches
+ * to render, capturing a screenshot of the active map scene, and verifying visual correctness using the Gemini API.
+ */
+@RunWith(AndroidJUnit4.class)
+public class AdvancedCameraAnimationVisualTest extends BaseVisualTest {
+
+    @Test
+    public void verifyAdvancedCameraAnimationRenders() {
+        // Launch AdvancedCameraAnimationActivity
+        Intent intent = new Intent(context, AdvancedCameraAnimationActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+
+        // Wait for the activity to be displayed in the foreground
+        uiDevice.wait(Until.hasObject(By.pkg(context.getPackageName()).depth(0)), 10000);
+
+        // Wait for map tiles to load, 3D airplane model to stream, and camera flight animation to settle
+        waitForMapRendering(15);
+
+        // Capture high-resolution screenshot of the active 3D map scene
+        Bitmap screenshotBitmap = captureScreenshot("advanced_camera_animation_screenshot.png");
+
+        // Define the verification prompt for the visual testing agent
+        String prompt = "Please act as a UI tester and analyze this screenshot.\n" +
+                "1. Confirm that a 3D map view is visible over San Francisco (Golden Gate Bridge / Bay area).\n" +
+                "2. Confirm that a 3D AIRPLANE MODEL or aerial flight path object is visible in 3D space.\n" +
+                "3. Confirm that the animation approach control card (with radio options for Simple flyTo, Keyframe Tour, Frame Dispatcher, 360 Orbit Spin, and Play/Reset buttons) is visible at the bottom of the screen.\n" +
+                "\n" +
+                "If and ONLY IF you can clearly see the 3D map scene, 3D airplane flight tour, and bottom animation approach selector card, reply with \"PASSED\".\n" +
+                "If you cannot see the 3D map scene or control card, reply with \"FAILED: 3D map scene or control card not visible\".\n" +
+                "Report what you see in detail.";
+
+        // Analyze the image using Gemini (using blocking wrapper)
+        String geminiResponse = helper.analyzeImageBlocking(screenshotBitmap, prompt, geminiApiKey);
+        System.out.println("Gemini's analysis: " + geminiResponse);
+
+        // Assert on Gemini's response
+        assertTrue(
+            "Visual verification failed. Gemini response: " + geminiResponse,
+            geminiResponse != null && geminiResponse.toUpperCase().contains("PASSED")
+        );
+    }
+}

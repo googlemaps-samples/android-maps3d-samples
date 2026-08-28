@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <!-- Fullscreen 3D Map View -->
+    <com.google.android.gms.maps3d.Map3DView
+        android:id="@+id/map3dView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+    <!-- Transparent Touch Gesture Overlay replacing built-in map gestures -->
+    <View
+        android:id="@+id/gesture_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true"
+        />
+
+
+
+    <!-- Bottom Control Panel Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/controls_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="12dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+            <!-- Card Header with title and collapse/expand button -->
+            <!-- Drag Handle Affordance -->
+            <View
+                android:id="@+id/drag_handle"
+                android:layout_width="36dp"
+                android:layout_height="4dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="2dp"
+                android:background="@drawable/drag_handle_bar"
+                android:alpha="0.6"
+                />
+
+            <LinearLayout
+                android:id="@+id/card_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
+                android:paddingStart="12dp"
+                android:paddingEnd="6dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                >
+
+                <TextView
+                    style="@style/TextAppearance.Material3.TitleSmall"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/path_controls_title"
+                    android:textStyle="bold"
+                    />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_help"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    app:icon="@drawable/help_outline_24px"
+                    app:iconTint="?attr/colorOnSurface"
+                    android:contentDescription="@string/help_button_description"
+                    />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_collapse"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    app:icon="@drawable/expand_more_24px"
+                    app:iconTint="?attr/colorOnSurface"
+                    android:contentDescription="@string/collapse_controls"
+                    />
+            </LinearLayout>
+
+            <!-- Speed Preset Chips & Playback Row (Always visible even when collapsed) -->
+            <LinearLayout
+                android:id="@+id/layout_speed_chips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                >
+
+
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chip_group_speed"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:singleSelection="true"
+                    app:selectionRequired="true"
+                    >
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_speed_05x"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/speed_05x"
+                        />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_speed_1x"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="@string/speed_1x"
+                        />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_speed_2x"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/speed_2x"
+                        />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_speed_3x"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/speed_3x"
+                        />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_speed_5x"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/speed_5x"
+                        />
+                </com.google.android.material.chip.ChipGroup>
+            </LinearLayout>
+
+            <!-- Persistent Play/Pause & Progress Row (Always visible even when collapsed) -->
+            <LinearLayout
+                android:id="@+id/layout_persistent_playback"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="4dp"
+                >
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_play_pause"
+                    style="@style/Widget.Material3.Button.IconButton.Filled"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    app:icon="@drawable/play_arrow_24px"
+                    android:contentDescription="@string/play_or_pause_animation"
+                    />
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/progress_slider"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:valueFrom="0.0"
+                    android:valueTo="1.0"
+                    android:value="0.0"
+                    />
+            </LinearLayout>
+
+            <ScrollView
+                android:id="@+id/controls_scroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxHeight="300dp"
+                >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="12dp"
+                    >
+
+                <!-- Environment Selection Header -->
+                <TextView
+                    style="@style/TextAppearance.Material3.LabelLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/path_environment"
+                    android:textStyle="bold"
+                    />
+
+                <RadioGroup
+                    android:id="@+id/rg_environment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="2dp"
+                    >
+
+                    <RadioButton
+                        android:id="@+id/rb_urban"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checked="true"
+                        android:text="@string/urban"
+                        />
+
+                    <RadioButton
+                        android:id="@+id/rb_rural"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/rural"
+                        />
+                </RadioGroup>
+
+                <!-- Altitude Mode Selection -->
+                <TextView
+                    style="@style/TextAppearance.Material3.LabelLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/altitude_mode"
+                    android:textStyle="bold"
+                    />
+
+                <RadioGroup
+                    android:id="@+id/rg_altitude_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="2dp"
+                    >
+
+                    <RadioButton
+                        android:id="@+id/rb_relative_to_ground"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/relative_to_ground"
+                        />
+
+                    <RadioButton
+                        android:id="@+id/rb_clamp_to_ground"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="@string/clamp_to_ground"
+                        />
+
+                    <RadioButton
+                        android:id="@+id/rb_relative_to_mesh"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/relative_to_mesh"
+                        />
+
+                    <RadioButton
+                        android:id="@+id/rb_absolute"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/absolute"
+                        />
+                </RadioGroup>
+
+                <!-- Draw Occluded Segments Switch -->
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switch_draws_occluded_segments"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:checked="true"
+                    android:text="@string/draws_occluded_segments"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                    android:textStyle="bold"
+                    />
+
+                <!-- Path Height (Relative Altitude) Slider -->
+                <TextView
+                    android:id="@+id/path_altitude_slider_label"
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/default_path_height"
+                    />
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/path_altitude_slider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:valueFrom="0.0"
+                    android:valueTo="10.0"
+                    android:stepSize="0.1"
+                    android:value="0.5"
+                    />
+
+                
+
+                <!-- Camera Parameter Sliders -->
+                <TextView
+                    android:id="@+id/range_slider_label"
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/default_camera_range"
+                    />
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/range_slider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:valueFrom="20.0"
+                    android:valueTo="5000.0"
+                    android:value="300.0"
+                    />
+
+                <TextView
+                    android:id="@+id/altitude_slider_label"
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/default_ground_altitude"
+                    />
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/altitude_slider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:valueFrom="0.0"
+                    android:valueTo="500.0"
+                    android:value="20.0"
+                    />
+
+                <TextView
+                    android:id="@+id/heading_slider_label"
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/default_heading_offset"
+                    />
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/heading_slider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:valueFrom="-180.0"
+                    android:valueTo="180.0"
+                    android:value="0.0"
+                    />
+
+                <TextView
+                    android:id="@+id/tilt_slider_label"
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/default_camera_tilt"
+                    />
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/tilt_slider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:valueFrom="0.0"
+                    android:valueTo="85.0"
+                    android:value="70.0"
+                    />
+
+                <TextView
+                    android:id="@+id/speed_slider_label"
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/default_follow_speed"
+                    />
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/speed_slider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:valueFrom="5.0"
+                    android:valueTo="100.0"
+                    android:value="30.0"
+                    />
+            </LinearLayout>
+        </ScrollView>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -25,6 +25,7 @@ import com.google.android.gms.maps3d.model.Glyph
 import com.google.android.gms.maps3d.model.Hole
 import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.Model
+import com.google.android.gms.maps3d.model.Orientation
 import com.google.android.gms.maps3d.model.PinConfiguration
 import com.google.android.gms.maps3d.model.Polygon
 import com.google.android.gms.maps3d.model.Polyline
@@ -195,7 +196,10 @@ class Map3DState {
             if (existing != null) {
                 val (oldConfig, model) = existing
                 if (oldConfig != config) {
-                    // Config changed, update by adding again with same ID!
+                    // Config changed.
+                    // Note: We dynamically update the model's properties by adding it again
+                    // with the same underlying ID (`model.id`). Under the hood, this acts as a safe,
+                    // efficient upsert operation to the renderer.
                     val newModel = createModel(map, config, model.id)
                     if (newModel != null) {
                         models[config.key] = Pair(config, newModel)

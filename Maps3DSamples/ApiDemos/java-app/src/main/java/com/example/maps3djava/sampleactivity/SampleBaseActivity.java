@@ -18,8 +18,10 @@ package com.example.maps3djava.sampleactivity;
 import static com.example.maps3d.common.UtilitiesKt.toCameraString;
 import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
 
-import android.app.Activity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -64,7 +66,7 @@ import com.google.android.material.button.MaterialButton;
  * <p>
  * The activity layout includes a [Map3DView], a snapshot button, and a recenter button.
  */
-public abstract class SampleBaseActivity extends Activity implements OnMap3DViewReadyCallback {
+public abstract class SampleBaseActivity extends AppCompatActivity implements OnMap3DViewReadyCallback {
     protected Map3DView map3DView;
     protected GoogleMap3D googleMap3D;
 
@@ -182,7 +184,22 @@ public abstract class SampleBaseActivity extends Activity implements OnMap3DView
     public void onMap3DViewReady(GoogleMap3D googleMap3D) {
         this.googleMap3D = googleMap3D;
 
-        googleMap3D.setCamera(getInitialCamera());
+        // Workaround: The Maps 3D SDK onMap3DViewReady callback fires when the map object
+        // is instantiated, but the internal native rendering pipeline and layout pass may briefly
+        // override initial programmatic camera positions. A short delay ensures the native map viewport
+        // has fully stabilized before applying the initial camera position.
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (!isDestroyed() && !isFinishing() && this.googleMap3D != null) {
+                this.googleMap3D.setCamera(getInitialCamera());
+            }
+        }, 350L);
+
+        // Mark map view as steady when rendering stabilizes for automated visual tests
+        googleMap3D.setOnMapSteadyListener(isSceneSteady -> {
+            if (isSceneSteady && map3DView != null) {
+                map3DView.setContentDescription("MapSteady");
+            }
+        });
 
         // Initialize and set the camera changed listener
         cameraChangedListener = cameraPosition -> {

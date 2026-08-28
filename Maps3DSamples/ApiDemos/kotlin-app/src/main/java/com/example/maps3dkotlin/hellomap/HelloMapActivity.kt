@@ -96,7 +96,7 @@ class HelloMapActivity : Activity(), OnMap3DViewReadyCallback {
             initializeMap()
         }
 
-        // Workaround for bug where onMapReady is not called on reused instances.
+        // Ensure onMapReady triggers even on delayed or reused fragments.
         // Call initialization after a short delay.
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             initializeMap()

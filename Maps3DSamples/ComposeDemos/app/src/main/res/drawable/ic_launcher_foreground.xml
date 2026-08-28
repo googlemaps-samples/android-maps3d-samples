@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 3D Ground Shadow -->
+    <path
+        android:fillColor="#20000000"
+        android:pathData="M26,76 a22,8 0 1,0 44,0 a22,8 0 1,0 -44,0"/>
+
+    <!-- 3D Isometric Map Tile Base -->
+    <path
+        android:fillColor="#E1E5EA"
+        android:pathData="M24,72 L48,84 L72,72 L48,60 Z"/>
+    <path
+        android:fillColor="#CFD6DE"
+        android:pathData="M24,72 L48,84 L48,87 L24,75 Z"/>
+    <path
+        android:fillColor="#B0B9C3"
+        android:pathData="M48,84 L72,72 L72,75 L48,87 Z"/>
+    <!-- 3D Map Roads on Tile -->
+    <path
+        android:pathData="M30,75 L48,84 L66,75"
+        android:strokeWidth="2.5"
+        android:strokeColor="#FFFFFF"/>
+    <path
+        android:pathData="M40,64 L48,84 L56,64"
+        android:strokeWidth="1.8"
+        android:strokeColor="#FBBC04"/>
+
+    <!-- Google Maps 3D Pin (Authentic Google 4-Color Palette) -->
+    <!-- Red Top & Left Arch -->
+    <path
+        android:fillColor="#EA4335"
+        android:pathData="M48,16 C35.8,16 26,25.8 26,38 C26,45.4 30.5,52.8 35.8,61.4 L48,78 C48,78 48,78 48,78 C48,78 48,78 48,78 L48,16 Z"/>
+    <!-- Yellow Right Arch -->
+    <path
+        android:fillColor="#FBBC04"
+        android:pathData="M48,16 C60.2,16 70,25.8 70,38 C70,45.4 65.5,52.8 60.2,61.4 L48,78 L48,16 Z"/>
+    <!-- Blue Left Inner Body -->
+    <path
+        android:fillColor="#4285F4"
+        android:pathData="M48,22 C39.2,22 32,29.2 32,38 C32,44 35.5,50 40,58 L48,70 L48,22 Z"/>
+    <!-- Green Right Bottom Point -->
+    <path
+        android:fillColor="#34A853"
+        android:pathData="M48,22 C56.8,22 64,29.2 64,38 C64,44 60.5,50 56,58 L48,70 L48,22 Z"/>
+    <!-- White Pin Center -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,38 m-8,0 a8,8 0 1,1 16,0 a8,8 0 1,1 -16,0"/>
+    <!-- Pin Core Depth -->
+    <path
+        android:fillColor="#1A73E8"
+        android:pathData="M48,38 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0"/>
+
+
+    <!-- Compose Framework Badge (Bottom-Right) -->
+    <!-- Badge Drop Shadow -->
+    <path
+        android:fillColor="#33000000"
+        android:pathData="M65,65 h28 v28 h-28 z"/>
+    <!-- Badge Background (Compose Dark Navy) -->
+    <path
+        android:fillColor="#073042"
+        android:pathData="M66,66 h26 a4,4 0 0 1 4,4 v24 a4,4 0 0 1 -4,4 h-24 a4,4 0 0 1 -4,-4 v-24 a4,4 0 0 1 4,-4 z"/>
+    <!-- White Border -->
+    <path
+        android:pathData="M66,66 h26 a4,4 0 0 1 4,4 v24 a4,4 0 0 1 -4,4 h-24 a4,4 0 0 1 -4,-4 v-24 a4,4 0 0 1 4,-4 z"
+        android:strokeWidth="1.5"
+        android:strokeColor="#FFFFFF"/>
+    <!-- Compose Logo: Outer Chevron (Cyan/Blue) & Inner Chevron (Green) -->
+    <path
+        android:fillColor="#4285F4"
+        android:pathData="M70,72 L78,79 L70,86 L74,86 L82,79 L74,72 Z"/>
+    <path
+        android:fillColor="#3DDC84"
+        android:pathData="M88,72 L80,79 L88,86 L84,86 L76,79 L84,72 Z"/>
+    <path
+        android:fillColor="#00D2B4"
+        android:pathData="M78,75 L82,79 L78,83 L75,79 Z"/>
+
+</vector>

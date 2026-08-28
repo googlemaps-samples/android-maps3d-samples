@@ -74,7 +74,6 @@
     <string name="snapshot_camera">Snapshot</string>
     <string name="stop_camera">Stop camera animations</string>
 
-
     <!--
     Distance in feet, formatted to 0 decimal places.
     For example, 1234.56 feet will be formatted as "1,235 ft".
@@ -122,9 +121,124 @@
     <string name="content_description_fly_nyc">Fly to NYC</string>
 
     <!-- Routes API sample strings -->
+    <string name="routes_controls_title">Route Simulation Controls</string>
+    <string name="route_loading">Route is still loading…</string>
     <string name="play_or_pause_route_animation">Play or pause route animation</string>
     <string name="camera_altitude_format">Camera Altitude: %1$dm</string>
     <string name="vehicle_speed_format">Vehicle Speed: %1$dm/s</string>
     <string name="camera_yaw_offset_format">Camera Yaw Offset: %1$d°</string>
     <string name="routes_offline_fallback">Offline: Using local Oahu fallback route</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="reset">Reset</string>
+
+    <!-- Roadmap Mode strings -->
+    <string name="map_mode_controls_title">3D Map Mode Controls</string>
+    <string name="map_mode">Map Mode</string>
+    <string name="roadmap">Roadmap</string>
+    <string name="hybrid">Hybrid</string>
+    <string name="satellite">Satellite</string>
+
+    <!-- Advanced Camera Animation strings -->
+    <string name="aerial_tour_title">San Francisco Aerial Tour</string>
+    <string name="framework_kotlin_views">Kotlin Views</string>
+    <string name="framework_java_views">Java Views</string>
+    <string name="framework_compose">Jetpack Compose</string>
+    <string name="select_animation_approach">Select Animation Approach:</string>
+    <string name="approach_simple_fly_to">1. SDK Simple flyTo</string>
+    <string name="approach_keyframe_tour">2. Keyframe Queue Tour</string>
+    <string name="approach_dispatcher_frame_loop">3. Frame Dispatcher (400 m/s)</string>
+    <string name="approach_orbit_360_spin">4. 360° Continuous Orbit</string>
+    <string name="help_dialog_advanced_animation_title">3D Camera Animation Paradigms</string>
+    <string name="help_dialog_advanced_animation_message"><![CDATA[
+<p><b>✈️ Animation Approaches:</b></p>
+<p><b>1. SDK Simple flyTo:</b> Native asynchronous camera flight transition directly to Coit Tower with automatic altitude and tilt easing.</p>
+<p><b>2. Keyframe Queue Tour:</b> Declarative 5-step sequence: Swoop FlyTo → Dwell Pause → 360° Orbit → Stationary Tracking Flight → Final FlyTo.</p>
+<p><b>3. High-Rate Frame Dispatcher:</b> Continuous 400 m/s flight synced to hardware VSYNC display frames via Choreographer.</p>
+<p><b>4. 360° Continuous Orbit:</b> Constant angular camera rotation around the Golden Gate Bridge.</p>
+<br/>
+<p><b>🎛️ Control Panel:</b></p>
+<p>• <b>Dropdown Menu:</b> Tap to select animation approach</p>
+<p>• <b>Header / Drag Handle:</b> Tap or swipe to expand/collapse panel</p>
+<p>• <b>Idle Auto-Fade:</b> Panel dims after 3.5s of inactivity</p>
+]]></string>
+    <string name="aerial_tour_status_idle">Press Play to begin the multi-step aerial tour.</string>
+    <string name="aerial_tour_status_running">Step %1$d of %2$d: %3$s</string>
+    <string name="aerial_tour_status_finished">Tour complete. Press Reset to replay.</string>
+    <string name="tour_step_1_title">1. Swoop to Golden Gate</string>
+    <string name="tour_step_1_desc">Descend from high-altitude SF panorama to Golden Gate Bridge</string>
+    <string name="tour_step_2_title">2. Mid-Air Observation</string>
+    <string name="tour_step_2_desc">Dwell pause observing 3D airplane over Golden Gate</string>
+    <string name="tour_step_3_title">3. Golden Gate 360° Orbit</string>
+    <string name="tour_step_3_desc">360° orbital camera spin around airplane</string>
+    <string name="tour_step_4_title">4. Transit to Coit Tower</string>
+    <string name="tour_step_4_desc">Airplane flight across San Francisco to Coit Tower</string>
+    <string name="orbit_spin_title">Continuous 360° Orbit</string>
+    <string name="orbit_spin_desc">Continuous orbital camera spin around Golden Gate Bridge</string>
+    <string name="dwell_pause_default_title">Dwell Pause</string>
+    <string name="dwell_pause_default_desc">Observing current location</string>
+
+    <!-- Path Following strings -->
+    <string name="path_controls_title">Path Controls</string>
+    <string name="collapse_controls">Collapse Controls</string>
+    <string name="expand_controls">Expand Controls</string>
+    <string name="path_environment">Path Environment:</string>
+    <string name="urban">Urban</string>
+    <string name="rural">Rural</string>
+    <string name="altitude_mode">Altitude Mode:</string>
+    <string name="relative_to_ground">Relative to Ground</string>
+    <string name="clamp_to_ground">Clamp to Ground</string>
+    <string name="relative_to_mesh">Relative to Mesh</string>
+    <string name="absolute">Absolute</string>
+    <string name="path_height_format">Path Height: %1$.1fm</string>
+    <string name="camera_range_format">Camera Range: %1$dm</string>
+    <string name="ground_altitude_format">Ground Altitude: %1$dm</string>
+    <string name="heading_offset_format">Heading Offset: %1$d°</string>
+    <string name="camera_tilt_format">Camera Tilt: %1$d°</string>
+    <string name="follow_speed_format">Follow Speed: %1$d m/s</string>
+    <string name="default_path_height">Path Height: 0.5m</string>
+    <string name="default_camera_range">Camera Range: 300m</string>
+    <string name="default_ground_altitude">Ground Altitude: 20m</string>
+    <string name="default_heading_offset">Heading Offset: 0°</string>
+    <string name="default_camera_tilt">Camera Tilt: 70°</string>
+    <string name="default_follow_speed">Follow Speed: 30 m/s</string>
+    <string name="help_button_description">Help</string>
+    <string name="speed_05x" translatable="false">0.5x</string>
+    <string name="speed_1x" translatable="false">1x</string>
+    <string name="speed_2x" translatable="false">2x</string>
+    <string name="speed_3x" translatable="false">3x</string>
+    <string name="speed_5x" translatable="false">5x</string>
+    <string name="play_or_pause_animation">Play or pause animation</string>
+    <string name="draws_occluded_segments">Draw Occluded Segments</string>
+
+    <!-- Data Visualization strings -->
+    <string name="data_visualization_controls_title">Flood Simulation Controls</string>
+    <string name="flood_elevation_format">Flood Elevation: +%1$.1f m (%2$.1f ft)</string>
+    <string name="flood_default_elevation">Flood Elevation: +10.0 m (32.8 ft)</string>
+    <string name="flood_risk_baseline">🌊 Baseline Tide</string>
+    <string name="flood_risk_minor">⚠️ Minor Inundation</string>
+    <string name="flood_risk_moderate">🌊 Moderate Flooding</string>
+    <string name="flood_risk_storm_surge">🚨 Storm Surge (Cat 3)</string>
+    <string name="flood_risk_extreme">⛔ Extreme Inundation</string>
+    <string name="continuous_tide_simulation">Continuous Tide Simulation:</string>
+    <string name="start_simulation">▶ Start Simulation</string>
+    <string name="stop_simulation">⏹ Stop Simulation</string>
+    <string name="flood_toast_format">San Francisco Waterfront - Water Level: +%1$.1f m</string>
+
+    <!-- Field of View strings -->
+    <string name="fov_controls_title">Field of View Controls</string>
+    <string name="field_of_view_format">Field of View: %1$d°</string>
+    <string name="fov_default_label">Field of View: 45°</string>
+    <string name="fov_presets">FOV Presets:</string>
+    <string name="fov_telephoto">20° Tele</string>
+    <string name="fov_standard">45° Standard</string>
+    <string name="fov_wide">90° Wide</string>
+    <string name="fov_ultrawide">120° Ultra</string>
+    <string name="help_dialog_title">3D Path Following Controls</string>
+    <string name="help_dialog_message" formatted="false">🧭 Camera Gestures:\n• Vertical Sweep (1 Finger): Adjusts camera tilt (0° to 85°)\n• Horizontal Sweep (1 Finger): Rotates camera heading orbit\n• Pinch (2 Fingers): Zooms camera in / out\n\n⚡ Speed &amp; Navigation:\n• Long Press &amp; Hold: 2x Boost (at 0.5s) → 5x Warp Speed (at 2s)\n• Double-Tap &amp; Hold Right: +5x Fast-Forward\n• Double-Tap &amp; Hold Left: -5x Rewind\n• Quick Double-Tap: Skip +/- 10% along path\n• Speed Chips (0.5x - 5x): Instant preset selection\n\n🎛️ Control Panel:\n• Swipe Up / Down or Tap Header: Expand / collapse settings panel\n• Idle Auto-Fade: Panel fades to transparent after 3.5s of inactivity</string>
+    <string name="help_dialog_ok">Got It</string>
+    <!-- Simple FlyTo Sub-modes -->
+    <string name="model_animation_mode_title">3D Model Animation Mode:</string>
+    <string name="fly_to_mode_synchronized">Synchronized (High CPU)</string>
+    <string name="fly_to_mode_midpoint">Midpoint Jump (Low CPU)</string>
 </resources>
