@@ -308,7 +308,7 @@ public class AdvancedCameraAnimationActivity extends SampleBaseActivity {
     private void resetAndRestartTour() {
         if (googleMap3D != null) {
             Camera targetCam = (viewModel.getCurrentState().getSelectedApproach() == AnimationApproach.KEYFRAME_TOUR) ? TourData.OVERVIEW_CAMERA : getInitialCamera();
-                    googleMap3D.setCamera(targetCam);
+            googleMap3D.setCamera(targetCam);
         }
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (!isDestroyed() && !isFinishing()) {

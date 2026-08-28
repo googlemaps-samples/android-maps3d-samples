@@ -338,7 +338,7 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
 
     private fun resetAndRestartTour() {
         val targetCam = if (viewModel.currentState.selectedApproach == AnimationApproach.KEYFRAME_TOUR) TourData.OVERVIEW_CAMERA else initialCamera
-            googleMap3D?.setCamera(targetCam)
+        googleMap3D?.setCamera(targetCam)
         Handler(Looper.getMainLooper()).postDelayed({
             if (!isDestroyed && !isFinishing) {
                 startSelectedApproach()
