@@ -17,17 +17,17 @@ This directory contains the Java samples using traditional Android Views for the
 | **Camera Restrictions** | 🚧 Skeleton | [CameraRestrictionsActivity.java](src/main/java/com/example/maps3djava/camerarestrictions/CameraRestrictionsActivity.java) | |
 | **Flight Simulator** | 🚧 Skeleton | [FlightSimulatorActivity.java](src/main/java/com/example/maps3djava/flightsimulator/FlightSimulatorActivity.java) | |
 | **Routes API** | ✅ Done | [RoutesActivity.java](src/main/java/com/example/maps3djava/routes/RoutesActivity.java) | <img src="screenshots/routes_screenshot.png" alt="Screenshot" width="121"/> |
-| **Path Following** | 🚧 Skeleton | [PathFollowingActivity.java](src/main/java/com/example/maps3djava/pathfollowing/PathFollowingActivity.java) | |
+| **Path Following** | ✅ Done | [PathFollowingActivity.java](src/main/java/com/example/maps3djava/pathfollowing/PathFollowingActivity.java) | |
 | **Path Styling** | 🚧 Skeleton | [PathStylingActivity.java](src/main/java/com/example/maps3djava/pathstyling/PathStylingActivity.java) | |
 | **Animating Models** | 🚧 Skeleton | [AnimatingModelsActivity.java](src/main/java/com/example/maps3djava/animatingmodels/AnimatingModelsActivity.java) | |
 | **Place Search** | 🚧 Skeleton | [PlaceSearchActivity.java](src/main/java/com/example/maps3djava/placesearch/PlaceSearchActivity.java) | |
 | **Place Autocomplete** | 🚧 Skeleton | [PlaceAutocompleteActivity.java](src/main/java/com/example/maps3djava/placeautocomplete/PlaceAutocompleteActivity.java) | |
 | **Place Details** | 🚧 Skeleton | [PlaceDetailsActivity.java](src/main/java/com/example/maps3djava/placedetails/PlaceDetailsActivity.java) | |
-| **Advanced Camera Animation** | 🚧 Skeleton | [AdvancedCameraAnimationActivity.java](src/main/java/com/example/maps3djava/advancedcameraanimation/AdvancedCameraAnimationActivity.java) | |
-| **Data Visualization** | 🚧 Skeleton | [DataVisualizationActivity.java](src/main/java/com/example/maps3djava/datavisualization/DataVisualizationActivity.java) | |
-| **Cloud Map Styling** | 🚧 Skeleton | [CloudStylingActivity.java](src/main/java/com/example/maps3djava/cloudstyling/CloudStylingActivity.java) | |
-| **Roadmap Mode** | 🚧 Skeleton | [RoadmapModeActivity.java](src/main/java/com/example/maps3djava/roadmapmode/RoadmapModeActivity.java) | |
-| **Field Of View** | 🚧 Skeleton | [FieldOfViewActivity.java](src/main/java/com/example/maps3djava/fieldofview/FieldOfViewActivity.java) | |
+| **Advanced Camera Animation** | ✅ Done | [AdvancedCameraAnimationActivity.java](src/main/java/com/example/maps3djava/advancedcameraanimation/AdvancedCameraAnimationActivity.java) | |
+| **Data Visualization** | ✅ Done | [DataVisualizationActivity.java](src/main/java/com/example/maps3djava/datavisualization/DataVisualizationActivity.java) | |
+| **Cloud Map Styling** | ✅ Done | [CloudStylingActivity.java](src/main/java/com/example/maps3djava/cloudstyling/CloudStylingActivity.java) | |
+| **Roadmap Mode** | ✅ Done | [RoadmapModeActivity.java](src/main/java/com/example/maps3djava/roadmapmode/RoadmapModeActivity.java) | |
+| **Field Of View** | ✅ Done | [FieldOfViewActivity.java](src/main/java/com/example/maps3djava/fieldofview/FieldOfViewActivity.java) | |
 
 ---
 > [!NOTE]

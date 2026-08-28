@@ -131,9 +131,9 @@ class RoadmapModeActivity : SampleBaseActivity() {
   private fun initViews() {
     controlsCard = findViewById(R.id.control_panel)
     cardHeader = findViewById(R.id.card_header)
-    cardContent = findViewById(R.id.rg_map_mode)
-    btnCollapse = findViewById(R.id.btn_collapse)
     rgMapMode = findViewById(R.id.rg_map_mode)
+    cardContent = rgMapMode
+    btnCollapse = findViewById(R.id.btn_collapse)
 
     btnCollapse?.setOnClickListener {
       if (isCollapsed) expandControls() else collapseControls()

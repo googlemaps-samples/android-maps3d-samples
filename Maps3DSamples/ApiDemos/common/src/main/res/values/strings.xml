@@ -202,6 +202,12 @@
     <string name="default_heading_offset">Heading Offset: 0°</string>
     <string name="default_camera_tilt">Camera Tilt: 70°</string>
     <string name="default_follow_speed">Follow Speed: 30 m/s</string>
+    <string name="help_button_description">Help</string>
+    <string name="speed_05x" translatable="false">0.5x</string>
+    <string name="speed_1x" translatable="false">1x</string>
+    <string name="speed_2x" translatable="false">2x</string>
+    <string name="speed_3x" translatable="false">3x</string>
+    <string name="speed_5x" translatable="false">5x</string>
     <string name="play_or_pause_animation">Play or pause animation</string>
     <string name="draws_occluded_segments">Draw Occluded Segments</string>
 

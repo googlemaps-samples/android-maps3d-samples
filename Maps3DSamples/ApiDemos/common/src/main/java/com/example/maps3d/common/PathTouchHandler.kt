@@ -16,6 +16,7 @@
 
 package com.example.maps3d.common
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -106,6 +107,7 @@ class PathTouchHandler(
         }
     )
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouch(v: View, event: MotionEvent): Boolean {
         scaleDetector.onTouchEvent(event)
 

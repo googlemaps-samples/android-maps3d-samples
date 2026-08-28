@@ -100,7 +100,7 @@
                     android:layout_height="48dp"
                     app:icon="@drawable/help_outline_24px"
                     app:iconTint="?attr/colorOnSurface"
-                    android:contentDescription="Help"
+                    android:contentDescription="@string/help_button_description"
                     />
 
                 <com.google.android.material.button.MaterialButton
@@ -143,7 +143,7 @@
                         style="@style/Widget.Material3.Chip.Filter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0.5x"
+                        android:text="@string/speed_05x"
                         />
 
                     <com.google.android.material.chip.Chip
@@ -152,7 +152,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="true"
-                        android:text="1x"
+                        android:text="@string/speed_1x"
                         />
 
                     <com.google.android.material.chip.Chip
@@ -160,7 +160,7 @@
                         style="@style/Widget.Material3.Chip.Filter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="2x"
+                        android:text="@string/speed_2x"
                         />
 
                     <com.google.android.material.chip.Chip
@@ -168,7 +168,7 @@
                         style="@style/Widget.Material3.Chip.Filter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="3x"
+                        android:text="@string/speed_3x"
                         />
 
                     <com.google.android.material.chip.Chip
@@ -176,7 +176,7 @@
                         style="@style/Widget.Material3.Chip.Filter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="5x"
+                        android:text="@string/speed_5x"
                         />
                 </com.google.android.material.chip.ChipGroup>
             </LinearLayout>
