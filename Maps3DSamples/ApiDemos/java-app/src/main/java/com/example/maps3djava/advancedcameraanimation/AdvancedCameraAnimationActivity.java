@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,304 +19,533 @@ package com.example.maps3djava.advancedcameraanimation;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
+import android.view.Choreographer;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.example.maps3dcommon.R;
+import androidx.cardview.widget.CardView;
+import androidx.lifecycle.ViewModelProvider;
+import com.example.maps3d.common.AdvancedCameraAnimationViewModel;
+import com.example.maps3d.common.AnimationApproach;
+import com.example.maps3d.common.CameraKeyframe;
+import com.example.maps3d.common.EntityPose;
+import com.example.maps3d.common.HtmlUtils;
+import com.example.maps3d.common.Map3DModelEntity;
+import com.example.maps3d.common.SimpleFlyToMode;
+import com.example.maps3d.common.TourData;
+import com.example.maps3d.common.StationaryCameraTracker;
+import com.example.maps3d.common.TrajectoryFlightAnimator;
+import com.example.maps3d.common.EntityPose;
+import com.example.maps3d.common.WorldState;
+
+import com.example.maps3djava.R;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyToOptions;
+import com.google.android.gms.maps3d.model.FlyAroundOptions;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
-import com.google.android.gms.maps3d.model.Model;
-import com.google.android.gms.maps3d.model.ModelOptions;
-import com.google.android.gms.maps3d.model.Orientation;
-import com.google.android.gms.maps3d.model.Vector3D;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.maps.android.SphericalUtil;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import java.util.List;
 
 /**
- * Demonstrates advanced camera animations on Google Maps 3D using {@link Map3DAnimator}.
- *
- * <p>Showcases a declarative multi-step aerial tour with native flight transitions ({@link
- * FlyToStep}), stationary observation pauses ({@link DwellStep}), and 360-degree orbital spins
- * ({@link OrbitStep}) around synchronized 3D assets.
+ * Java implementation of Advanced Camera Animation demo in Google Maps 3D.
  */
 public class AdvancedCameraAnimationActivity extends SampleBaseActivity {
 
-  private static final String MODEL_ID = "airplane_model";
-  private static final String PLANE_URL =
-      "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb";
-
-  // Key landmarks for the aerial tour
-  private static final LatLng SF_PANORAMA_CENTER = new LatLng(37.7650, -122.4400);
-  private static final LatLng GOLDEN_GATE_BRIDGE = new LatLng(37.8199, -122.4783);
-  private static final LatLng COIT_TOWER = new LatLng(37.8024, -122.4058);
-
-  private final Handler handler = new Handler(Looper.getMainLooper());
-  private Map3DAnimator tourAnimator;
-  private Model airplaneModel;
-  private boolean isPlaying = false;
-
-  private TextView tvTourStatus;
-  private Button btnPlayPause;
-
-  /**
-   * Constructs the declarative multi-step camera tour using {@link Map3DAnimator.Builder}.
-   */
-  private Map3DAnimator buildTourAnimator() {
-    double planeHeading = SphericalUtil.computeHeading(GOLDEN_GATE_BRIDGE, COIT_TOWER);
-
-    OrbitOptions goldenGateOrbit =
-        new OrbitOptions.Builder()
-            .setCenter(GOLDEN_GATE_BRIDGE)
-            .setAltitude(200.0)
-            .setRange(600.0)
-            .setTilt(65.0)
-            .setHeadingRange(/* startHeading= */ 105.0, /* endHeading= */ 465.0)
-            .setDurationMs(4500L)
-            .build();
-
-    return new Map3DAnimator.Builder()
-        // Step 1: Smooth swoop from high-altitude SF panorama down into Golden Gate flight path
-        .flyTo(
-            getString(R.string.tour_step_1_title),
-            getString(R.string.tour_step_1_desc),
-            new FlyToOptions(
-                new Camera(
-                    new LatLngAltitude(
-                        GOLDEN_GATE_BRIDGE.latitude, GOLDEN_GATE_BRIDGE.longitude, 200.0),
-                    /* heading= */ 105.0,
-                    /* tilt= */ 65.0,
-                    /* roll= */ 0.0,
-                    /* range= */ 600.0),
-                /* durationMs= */ 3000L),
-            /* durationMs= */ 3000L,
-            () -> updateAirplaneModel(GOLDEN_GATE_BRIDGE, planeHeading + 180.0))
-        // Step 2: Dwell pause holding camera steady on the airplane over the bridge
-        .dwell(
-            getString(R.string.tour_step_2_title),
-            getString(R.string.tour_step_2_desc),
-            /* durationMs= */ 1500L)
-        // Step 3: 360-degree orbital camera spin around the airplane
-        .orbit(
-            getString(R.string.tour_step_3_title),
-            getString(R.string.tour_step_3_desc),
-            goldenGateOrbit)
-        // Step 4: High-speed transit across San Francisco coastline to Coit Tower
-        .flyTo(
-            getString(R.string.tour_step_4_title),
-            getString(R.string.tour_step_4_desc),
-            new FlyToOptions(
-                new Camera(
-                    new LatLngAltitude(COIT_TOWER.latitude, COIT_TOWER.longitude, 200.0),
-                    /* heading= */ 115.0,
-                    /* tilt= */ 65.0,
-                    /* roll= */ 0.0,
-                    /* range= */ 600.0),
-                /* durationMs= */ 3500L),
-            /* durationMs= */ 3500L,
-            () -> handler.postDelayed(
-                () -> updateAirplaneModel(COIT_TOWER, planeHeading + 180.0),
-                /* delayMillis= */ 3500L / 2))
-        .build();
-  }
-
-  @Override
-  protected void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    ViewGroup container = findViewById(R.id.map_container);
-    if (container != null) {
-      getLayoutInflater().inflate(R.layout.control_panel_advanced_animation, container, true);
+    @NonNull
+    @Override
+    public String getTAG() {
+        return "AdvancedCameraAnimationActivity";
     }
 
-    MaterialToolbar topBar = findViewById(R.id.top_bar);
-    if (topBar != null) {
-      topBar.setTitle(R.string.feature_title_advanced_camera_animation);
-      topBar.setNavigationOnClickListener(v -> finish());
+
+    private AdvancedCameraAnimationViewModel viewModel;
+    private final Map3DModelEntity airplaneEntity =
+            new Map3DModelEntity(TourData.AIRPLANE_MODEL_ID, TourData.AIRPLANE_MODEL_URL, AltitudeMode.ABSOLUTE);
+
+    private CardView controlsCard;
+    private MaterialButton btnPlayPause;
+    private MaterialButton btnReset;
+    private MaterialButton btnCollapseToggle;
+    private TextView tvTourStatus;
+    private LinearLayout collapsibleContent;
+    private MaterialButton btnSelectApproach;
+    private com.google.android.material.card.MaterialCardView cardKeyframeTourStep;
+    private TextView tvKeyframeStepBadge;
+    private TextView tvKeyframeStepDesc;
+    private com.google.android.material.progressindicator.LinearProgressIndicator progressKeyframeStep;
+    private TextView tvStepDetail;
+    private LinearLayout layoutSimpleFlyToOptions;
+    private ChipGroup chipGroupSimpleFlyToMode;
+
+    private boolean isControlsCollapsed = false;
+    private final Handler autoFadeHandler = new Handler(Looper.getMainLooper());
+    private final Runnable autoFadeRunnable = () ->
+            controlsCard.animate().alpha(0.35f).setDuration(400L).start();
+
+    private Choreographer.FrameCallback frameCallback;
+    private boolean isTourRunning = false;
+    private int currentKeyframeIndex = 0;
+
+    @NonNull
+    @Override
+    public Camera getInitialCamera() {
+        LatLng start = TourData.AIRPLANE_FLIGHT_PATH.get(0);
+        return new Camera(
+                new LatLngAltitude(start.latitude, start.longitude, 250.0),
+                105.0,
+                65.0,
+                0.0,
+                600.0
+        );
     }
 
-    tvTourStatus = findViewById(R.id.tv_tour_status);
-    btnPlayPause = findViewById(R.id.btn_play_pause);
-    Button btnReset = findViewById(R.id.btn_reset);
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-    if (btnPlayPause != null) {
-      btnPlayPause.setOnClickListener(
-          v -> {
-            if (isPlaying) {
-              pauseTour();
+        if (snapshotButton != null) snapshotButton.setVisibility(View.GONE);
+        if (recenterButton != null) recenterButton.setVisibility(View.GONE);
+
+        MaterialToolbar topBar = findViewById(com.example.maps3dcommon.R.id.top_bar);
+        if (topBar != null) {
+            topBar.setTitle(com.example.maps3dcommon.R.string.aerial_tour_title);
+        }
+
+        viewModel = new ViewModelProvider(this).get(AdvancedCameraAnimationViewModel.class);
+
+        setupCustomControls();
+        observeViewModel();
+        resetAutoFadeTimer();
+    }
+
+    private void setupCustomControls() {
+        ViewGroup rootLayout = findViewById(com.example.maps3dcommon.R.id.map_container);
+        View customView = getLayoutInflater().inflate(
+                com.example.maps3dcommon.R.layout.control_panel_advanced_animation,
+                rootLayout,
+                false
+        );
+        rootLayout.addView(customView);
+
+        controlsCard = customView.findViewById(com.example.maps3dcommon.R.id.control_panel);
+        LinearLayout headerTitleBar = customView.findViewById(com.example.maps3dcommon.R.id.header_title_bar);
+        MaterialButton btnHelp = customView.findViewById(com.example.maps3dcommon.R.id.btn_help);
+        btnCollapseToggle = customView.findViewById(com.example.maps3dcommon.R.id.btn_collapse_toggle);
+        btnPlayPause = customView.findViewById(com.example.maps3dcommon.R.id.btn_play_pause);
+        btnReset = customView.findViewById(com.example.maps3dcommon.R.id.btn_reset);
+        tvTourStatus = customView.findViewById(com.example.maps3dcommon.R.id.tv_tour_status);
+        collapsibleContent = customView.findViewById(com.example.maps3dcommon.R.id.collapsible_content);
+        btnSelectApproach = customView.findViewById(com.example.maps3dcommon.R.id.btn_select_approach);
+        tvStepDetail = customView.findViewById(com.example.maps3dcommon.R.id.tv_step_detail);
+        layoutSimpleFlyToOptions = customView.findViewById(com.example.maps3dcommon.R.id.layout_simple_fly_to_options);
+        cardKeyframeTourStep = customView.findViewById(com.example.maps3dcommon.R.id.card_keyframe_tour_step);
+        tvKeyframeStepBadge = customView.findViewById(com.example.maps3dcommon.R.id.tv_keyframe_step_badge);
+        tvKeyframeStepDesc = customView.findViewById(com.example.maps3dcommon.R.id.tv_keyframe_step_description);
+        progressKeyframeStep = customView.findViewById(com.example.maps3dcommon.R.id.progress_keyframe_step);
+        chipGroupSimpleFlyToMode = customView.findViewById(com.example.maps3dcommon.R.id.chip_group_simple_fly_to_mode);
+
+        headerTitleBar.setOnClickListener(v -> {
+            toggleControlsCollapse();
+            resetAutoFadeTimer();
+        });
+
+        btnCollapseToggle.setOnClickListener(v -> {
+            toggleControlsCollapse();
+            resetAutoFadeTimer();
+        });
+
+        btnPlayPause.setOnClickListener(v -> {
+            resetAutoFadeTimer();
+            if (viewModel.getCurrentState().isPlaying()) {
+                stopAnimationLoops();
+                viewModel.pause();
             } else {
-              startOrResumeTour();
+                startSelectedApproach();
             }
-          });
+        });
+
+        btnReset.setOnClickListener(v -> {
+            resetAutoFadeTimer();
+            stopAnimationLoops();
+            viewModel.resetTour();
+            if (googleMap3D != null) {
+                Camera targetCam = (viewModel.getCurrentState().getSelectedApproach() == AnimationApproach.KEYFRAME_TOUR) ? TourData.OVERVIEW_CAMERA : getInitialCamera();
+                    googleMap3D.setCamera(targetCam);
+            }
+        });
+
+        btnHelp.setOnClickListener(v -> {
+            showHelpDialog();
+            resetAutoFadeTimer();
+        });
+
+        btnSelectApproach.setOnClickListener(v -> {
+            resetAutoFadeTimer();
+            showApproachMenu(v);
+        });
+
+        chipGroupSimpleFlyToMode.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (checkedIds.isEmpty()) return;
+            int id = checkedIds.get(0);
+            SimpleFlyToMode mode = (id == com.example.maps3dcommon.R.id.chip_fly_to_midpoint)
+                    ? SimpleFlyToMode.MIDPOINT_JUMP
+                    : SimpleFlyToMode.SYNCHRONIZED_FLIGHT;
+            viewModel.setSimpleFlyToMode(mode);
+            resetAutoFadeTimer();
+        });
+
+        GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                if (e1 == null) return false;
+                float deltaY = e2.getY() - e1.getY();
+                if (Math.abs(deltaY) > 50 && Math.abs(velocityY) > 100) {
+                    if (deltaY > 0 && !isControlsCollapsed) {
+                        toggleControlsCollapse();
+                    } else if (deltaY < 0 && isControlsCollapsed) {
+                        toggleControlsCollapse();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        controlsCard.setOnTouchListener((v, event) -> {
+            resetAutoFadeTimer();
+            gestureDetector.onTouchEvent(event);
+            return false;
+        });
     }
 
-    if (btnReset != null) {
-      btnReset.setOnClickListener(v -> resetTour());
+    private void observeViewModel() {
+        viewModel.getLiveData().observe(this, state -> {
+            if (state == null) return;
+            tvTourStatus.setText(state.getStatusText());
+            btnPlayPause.setIconResource(
+                    state.isPlaying()
+                            ? com.example.maps3dcommon.R.drawable.pause_24px
+                            : com.example.maps3dcommon.R.drawable.play_arrow_24px
+            );
+
+            if (googleMap3D != null) {
+                if (state.getSelectedApproach() == AnimationApproach.DISPATCHER_FRAME_LOOP ||
+                        state.getSelectedApproach() == AnimationApproach.ORBIT_360_SPIN) {
+                    googleMap3D.setCamera(state.getCamera());
+                }
+            }
+
+            EntityPose pose = state.getEntityPose(TourData.AIRPLANE_MODEL_ID);
+            if (pose != null) {
+                airplaneEntity.applyPose(pose, googleMap3D);
+            }
+        });
     }
-  }
 
-  @NonNull
-  @Override
-  public Camera getInitialCamera() {
-    return new Camera(
-        new LatLngAltitude(SF_PANORAMA_CENTER.latitude, SF_PANORAMA_CENTER.longitude, 300.0),
-        /* heading= */ 30.0,
-        /* tilt= */ 60.0,
-        /* roll= */ 0.0,
-        /* range= */ 4500.0);
-  }
+    @Override
+    public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
+        super.onMap3DViewReady(googleMap3D);
+        EntityPose initialPose = viewModel.getCurrentState().getEntityPose(TourData.AIRPLANE_MODEL_ID);
+        if (initialPose != null) {
+            airplaneEntity.attach(googleMap3D, initialPose);
+        }
+    }
 
-  @NonNull
-  @Override
-  public String getTAG() {
-    return "AdvancedCameraAnimation";
-  }
+    private void resetAndRestartTour() {
+        if (googleMap3D != null) {
+            Camera targetCam = (viewModel.getCurrentState().getSelectedApproach() == AnimationApproach.KEYFRAME_TOUR) ? TourData.OVERVIEW_CAMERA : getInitialCamera();
+                    googleMap3D.setCamera(targetCam);
+        }
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (!isDestroyed() && !isFinishing()) {
+                startSelectedApproach();
+            }
+        }, 400L);
+    }
 
-  @Override
-  public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
-    super.onMap3DViewReady(googleMap3D);
-    googleMap3D.setCamera(getInitialCamera());
-    googleMap3D.flyCameraTo(new FlyToOptions(getInitialCamera(), 0L));
+    private void startSelectedApproach() {
+        if (googleMap3D == null) return;
+        stopAnimationLoops();
+        viewModel.play();
 
-    // Re-apply after a short delay to guarantee native viewport receives target coordinates
-    handler.postDelayed(
-        () -> {
-          if (this.googleMap3D != null) {
-            this.googleMap3D.setCamera(getInitialCamera());
-            this.googleMap3D.flyCameraTo(new FlyToOptions(getInitialCamera(), 0L));
-          }
-        },
-        150L);
+        AnimationApproach approach = viewModel.getCurrentState().getSelectedApproach();
+        if (approach == AnimationApproach.SIMPLE_FLY_TO) {
+            runSimpleFlyTo(googleMap3D);
+        } else if (approach == AnimationApproach.KEYFRAME_TOUR) {
+            runKeyframeTour(googleMap3D);
+        } else if (approach == AnimationApproach.DISPATCHER_FRAME_LOOP) {
+            runFrameDispatcherLoop();
+        } else if (approach == AnimationApproach.ORBIT_360_SPIN) {
+            runContinuousOrbitLoop();
+        }
+    }
 
-    double planeHeading = SphericalUtil.computeHeading(GOLDEN_GATE_BRIDGE, COIT_TOWER);
-    updateAirplaneModel(GOLDEN_GATE_BRIDGE, planeHeading + 180.0);
-  }
+    private void runSimpleFlyTo(GoogleMap3D map) {
+        isTourRunning = true;
+        LatLng target = TourData.AIRPLANE_FLIGHT_PATH.get(TourData.AIRPLANE_FLIGHT_PATH.size() - 1);
+        Camera targetCam = new Camera(
+                new LatLngAltitude(target.latitude, target.longitude, 250.0),
+                285.0, // Facing back toward Golden Gate Bridge to watch the plane fly in
+                65.0,
+                0.0,
+                600.0
+        );
 
-  private final Map3DAnimator.Listener animatorListener =
-      new Map3DAnimator.Listener() {
-        @Override
-        public void onStepStarted(int index, @NonNull KeyframeStep step) {
-          Log.d(getTAG(), "Keyframe Step " + (index + 1) + " started: " + step.getTitle());
-          if (tvTourStatus != null && tourAnimator != null) {
-            tvTourStatus.setText(
-                getString(
-                    R.string.aerial_tour_status_running,
-                    index + 1,
-                    tourAnimator.getSteps().size(),
-                    step.getTitle()));
-          }
+        FlyToOptions options = new FlyToOptions(targetCam, 5000);
+
+        frameCallback = new Choreographer.FrameCallback() {
+            private long lastNanos = 0L;
+            @Override
+            public void doFrame(long frameTimeNanos) {
+                if (lastNanos > 0L) {
+                    double dt = (frameTimeNanos - lastNanos) / 1_000_000_000.0;
+                    viewModel.tick(Math.max(0.001, Math.min(0.1, dt)));
+                }
+                lastNanos = frameTimeNanos;
+                if (viewModel.getCurrentState().isPlaying() && isTourRunning) {
+                    Choreographer.getInstance().postFrameCallback(this);
+                }
+            }
+        };
+        Choreographer.getInstance().postFrameCallback(frameCallback);
+
+        map.setCameraAnimationEndListener(() -> {
+            map.setCameraAnimationEndListener(null);
+            stopAnimationLoops();
+            viewModel.onNativeCameraAnimationFinished();
+        });
+        map.flyCameraTo(options);
+    }
+
+    private void runKeyframeTour(GoogleMap3D map) {
+        isTourRunning = true;
+        currentKeyframeIndex = 0;
+        executeNextKeyframeStep(map);
+    }
+
+    private void executeNextKeyframeStep(GoogleMap3D map) {
+        List<CameraKeyframe> tour = TourData.SAN_FRANCISCO_TOUR;
+        if (!isTourRunning || currentKeyframeIndex >= tour.size() || !viewModel.getCurrentState().isPlaying()) {
+            stopAnimationLoops();
+            viewModel.onNativeCameraAnimationFinished();
+            return;
         }
 
-        @Override
-        public void onStepCompleted(int index, @NonNull KeyframeStep step) {
-          Log.d(getTAG(), "Keyframe Step " + (index + 1) + " completed: " + step.getTitle());
+        viewModel.setKeyframeStep(currentKeyframeIndex);
+        CameraKeyframe step = tour.get(currentKeyframeIndex);
+
+        if (step instanceof CameraKeyframe.FlyTo) {
+            CameraKeyframe.FlyTo flyStep = (CameraKeyframe.FlyTo) step;
+            FlyToOptions options = new FlyToOptions(flyStep.getTargetCamera(), (int) flyStep.getDurationMs());
+            map.setCameraAnimationEndListener(() -> {
+                map.setCameraAnimationEndListener(null);
+                currentKeyframeIndex++;
+                executeNextKeyframeStep(map);
+            });
+            map.flyCameraTo(options);
+        } else if (step instanceof CameraKeyframe.DwellPause) {
+            CameraKeyframe.DwellPause dwellStep = (CameraKeyframe.DwellPause) step;
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                currentKeyframeIndex++;
+                executeNextKeyframeStep(map);
+            }, dwellStep.getDurationMs());
+        } else if (step instanceof CameraKeyframe.FlyAround) {
+            CameraKeyframe.FlyAround flyAround = (CameraKeyframe.FlyAround) step;
+            FlyAroundOptions options = new FlyAroundOptions(flyAround.getCenterCamera(), (int) flyAround.getDurationMs(), (float) flyAround.getRounds());
+            map.setCameraAnimationEndListener(() -> {
+                map.setCameraAnimationEndListener(null);
+                currentKeyframeIndex++;
+                executeNextKeyframeStep(map);
+            });
+            map.flyCameraAround(options);
+        } else if (step instanceof CameraKeyframe.StationaryTrackingFlight) {
+            CameraKeyframe.StationaryTrackingFlight trackingStep = (CameraKeyframe.StationaryTrackingFlight) step;
+            FlyToOptions toVantage = new FlyToOptions(trackingStep.getObservationCamera(), 2000);
+            map.setCameraAnimationEndListener(() -> {
+                map.setCameraAnimationEndListener(null);
+                if (!isTourRunning || !viewModel.getCurrentState().isPlaying()) return;
+                StationaryCameraTracker tracker = StationaryCameraTracker.Companion.fromInitialCamera(trackingStep.getObservationCamera());
+                TrajectoryFlightAnimator flightAnimator = new TrajectoryFlightAnimator(trackingStep.getFlightPath(), 250.0, 0.08);
+                long startTime = System.currentTimeMillis();
+                Handler trackHandler = new Handler(Looper.getMainLooper());
+                Runnable trackRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!isTourRunning || !viewModel.getCurrentState().isPlaying()) return;
+                        long elapsed = System.currentTimeMillis() - startTime;
+                        EntityPose targetPose = flightAnimator.update(elapsed, trackingStep.getDurationMs());
+                        Camera trackingCam = tracker.computeTrackingCamera(targetPose);
+
+                        viewModel.updateAirplanePose(targetPose);
+                        airplaneEntity.applyPose(targetPose, map);
+                        map.setCamera(trackingCam);
+
+                        if (!flightAnimator.isFinished(elapsed, trackingStep.getDurationMs())) {
+                            trackHandler.postDelayed(this, 16L);
+                        } else {
+                            EntityPose finalPose = flightAnimator.update(trackingStep.getDurationMs(), trackingStep.getDurationMs());
+                            viewModel.updateAirplanePose(finalPose);
+                            airplaneEntity.applyPose(finalPose, map);
+
+                            currentKeyframeIndex++;
+                            executeNextKeyframeStep(map);
+                        }
+                    }
+                };
+                trackHandler.post(trackRunnable);
+            });
+            map.flyCameraTo(toVantage);
+        }
+    }
+
+    private void runFrameDispatcherLoop() {
+        isTourRunning = true;
+        frameCallback = new Choreographer.FrameCallback() {
+            private long lastNanos = 0L;
+            @Override
+            public void doFrame(long frameTimeNanos) {
+                if (lastNanos > 0L) {
+                    double dt = (frameTimeNanos - lastNanos) / 1_000_000_000.0;
+                    viewModel.tick(Math.max(0.001, Math.min(0.1, dt)));
+                }
+                lastNanos = frameTimeNanos;
+                if (viewModel.getCurrentState().isPlaying() && isTourRunning) {
+                    Choreographer.getInstance().postFrameCallback(this);
+                }
+            }
+        };
+        Choreographer.getInstance().postFrameCallback(frameCallback);
+    }
+
+    private void runContinuousOrbitLoop() {
+        isTourRunning = true;
+        frameCallback = new Choreographer.FrameCallback() {
+            private long lastNanos = 0L;
+            @Override
+            public void doFrame(long frameTimeNanos) {
+                if (lastNanos > 0L) {
+                    double dt = (frameTimeNanos - lastNanos) / 1_000_000_000.0;
+                    viewModel.tick(Math.max(0.001, Math.min(0.1, dt)));
+                }
+                lastNanos = frameTimeNanos;
+                if (viewModel.getCurrentState().isPlaying() && isTourRunning) {
+                    Choreographer.getInstance().postFrameCallback(this);
+                }
+            }
+        };
+        Choreographer.getInstance().postFrameCallback(frameCallback);
+    }
+
+    private void stopAnimationLoops() {
+        isTourRunning = false;
+        if (frameCallback != null) {
+            Choreographer.getInstance().removeFrameCallback(frameCallback);
+            frameCallback = null;
+        }
+        if (googleMap3D != null) {
+            googleMap3D.setCameraAnimationEndListener(null);
+            googleMap3D.stopCameraAnimation();
+        }
+    }
+
+    private void toggleControlsCollapse() {
+        isControlsCollapsed = !isControlsCollapsed;
+        collapsibleContent.setVisibility(isControlsCollapsed ? View.GONE : View.VISIBLE);
+        btnCollapseToggle.setIconResource(
+                isControlsCollapsed
+                        ? com.example.maps3dcommon.R.drawable.expand_less_24px
+                        : com.example.maps3dcommon.R.drawable.expand_more_24px
+        );
+    }
+
+    private void updateApproachUI(AnimationApproach approach) {
+        layoutSimpleFlyToOptions.setVisibility(
+                approach == AnimationApproach.SIMPLE_FLY_TO ? View.VISIBLE : View.GONE
+        );
+        if (approach == AnimationApproach.SIMPLE_FLY_TO) {
+            tvStepDetail.setText("Native asynchronous SDK flight transition directly to Coit Tower.");
+        } else if (approach == AnimationApproach.KEYFRAME_TOUR) {
+            tvStepDetail.setText("Declarative 5-step sequence: Swoop FlyTo → Dwell Pause → 360° Orbit → Stationary Tracking Flight → Final FlyTo.");
+        } else if (approach == AnimationApproach.DISPATCHER_FRAME_LOOP) {
+            tvStepDetail.setText("Continuous 400 m/s flight synced to hardware VSYNC display frames.");
+        } else if (approach == AnimationApproach.ORBIT_360_SPIN) {
+            tvStepDetail.setText("Continuous 360° orbital camera rotation around Golden Gate Bridge.");
+        }
+    }
+
+    private void resetAutoFadeTimer() {
+        controlsCard.animate().alpha(1.0f).setDuration(150L).start();
+        autoFadeHandler.removeCallbacks(autoFadeRunnable);
+        autoFadeHandler.postDelayed(autoFadeRunnable, 3500L);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        resetAutoFadeTimer();
+        return super.dispatchTouchEvent(ev);
+    }
+
+    private void showApproachMenu(View anchor) {
+        androidx.appcompat.widget.PopupMenu popup = new androidx.appcompat.widget.PopupMenu(this, anchor);
+        AnimationApproach[] approaches = AnimationApproach.values();
+        for (int i = 0; i < approaches.length; i++) {
+            popup.getMenu().add(0, i, i, approaches[i].getTitle());
+        }
+        popup.setOnMenuItemClickListener(item -> {
+            resetAutoFadeTimer();
+            int index = item.getItemId();
+            if (index >= 0 && index < approaches.length) {
+                stopAnimationLoops();
+                viewModel.setApproach(approaches[index]);
+                viewModel.resetTour();
+                if (googleMap3D != null) {
+                    Camera targetCam = (viewModel.getCurrentState().getSelectedApproach() == AnimationApproach.KEYFRAME_TOUR) ? TourData.OVERVIEW_CAMERA : getInitialCamera();
+                    googleMap3D.setCamera(targetCam);
+                }
+                return true;
+            }
+            return false;
+        });
+        popup.show();
+    }
+
+    private void showHelpDialog() {
+        View dialogView = getLayoutInflater().inflate(com.example.maps3dcommon.R.layout.dialog_help_advanced_animation, null);
+        TextView tvContent = dialogView.findViewById(com.example.maps3dcommon.R.id.tv_help_html_content);
+        if (tvContent != null) {
+            tvContent.setText(HtmlUtils.loadRawHtml(this, com.example.maps3dcommon.R.raw.help_advanced_animation));
         }
 
-        @Override
-        public void onAnimationFinished() {
-          Log.d(getTAG(), "Aerial tour completed successfully.");
-          isPlaying = false;
-          updatePlayPauseButtonState();
-          if (tvTourStatus != null) {
-            tvTourStatus.setText(R.string.aerial_tour_status_finished);
-          }
-        }
-      };
-
-  private void startOrResumeTour() {
-    isPlaying = true;
-    updatePlayPauseButtonState();
-
-    if (googleMap3D != null) {
-      if (tourAnimator == null) {
-        tourAnimator = buildTourAnimator();
-        tourAnimator.start(googleMap3D, animatorListener);
-      } else if (tourAnimator.getCurrentStepIndex() < tourAnimator.getSteps().size()) {
-        tourAnimator.resume();
-      } else {
-        tourAnimator.start(googleMap3D, animatorListener);
-      }
-    }
-  }
-
-  private void pauseTour() {
-    isPlaying = false;
-    updatePlayPauseButtonState();
-    handler.removeCallbacksAndMessages(null);
-    if (tourAnimator != null) {
-      tourAnimator.pause();
-    }
-  }
-
-  private void stopTour() {
-    isPlaying = false;
-    updatePlayPauseButtonState();
-    handler.removeCallbacksAndMessages(null);
-    if (tourAnimator != null) {
-      tourAnimator.stop();
-    }
-    if (googleMap3D != null) {
-      googleMap3D.setCameraAnimationEndListener(null);
-      googleMap3D.stopCameraAnimation();
-    }
-  }
-
-  public void resetTour() {
-    stopTour();
-    tourAnimator = null;
-
-    if (googleMap3D != null) {
-      googleMap3D.setCamera(getInitialCamera());
-      googleMap3D.flyCameraTo(new FlyToOptions(getInitialCamera(), 0L));
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(com.example.maps3dcommon.R.string.help_dialog_advanced_animation_title)
+                .setView(dialogView)
+                .setPositiveButton(com.example.maps3dcommon.R.string.help_dialog_ok, (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
-    double planeHeading = SphericalUtil.computeHeading(GOLDEN_GATE_BRIDGE, COIT_TOWER);
-    updateAirplaneModel(GOLDEN_GATE_BRIDGE, planeHeading + 180.0);
-
-    if (tvTourStatus != null) {
-      tvTourStatus.setText(R.string.aerial_tour_status_idle);
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopAnimationLoops();
+        viewModel.pause();
+        autoFadeHandler.removeCallbacks(autoFadeRunnable);
     }
-  }
 
-  private void updateAirplaneModel(LatLng position, double planeHeadingDeg) {
-    if (googleMap3D != null) {
-      ModelOptions modelOptions = new ModelOptions();
-      modelOptions.setId(MODEL_ID);
-      modelOptions.setPosition(new LatLngAltitude(position.latitude, position.longitude, 200.0));
-      modelOptions.setUrl(PLANE_URL);
-      modelOptions.setAltitudeMode(AltitudeMode.ABSOLUTE);
-      modelOptions.setScale(new Vector3D(0.08, 0.08, 0.08));
-      modelOptions.setOrientation(
-          new Orientation(
-              /* heading= */ normalizeHeading(planeHeadingDeg),
-              /* tilt= */ -90.0,
-              /* roll= */ 0.0));
-
-      airplaneModel = googleMap3D.addModel(modelOptions);
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        airplaneEntity.detach();
     }
-  }
-
-  private void updatePlayPauseButtonState() {
-    if (btnPlayPause != null) {
-      btnPlayPause.setText(isPlaying ? R.string.pause : R.string.play);
-    }
-  }
-
-  private static double normalizeHeading(double headingDeg) {
-    double normalized = headingDeg % 360.0;
-    return normalized < 0.0 ? normalized + 360.0 : normalized;
-  }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
-    pauseTour();
-  }
 }

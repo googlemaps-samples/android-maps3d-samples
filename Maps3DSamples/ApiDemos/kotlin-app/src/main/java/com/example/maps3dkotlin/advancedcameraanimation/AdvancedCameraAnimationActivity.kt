@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,549 +17,549 @@
 package com.example.maps3dkotlin.advancedcameraanimation
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.view.Choreographer
+import android.view.GestureDetector
+import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.activity.viewModels
+import androidx.cardview.widget.CardView
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import com.example.maps3d.common.RouteEngine
-import com.example.maps3dcommon.R
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.maps3d.common.AdvancedCameraAnimationViewModel
+import com.example.maps3d.common.AnimationApproach
+import com.example.maps3d.common.CameraKeyframe
+import com.example.maps3d.common.HtmlUtils
+import com.example.maps3d.common.Map3DModelEntity
+import com.example.maps3d.common.SimpleFlyToMode
+import com.example.maps3d.common.TourData
+import com.example.maps3d.common.StationaryCameraTracker
+import com.example.maps3d.common.TrajectoryFlightAnimator
+import com.example.maps3d.common.awaitCameraUpdate
+import com.example.maps3d.common.toCameraUpdate
+import com.example.maps3dcommon.R as CommonR
+import com.example.maps3dkotlin.R
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.FlyToOptions
-import com.google.android.gms.maps3d.model.LatLngAltitude
-import com.google.android.gms.maps3d.model.Model
-import com.google.android.gms.maps3d.model.ModelOptions
-import com.google.android.gms.maps3d.model.Orientation
-import com.google.android.gms.maps3d.model.Vector3D
 import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
+import com.google.android.gms.maps3d.model.flyAroundOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.maps.android.SphericalUtil
-import kotlin.coroutines.resume
-import kotlinx.coroutines.Dispatchers
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.google.android.material.chip.ChipGroup
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlin.math.abs
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.coroutines.resume
 
 /**
- * Suspends until the 3D map camera animation completes using [com.google.android.gms.maps3d.OnCameraAnimationEndListener].
+ * Advanced Camera Animation demo showcasing 4 camera control paradigms in Google Maps 3D.
+ *
+ * Demonstrates:
+ * 1. Native asynchronous SDK flyTo transitions with optional high-rate vs discrete model updates.
+ * 2. Declarative sequential keyframe queuing (FlyTo -> Dwell -> Orbit -> FlyTo).
+ * 3. High-rate 400 m/s continuous flight frame loop synced to display hardware VSYNC.
+ * 4. 360-degree continuous orbital camera rotation around landmarks.
  */
-private suspend fun GoogleMap3D.awaitFlyCameraTo(options: FlyToOptions) =
-    suspendCancellableCoroutine { continuation ->
-        setCameraAnimationEndListener {
-            setCameraAnimationEndListener(null)
-            if (continuation.isActive) {
-                continuation.resume(Unit)
-            }
-        }
-        flyCameraTo(options)
-        continuation.invokeOnCancellation {
-            setCameraAnimationEndListener(null)
-            stopCameraAnimation()
-        }
-    }
-
-enum class AnimationApproach {
-    SIMPLE_FLY_TO,
-    KEYFRAME_TOUR,
-    DISPATCHER_FRAME_LOOP,
-    ORBIT_360_SPIN
-}
-
-sealed interface CameraKeyframe {
-    val stepTitle: String
-    val stepDescription: String
-
-    data class FlyTo(
-        override val stepTitle: String,
-        override val stepDescription: String,
-        val targetCenter: LatLng,
-        val targetAltitude: Double,
-        val targetHeading: Double,
-        val targetTilt: Double,
-        val targetRange: Double,
-        val durationMs: Long = 2500L
-    ) : CameraKeyframe
-
-    data class DwellPause(
-        override val stepTitle: String,
-        override val stepDescription: String,
-        val durationMs: Long = 1500L
-    ) : CameraKeyframe
-
-    data class OrbitAround(
-        override val stepTitle: String,
-        override val stepDescription: String,
-        val center: LatLng,
-        val altitude: Double,
-        val range: Double,
-        val tilt: Double,
-        val startHeading: Double,
-        val endHeading: Double,
-        val durationMs: Long = 4000L
-    ) : CameraKeyframe
-}
-
 class AdvancedCameraAnimationActivity : SampleBaseActivity() {
+    override val TAG: String = "AdvancedCameraAnimationActivity"
 
-    override val TAG = "AdvancedCameraAnimation"
+    override val initialCamera: Camera = camera {
+        center = latLngAltitude {
+            latitude = TourData.AIRPLANE_FLIGHT_PATH.first().latitude
+            longitude = TourData.AIRPLANE_FLIGHT_PATH.first().longitude
+            altitude = 250.0
+        }
+        heading = 105.0
+        tilt = 65.0
+        range = 600.0
+    }
 
-    override val initialCamera: Camera
-        get() {
-            val firstLoc = AIRPLANE_FLIGHT_PATH.first()
-            val initialHeading = SphericalUtil.computeHeading(firstLoc, AIRPLANE_FLIGHT_PATH[1])
-            return camera {
-                center = latLngAltitude {
-                    latitude = firstLoc.latitude
-                    longitude = firstLoc.longitude
-                    altitude = 200.0
+    private val viewModel: AdvancedCameraAnimationViewModel by viewModels()
+    private val airplaneEntity = Map3DModelEntity(TourData.AIRPLANE_MODEL_ID, TourData.AIRPLANE_MODEL_URL)
+
+    // UI View References
+    private lateinit var controlsCard: CardView
+    private lateinit var headerTitleBar: LinearLayout
+    private lateinit var btnHelp: MaterialButton
+    private lateinit var btnCollapseToggle: MaterialButton
+    private lateinit var btnPlayPause: MaterialButton
+    private lateinit var btnReset: MaterialButton
+    private lateinit var tvTourStatus: TextView
+    private lateinit var collapsibleContent: LinearLayout
+    private lateinit var btnSelectApproach: MaterialButton
+    private lateinit var cardKeyframeTourStep: MaterialCardView
+    private lateinit var tvKeyframeStepBadge: TextView
+    private lateinit var tvKeyframeStepDesc: TextView
+    private lateinit var progressKeyframeStep: LinearProgressIndicator
+    private lateinit var tvStepDetail: TextView
+    private lateinit var layoutSimpleFlyToOptions: LinearLayout
+    private lateinit var chipGroupSimpleFlyToMode: ChipGroup
+
+    private var isControlsCollapsed = false
+    private val autoFadeHandler = Handler(Looper.getMainLooper())
+    private val autoFadeRunnable = Runnable {
+        controlsCard.animate().alpha(0.35f).setDuration(400L).start()
+    }
+
+    private var frameCallback: Choreographer.FrameCallback? = null
+    private var tourJob: Job? = null
+
+    /**
+     * Suspends until the 3D map camera animation completes.
+     */
+    private suspend fun GoogleMap3D.awaitFlyCameraTo(options: FlyToOptions) =
+        suspendCancellableCoroutine { continuation ->
+            setCameraAnimationEndListener {
+                setCameraAnimationEndListener(null)
+                if (continuation.isActive) {
+                    continuation.resume(Unit)
                 }
-                heading = normalizeHeading(initialHeading)
-                tilt = 65.0
-                range = 600.0
+            }
+            flyCameraTo(options)
+            continuation.invokeOnCancellation {
+                setCameraAnimationEndListener(null)
+                stopCameraAnimation()
             }
         }
-
-    private var airplaneModel: Model? = null
-    private var currentStepIndex = 0
-    private var isPlaying = false
-    private var tourJob: Job? = null
-    private var restartJob: Job? = null
-    private var selectedApproach = AnimationApproach.DISPATCHER_FRAME_LOOP
-
-    private var btnPlayPause: Button? = null
-
-    private val cumulativeDistances by lazy {
-        RouteEngine.calculateCumulativeDistances(AIRPLANE_FLIGHT_PATH)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inflate control panel overlay into the map container managed by SampleBaseActivity
-        findViewById<ViewGroup>(R.id.map_container)?.let { container ->
-            layoutInflater.inflate(R.layout.control_panel_advanced_animation, container, true)
+        // Hide floating snapshot/recenter buttons from base layout
+        snapshotButton.visibility = View.GONE
+        recenterButton.visibility = View.GONE
+
+        findViewById<MaterialToolbar>(CommonR.id.top_bar)?.apply {
+            title = getString(CommonR.string.aerial_tour_title)
         }
 
-        findViewById<MaterialToolbar>(R.id.top_bar)?.apply {
-            title = "Advanced Camera Animation"
-            setNavigationOnClickListener { finish() }
+        setupCustomControls()
+        observeViewModel()
+        resetAutoFadeTimer()
+    }
+
+    private fun setupCustomControls() {
+        val rootLayout = findViewById<ViewGroup>(CommonR.id.map_container)
+        val customView = layoutInflater.inflate(
+            CommonR.layout.control_panel_advanced_animation,
+            rootLayout,
+            false
+        )
+        rootLayout.addView(customView)
+
+        controlsCard = customView.findViewById(CommonR.id.control_panel)
+        headerTitleBar = customView.findViewById(CommonR.id.header_title_bar)
+        btnHelp = customView.findViewById(CommonR.id.btn_help)
+        btnCollapseToggle = customView.findViewById(CommonR.id.btn_collapse_toggle)
+        btnPlayPause = customView.findViewById(CommonR.id.btn_play_pause)
+        btnReset = customView.findViewById(CommonR.id.btn_reset)
+        tvTourStatus = customView.findViewById(CommonR.id.tv_tour_status)
+        collapsibleContent = customView.findViewById(CommonR.id.collapsible_content)
+        btnSelectApproach = customView.findViewById(CommonR.id.btn_select_approach)
+        tvStepDetail = customView.findViewById(CommonR.id.tv_step_detail)
+        layoutSimpleFlyToOptions = customView.findViewById(CommonR.id.layout_simple_fly_to_options)
+        cardKeyframeTourStep = customView.findViewById(CommonR.id.card_keyframe_tour_step)
+        tvKeyframeStepBadge = customView.findViewById(CommonR.id.tv_keyframe_step_badge)
+        tvKeyframeStepDesc = customView.findViewById(CommonR.id.tv_keyframe_step_description)
+        progressKeyframeStep = customView.findViewById(CommonR.id.progress_keyframe_step)
+        chipGroupSimpleFlyToMode = customView.findViewById(CommonR.id.chip_group_simple_fly_to_mode)
+
+        headerTitleBar.setOnClickListener {
+            toggleControlsCollapse()
+            resetAutoFadeTimer()
         }
 
-        findViewById<Button>(R.id.btn_reset)?.setOnClickListener {
-            resetAndRestartTour()
+        btnCollapseToggle.setOnClickListener {
+            toggleControlsCollapse()
+            resetAutoFadeTimer()
         }
 
-        btnPlayPause = findViewById(R.id.btn_play_pause)
-        btnPlayPause?.setOnClickListener {
-            if (isPlaying) {
-                stopTour()
+        btnPlayPause.setOnClickListener {
+            resetAutoFadeTimer()
+            if (viewModel.currentState.isPlaying) {
+                stopAnimationLoops()
+                viewModel.pause()
             } else {
                 startSelectedApproach()
             }
         }
-    }
 
-    private fun updatePlayPauseButtonState() {
-        btnPlayPause?.text = if (isPlaying) "Pause" else "Play"
-    }
-
-    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-        super.onMap3DViewReady(googleMap3D)
-
-        // Instantiate 3D Airplane Model on map at initial start position
-        val startLoc = AIRPLANE_FLIGHT_PATH.first()
-        val initialHeading = SphericalUtil.computeHeading(startLoc, AIRPLANE_FLIGHT_PATH[1])
-        updateAirplaneModel(startLoc, initialHeading + 180.0)
-
-        // Auto-start smooth flight animation after 1 second delay
-        restartJob = lifecycleScope.launch {
-            delay(1000L.milliseconds)
-            startSelectedApproach()
+        btnReset.setOnClickListener {
+            resetAutoFadeTimer()
+            stopAnimationLoops()
+            viewModel.resetTour()
+            val targetCam = if (viewModel.currentState.selectedApproach == AnimationApproach.KEYFRAME_TOUR) TourData.OVERVIEW_CAMERA else initialCamera
+            googleMap3D?.setCamera(targetCam)
         }
-    }
 
-    /**
-     * Updates the 3D Airplane Model's position and orientation on the map.
-     * Note: Calling `map.addModel(opts)` continuously with the same `id` string
-     * is the recommended approach for dynamically updating a model's location.
-     *
-     * Remote URLs: Models should be hosted and loaded via external URL.
-     */
-    private fun updateAirplaneModel(targetLatLng: LatLng, planeHeadingDeg: Double) {
-        googleMap3D?.let { map ->
-            val opts = ModelOptions().apply {
-                id = MODEL_ID
-                position = LatLngAltitude(targetLatLng.latitude, targetLatLng.longitude, 200.0)
-                altitudeMode = AltitudeMode.ABSOLUTE
-                orientation = Orientation(normalizeHeading(planeHeadingDeg), -90.0, 0.0)
-                url = PLANE_URL
-                scale = Vector3D(0.08, 0.08, 0.08)
+        btnHelp.setOnClickListener {
+            showHelpDialog()
+            resetAutoFadeTimer()
+        }
+
+        btnSelectApproach.setOnClickListener { view ->
+            resetAutoFadeTimer()
+            showApproachMenu(view)
+        }
+
+        // Sub-mode switching for Simple FlyTo
+        chipGroupSimpleFlyToMode.setOnCheckedStateChangeListener { _, checkedIds ->
+            if (checkedIds.isEmpty()) return@setOnCheckedStateChangeListener
+            val mode = when (checkedIds.first()) {
+                CommonR.id.chip_fly_to_midpoint -> SimpleFlyToMode.MIDPOINT_JUMP
+                else -> SimpleFlyToMode.SYNCHRONIZED_FLIGHT
             }
-            airplaneModel = map.addModel(opts)
+            viewModel.setSimpleFlyToMode(mode)
+            resetAutoFadeTimer()
         }
+
+        // Swipe up/down gesture on bottom sheet
+        val sheetGestureDetector = GestureDetector(
+            this,
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onFling(
+                    e1: MotionEvent?,
+                    e2: MotionEvent,
+                    velocityX: Float,
+                    velocityY: Float
+                ): Boolean {
+                    if (e1 == null) return false
+                    val deltaY = e2.y - e1.y
+                    if (abs(deltaY) > 50 && abs(velocityY) > 100) {
+                        if (deltaY > 0 && !isControlsCollapsed) {
+                            toggleControlsCollapse()
+                        } else if (deltaY < 0 && isControlsCollapsed) {
+                            toggleControlsCollapse()
+                        }
+                        return true
+                    }
+                    return false
+                }
+            }
+        )
+
+        controlsCard.setOnTouchListener { _, event ->
+            resetAutoFadeTimer()
+            sheetGestureDetector.onTouchEvent(event)
+            false
+        }
+    }
+
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.worldState.collect { state ->
+                    tvTourStatus.text = state.statusText
+                    btnPlayPause.setIconResource(
+                        if (state.isPlaying) CommonR.drawable.pause_24px else CommonR.drawable.play_arrow_24px
+                    )
+
+                    // Synchronize approach dropdown label & visibility of sub-options
+                    btnSelectApproach.text = state.selectedApproach.title
+                    layoutSimpleFlyToOptions.visibility =
+                        if (state.selectedApproach == AnimationApproach.SIMPLE_FLY_TO) View.VISIBLE else View.GONE
+
+                    val isKeyframeTour = state.selectedApproach == AnimationApproach.KEYFRAME_TOUR
+                    cardKeyframeTourStep.visibility = if (isKeyframeTour) View.VISIBLE else View.GONE
+                    if (isKeyframeTour) {
+                        tvKeyframeStepBadge.text = if (state.stepTitle.isNotEmpty()) state.stepTitle else "Step ${state.currentStepIndex + 1} of ${state.totalSteps}"
+                        tvKeyframeStepDesc.text = state.stepDescription
+                        progressKeyframeStep.max = state.totalSteps
+                        progressKeyframeStep.progress = state.currentStepIndex + 1
+                    }
+
+                    // Update detail explanation text
+                    tvStepDetail.text = when (state.selectedApproach) {
+                        AnimationApproach.SIMPLE_FLY_TO -> "Native asynchronous SDK flight transition directly to Coit Tower."
+                        AnimationApproach.KEYFRAME_TOUR -> "Declarative 5-step sequence: Swoop FlyTo → Dwell Pause → 360° Orbit → Stationary Tracking Flight → Final FlyTo."
+                        AnimationApproach.DISPATCHER_FRAME_LOOP -> "Continuous 400 m/s flight synced to hardware VSYNC display frames."
+                        AnimationApproach.ORBIT_360_SPIN -> "Continuous 360° orbital camera rotation around Golden Gate Bridge."
+                    }
+
+                    // Synchronize sub-mode chip selection
+                    val targetSubModeChipId = when (state.simpleFlyToMode) {
+                        SimpleFlyToMode.SYNCHRONIZED_FLIGHT -> CommonR.id.chip_fly_to_synchronized
+                        SimpleFlyToMode.MIDPOINT_JUMP -> CommonR.id.chip_fly_to_midpoint
+                    }
+                    if (chipGroupSimpleFlyToMode.checkedChipId != targetSubModeChipId) {
+                        chipGroupSimpleFlyToMode.check(targetSubModeChipId)
+                    }
+
+                    // Synchronize 3D camera for frame dispatcher and continuous orbit
+                    googleMap3D?.let { map ->
+                        if (state.selectedApproach == AnimationApproach.DISPATCHER_FRAME_LOOP ||
+                            state.selectedApproach == AnimationApproach.ORBIT_360_SPIN) {
+                            map.setCamera(state.camera)
+                        }
+                    }
+
+                    // Synchronize 3D Airplane model pose
+                    state.getEntityPose(TourData.AIRPLANE_MODEL_ID)?.let { pose ->
+                        airplaneEntity.applyPose(pose, googleMap3D)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onMapReady(googleMap3D: GoogleMap3D) {
+        super.onMapReady(googleMap3D)
+        viewModel.currentState.getEntityPose(TourData.AIRPLANE_MODEL_ID)?.let { initialPose ->
+            airplaneEntity.attach(googleMap3D, initialPose)
+        }
+    }
+
+    private fun resetAndRestartTour() {
+        val targetCam = if (viewModel.currentState.selectedApproach == AnimationApproach.KEYFRAME_TOUR) TourData.OVERVIEW_CAMERA else initialCamera
+            googleMap3D?.setCamera(targetCam)
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (!isDestroyed && !isFinishing) {
+                startSelectedApproach()
+            }
+        }, 400L)
     }
 
     private fun startSelectedApproach() {
-        stopTour()
-        when (selectedApproach) {
-            AnimationApproach.SIMPLE_FLY_TO -> runSimpleFlyTo()
-            AnimationApproach.KEYFRAME_TOUR -> startOrResumeTour()
+        val map = googleMap3D ?: return
+        stopAnimationLoops()
+        viewModel.play()
+
+        when (viewModel.currentState.selectedApproach) {
+            AnimationApproach.SIMPLE_FLY_TO -> runSimpleFlyTo(map)
+            AnimationApproach.KEYFRAME_TOUR -> runKeyframeTour(map)
             AnimationApproach.DISPATCHER_FRAME_LOOP -> runFrameDispatcherLoop()
-            AnimationApproach.ORBIT_360_SPIN -> run360OrbitSpin()
+            AnimationApproach.ORBIT_360_SPIN -> runContinuousOrbitLoop()
         }
     }
 
-    private fun runSimpleFlyTo() {
-        stopTour()
-        isPlaying = true
-        updatePlayPauseButtonState()
-
-        val targetLoc = AIRPLANE_FLIGHT_PATH.last()
-        val flightHeading = SphericalUtil.computeHeading(AIRPLANE_FLIGHT_PATH[AIRPLANE_FLIGHT_PATH.size - 2], targetLoc)
-        updateAirplaneModel(targetLoc, flightHeading + 180.0)
-
-        val targetCam = camera {
-            center = latLngAltitude {
-                latitude = targetLoc.latitude
-                longitude = targetLoc.longitude
-                altitude = 200.0
+    private fun runSimpleFlyTo(map: GoogleMap3D) {
+        tourJob = lifecycleScope.launch {
+            val targetLoc = TourData.AIRPLANE_FLIGHT_PATH.last()
+            val targetCam = camera {
+                center = latLngAltitude {
+                    latitude = targetLoc.latitude
+                    longitude = targetLoc.longitude
+                    altitude = 250.0
+                }
+                heading = 285.0 // Facing back toward Golden Gate Bridge to watch the plane fly in
+                tilt = 65.0
+                range = 600.0
             }
-            heading = normalizeHeading(flightHeading)
-            tilt = 65.0
-            range = 600.0
-        }
-        tourJob = lifecycleScope.launch(Dispatchers.Main) {
-            googleMap3D?.awaitFlyCameraTo(FlyToOptions(targetCam, 1500L))
-            isPlaying = false
-            updatePlayPauseButtonState()
+
+            val options = flyToOptions {
+                endCamera = targetCam
+                durationInMillis = 5000L
+            }
+
+            // Start VSYNC frame callback to tick the world model & update plane entity during flyTo
+            frameCallback = object : Choreographer.FrameCallback {
+                private var lastTimeNanos = 0L
+                override fun doFrame(frameTimeNanos: Long) {
+                    if (lastTimeNanos > 0L) {
+                        val dt = (frameTimeNanos - lastTimeNanos) / 1_000_000_000.0
+                        viewModel.tick(dt.coerceIn(0.001, 0.1))
+                    }
+                    lastTimeNanos = frameTimeNanos
+                    if (viewModel.currentState.isPlaying) {
+                        Choreographer.getInstance().postFrameCallback(this)
+                    }
+                }
+            }
+            Choreographer.getInstance().postFrameCallback(frameCallback!!)
+
+            map.awaitFlyCameraTo(options)
+
+            frameCallback?.let { Choreographer.getInstance().removeFrameCallback(it) }
+            viewModel.onNativeCameraAnimationFinished()
         }
     }
 
-    /**
-     * Executes multi-step keyframe queue tour smoothly stage by stage.
-     */
-    private fun startOrResumeTour() {
-        stopTour()
-        isPlaying = true
-        updatePlayPauseButtonState()
-        currentStepIndex = 0
+    private fun runKeyframeTour(map: GoogleMap3D) {
+        tourJob = lifecycleScope.launch {
+            for (index in TourData.SAN_FRANCISCO_TOUR.indices) {
+                if (!isActive || !viewModel.currentState.isPlaying) break
+                viewModel.setKeyframeStep(index)
 
-        tourJob = lifecycleScope.launch(Dispatchers.Main) {
-            val frameDurationMs = 16L
-
-            while (currentStepIndex < SAN_FRANCISCO_TOUR.size && isActive && isPlaying) {
-                val step = SAN_FRANCISCO_TOUR[currentStepIndex]
-
-                when (step) {
+                when (val step = TourData.SAN_FRANCISCO_TOUR[index]) {
                     is CameraKeyframe.FlyTo -> {
-                        val targetCam = camera {
-                            center = latLngAltitude {
-                                latitude = step.targetCenter.latitude
-                                longitude = step.targetCenter.longitude
-                                altitude = step.targetAltitude
-                            }
-                            heading = normalizeHeading(step.targetHeading)
-                            tilt = step.targetTilt
-                            range = step.targetRange
+                        val options = flyToOptions {
+                            endCamera = step.targetCamera
+                            durationInMillis = step.durationMs
                         }
-                        updateAirplaneModel(step.targetCenter, step.targetHeading + 180.0)
-                        googleMap3D?.awaitFlyCameraTo(FlyToOptions(targetCam, step.durationMs))
+                        awaitCameraUpdate(map, options.toCameraUpdate())
                     }
 
                     is CameraKeyframe.DwellPause -> {
-                        delay(step.durationMs.milliseconds)
+                        kotlinx.coroutines.delay(step.durationMs)
                     }
 
-                    is CameraKeyframe.OrbitAround -> {
-                        val totalFrames = (step.durationMs / frameDurationMs).coerceAtLeast(1)
-                        for (frame in 0..totalFrames) {
-                            if (!isActive || !isPlaying) break
-                            val t = frame.toDouble() / totalFrames
-                            val orbitHeading = interpolateAngle(step.startHeading, step.endHeading, t)
-
-                            val updatedCam = camera {
-                                center = latLngAltitude {
-                                    latitude = step.center.latitude
-                                    longitude = step.center.longitude
-                                    altitude = step.altitude
-                                }
-                                heading = normalizeHeading(orbitHeading)
-                                tilt = step.tilt
-                                range = step.range
-                            }
-
-                            updateAirplaneModel(step.center, orbitHeading + 180.0)
-                            googleMap3D?.setCamera(updatedCam)
-                            delay(frameDurationMs.milliseconds)
+                    is CameraKeyframe.FlyAround -> {
+                        val options = flyAroundOptions {
+                            center = step.centerCamera
+                            rounds = step.rounds
+                            durationInMillis = step.durationMs
                         }
+                        awaitCameraUpdate(map, options.toCameraUpdate())
                     }
-                }
 
-                if (!isActive || !isPlaying) break
+                    is CameraKeyframe.StationaryTrackingFlight -> {
+                        val toVantageOptions = flyToOptions {
+                            endCamera = step.observationCamera
+                            durationInMillis = 2000L
+                        }
+                        awaitCameraUpdate(map, toVantageOptions.toCameraUpdate())
 
-                if (currentStepIndex < SAN_FRANCISCO_TOUR.size - 1) {
-                    currentStepIndex++
-                } else {
-                    isPlaying = false
-                    updatePlayPauseButtonState()
-                    break
+                        val tracker = StationaryCameraTracker.fromInitialCamera(step.observationCamera)
+                        val flightAnimator = TrajectoryFlightAnimator(step.flightPath, altitude = 250.0, scale = 0.08)
+                        val startMs = System.currentTimeMillis()
+
+                        while (isActive && viewModel.currentState.isPlaying) {
+                            val elapsed = System.currentTimeMillis() - startMs
+                            val targetPose = flightAnimator.update(elapsed, step.durationMs)
+                            val trackingCam = tracker.computeTrackingCamera(targetPose)
+
+                            viewModel.updateAirplanePose(targetPose)
+                            airplaneEntity.applyPose(targetPose, map)
+                            map.setCamera(trackingCam)
+
+                            if (flightAnimator.isFinished(elapsed, step.durationMs)) break
+                            kotlinx.coroutines.delay(16L)
+                        }
+
+                        val finalPose = flightAnimator.update(step.durationMs, step.durationMs)
+                        viewModel.updateAirplanePose(finalPose)
+                        airplaneEntity.applyPose(finalPose, map)
+                    }
                 }
             }
+            viewModel.onNativeCameraAnimationFinished()
         }
     }
 
-    /**
-     * Frame Dispatcher Animation Loop.
-     * High-speed flight animation (400 m/s) stopping cleanly at destination.
-     * 
-     * For the most visually uniform cinematic sweeping motion, we recommend using
-     * `Choreographer.FrameCallback` to sync our delta-time interpolation directly 
-     * to the hardware display frames.
-     */
     private fun runFrameDispatcherLoop() {
-        stopTour()
-        isPlaying = true
-        updatePlayPauseButtonState()
-
-        val totalDistance = cumulativeDistances.last().coerceAtLeast(1.0)
-        val flightSpeedMps = 400.0 // Fast 400 m/s high-speed flight
-
-        val frameCallback = object : android.view.Choreographer.FrameCallback {
+        frameCallback = object : Choreographer.FrameCallback {
             private var lastTimeNanos = 0L
-            private var elapsedDistance = 0.0
-
             override fun doFrame(frameTimeNanos: Long) {
-                if (!isPlaying) return
-
-                if (lastTimeNanos == 0L) {
-                    lastTimeNanos = frameTimeNanos
-                    android.view.Choreographer.getInstance().postFrameCallback(this)
-                    return
+                if (lastTimeNanos > 0L) {
+                    val dt = (frameTimeNanos - lastTimeNanos) / 1_000_000_000.0
+                    viewModel.tick(dt.coerceIn(0.001, 0.1))
                 }
-
-                val dt = (frameTimeNanos - lastTimeNanos) / 1_000_000_000.0
                 lastTimeNanos = frameTimeNanos
-
-                elapsedDistance += flightSpeedMps * dt
-
-                if (elapsedDistance >= totalDistance) {
-                    elapsedDistance = totalDistance
-                    val posAndHeading = RouteEngine.calculatePositionAndHeading(
-                        AIRPLANE_FLIGHT_PATH,
-                        cumulativeDistances,
-                        elapsedDistance,
-                        30.0
-                    )
-                    val planeHeading = posAndHeading.heading.toDouble() + 180.0
-                    updateAirplaneModel(posAndHeading.position, planeHeading)
-
-                    val finalCam = camera {
-                        center = latLngAltitude {
-                            latitude = posAndHeading.position.latitude
-                            longitude = posAndHeading.position.longitude
-                            altitude = 200.0
-                        }
-                        heading = normalizeHeading(posAndHeading.heading.toDouble())
-                        tilt = 65.0
-                        range = 600.0
-                    }
-                    googleMap3D?.setCamera(finalCam)
-                    isPlaying = false
-                    updatePlayPauseButtonState()
-                    return
+                if (viewModel.currentState.isPlaying) {
+                    Choreographer.getInstance().postFrameCallback(this)
                 }
-
-                val posAndHeading = RouteEngine.calculatePositionAndHeading(
-                    AIRPLANE_FLIGHT_PATH,
-                    cumulativeDistances,
-                    elapsedDistance,
-                    30.0
-                )
-
-                val planeHeading = posAndHeading.heading.toDouble() + 180.0
-                updateAirplaneModel(posAndHeading.position, planeHeading)
-
-                val updatedCam = camera {
-                    center = latLngAltitude {
-                        latitude = posAndHeading.position.latitude
-                        longitude = posAndHeading.position.longitude
-                        altitude = 200.0
-                    }
-                    heading = normalizeHeading(posAndHeading.heading.toDouble())
-                    tilt = 65.0
-                    range = 600.0
-                }
-                googleMap3D?.setCamera(updatedCam)
-
-                android.view.Choreographer.getInstance().postFrameCallback(this)
             }
         }
-        android.view.Choreographer.getInstance().postFrameCallback(frameCallback)
+        Choreographer.getInstance().postFrameCallback(frameCallback!!)
     }
 
-    /**
-     * Option 4: Continuous 360-degree orbital camera spin around landmark.
-     */
-    private fun run360OrbitSpin() {
-        stopTour()
-        isPlaying = true
-        updatePlayPauseButtonState()
-
-        val targetCenter = AIRPLANE_FLIGHT_PATH.first()
-        updateAirplaneModel(targetCenter, 105.0 + 180.0)
-
-        tourJob = lifecycleScope.launch(Dispatchers.Main) {
-            val frameDurationMs = 16L
-            val totalMs = 6000L // 6 second smooth 360° spin
-            val totalFrames = (totalMs / frameDurationMs).coerceAtLeast(1)
-            val startHeading = 105.0
-
-            for (frame in 0..totalFrames) {
-                if (!isActive || !isPlaying) break
-                val t = frame.toDouble() / totalFrames
-                val headingDeg = (startHeading + t * 360.0) % 360.0
-
-                val currentCam = camera {
-                    center = latLngAltitude {
-                        latitude = targetCenter.latitude
-                        longitude = targetCenter.longitude
-                        altitude = 200.0
-                    }
-                    heading = normalizeHeading(headingDeg)
-                    tilt = 65.0
-                    range = 600.0
+    private fun runContinuousOrbitLoop() {
+        frameCallback = object : Choreographer.FrameCallback {
+            private var lastTimeNanos = 0L
+            override fun doFrame(frameTimeNanos: Long) {
+                if (lastTimeNanos > 0L) {
+                    val dt = (frameTimeNanos - lastTimeNanos) / 1_000_000_000.0
+                    viewModel.tick(dt.coerceIn(0.001, 0.1))
                 }
-                googleMap3D?.setCamera(currentCam)
-                delay(frameDurationMs.milliseconds)
+                lastTimeNanos = frameTimeNanos
+                if (viewModel.currentState.isPlaying) {
+                    Choreographer.getInstance().postFrameCallback(this)
+                }
             }
-            isPlaying = false
-            updatePlayPauseButtonState()
         }
+        Choreographer.getInstance().postFrameCallback(frameCallback!!)
     }
 
-    private fun stopTour() {
-        isPlaying = false
-        updatePlayPauseButtonState()
-        restartJob?.cancel()
-        restartJob = null
+    private fun stopAnimationLoops() {
+        frameCallback?.let { Choreographer.getInstance().removeFrameCallback(it) }
+        frameCallback = null
         tourJob?.cancel()
         tourJob = null
-        googleMap3D?.setCameraAnimationEndListener(null)
-        googleMap3D?.stopCameraAnimation()
     }
 
-    /**
-     * Resets the camera and airplane model to the initial start location and restarts animation.
-     */
-    fun resetAndRestartTour() {
-        stopTour()
-        currentStepIndex = 0
+    private fun toggleControlsCollapse() {
+        isControlsCollapsed = !isControlsCollapsed
+        collapsibleContent.visibility = if (isControlsCollapsed) View.GONE else View.VISIBLE
+        btnCollapseToggle.setIconResource(
+            if (isControlsCollapsed) CommonR.drawable.expand_less_24px else CommonR.drawable.expand_more_24px
+        )
+    }
 
-        val startLoc = AIRPLANE_FLIGHT_PATH.first()
-        val initialHeading = SphericalUtil.computeHeading(startLoc, AIRPLANE_FLIGHT_PATH[1])
-        updateAirplaneModel(startLoc, initialHeading + 180.0)
-
-        val resetCam = camera {
-            center = latLngAltitude {
-                latitude = startLoc.latitude
-                longitude = startLoc.longitude
-                altitude = 200.0
-            }
-            heading = normalizeHeading(initialHeading)
-            tilt = 65.0
-            range = 600.0
+    private fun updateApproachUI(approach: AnimationApproach) {
+        layoutSimpleFlyToOptions.visibility = if (approach == AnimationApproach.SIMPLE_FLY_TO) View.VISIBLE else View.GONE
+        tvStepDetail.text = when (approach) {
+            AnimationApproach.SIMPLE_FLY_TO -> "Native asynchronous SDK flight transition directly to Coit Tower."
+            AnimationApproach.KEYFRAME_TOUR -> "Declarative 5-step sequence: Swoop FlyTo → Dwell Pause → 360° Orbit → Stationary Tracking Flight → Final FlyTo."
+            AnimationApproach.DISPATCHER_FRAME_LOOP -> "Continuous 400 m/s flight synced to hardware VSYNC display frames."
+            AnimationApproach.ORBIT_360_SPIN -> "Continuous 360° orbital camera rotation around Golden Gate Bridge."
         }
-        googleMap3D?.setCamera(resetCam)
+    }
 
-        restartJob = lifecycleScope.launch {
-            delay(300.milliseconds)
-            startSelectedApproach()
+    private fun resetAutoFadeTimer() {
+        controlsCard.animate().alpha(1.0f).setDuration(150L).start()
+        autoFadeHandler.removeCallbacks(autoFadeRunnable)
+        autoFadeHandler.postDelayed(autoFadeRunnable, 3500L)
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        resetAutoFadeTimer()
+        return super.dispatchTouchEvent(ev)
+    }
+
+    private fun showApproachMenu(anchor: View) {
+        val popup = androidx.appcompat.widget.PopupMenu(this, anchor)
+        val approaches = AnimationApproach.values()
+        approaches.forEachIndexed { index, approach ->
+            popup.menu.add(0, index, index, approach.title)
         }
+        popup.setOnMenuItemClickListener { menuItem ->
+            resetAutoFadeTimer()
+            val selected = approaches.getOrNull(menuItem.itemId) ?: return@setOnMenuItemClickListener false
+            stopAnimationLoops()
+            viewModel.setApproach(selected)
+            viewModel.resetTour()
+            val targetCam = if (viewModel.currentState.selectedApproach == AnimationApproach.KEYFRAME_TOUR) TourData.OVERVIEW_CAMERA else initialCamera
+            googleMap3D?.setCamera(targetCam)
+            true
+        }
+        popup.show()
+    }
+
+    private fun showHelpDialog() {
+        val dialogView = layoutInflater.inflate(CommonR.layout.dialog_help_advanced_animation, null)
+        dialogView.findViewById<TextView>(CommonR.id.tv_help_html_content)?.text =
+            HtmlUtils.loadRawHtml(this, CommonR.raw.help_advanced_animation)
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(CommonR.string.help_dialog_advanced_animation_title)
+            .setView(dialogView)
+            .setPositiveButton(CommonR.string.help_dialog_ok) { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 
     override fun onPause() {
         super.onPause()
-        stopTour()
+        stopAnimationLoops()
+        viewModel.pause()
+        autoFadeHandler.removeCallbacks(autoFadeRunnable)
     }
 
-    companion object {
-        private const val MODEL_ID = "airplane_model"
-        private const val PLANE_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb"
-
-        val SAN_FRANCISCO_TOUR = listOf(
-            CameraKeyframe.FlyTo(
-                stepTitle = "1. Golden Gate Bridge Flight",
-                stepDescription = "3D Airplane flight over Golden Gate Bridge",
-                targetCenter = LatLng(37.8199, -122.4783),
-                targetAltitude = 200.0,
-                targetHeading = 105.0,
-                targetTilt = 65.0,
-                targetRange = 600.0,
-                durationMs = 2500L
-            ),
-            CameraKeyframe.DwellPause(
-                stepTitle = "2. Mid-Air Observation",
-                stepDescription = "Dwell pause observing 3D airplane over Golden Gate",
-                durationMs = 1500L
-            ),
-            CameraKeyframe.OrbitAround(
-                stepTitle = "3. Golden Gate 360° Orbit",
-                stepDescription = "360° orbital camera spin around flying airplane",
-                center = LatLng(37.8199, -122.4783),
-                altitude = 200.0,
-                range = 600.0,
-                tilt = 65.0,
-                startHeading = 105.0,
-                endHeading = 465.0,
-                durationMs = 4000L
-            ),
-            CameraKeyframe.FlyTo(
-                stepTitle = "4. Transit to Coit Tower",
-                stepDescription = "Airplane flight to Coit Tower Landmark",
-                targetCenter = LatLng(37.8024, -122.4058),
-                targetAltitude = 200.0,
-                targetHeading = 105.0,
-                targetTilt = 65.0,
-                targetRange = 600.0,
-                durationMs = 3000L
-            )
-        )
-
-        // 15 Fine-Grained Waypoints on the direct route from Golden Gate Bridge to Coit Tower
-        val AIRPLANE_FLIGHT_PATH = listOf(
-            LatLng(37.8199, -122.4783), // 1. Golden Gate Bridge (Source)
-            LatLng(37.8188, -122.4735), // 2. Fort Point / Presidio Overlook
-            LatLng(37.8175, -122.4685), // 3. Crissy Field West
-            LatLng(37.8160, -122.4635), // 4. Crissy Field East
-            LatLng(37.8145, -122.4585), // 5. Marina Green West
-            LatLng(37.8130, -122.4530), // 6. Marina District Center
-            LatLng(37.8115, -122.4475), // 7. Fort Mason West
-            LatLng(37.8100, -122.4420), // 8. Fort Mason Heights
-            LatLng(37.8085, -122.4365), // 9. Aquatic Park Cove
-            LatLng(37.8070, -122.4310), // 10. Fisherman's Wharf West
-            LatLng(37.8058, -122.4250), // 11. Fisherman's Wharf Center
-            LatLng(37.8048, -122.4195), // 12. Pier 39 Promenade
-            LatLng(37.8038, -122.4140), // 13. Embarcadero North
-            LatLng(37.8030, -122.4090), // 14. Telegraph Hill Slopes
-            LatLng(37.8024, -122.4058)  // 15. Coit Tower (Destination)
-        )
-
-        private fun normalizeHeading(headingDeg: Double): Double {
-            val normalized = headingDeg % 360.0
-            return if (normalized < 0.0) normalized + 360.0 else normalized
-        }
-
-        private fun interpolateAngle(start: Double, end: Double, fraction: Double): Double {
-            var diff = (end - start) % 360.0
-            if (diff > 180.0) diff -= 360.0
-            if (diff < -180.0) diff += 360.0
-            return (start + diff * fraction + 360.0) % 360.0
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        airplaneEntity.detach()
     }
 }

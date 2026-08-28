@@ -18,7 +18,7 @@ package com.example.maps3djava.sampleactivity;
 import static com.example.maps3d.common.UtilitiesKt.toCameraString;
 import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
 
-import android.app.Activity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -64,7 +64,7 @@ import com.google.android.material.button.MaterialButton;
  * <p>
  * The activity layout includes a [Map3DView], a snapshot button, and a recenter button.
  */
-public abstract class SampleBaseActivity extends Activity implements OnMap3DViewReadyCallback {
+public abstract class SampleBaseActivity extends AppCompatActivity implements OnMap3DViewReadyCallback {
     protected Map3DView map3DView;
     protected GoogleMap3D googleMap3D;
 

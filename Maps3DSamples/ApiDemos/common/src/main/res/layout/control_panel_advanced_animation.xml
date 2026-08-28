@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- Copyright 2025 Google LLC
+ Copyright 2026 Google LLC
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@
     android:layout_height="wrap_content"
     app:cardElevation="8dp"
     app:cardCornerRadius="16dp"
+    app:cardBackgroundColor="?attr/colorSurface"
     android:layout_margin="12dp"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintStart_toStartOf="parent"
@@ -31,51 +32,234 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp"
         android:orientation="vertical"
+        android:padding="12dp"
         >
 
-        <TextView
-            style="@style/TextAppearance.Material3.TitleMedium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/aerial_tour_title"
-            android:textStyle="bold"
+        <!-- Visual Drag Handle -->
+        <View
+            android:layout_width="36dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/drag_handle_bar"
             />
 
-        <TextView
-            android:id="@+id/tv_tour_status"
-            style="@style/TextAppearance.Material3.BodyMedium"
+        <!-- Title & Header Bar (Clickable to Collapse/Expand) -->
+        <LinearLayout
+            android:id="@+id/header_title_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/aerial_tour_status_idle"
-            android:textColor="?android:attr/textColorSecondary"
-            />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            >
 
+            <TextView
+                android:id="@+id/tv_title"
+                style="@style/TextAppearance.Material3.TitleMedium"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/aerial_tour_title"
+                android:textStyle="bold"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_help"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:icon="@drawable/help_outline_24px"
+                app:iconTint="?attr/colorOnSurfaceVariant"
+                android:contentDescription="@string/help_dialog_title"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_collapse_toggle"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:icon="@drawable/expand_more_24px"
+                app:iconTint="?attr/colorOnSurfaceVariant"
+                android:contentDescription="@string/collapse_controls"
+                />
+        </LinearLayout>
+
+        <!-- Persistent Playback & Status Bar (Always Visible) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="end"
-            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:layout_marginTop="4dp"
             >
 
-            <Button
-                android:id="@+id/btn_reset"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/reset"
-                android:layout_marginEnd="8dp"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_play_pause"
+                style="@style/Widget.Material3.Button.IconButton.Filled"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:icon="@drawable/play_arrow_24px"
+                android:contentDescription="@string/play_or_pause_animation"
                 />
 
-            <Button
-                android:id="@+id/btn_play_pause"
-                style="@style/Widget.Material3.Button"
-                android:layout_width="wrap_content"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_reset"
+                style="@style/Widget.Material3.Button.IconButton.Outlined"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="6dp"
+                app:icon="@drawable/restart_alt_24px"
+                android:contentDescription="@string/reset"
+                />
+
+            <TextView
+                android:id="@+id/tv_tour_status"
+                style="@style/TextAppearance.Material3.BodyMedium"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/play"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:text="@string/aerial_tour_status_idle"
+                android:textColor="?android:attr/textColorSecondary"
+                android:maxLines="2"
+                android:ellipsize="end"
+                />
+        </LinearLayout>
+
+        <!-- Collapsible Content (Approach Selection & Step Details) -->
+        <LinearLayout
+            android:id="@+id/collapsible_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            >
+
+
+
+            <!-- Approach Selection Menu Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_select_approach"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/approach_simple_fly_to"
+                android:textAlignment="viewStart"
+                app:icon="@drawable/arrow_drop_down_24px"
+                app:iconGravity="end"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                />
+
+            <!-- Sub-options for Simple FlyTo (Visible when Simple FlyTo is selected) -->
+            <LinearLayout
+                android:id="@+id/layout_simple_fly_to_options"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible"
+                android:layout_marginTop="6dp"
+                >
+
+                <TextView
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/model_animation_mode_title"
+                    android:textStyle="bold"
+                    />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chip_group_simple_fly_to_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:singleSelection="true"
+                    app:selectionRequired="true"
+                    android:layout_marginTop="2dp"
+                    >
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_fly_to_synchronized"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="@string/fly_to_mode_synchronized"
+                        />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_fly_to_midpoint"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/fly_to_mode_midpoint"
+                        />
+                </com.google.android.material.chip.ChipGroup>
+            </LinearLayout>
+
+            <!-- Keyframe Tour Step Card (Visible when Keyframe Tour is selected) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_keyframe_tour_step"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="?attr/materialCardViewFilledStyle"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                app:cardCornerRadius="10dp"
+                android:visibility="gone"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="4dp"
+                >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp"
+                    >
+
+                    <TextView
+                        android:id="@+id/tv_keyframe_step_badge"
+                        style="@style/TextAppearance.Material3.LabelLarge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Step 1 of 4: High-Altitude Swoop In"
+                        android:textColor="?attr/colorPrimary"
+                        android:textStyle="bold"
+                        />
+
+                    <TextView
+                        android:id="@+id/tv_keyframe_step_description"
+                        style="@style/TextAppearance.Material3.BodySmall"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Swooping down from 1200m overview into close flight alignment (250m) behind the airplane."
+                        />
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/progress_keyframe_step"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        app:trackCornerRadius="4dp"
+                        android:max="4"
+                        android:progress="1"
+                        />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/tv_step_detail"
+                style="@style/TextAppearance.Material3.BodySmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="?android:attr/textColorTertiary"
+                android:text="Native asynchronous SDK flight transition directly to Coit Tower."
                 />
         </LinearLayout>
 
