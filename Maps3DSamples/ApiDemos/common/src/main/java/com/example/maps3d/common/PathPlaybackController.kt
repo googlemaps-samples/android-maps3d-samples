@@ -25,7 +25,6 @@ import com.google.android.gms.maps3d.model.LatLngAltitude
  */
 data class PathPlaybackState(
     val route: List<LatLngAltitude> = PathData.URBAN_PATH,
-    val cumulativeDistances: DoubleArray = doubleArrayOf(0.0),
     val totalDistance: Double = 0.0,
     val elapsedDistance: Double = 0.0,
     val progressRatio: Float = 0.0f,
@@ -65,60 +64,6 @@ data class PathPlaybackState(
 
     val effectiveSpeedMps: Double
         get() = followSpeedMps * speedBoostMultiplier
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is PathPlaybackState) return false
-
-        return route == other.route &&
-                cumulativeDistances.contentEquals(other.cumulativeDistances) &&
-                totalDistance == other.totalDistance &&
-                elapsedDistance == other.elapsedDistance &&
-                progressRatio == other.progressRatio &&
-                isPlaying == other.isPlaying &&
-                isScrubbing == other.isScrubbing &&
-                speedBoostMultiplier == other.speedBoostMultiplier &&
-                followSpeedMps == other.followSpeedMps &&
-                cameraRange == other.cameraRange &&
-                groundAltitude == other.groundAltitude &&
-                headingOffset == other.headingOffset &&
-                cameraTilt == other.cameraTilt &&
-                altitudeMode == other.altitudeMode &&
-                pathAltitudeOffset == other.pathAltitudeOffset &&
-                drawsOccludedSegments == other.drawsOccludedSegments &&
-                currentPosition == other.currentPosition &&
-                currentAltitude == other.currentAltitude &&
-                currentHeading == other.currentHeading &&
-                cameraHeading == other.cameraHeading &&
-                staticPolylineVertices == other.staticPolylineVertices &&
-                progressPolylineVertices == other.progressPolylineVertices
-    }
-
-    override fun hashCode(): Int {
-        var result = route.hashCode()
-        result = 31 * result + cumulativeDistances.contentHashCode()
-        result = 31 * result + totalDistance.hashCode()
-        result = 31 * result + elapsedDistance.hashCode()
-        result = 31 * result + progressRatio.hashCode()
-        result = 31 * result + isPlaying.hashCode()
-        result = 31 * result + isScrubbing.hashCode()
-        result = 31 * result + speedBoostMultiplier.hashCode()
-        result = 31 * result + followSpeedMps.hashCode()
-        result = 31 * result + cameraRange.hashCode()
-        result = 31 * result + groundAltitude.hashCode()
-        result = 31 * result + headingOffset.hashCode()
-        result = 31 * result + cameraTilt.hashCode()
-        result = 31 * result + altitudeMode.hashCode()
-        result = 31 * result + pathAltitudeOffset.hashCode()
-        result = 31 * result + drawsOccludedSegments.hashCode()
-        result = 31 * result + currentPosition.hashCode()
-        result = 31 * result + currentAltitude.hashCode()
-        result = 31 * result + currentHeading.hashCode()
-        result = 31 * result + cameraHeading.hashCode()
-        result = 31 * result + staticPolylineVertices.hashCode()
-        result = 31 * result + progressPolylineVertices.hashCode()
-        return result
-    }
 }
 
 /**
@@ -131,11 +76,12 @@ data class PathPlaybackState(
 class PathPlaybackController(
     initialRoute: List<LatLngAltitude> = PathData.URBAN_PATH
 ) {
+    private var cumulativeDistances: DoubleArray
     private var state: PathPlaybackState
 
     init {
-        val cumDist = PathEngine.calculateCumulativeDistances(initialRoute)
-        val totalDist = cumDist.lastOrNull() ?: 0.0
+        cumulativeDistances = PathEngine.calculateCumulativeDistances(initialRoute)
+        val totalDist = cumulativeDistances.lastOrNull() ?: 0.0
         val baseAlt = if (initialRoute == PathData.RURAL_PATH) 45.0 else 50.0
         val staticVertices = PathEngine.buildStaticVertices(
             path = initialRoute,
@@ -146,13 +92,13 @@ class PathPlaybackController(
 
         val point = PathEngine.interpolatePoint(
             path = initialRoute,
-            cumulativeDistances = cumDist,
+            cumulativeDistances = cumulativeDistances,
             distance = 0.0
         )
 
         val progressVertices = PathEngine.buildProgressVertices(
             path = initialRoute,
-            cumulativeDistances = cumDist,
+            cumulativeDistances = cumulativeDistances,
             elapsedDistance = 0.0,
             currentLatLng = point.latLng,
             waypointIndex = point.waypointIndex,
@@ -163,7 +109,6 @@ class PathPlaybackController(
 
         state = PathPlaybackState(
             route = initialRoute,
-            cumulativeDistances = cumDist,
             totalDistance = totalDist,
             elapsedDistance = 0.0,
             progressRatio = 0f,
@@ -246,8 +191,8 @@ class PathPlaybackController(
     }
 
     fun setRoute(newRoute: List<LatLngAltitude>, applyDefaults: Boolean = true): PathPlaybackState {
-        val cumDist = PathEngine.calculateCumulativeDistances(newRoute)
-        val totalDist = cumDist.lastOrNull() ?: 0.0
+        cumulativeDistances = PathEngine.calculateCumulativeDistances(newRoute)
+        val totalDist = cumulativeDistances.lastOrNull() ?: 0.0
         val isRural = newRoute == PathData.RURAL_PATH
 
         val range = if (applyDefaults) (if (isRural) 450.0 else 300.0) else state.cameraRange
@@ -257,7 +202,7 @@ class PathPlaybackController(
 
         val point = PathEngine.interpolatePoint(
             path = newRoute,
-            cumulativeDistances = cumDist,
+            cumulativeDistances = cumulativeDistances,
             distance = 0.0
         )
 
@@ -270,7 +215,7 @@ class PathPlaybackController(
 
         val progressVertices = PathEngine.buildProgressVertices(
             path = newRoute,
-            cumulativeDistances = cumDist,
+            cumulativeDistances = cumulativeDistances,
             elapsedDistance = 0.0,
             currentLatLng = point.latLng,
             waypointIndex = point.waypointIndex,
@@ -281,7 +226,6 @@ class PathPlaybackController(
 
         state = state.copy(
             route = newRoute,
-            cumulativeDistances = cumDist,
             totalDistance = totalDist,
             elapsedDistance = 0.0,
             progressRatio = 0f,
@@ -390,7 +334,7 @@ class PathPlaybackController(
     private fun updateDistanceAndRecompute(newDistance: Double, updateProgressRatio: Boolean): PathPlaybackState {
         val point = PathEngine.interpolatePoint(
             path = state.route,
-            cumulativeDistances = state.cumulativeDistances,
+            cumulativeDistances = cumulativeDistances,
             distance = newDistance
         )
 
@@ -404,7 +348,7 @@ class PathPlaybackController(
 
         val progressVertices = PathEngine.buildProgressVertices(
             path = state.route,
-            cumulativeDistances = state.cumulativeDistances,
+            cumulativeDistances = cumulativeDistances,
             elapsedDistance = newDistance,
             currentLatLng = point.latLng,
             waypointIndex = point.waypointIndex,
@@ -434,7 +378,7 @@ class PathPlaybackController(
     private fun recomputeVerticesAndAltitude(): PathPlaybackState {
         val point = PathEngine.interpolatePoint(
             path = state.route,
-            cumulativeDistances = state.cumulativeDistances,
+            cumulativeDistances = cumulativeDistances,
             distance = state.elapsedDistance
         )
 
@@ -447,7 +391,7 @@ class PathPlaybackController(
 
         val progressVertices = PathEngine.buildProgressVertices(
             path = state.route,
-            cumulativeDistances = state.cumulativeDistances,
+            cumulativeDistances = cumulativeDistances,
             elapsedDistance = state.elapsedDistance,
             currentLatLng = point.latLng,
             waypointIndex = point.waypointIndex,
