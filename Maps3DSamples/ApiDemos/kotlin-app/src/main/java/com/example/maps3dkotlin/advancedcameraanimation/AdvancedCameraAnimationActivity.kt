@@ -323,6 +323,8 @@ class AdvancedCameraAnimationActivity : SampleBaseActivity() {
 
     override fun onMapReady(googleMap3D: GoogleMap3D) {
         super.onMapReady(googleMap3D)
+        // Workaround: A short delay ensures the native map viewport and surface have fully initialized
+        // before setting the initial tour camera and binding the 3D Airplane glTF entity to the scene.
         Handler(Looper.getMainLooper()).postDelayed({
             if (!isDestroyed && !isFinishing) {
                 val targetCam = if (viewModel.currentState.selectedApproach == AnimationApproach.KEYFRAME_TOUR) TourData.OVERVIEW_CAMERA else initialCamera

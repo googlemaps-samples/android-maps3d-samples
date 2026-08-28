@@ -289,6 +289,8 @@ public class AdvancedCameraAnimationActivity extends SampleBaseActivity {
     @Override
     public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
         super.onMap3DViewReady(googleMap3D);
+        // Workaround: A short delay ensures the native map viewport and surface have fully initialized
+        // before setting the initial tour camera and binding the 3D Airplane glTF entity to the scene.
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (!isDestroyed() && !isFinishing() && this.googleMap3D != null) {
                 Camera targetCam = (viewModel.getCurrentState().getSelectedApproach() == AnimationApproach.KEYFRAME_TOUR)

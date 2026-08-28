@@ -184,6 +184,10 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
     public void onMap3DViewReady(GoogleMap3D googleMap3D) {
         this.googleMap3D = googleMap3D;
 
+        // Workaround: The Maps 3D SDK onMap3DViewReady callback fires when the map object
+        // is instantiated, but the internal native rendering pipeline and layout pass may briefly
+        // override initial programmatic camera positions. A short delay ensures the native map viewport
+        // has fully stabilized before applying the initial camera position.
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (!isDestroyed() && !isFinishing() && this.googleMap3D != null) {
                 this.googleMap3D.setCamera(getInitialCamera());
