@@ -76,7 +76,11 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
+    implementation(libs.androidx.ui)
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.foundation:foundation-layout")
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.material.icons.extended)
 
     api(libs.play.services.base) // "com.google.android.gms:play-services-base:18.10.0"
     api(libs.play.services.maps3d) // "com.google.android.gms:play-services-maps3d:0.2.2"
