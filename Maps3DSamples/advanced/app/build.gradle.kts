@@ -60,12 +60,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
     buildFeatures {
@@ -104,7 +104,7 @@ dependencies {
     testImplementation(libs.google.truth)
 
     // Google Maps Utils for the polyline decoder
-    implementation(libs.maps.utils.ktx)
+    implementation(libs.android.maps.utils)
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)

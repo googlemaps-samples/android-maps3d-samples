@@ -38,7 +38,8 @@ class PlaceSnippets(private val context: Context, private val map: TrackedMap3D)
     @Suppress("unused")
     @SnippetItem(
         title = "1. Listen Clicks",
-        description = "Sets up a listener that logs the Place ID when a user clicks on a 3D building or POI.",
+        description = "Sets up a listener that logs the Place ID when a user clicks on a " +
+            "3D building or POI.",
     )
     fun listenToPlaceClicks() {
         // [START maps_android_3d_place_click_kt]

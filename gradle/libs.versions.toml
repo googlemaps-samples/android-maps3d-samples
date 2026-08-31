@@ -33,7 +33,7 @@ kotlinxSerialization = "1.11.0"
 ktor = "3.5.2"
 hilt = "2.60.1"
 ksp = "2.3.6"
-mapsUtilsKtx = "6.3.0"
+mapsUtils = "6.0.0-rc01"
 androidx-core-ktx = "1.8.9"
 androidxArchCoreTesting = "2.2.0"
 kotlinxCoroutines = "1.8.0"
@@ -81,7 +81,8 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
-maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version.ref = "mapsUtilsKtx" }
+android-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "mapsUtils" }
+android-maps-utils-core = { module = "com.google.maps.android:android-maps-utils-core", version.ref = "mapsUtils" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 
 [plugins]
