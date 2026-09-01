@@ -140,8 +140,8 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         setContentView(R.layout.activity_common_map)
         val rootView = findViewById<View>(R.id.map_container)
         val topBar = findViewById<MaterialToolbar>(R.id.top_bar)
-        
         topBar.title = title
+        com.example.maps3d.common.showcase.ui.CrossFrameworkSwitcher.setupToolbarSwitcher(this, topBar)
 
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, insets ->
             val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())

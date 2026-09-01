@@ -95,6 +95,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.composedemos.BuildConfig
 import com.example.composedemos.R
+import com.example.maps3d.common.showcase.ui.SampleTopBar
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
@@ -413,25 +414,11 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
             },
         )
 
-        // Custom Translucent Top Bar
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
-                .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "Routes API",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-
+        // Top Bar with Cross-Framework Switcher
+        SampleTopBar(
+            title = "Routes API",
+            sampleId = "routes",
+            actions = {
                 IconButton(onClick = {
                     currentTracker = when (currentTracker) {
                         RouteTracker.Marker -> RouteTracker.RedCar
@@ -449,8 +436,8 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                         tint = MaterialTheme.colorScheme.onSurface,
                     )
                 }
-            }
-        }
+            },
+        )
 
         // Interactive Overlay UI
         if (!flyModeActive) {

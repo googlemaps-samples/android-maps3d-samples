@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.maps3d.common.showcase.ui.SampleTopBar
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
@@ -99,6 +100,10 @@ fun RoadmapModeScreen() {
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
+        SampleTopBar(
+            title = "Map Modes",
+            sampleId = "roadmap_mode",
+        )
         GoogleMap3D(
             camera = currentCameraState,
             mapMode = selectedMapMode,

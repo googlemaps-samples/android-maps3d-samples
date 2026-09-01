@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.maps3d.common.showcase.ui.SampleTopBar
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.maps.android.compose3d.GoogleMap3D
@@ -102,21 +103,10 @@ fun HelloMapScreen() {
             },
         )
 
-        // 2. Custom Translucent Top Bar
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                // 75% opaque surface color
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
-                // Respect status bar / cutout area for padding the content
-                .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-        ) {
-            Text(
-                text = "Hello Map",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
+        // 2. Top Bar with Cross-Framework Switcher
+        SampleTopBar(
+            title = "Hello Map",
+            sampleId = "hello_map",
+        )
     }
 }

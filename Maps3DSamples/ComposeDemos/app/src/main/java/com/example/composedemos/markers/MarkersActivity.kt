@@ -46,6 +46,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.composedemos.R
+import com.example.maps3d.common.showcase.ui.SampleTopBar
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.CollisionBehavior
 import com.google.android.gms.maps3d.model.ImageView
@@ -217,19 +218,10 @@ fun MarkersScreen() {
             },
         )
 
-        // 2. Custom Translucent Top Bar
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
-                .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-        ) {
-            Text(
-                text = "Markers",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
+        // 2. Top Bar with Cross-Framework Switcher
+        SampleTopBar(
+            title = "Markers",
+            sampleId = "markers",
+        )
     }
 }

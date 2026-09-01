@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.maps3d.common.showcase.ui.SampleTopBar
 
 class FlightSimulatorActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +39,15 @@ class FlightSimulatorActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MaterialTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    topBar = {
+                        SampleTopBar(
+                            title = "Flight Simulator",
+                            sampleId = "flight_simulator",
+                        )
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                ) { innerPadding ->
                     Box(
                         modifier = Modifier
                             .fillMaxSize()

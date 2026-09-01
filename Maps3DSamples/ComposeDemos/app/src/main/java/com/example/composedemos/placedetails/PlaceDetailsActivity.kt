@@ -65,6 +65,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.composedemos.R
+import com.example.maps3d.common.showcase.ui.SampleTopBar
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera

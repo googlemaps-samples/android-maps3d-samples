@@ -246,4 +246,36 @@ object ShowcaseRegistry {
 
     fun allTags(): List<String> =
         SAMPLES.flatMap { it.tags }.distinct().sorted()
+
+    @JvmStatic
+    fun findSampleForActivity(className: String): ShowcaseSample? {
+        val simpleName = className.substringAfterLast('.')
+        return SAMPLES.find { sample ->
+            sample.composeActivity == className ||
+                sample.kotlinActivity == className ||
+                sample.javaActivity == className ||
+                sample.composeActivity?.endsWith(simpleName) == true ||
+                sample.kotlinActivity?.endsWith(simpleName) == true ||
+                sample.javaActivity?.endsWith(simpleName) == true
+        }
+    }
+
+    @JvmStatic
+    fun detectFramework(className: String): FrameworkType {
+        return when {
+            className.contains("composedemos") || className.contains("compose") -> FrameworkType.COMPOSE
+            className.contains("maps3djava") || className.contains("java") -> FrameworkType.JAVA_VIEWS
+            else -> FrameworkType.KOTLIN_VIEWS
+        }
+    }
+
+    @JvmStatic
+    fun getNextAvailableFramework(sample: ShowcaseSample, current: FrameworkType): FrameworkType? {
+        val order = when (current) {
+            FrameworkType.COMPOSE -> listOf(FrameworkType.KOTLIN_VIEWS, FrameworkType.JAVA_VIEWS)
+            FrameworkType.KOTLIN_VIEWS -> listOf(FrameworkType.JAVA_VIEWS, FrameworkType.COMPOSE)
+            FrameworkType.JAVA_VIEWS -> listOf(FrameworkType.COMPOSE, FrameworkType.KOTLIN_VIEWS)
+        }
+        return order.firstOrNull { sample.isAvailable(it) }
+    }
 }

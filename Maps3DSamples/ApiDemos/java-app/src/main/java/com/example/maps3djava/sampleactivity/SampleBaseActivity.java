@@ -99,6 +99,7 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
         MaterialToolbar topBar = findViewById(R.id.top_bar);
 
         topBar.setTitle(getTitle());
+        com.example.maps3d.common.showcase.ui.CrossFrameworkSwitcher.setupToolbarSwitcher(this, topBar);
 
         ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, windowInsets) -> {
             Insets statusBarInsets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars());
