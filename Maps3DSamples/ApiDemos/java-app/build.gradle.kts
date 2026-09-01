@@ -17,7 +17,7 @@
 val isCI = rootProject.extra["isCI"] as? Boolean ?: false
 
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.secrets.gradle.plugin)
 }
 
@@ -29,13 +29,9 @@ android {
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.example.maps3djava"
         minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
 
         manifestPlaceholders["MAPS3D_API_KEY"] = "DEFAULT_API_KEY"
         manifestPlaceholders["PLACES_API_KEY"] = "DEFAULT_API_KEY"
@@ -108,12 +104,4 @@ secrets {
         propertiesFileName = "secrets.properties"
     }
     defaultPropertiesFileName = "local.defaults.properties"
-}
-
-tasks.register<Exec>("installAndLaunch") {
-    description = "Installs and launches the demo app."
-    group = "install"
-    dependsOn("installDebug")
-    // Retrieve the absolute path of adb from the Android extension to avoid reliance on system PATH.
-    commandLine(android.adbExecutable.absolutePath, "shell", "am", "start", "-n", "com.example.maps3djava/.mainactivity.MainActivity")
 }

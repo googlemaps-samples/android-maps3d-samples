@@ -90,6 +90,8 @@ dependencies {
 
     implementation(project(":maps3d-compose"))
     implementation(project(":Maps3DSamples:ApiDemos:common"))
+    implementation(project(":Maps3DSamples:ApiDemos:kotlin-app"))
+    implementation(project(":Maps3DSamples:ApiDemos:java-app"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
