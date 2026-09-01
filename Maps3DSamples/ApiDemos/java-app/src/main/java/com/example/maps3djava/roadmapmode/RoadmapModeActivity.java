@@ -69,6 +69,11 @@ import com.google.android.material.button.MaterialButton;
  */
 public class RoadmapModeActivity extends SampleBaseActivity {
 
+  @Override
+  public int getExpectedMapMode() {
+    return Map3DMode.ROADMAP;
+  }
+
   // --- Constants & Geographical Bounds ---
 
   /** Focal landmark centered on the San Francisco Financial District. */

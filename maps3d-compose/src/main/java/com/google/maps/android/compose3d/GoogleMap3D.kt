@@ -163,6 +163,13 @@ fun GoogleMap3D(
                     state.syncPolygons(googleMap3D, polygons)
                     state.syncModels(googleMap3D, models)
                     state.syncPopovers(map3dView.context, googleMap3D, popovers)
+
+                    // Workaround: Delayed stabilization reset to guarantee native 3D engine enforces mapMode and camera
+                    map3dView.postDelayed({
+                        googleMap3D.setMapMode(mapMode)
+                        googleMap3D.setCamera(camera.toValidCamera())
+                        googleMap3D.setCameraRestriction(cameraRestriction.toValidCameraRestriction())
+                    }, 400L)
                 }
 
                 if (Map3DRegistry.isMapReady) {
@@ -179,6 +186,12 @@ fun GoogleMap3D(
             }
         },
         onRelease = { map3dView ->
+            googleMap3DState.value?.let { map ->
+                map.setCameraRestriction(null)
+                map.setCameraChangedListener(null)
+                map.setOnMapSteadyListener(null)
+                map.setMapMode(Map3DMode.HYBRID)
+            }
             state.clear()
             Map3DRegistry.clearInstance()
             map3dView.onDestroy()
