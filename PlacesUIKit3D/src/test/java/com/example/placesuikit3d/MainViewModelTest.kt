@@ -52,7 +52,7 @@ class MainViewModelTest {
         assertThat(viewModel.placeId.value).isEqualTo(landmark.id)
 
         viewModel.setSelectedPlaceId(null)
-        
+
         assertThat(viewModel.placeId.value).isNull()
         // verify selectedLandmark remains the last selected one, just the place details overlay dismissed
         assertThat(viewModel.selectedLandmark.value).isEqualTo(landmark)

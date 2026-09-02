@@ -30,32 +30,30 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.placesuikit3d.data.model.PlaceSearchResult
 
 /**
- * A composable that displays a list of landmarks.
- *
- * @param landmarks The list of landmarks to display.
- * @param onLandmarkClick Callback invoked when a landmark is clicked.
- * @param modifier The modifier to apply to the list.
+ * A composable that displays a list of search result places / landmarks on 3D map.
  */
 @Composable
 fun LandmarkList(
-    landmarks: List<Landmark>,
-    onLandmarkClick: (Landmark) -> Unit,
-    modifier: Modifier = Modifier
+    places: List<PlaceSearchResult>,
+    onPlaceClick: (PlaceSearchResult) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         Text(
-            text = "Locations",
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(16.dp)
+            text = stringResource(id = R.string.explore_places_count, places.size),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
         )
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            items(landmarks) { landmark ->
-                LandmarkItem(
-                    landmark = landmark,
-                    onClick = { onLandmarkClick(landmark) }
+        LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
+            items(places, key = { it.id }) { place ->
+                PlaceItem(
+                    place = place,
+                    onClick = { onPlaceClick(place) },
                 )
                 HorizontalDivider()
             }
@@ -63,36 +61,45 @@ fun LandmarkList(
     }
 }
 
-/**
- * A composable that displays a single landmark item.
- */
 @Composable
-private fun LandmarkItem(
-    landmark: Landmark,
-    onClick: () -> Unit
+private fun PlaceItem(
+    place: PlaceSearchResult,
+    onClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = Icons.Default.Place,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(end = 16.dp)
+            tint = if (place.isSelected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
+            modifier = Modifier.padding(end = 16.dp),
         )
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = landmark.name,
-                style = MaterialTheme.typography.titleMedium
+                text = place.name,
+                style = MaterialTheme.typography.titleMedium,
             )
             Text(
-                text = "Boulder, CO",
+                text = place.address ?: stringResource(id = R.string.default_location_city),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (place.rating != null) {
+            Text(
+                text = stringResource(id = R.string.star_rating_format, place.rating),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = 8.dp),
             )
         }
     }

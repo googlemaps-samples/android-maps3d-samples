@@ -23,6 +23,7 @@ material = "1.14.0"
 playServicesBase = "18.10.0"
 playServicesMaps3d = "0.2.2"
 places = "5.3.0"
+placesCompose = "0.2.1"
 secretsGradlePlugin = "2.0.1"
 truth = "1.4.5"
 uiautomator = "2.4.0"
@@ -68,6 +69,7 @@ androidx-fragment-compose = { group = "androidx.fragment", name = "fragment-comp
 play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "playServicesBase" }
 play-services-maps3d = { module = "com.google.android.gms:play-services-maps3d", version.ref = "playServicesMaps3d" }
 places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
+places-compose = { module = "com.google.maps.android:places-compose", version.ref = "placesCompose" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }

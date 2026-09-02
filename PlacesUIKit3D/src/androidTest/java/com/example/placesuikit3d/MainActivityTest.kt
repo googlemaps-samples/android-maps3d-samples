@@ -17,7 +17,7 @@
 package com.example.placesuikit3d
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
@@ -38,7 +38,7 @@ class MainActivityTest {
     fun testMapIsDisplayed() {
         // Verify that the activity launches and the map view is displayed.
         composeTestRule.onNodeWithTag("map3d_view").assertIsDisplayed()
-        
+
         // Also verify that the activity is not finishing.
         composeTestRule.activityRule.scenario.onActivity { activity ->
             assertThat(activity.isFinishing).isFalse()

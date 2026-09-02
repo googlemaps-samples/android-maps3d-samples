@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//   http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -91,8 +91,7 @@ fun LatLngAltitude.toValidLocation(): LatLngAltitude {
  * @receiver The Number? to convert.
  * @return The heading value as a Double within [0.0, 360.0).
  */
-fun Number?.toHeading(): Double =
-    this?.toDouble()?.wrapIn(headingRange.start, headingRange.endInclusive) ?: DEFAULT_HEADING
+fun Number?.toHeading(): Double = this?.toDouble()?.wrapIn(headingRange.start, headingRange.endInclusive) ?: DEFAULT_HEADING
 
 /**
  * Converts a Number? to a valid tilt value (0.0 to 90.0).
@@ -195,7 +194,7 @@ fun Number.toCompassDirection(): String {
         "N", "NNE", "NE", "ENE",
         "E", "ESE", "SE", "SSE",
         "S", "SSW", "SW", "WSW",
-        "W", "WNW", "NW", "NNW"
+        "W", "WNW", "NW", "NNW",
     )
 
     val headingDegrees = this.toDouble()
@@ -244,7 +243,7 @@ fun FlyAroundOptions.copy(
     center: Camera? = null,
     durationInMillis: Long? = null,
     rounds: Double? = null,
-) : FlyAroundOptions {
+): FlyAroundOptions {
     val objectToCopy = this
 
     return flyAroundOptions {
@@ -257,7 +256,7 @@ fun FlyAroundOptions.copy(
 fun FlyToOptions.copy(
     endCamera: Camera? = null,
     durationInMillis: Long? = null,
-) : FlyToOptions {
+): FlyToOptions {
     val objectToCopy = this
 
     return flyToOptions {
@@ -310,7 +309,8 @@ fun Camera.toCameraString(): String {
             heading = ${camera.heading.format(0)}
             tilt = ${camera.tilt.format(0)}
             range = ${camera.range.format(0)}
-        }""".trimIndent()
+        }
+    """.trimIndent()
 }
 
 /**

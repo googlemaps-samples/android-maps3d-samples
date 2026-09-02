@@ -35,6 +35,24 @@ plugins {
     alias(libs.plugins.hilt.android)
     // The parcelize plugin provides a @Parcelize annotation to automatically generate Parcelable implementations.
     alias(libs.plugins.jetbrains.kotlin.parcelize)
+    alias(libs.plugins.spotless)
+}
+
+configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+    kotlin {
+        target("**/*.kt")
+        ktlint().editorConfigOverride(
+            mapOf(
+                "indent_size" to "4",
+                "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
+                "max_line_length" to "off",
+                "ktlint_standard_property-naming" to "disabled",
+                "ktlint_standard_backing-property-naming" to "disabled"
+            )
+        )
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }
 
 // The `android` block is where we configure all the Android-specific build options.
@@ -45,6 +63,10 @@ android {
     // `compileSdk` specifies the Android API level the app is compiled against.
     // Using a recent version allows us to use the latest Android features.
     compileSdk = libs.versions.compileSdk.get().toInt()
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 
     defaultConfig {
         // `applicationId` is the unique identifier for the app on the Google Play Store and on the device.
@@ -89,7 +111,9 @@ android {
     }
 
     kotlin {
-        jvmToolchain(17)
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
 
     buildFeatures {
@@ -101,18 +125,6 @@ android {
         // `buildConfig` generates a `BuildConfig` class that contains constants from the build configuration,
         // such as the API key from the secrets plugin.
         buildConfig = true
-    }
-
-    java {
-        // Specifies the Java language version for the project's toolchain.
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(17))
-        }
-    }
-    composeOptions {
-        // Sets the version of the Kotlin compiler extension for Compose. This version must be
-        // compatible with the Kotlin version used in the project.
-        kotlinCompilerExtensionVersion = "1.5.1"
     }
 }
 
@@ -142,6 +154,7 @@ dependencies {
     // These are the essential libraries for this sample, providing Maps and Places functionality.
     implementation(libs.play.services.maps3d) // The core SDK for embedding 3D Google Maps.
     implementation(libs.places) // The SDK for the Places UI Kit (PlaceDetails fragments).
+    implementation(libs.places.compose) // Official Places Compose autocomplete UI kit.
     implementation(libs.maps.utils.ktx) // Google Maps Utils for polyline decoding and other utilities.
 
     // --- Dependency Injection ---
@@ -159,6 +172,9 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.google.truth)
     testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.core)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.arch.core.testing)
     // `androidTestImplementation` is for instrumented tests (running on an Android device or emulator).
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.google.truth)
