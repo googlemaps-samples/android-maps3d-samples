@@ -74,6 +74,7 @@ class PlaceSearch3DViewModelTest {
         assertThat(state.selectedCategory).isEqualTo("☕ Cafes")
         assertThat(state.allMarkers).isNotEmpty()
         assertThat(state.allMarkers.any { it.name.contains("Coffee") || it.category == "☕ Cafes" }).isTrue()
+        assertThat(state.cameraMode).isInstanceOf(Camera3DMode.FlyingTo::class.java)
     }
 
     @Test

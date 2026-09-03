@@ -37,6 +37,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sqrt
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Controller managing cinematic 3D camera transitions, pitch/tilt adjustments,
@@ -59,6 +60,15 @@ class Camera3DAnimator(
                 flyToTarget(target)
             }
         }
+    }
+
+    /**
+     * Cleans up running animations and releases references to prevent leaks.
+     */
+    fun cleanup() {
+        stopOrbit()
+        googleMap3D = null
+        pendingTarget = null
     }
 
     /**
@@ -94,7 +104,7 @@ class Camera3DAnimator(
             )
             if (onComplete != null) {
                 coroutineScope.launch(Dispatchers.Main) {
-                    delay(durationMs)
+                    delay(durationMs.milliseconds)
                     onComplete()
                 }
             }
@@ -158,7 +168,7 @@ class Camera3DAnimator(
                             this.rounds = 1.0
                         },
                     )
-                    delay(roundDurationMs)
+                    delay(roundDurationMs.milliseconds)
                 } catch (e: Exception) {
                     Log.w(tag, "Orbit cycle interrupted: ${e.message}")
                     break
@@ -206,37 +216,6 @@ class Camera3DAnimator(
         )
 
         flyToTarget(overviewTarget, durationMs)
-    }
-
-    /**
-     * Toggles camera view between 2D Top-Down (tilt 0°) and 3D Perspective (tilt 50°).
-     */
-    fun toggle2D3D(
-        currentCenter: LatLngAltitude,
-        to3D: Boolean,
-        durationMs: Long = 2000,
-    ) {
-        stopOrbit()
-        val target = if (to3D) {
-            Camera3DTarget(
-                latitude = currentCenter.latitude,
-                longitude = currentCenter.longitude,
-                altitude = currentCenter.altitude,
-                heading = 25.0,
-                tilt = 50.0,
-                range = 1400.0,
-            )
-        } else {
-            Camera3DTarget(
-                latitude = currentCenter.latitude,
-                longitude = currentCenter.longitude,
-                altitude = currentCenter.altitude,
-                heading = 0.0,
-                tilt = 0.0,
-                range = 3500.0,
-            )
-        }
-        flyToTarget(target, durationMs)
     }
 
     companion object {

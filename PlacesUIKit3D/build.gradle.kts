@@ -75,7 +75,7 @@ android {
         minSdk = 29
         // `targetSdk` indicates the API level the app was tested against. Android may enable
         // compatibility behaviors on newer OS versions if the target is lower.
-        targetSdk = 36
+        targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
 
@@ -104,15 +104,13 @@ android {
         }
     }
     compileOptions {
-        // Sets the Java language compatibility for the source code and compiled bytecode.
-        // Using Java 17 is required for modern Android development.
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
         }
     }
 

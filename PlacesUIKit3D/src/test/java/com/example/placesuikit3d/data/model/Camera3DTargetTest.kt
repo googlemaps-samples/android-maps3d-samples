@@ -69,4 +69,34 @@ class Camera3DTargetTest {
         assertThat(defaultTarget.tilt).isAtLeast(45.0)
         assertThat(defaultTarget.range).isGreaterThan(1000.0)
     }
+
+    @Test
+    fun camera3DTarget_fromPlaces_framesAllPlacesEncompassing() {
+        val place1 = PlaceSearchResult(
+            id = "p1",
+            name = "Flatirons",
+            address = "Boulder, CO",
+            location = latLngAltitude {
+                latitude = 39.9880
+                longitude = -105.2930
+                altitude = 2100.0
+            },
+        )
+        val place2 = PlaceSearchResult(
+            id = "p2",
+            name = "Boulder Reservoir",
+            address = "Boulder, CO",
+            location = latLngAltitude {
+                latitude = 40.0780
+                longitude = -105.2220
+                altitude = 1580.0
+            },
+        )
+
+        val target = Camera3DTarget.fromPlaces(listOf(place1, place2))
+        assertThat(target.latitude).isWithin(0.01).of((39.9880 + 40.0780) / 2.0)
+        assertThat(target.longitude).isWithin(0.01).of((-105.2930 + -105.2220) / 2.0)
+        assertThat(target.range).isAtLeast(1600.0)
+        assertThat(target.tilt).isEqualTo(42.0)
+    }
 }

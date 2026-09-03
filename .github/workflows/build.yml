@@ -57,3 +57,21 @@ jobs:
         run: ./gradlew :Maps3DSamples:advanced:app:assembleDebug
       - name: Run advanced Unit Tests
         run: ./gradlew :Maps3DSamples:advanced:app:testDebugUnitTest
+
+  build-PlacesUIKit3D:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Java 21
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '21'
+      - name: Build PlacesUIKit3D
+        run: ./gradlew :PlacesUIKit3D:assembleDebug
+      - name: Run PlacesUIKit3D Unit Tests
+        run: ./gradlew :PlacesUIKit3D:testDebugUnitTest
+      - name: Run PlacesUIKit3D Spotless Check
+        run: ./gradlew :PlacesUIKit3D:spotlessCheck
+

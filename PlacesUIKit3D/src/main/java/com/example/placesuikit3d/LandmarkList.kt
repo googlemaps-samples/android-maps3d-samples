@@ -17,12 +17,16 @@ package com.example.placesuikit3d
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,8 +35,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.placesuikit3d.data.model.PlaceSearchResult
+import com.example.placesuikit3d.ui.theme.RatingYellow
+import java.util.Locale
 
 /**
  * A composable that displays a list of search result places / landmarks on 3D map.
@@ -61,13 +68,17 @@ fun LandmarkList(
     }
 }
 
+/**
+ * Individual row item representing a place in the search/category results.
+ */
 @Composable
 private fun PlaceItem(
     place: PlaceSearchResult,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -95,12 +106,24 @@ private fun PlaceItem(
             )
         }
         if (place.rating != null) {
-            Text(
-                text = stringResource(id = R.string.star_rating_format, place.rating),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(start = 8.dp),
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = null,
+                    tint = RatingYellow,
+                    modifier = Modifier.size(16.dp),
+                )
+                Spacer(modifier = Modifier.width(3.dp))
+                Text(
+                    text = String.format(Locale.US, "%.1f", place.rating),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
         }
     }
 }

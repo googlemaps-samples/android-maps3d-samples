@@ -17,7 +17,6 @@ package com.example.placesuikit3d
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -71,6 +70,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.commit
@@ -84,6 +84,7 @@ import com.example.placesuikit3d.ui.compose.FloatingCameraControls
 import com.example.placesuikit3d.ui.compose.PlaceSearchTopBar
 import com.example.placesuikit3d.ui.theme.PlacesUIKit3DTheme
 import com.example.placesuikit3d.ui.viewmodel.Camera3DMode
+import com.example.placesuikit3d.ui.viewmodel.PlaceSearch3DScreenState
 import com.example.placesuikit3d.ui.viewmodel.PlaceSearch3DViewModel
 import com.example.placesuikit3d.ui.viewmodel.PlaceSearchUiState
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -104,7 +105,9 @@ import com.google.android.libraries.places.widget.PlaceDetailsCompactFragment
 import com.google.android.libraries.places.widget.PlaceLoadListener
 import com.google.android.libraries.places.widget.model.Orientation
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Main Activity hosting the Places UI Kit & Google Maps 3D Showcase in Pure Jetpack Compose.
@@ -117,7 +120,7 @@ import kotlinx.coroutines.launch
  * 3. **Camera Kinematics:** Observes [Camera3DMode] state changes and drives smooth [Camera3DAnimator]
  *    fly-to transitions and continuous 360-degree orbit loops.
  * 4. **3D Marker Pipeline:** Diffs and renders [PlaceSearchResult] markers with custom pin styles,
- *    [AltitudeMode.RELATIVE_TO_MESH], elevation offsets, and [isExtruded] = true for white vertical stems.
+ *    [AltitudeMode.RELATIVE_TO_MESH], elevation offsets, and `isExtruded` = true for white vertical stems.
  * 5. **Places Autocomplete:** Hosts [PlaceSearchTopBar] powered by Google Places Compose
  *    (`places-compose`) with automatic debouncing and prediction filtering.
  * 6. **Place Details Integration:** Displays Google Places UI Kit [PlaceDetailsCompactFragment]
@@ -144,7 +147,11 @@ class MainActivity :
                 if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true || permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
                     fetchLastLocation()
                 } else {
-                    Toast.makeText(this, getString(R.string.location_permission_denied), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        getString(R.string.location_permission_denied),
+                        Toast.LENGTH_SHORT,
+                    ).show()
                     moveToDefaultLocation()
                 }
             }
@@ -216,8 +223,6 @@ class MainActivity :
                         onPlaceClick = { place ->
                             keyboardController?.hide()
                             focusManager.clearFocus()
-                            val target = place.toCameraTarget()
-                            cameraAnimator.flyToTarget(target)
                             viewModel.onPlaceSelected(place.id)
                             scope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
@@ -248,6 +253,15 @@ class MainActivity :
                             focusManager.clearFocus()
                             viewModel.onSuggestionSelected(place)
                         },
+                        selectedCategory = screenState.selectedCategory,
+                        onCategorySelected = { category ->
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+                            viewModel.selectCategory(category, getCurrentMapCenter())
+                            scope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                        },
                         isLoading = screenState.searchUiState is PlaceSearchUiState.Loading,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
@@ -258,7 +272,7 @@ class MainActivity :
                     val infoMessage = screenState.infoMessage
                     LaunchedEffect(infoMessage) {
                         if (!infoMessage.isNullOrEmpty()) {
-                            kotlinx.coroutines.delay(3200)
+                            delay(3200.milliseconds)
                             viewModel.clearInfoMessage()
                         }
                     }
@@ -268,7 +282,7 @@ class MainActivity :
                         exit = fadeOut() + slideOutVertically { -it },
                         modifier = Modifier
                             .align(Alignment.TopCenter)
-                            .padding(top = 105.dp),
+                            .padding(top = 150.dp),
                     ) {
                         Surface(
                             shape = RoundedCornerShape(20.dp),
@@ -421,7 +435,8 @@ class MainActivity :
         val containerId = remember { View.generateViewId() }
 
         LaunchedEffect(placeId) {
-            val fragment = supportFragmentManager.findFragmentById(containerId) as? PlaceDetailsCompactFragment
+            val fragment =
+                supportFragmentManager.findFragmentById(containerId) as? PlaceDetailsCompactFragment
             if (fragment != null) {
                 Log.d(tag, "Updating existing fragment for placeId: $placeId")
                 fragment.loadWithPlaceId(placeId)
@@ -443,18 +458,20 @@ class MainActivity :
                             Orientation.VERTICAL,
                             R.style.CustomizedPlaceDetailsTheme,
                         ).apply {
-                            setPlaceLoadListener(object : PlaceLoadListener {
-                                override fun onSuccess(place: Place) {
-                                    Log.d(tag, "Place loaded: ${place.id}")
-                                }
+                            setPlaceLoadListener(
+                                object : PlaceLoadListener {
+                                    override fun onSuccess(place: Place) {
+                                        Log.d(tag, "Place loaded: ${place.id}")
+                                    }
 
-                                override fun onFailure(e: Exception) {
-                                    Log.e(tag, "Place failed to load for ID: $placeId", e)
-                                }
-                            })
+                                    override fun onFailure(e: Exception) {
+                                        Log.e(tag, "Place failed to load for ID: $placeId", e)
+                                    }
+                                },
+                            )
                         }
 
-                        supportFragmentManager.commit {
+                        supportFragmentManager.commit(allowStateLoss = true) {
                             replace(containerId, newFragment)
                         }
 
@@ -523,6 +540,7 @@ class MainActivity :
         val previousSelectedId = lastSelectedMarkerId
         lastSelectedMarkerId = selectedId
 
+        val currentRange = googleMap3D?.getCamera()?.range
         places.forEach { place ->
             val isSelected = place.id == selectedId || place.isSelected
             val existingMarker = activeMarkers[place.id]
@@ -541,15 +559,20 @@ class MainActivity :
             }
 
             val pinConfig = PinConfiguration.builder()
-                .setBackgroundColor(Color.parseColor("#EA4335"))
-                .setBorderColor(Color.parseColor("#C5221F"))
+                .setBackgroundColor("#EA4335".toColorInt())
+                .setBorderColor("#C5221F".toColorInt())
                 .setScale(if (isSelected) 1.35f else 1.0f)
                 .build()
+
+            val dynamicAltitude = Camera3DAnimator.calculateDynamicMarkerAltitude(
+                cameraRange = currentRange,
+                isSelected = isSelected,
+            )
 
             val markerPosition = latLngAltitude {
                 latitude = place.location.latitude
                 longitude = place.location.longitude
-                altitude = if (isSelected) 16.0 else 12.0
+                altitude = dynamicAltitude
             }
 
             val marker = map.addMarker(
@@ -568,8 +591,6 @@ class MainActivity :
             if (marker != null) {
                 marker.setClickListener {
                     runOnUiThread {
-                        val target = place.toCameraTarget()
-                        cameraAnimator.flyToTarget(target)
                         viewModel.onMarkerClicked(place)
                     }
                 }
@@ -619,11 +640,22 @@ class MainActivity :
         return camera.center
     }
 
-    private fun isLocationPermissionGranted(): Boolean = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-        ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    private fun isLocationPermissionGranted(): Boolean = ActivityCompat.checkSelfPermission(
+        this,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+    ) == PackageManager.PERMISSION_GRANTED ||
+        ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+        ) == PackageManager.PERMISSION_GRANTED
 
     private fun requestLocationPermissions() {
-        requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+        requestPermissionLauncher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            ),
+        )
     }
 
     @SuppressLint("MissingPermission")
@@ -641,11 +673,19 @@ class MainActivity :
                     )
                     cameraAnimator.flyToTarget(userLocation)
                 } ?: run {
-                    Toast.makeText(this, getString(R.string.location_services_disabled), Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this,
+                        getString(R.string.location_services_disabled),
+                        Toast.LENGTH_LONG,
+                    ).show()
                     moveToDefaultLocation()
                 }
             }.addOnFailureListener {
-                Toast.makeText(this, getString(R.string.location_services_disabled), Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.location_services_disabled),
+                    Toast.LENGTH_LONG,
+                ).show()
                 moveToDefaultLocation()
             }
         } else {
@@ -655,6 +695,13 @@ class MainActivity :
 
     private fun moveToDefaultLocation() {
         cameraAnimator.flyToTarget(Camera3DTarget.DEFAULT)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cameraAnimator.cleanup()
+        activeMarkers.clear()
+        googleMap3D = null
     }
 
     override fun onError(error: Exception) {

@@ -21,6 +21,8 @@ import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
+import kotlin.math.cos
+import kotlin.math.sqrt
 
 /**
  * Encapsulates the 3D spatial orientation and position for cinematic camera animations.
@@ -112,5 +114,64 @@ data class Camera3DTarget(
             range = range,
             roll = roll,
         )
+
+        /**
+         * Calculates an encompassing [Camera3DTarget] that frames all [places] simultaneously in the viewport,
+         * automatically calculating geographic centroid and optimal range (zoom level).
+         */
+        fun fromPlaces(
+            places: List<PlaceSearchResult>,
+            heading: Double = 25.0,
+            tilt: Double = 42.0,
+        ): Camera3DTarget {
+            if (places.isEmpty()) return DEFAULT
+            if (places.size == 1) {
+                return places.first().toCameraTarget(heading = heading, tilt = tilt, range = 1400.0)
+            }
+
+            var sumLat = 0.0
+            var sumLng = 0.0
+            var sumAlt = 0.0
+            var minLat = Double.MAX_VALUE
+            var maxLat = -Double.MAX_VALUE
+            var minLng = Double.MAX_VALUE
+            var maxLng = -Double.MAX_VALUE
+
+            places.forEach { place ->
+                val lat = place.location.latitude
+                val lng = place.location.longitude
+                val alt = place.location.altitude
+                sumLat += lat
+                sumLng += lng
+                sumAlt += alt
+                if (lat < minLat) minLat = lat
+                if (lat > maxLat) maxLat = lat
+                if (lng < minLng) minLng = lng
+                if (lng > maxLng) maxLng = lng
+            }
+
+            val count = places.size.toDouble()
+            val centerLat = sumLat / count
+            val centerLng = sumLng / count
+            var centerAlt = sumAlt / count
+            if (centerAlt <= 0.0 && centerLat in 39.0..41.0 && centerLng in -106.0..-104.0) {
+                centerAlt = 1650.0
+            }
+
+            val latDistance = (maxLat - minLat) * 111_000.0
+            val avgLatRad = Math.toRadians(centerLat)
+            val lngDistance = (maxLng - minLng) * 111_000.0 * cos(avgLatRad)
+            val maxSpan = sqrt(latDistance * latDistance + lngDistance * lngDistance)
+            val optimalRange = (maxSpan * 2.2).coerceIn(1600.0, 20000.0)
+
+            return Camera3DTarget(
+                latitude = centerLat,
+                longitude = centerLng,
+                altitude = centerAlt,
+                heading = heading,
+                tilt = tilt,
+                range = optimalRange,
+            )
+        }
     }
 }

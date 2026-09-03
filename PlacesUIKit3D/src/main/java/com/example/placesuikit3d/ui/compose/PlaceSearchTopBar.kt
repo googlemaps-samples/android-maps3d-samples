@@ -17,15 +17,21 @@ package com.example.placesuikit3d.ui.compose
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,9 +43,17 @@ import com.example.placesuikit3d.R
 import com.google.android.libraries.places.compose.autocomplete.components.PlacesAutocompleteTextField
 import com.google.android.libraries.places.compose.autocomplete.models.AutocompletePlace
 
+val DEFAULT_CATEGORIES = listOf(
+    "🏛️ Landmarks",
+    "☕ Cafes",
+    "🏨 Hotels",
+    "🍕 Restaurants",
+    "🎨 Museums",
+)
+
 /**
  * Top Search Bar combining the official Google [PlacesAutocompleteTextField]
- * component from [places-compose] with 3D map exploration.
+ * component from [places-compose] with 3D map exploration and category filter chips.
  *
  * Utilizes the official UI search box and autocomplete predictions from [com.google.maps.android:places-compose]
  * while constraining input to 1 line (textFieldMaxLines = 1).
@@ -51,6 +65,9 @@ fun PlaceSearchTopBar(
     onQueryChange: (String) -> Unit,
     predictions: List<AutocompletePlace>,
     onPlaceSelected: (AutocompletePlace) -> Unit,
+    selectedCategory: String = "🏛️ Landmarks",
+    categories: List<String> = DEFAULT_CATEGORIES,
+    onCategorySelected: (String) -> Unit = {},
     isLoading: Boolean = false,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -101,6 +118,40 @@ fun PlaceSearchTopBar(
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     )
                 }
+            }
+        }
+
+        // Horizontal row of Category FilterChips
+        LazyRow(
+            modifier = Modifier
+                .widthIn(max = 600.dp)
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(categories) { category ->
+                val isSelected = category == selectedCategory
+                FilterChip(
+                    selected = isSelected,
+                    onClick = {
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                        onCategorySelected(category)
+                    },
+                    label = { Text(text = category) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        labelColor = MaterialTheme.colorScheme.onSurface,
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        borderColor = MaterialTheme.colorScheme.outlineVariant,
+                        selectedBorderColor = MaterialTheme.colorScheme.primary,
+                        enabled = true,
+                        selected = isSelected,
+                    ),
+                )
             }
         }
     }

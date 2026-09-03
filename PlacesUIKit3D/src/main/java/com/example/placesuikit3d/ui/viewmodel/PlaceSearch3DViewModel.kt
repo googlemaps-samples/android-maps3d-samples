@@ -28,12 +28,14 @@ import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.libraries.places.compose.autocomplete.models.AutocompletePlace
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * ViewModel governing the 3D Place Search and Autocomplete showcase.
@@ -103,12 +105,18 @@ class PlaceSearch3DViewModel @Inject constructor(
             val result = repository.searchPlacesByCategory(category, center)
             result.onSuccess { places ->
                 val markedPlaces = places.map { it.copy(isSelected = false) }
+                val encompassingTarget = if (markedPlaces.isNotEmpty()) {
+                    Camera3DTarget.fromPlaces(markedPlaces)
+                } else {
+                    Camera3DTarget.DEFAULT
+                }
                 _screenState.update { current ->
                     current.copy(
                         allMarkers = markedPlaces,
                         selectedPlace = null,
                         selectedPlaceId = null,
                         searchUiState = PlaceSearchUiState.SearchResultsLoaded(markedPlaces, null),
+                        cameraMode = Camera3DMode.FlyingTo(encompassingTarget),
                         infoMessage = getString(R.string.found_places_query, markedPlaces.size, category),
                     )
                 }
@@ -184,6 +192,7 @@ class PlaceSearch3DViewModel @Inject constructor(
 
         autocompleteJob?.cancel()
         autocompleteJob = viewModelScope.launch {
+            delay(300.milliseconds)
             val result = repository.getAutocompletePredictions(query, center)
             result.onSuccess { suggestions ->
                 _screenState.update { it.copy(autocompleteSuggestions = suggestions) }
@@ -293,7 +302,7 @@ class PlaceSearch3DViewModel @Inject constructor(
                         selectedPlaceId = placeId,
                         allMarkers = if (syncedMarkers.any { it.id == placeId }) syncedMarkers else syncedMarkers + selectedSearchResult,
                         searchUiState = PlaceSearchUiState.PlaceDetailsLoaded(place, target),
-                        cameraMode = Camera3DMode.FlyingTo(target),
+                        cameraMode = if (current.cameraMode is Camera3DMode.FlyingTo) current.cameraMode else Camera3DMode.FlyingTo(target),
                     )
                 }
             }.onFailure { error ->

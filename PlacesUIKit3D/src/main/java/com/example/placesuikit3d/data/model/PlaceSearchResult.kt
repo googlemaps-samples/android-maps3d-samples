@@ -72,11 +72,11 @@ data class PlaceSearchResult(
             "ChIJfXOTtWbsa4cRmW07qJRB6_8" to 2100.0, // The Flatirons
             "ChIJwd_EEkfsa4cRqy6eShKXFXY" to 1750.0, // Chautauqua Park
             "ChIJk7Q30j_sa4cR6-4G6_0Qv6c" to 1630.0, // Boulder Dushanbe Teahouse
-            "ChIJd74X4z_sa4cR7qR1hHq1m9s" to 1625.0, // Pearl Street Mall
-            "ChIJ5f9Z8j_sa4cR6L-QJ_qX5wE" to 1625.0, // St Julien Hotel & Spa
+            "ChIJiTEGLibsa4cRepH7ZMFEcJ8" to 1620.0, // Pearl Street Mall
+            "ChIJd8bN_fPsa4cRW8b7t5wQ5lY" to 1625.0, // St Julien Hotel & Spa
             "ChIJ3_0QzD_sa4cRw6xQ3_q8w9A" to 1630.0, // Avanti Food & Beverage
-            "ChIJ9Q_e0D_sa4cR_q6L6LqX5wE" to 1630.0, // Ozo Coffee Company
-            "ChIJ-Q_e0D_sa4cR_q6L6LqX5wE" to 1630.0, // Boxcar Coffee Roasters
+            "ChIJmZ56oBjsa4cRz32jJ3T0B3I" to 1622.0, // Ozo Coffee Company
+            "ChIJb7V2Lzrsa4cR3tqE6M3bZz8" to 1618.0, // Boxcar Coffee Roasters
             "ChIJ7Q_e0D_sa4cR_q6L6LqX5wE" to 1630.0, // Wonder Press
         )
 
