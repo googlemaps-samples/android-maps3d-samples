@@ -41,7 +41,7 @@ jobs:
       - name: Set up Java 21
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: '21'
       - name: Build ApiDemos
         run: ./gradlew :Maps3DSamples:ApiDemos:java-app:assembleDebug :Maps3DSamples:ApiDemos:kotlin-app:assembleDebug
@@ -58,7 +58,7 @@ jobs:
       - name: Set up Java 21
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: '21'
       - name: Build advanced
         run: ./gradlew :Maps3DSamples:advanced:app:assembleDebug
@@ -75,7 +75,7 @@ jobs:
       - name: Set up Java 21
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: '21'
       - name: Build PlacesUIKit3D
         run: ./gradlew :PlacesUIKit3D:assembleDebug
