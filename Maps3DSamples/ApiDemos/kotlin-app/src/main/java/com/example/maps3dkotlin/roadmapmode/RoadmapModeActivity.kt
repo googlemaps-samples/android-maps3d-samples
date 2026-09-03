@@ -66,6 +66,7 @@ import com.google.android.material.button.MaterialButton
 class RoadmapModeActivity : SampleBaseActivity() {
 
   override val TAG = "RoadmapModeActivity"
+  override val expectedMapMode: Int = Map3DMode.ROADMAP
 
   override val initialCamera: Camera
     get() = camera {

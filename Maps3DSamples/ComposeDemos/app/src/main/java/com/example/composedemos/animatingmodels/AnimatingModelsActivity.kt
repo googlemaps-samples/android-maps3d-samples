@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.maps3d.common.showcase.ui.SampleTopBar
 
 class AnimatingModelsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +39,15 @@ class AnimatingModelsActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MaterialTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    topBar = {
+                        SampleTopBar(
+                            title = "Animating Models",
+                            sampleId = "animating_models",
+                        )
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                ) { innerPadding ->
                     Box(
                         modifier = Modifier
                             .fillMaxSize()

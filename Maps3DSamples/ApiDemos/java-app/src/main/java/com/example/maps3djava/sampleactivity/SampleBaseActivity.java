@@ -76,6 +76,14 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
     public abstract Camera getInitialCamera();
     public abstract String getTAG();
 
+    public int getExpectedMapMode() {
+        return com.google.android.gms.maps3d.model.Map3DMode.HYBRID;
+    }
+
+    public com.google.android.gms.maps3d.model.CameraRestriction getInitialCameraRestriction() {
+        return null;
+    }
+
     private OnCameraChangedListener cameraChangedListener;
 
     @CallSuper
@@ -91,6 +99,7 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
         MaterialToolbar topBar = findViewById(R.id.top_bar);
 
         topBar.setTitle(getTitle());
+        com.example.maps3d.common.showcase.ui.CrossFrameworkSwitcher.setupToolbarSwitcher(this, topBar);
 
         ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, windowInsets) -> {
             Insets statusBarInsets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars());
@@ -149,9 +158,9 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        map3DView.onDestroy();
-        if (googleMap3D != null && cameraChangedListener != null) {
-            googleMap3D.setCameraChangedListener(null);
+        com.example.maps3d.common.MapResetHelper.teardownMap(googleMap3D);
+        if (map3DView != null) {
+            map3DView.onDestroy();
         }
     }
 
@@ -184,15 +193,27 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
     public void onMap3DViewReady(GoogleMap3D googleMap3D) {
         this.googleMap3D = googleMap3D;
 
-        // Workaround: The Maps 3D SDK onMap3DViewReady callback fires when the map object
-        // is instantiated, but the internal native rendering pipeline and layout pass may briefly
-        // override initial programmatic camera positions. A short delay ensures the native map viewport
-        // has fully stabilized before applying the initial camera position.
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (!isDestroyed() && !isFinishing() && this.googleMap3D != null) {
-                this.googleMap3D.setCamera(getInitialCamera());
+        // Immediate baseline reset
+        com.example.maps3d.common.MapResetHelper.resetMapState(
+            googleMap3D,
+            getExpectedMapMode(),
+            getInitialCamera(),
+            getInitialCameraRestriction()
+        );
+
+        // Delayed stabilization reset
+        com.example.maps3d.common.MapResetHelper.scheduleStabilizationReset(
+            () -> this.googleMap3D,
+            () -> !isDestroyed() && !isFinishing(),
+            getExpectedMapMode(),
+            getInitialCamera(),
+            getInitialCameraRestriction(),
+            com.example.maps3d.common.MapResetHelper.STABILIZATION_DELAY_MS,
+            map -> {
+                onMapStabilized(map);
+                return kotlin.Unit.INSTANCE;
             }
-        }, 350L);
+        );
 
         // Mark map view as steady when rendering stabilizes for automated visual tests
         googleMap3D.setOnMapSteadyListener(isSceneSteady -> {
@@ -205,7 +226,12 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
         cameraChangedListener = cameraPosition -> {
         };
         googleMap3D.setCameraChangedListener(cameraChangedListener);
+    }
 
+    /**
+     * Optional hook invoked after the map has fully stabilized and re-applied its baseline state.
+     */
+    protected void onMapStabilized(GoogleMap3D googleMap3D) {
     }
 
     @CallSuper

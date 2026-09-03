@@ -25,7 +25,13 @@ plugins {
 configure<com.diffplug.gradle.spotless.SpotlessExtension> {
     kotlin {
         target("**/*.kt")
-        ktlint().editorConfigOverride(mapOf("indent_size" to "4", "ktlint_function_naming_ignore_when_annotated_with" to "Composable"))
+        ktlint().editorConfigOverride(
+            mapOf(
+                "indent_size" to "4",
+                "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
+                "ktlint_standard_max-line-length" to "disabled",
+            ),
+        )
         trimTrailingWhitespace()
         endWithNewline()
     }
@@ -84,6 +90,8 @@ dependencies {
 
     implementation(project(":maps3d-compose"))
     implementation(project(":Maps3DSamples:ApiDemos:common"))
+    implementation(project(":Maps3DSamples:ApiDemos:kotlin-app"))
+    implementation(project(":Maps3DSamples:ApiDemos:java-app"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

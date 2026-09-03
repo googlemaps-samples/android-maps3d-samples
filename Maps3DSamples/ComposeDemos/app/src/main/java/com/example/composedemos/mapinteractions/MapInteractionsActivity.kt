@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.maps3d.common.showcase.ui.SampleTopBar
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
@@ -114,20 +115,11 @@ fun MapInteractionsScreen() {
             },
         )
 
-        // 2. Custom Translucent Top Bar
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
-                .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-        ) {
-            Text(
-                text = "Map Interactions",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
+        // 2. Top Bar with Cross-Framework Switcher
+        SampleTopBar(
+            title = "Map Interactions",
+            sampleId = "map_interactions",
+        )
 
         // 3. Click Info Card
         Card(

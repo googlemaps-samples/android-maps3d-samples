@@ -97,6 +97,7 @@ import com.example.maps3d.common.TourData
 import com.example.maps3d.common.TrajectoryFlightAnimator
 import com.example.maps3d.common.WorldState
 import com.example.maps3d.common.awaitCameraUpdate
+import com.example.maps3d.common.showcase.ui.SampleTopBar
 import com.example.maps3d.common.toCameraUpdate
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
@@ -124,7 +125,15 @@ class AdvancedCameraAnimationActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MaterialTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    topBar = {
+                        SampleTopBar(
+                            title = "Advanced Camera Animation",
+                            sampleId = "advanced_camera_animation",
+                        )
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                ) { innerPadding ->
                     Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                         AdvancedCameraAnimationScreen()
                     }

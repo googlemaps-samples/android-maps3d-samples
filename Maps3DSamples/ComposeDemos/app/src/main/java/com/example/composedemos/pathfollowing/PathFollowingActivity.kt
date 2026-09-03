@@ -93,6 +93,7 @@ import com.example.maps3d.common.PathData
 import com.example.maps3d.common.PathEngine
 import com.example.maps3d.common.PathFollowingViewModel
 import com.example.maps3d.common.PathPlaybackState
+import com.example.maps3d.common.showcase.ui.SampleTopBar
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
@@ -110,7 +111,15 @@ class PathFollowingActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MaterialTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    topBar = {
+                        SampleTopBar(
+                            title = "Path Following",
+                            sampleId = "path_following",
+                        )
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                ) { innerPadding ->
                     Surface(
                         modifier = Modifier
                             .fillMaxSize()

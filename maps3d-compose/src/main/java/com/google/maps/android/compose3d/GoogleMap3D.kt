@@ -68,7 +68,7 @@ fun GoogleMap3D(
     models: List<ModelConfig> = emptyList(),
     popovers: List<PopoverConfig> = emptyList(),
     cameraRestriction: CameraRestriction? = null,
-    @Map3DMode mapMode: Int = Map3DMode.SATELLITE,
+    @Map3DMode mapMode: Int = Map3DMode.HYBRID,
     options: Map3DInitConfig = Map3DInitConfig.create(
         centerLat = 0.0,
         centerLng = 0.0,
@@ -82,7 +82,7 @@ fun GoogleMap3D(
         minTilt = 0.0,
         maxTilt = 90.0,
         bounds = null,
-        mapMode = Map3DMode.SATELLITE, // using the class from com.google.android.gms.maps3d.model.Map3DMode
+        mapMode = Map3DMode.HYBRID,
         mapId = null,
         minAltitude = 0.0,
         maxAltitude = 1000000.0,
@@ -98,6 +98,25 @@ fun GoogleMap3D(
     val state = remember { Map3DState() }
     val hasCalledOnMapReady = remember { mutableStateOf(false) }
     val googleMap3DState = remember { mutableStateOf<GoogleMap3D?>(null) }
+    val map3dViewRef = remember { mutableStateOf<Map3DView?>(null) }
+
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+
+    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            val view = map3dViewRef.value ?: return@LifecycleEventObserver
+            when (event) {
+                androidx.lifecycle.Lifecycle.Event.ON_RESUME -> view.onResume()
+                androidx.lifecycle.Lifecycle.Event.ON_PAUSE -> view.onPause()
+                androidx.lifecycle.Lifecycle.Event.ON_DESTROY -> view.onDestroy()
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     // Use rememberUpdatedState to avoid capturing stale lambdas in the async callback
     val currentOnMapSteady by rememberUpdatedState(onMapSteady)
@@ -110,7 +129,9 @@ fun GoogleMap3D(
         modifier = modifier,
         factory = { context ->
             val map3dView = Map3DView(context, options)
+            map3dViewRef.value = map3dView
             map3dView.onCreate(null)
+            map3dView.onResume()
 
             map3dView.getMap3DViewAsync(object : OnMap3DViewReadyCallback {
                 override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
@@ -163,6 +184,13 @@ fun GoogleMap3D(
                     state.syncPolygons(googleMap3D, polygons)
                     state.syncModels(googleMap3D, models)
                     state.syncPopovers(map3dView.context, googleMap3D, popovers)
+
+                    // Workaround: Delayed stabilization reset to guarantee native 3D engine enforces mapMode and camera
+                    map3dView.postDelayed({
+                        googleMap3D.setMapMode(mapMode)
+                        googleMap3D.setCamera(camera.toValidCamera())
+                        googleMap3D.setCameraRestriction(cameraRestriction.toValidCameraRestriction())
+                    }, 400L)
                 }
 
                 if (Map3DRegistry.isMapReady) {
@@ -179,6 +207,12 @@ fun GoogleMap3D(
             }
         },
         onRelease = { map3dView ->
+            googleMap3DState.value?.let { map ->
+                map.setCameraRestriction(null)
+                map.setCameraChangedListener(null)
+                map.setOnMapSteadyListener(null)
+                map.setMapMode(Map3DMode.HYBRID)
+            }
             state.clear()
             Map3DRegistry.clearInstance()
             map3dView.onDestroy()

@@ -83,6 +83,9 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
     abstract val initialCamera: Camera
     abstract val TAG: String
 
+    open val expectedMapMode: Int = com.google.android.gms.maps3d.model.Map3DMode.HYBRID
+    open val initialCameraRestriction: com.google.android.gms.maps3d.model.CameraRestriction? = null
+
     // Private mutable state to hold the current camera position
     // This is updated by the listener when it's active.
     private val _currentCamera = MutableStateFlow(DEFAULT_CAMERA)
@@ -137,8 +140,8 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         setContentView(R.layout.activity_common_map)
         val rootView = findViewById<View>(R.id.map_container)
         val topBar = findViewById<MaterialToolbar>(R.id.top_bar)
-        
         topBar.title = title
+        com.example.maps3d.common.showcase.ui.CrossFrameworkSwitcher.setupToolbarSwitcher(this, topBar)
 
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, insets ->
             val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
@@ -195,6 +198,7 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
     @CallSuper
     override fun onDestroy() {
         super.onDestroy()
+        com.example.maps3d.common.MapResetHelper.teardownMap(googleMap3D)
         map3DView.onDestroy()
     }
 
@@ -228,15 +232,34 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         if (isMapInitialized) return
         isMapInitialized = true
         Log.d(TAG, "onMapReady called (guaranteed once)")
-        // Workaround: The Maps 3D SDK onMapReady callback fires when the map object
-        // is instantiated, but the internal native rendering pipeline and layout pass may briefly
-        // override initial programmatic camera positions. A short delay ensures the native map viewport
-        // has fully stabilized before applying the initial camera position.
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (!isDestroyed && !isFinishing) {
-                this.googleMap3D?.setCamera(initialCamera)
-            }
-        }, 350L)
+
+        // Immediate baseline reset
+        com.example.maps3d.common.MapResetHelper.resetMapState(
+            map = googleMap3D,
+            expectedMode = expectedMapMode,
+            initialCamera = initialCamera,
+            cameraRestriction = initialCameraRestriction,
+        )
+
+        // Delayed stabilization reset:
+        // Workaround: The Maps 3D SDK native engine may briefly override mapMode/camera
+        // during viewport layout. This delayed reset guarantees the map mode and camera stabilize.
+        com.example.maps3d.common.MapResetHelper.scheduleStabilizationReset(
+            mapProvider = { this.googleMap3D },
+            isAlive = { !isDestroyed && !isFinishing },
+            expectedMode = expectedMapMode,
+            initialCamera = initialCamera,
+            cameraRestriction = initialCameraRestriction,
+            onStabilized = { map ->
+                onMapStabilized(map)
+            },
+        )
+    }
+
+    /**
+     * Optional hook invoked after the map has fully stabilized and re-applied its baseline state.
+     */
+    protected open fun onMapStabilized(googleMap3D: GoogleMap3D) {
     }
 
     @CallSuper
