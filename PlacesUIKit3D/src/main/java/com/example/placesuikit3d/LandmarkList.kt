@@ -17,12 +17,16 @@ package com.example.placesuikit3d
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,32 +34,33 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.placesuikit3d.data.model.PlaceSearchResult
+import com.example.placesuikit3d.ui.theme.RatingYellow
+import java.util.Locale
 
 /**
- * A composable that displays a list of landmarks.
- *
- * @param landmarks The list of landmarks to display.
- * @param onLandmarkClick Callback invoked when a landmark is clicked.
- * @param modifier The modifier to apply to the list.
+ * A composable that displays a list of search result places / landmarks on 3D map.
  */
 @Composable
 fun LandmarkList(
-    landmarks: List<Landmark>,
-    onLandmarkClick: (Landmark) -> Unit,
-    modifier: Modifier = Modifier
+    places: List<PlaceSearchResult>,
+    onPlaceClick: (PlaceSearchResult) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         Text(
-            text = "Locations",
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(16.dp)
+            text = stringResource(id = R.string.explore_places_count, places.size),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
         )
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            items(landmarks) { landmark ->
-                LandmarkItem(
-                    landmark = landmark,
-                    onClick = { onLandmarkClick(landmark) }
+        LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
+            items(places, key = { it.id }) { place ->
+                PlaceItem(
+                    place = place,
+                    onClick = { onPlaceClick(place) },
                 )
                 HorizontalDivider()
             }
@@ -64,36 +69,61 @@ fun LandmarkList(
 }
 
 /**
- * A composable that displays a single landmark item.
+ * Individual row item representing a place in the search/category results.
  */
 @Composable
-private fun LandmarkItem(
-    landmark: Landmark,
-    onClick: () -> Unit
+private fun PlaceItem(
+    place: PlaceSearchResult,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = Icons.Default.Place,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(end = 16.dp)
+            tint = if (place.isSelected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
+            modifier = Modifier.padding(end = 16.dp),
         )
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = landmark.name,
-                style = MaterialTheme.typography.titleMedium
+                text = place.name,
+                style = MaterialTheme.typography.titleMedium,
             )
             Text(
-                text = "Boulder, CO",
+                text = place.address ?: stringResource(id = R.string.default_location_city),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+        if (place.rating != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(start = 8.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = null,
+                    tint = RatingYellow,
+                    modifier = Modifier.size(16.dp),
+                )
+                Spacer(modifier = Modifier.width(3.dp))
+                Text(
+                    text = String.format(Locale.US, "%.1f", place.rating),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
         }
     }
 }

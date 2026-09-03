@@ -41,7 +41,7 @@ class Maps3DPlacesApplication : Application() {
             Toast.makeText(
                 this,
                 "PLACES_API_KEY was not set in secrets.properties",
-                Toast.LENGTH_LONG
+                Toast.LENGTH_LONG,
             ).show()
             throw RuntimeException("API Key was not set in secrets.properties")
         }
@@ -76,7 +76,7 @@ class Maps3DPlacesApplication : Application() {
                 Toast.makeText(
                     this,
                     "API Key was not set in secrets.properties",
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_LONG,
                 ).show()
                 throw RuntimeException("API Key was not set in secrets.properties")
             }

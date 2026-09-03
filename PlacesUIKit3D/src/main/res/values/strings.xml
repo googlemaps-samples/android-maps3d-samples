@@ -48,4 +48,32 @@
     <string name="location_permission_denied">Location permission denied. Showing default location.</string>
     <string name="location_services_disabled">Location services disabled on device. Showing default location.</string>
 
+    <string name="search_places_hint">Search places…</string>
+    <string name="orbit_3d">Orbit 3D</string>
+    <string name="toggle_2d_3d">2D / 3D View</string>
+    <string name="reset_overview">Reset Overview</string>
+
+    <!-- Landmark and Places List -->
+    <string name="explore_places_count">Explore Places (%1$d)</string>
+    <string name="default_location_city">Boulder, CO</string>
+    <string name="star_rating_format">★ %1$.1f</string>
+
+    <!-- Camera and View Controls -->
+    <string name="label_3d">3D</string>
+    <string name="label_2d">2D</string>
+
+    <!-- UI Action Feedback Messages -->
+    <string name="switched_to_3d">Switched to 3D Perspective</string>
+    <string name="switched_to_2d">Switched to 2D Top-Down</string>
+    <string name="camera_reset_overview">Camera reset to Boulder Overview</string>
+    <string name="stopped_orbit">Stopped 360° orbit</string>
+    <string name="orbiting_place">Orbiting around %1$s</string>
+    <string name="focused_on_place">Focused on %1$s. Tap marker for details.</string>
+    <string name="found_places_query">Found %1$d results for \"%2$s\". Tap marker for details.</string>
+    <string name="no_places_found_query">No places found for \"%1$s\".</string>
+    <string name="highlighting_landmark">Highlighting US Landmark: %1$s</string>
+    <string name="error_search_failed">Search failed</string>
+    <string name="error_find_location">Failed to find location</string>
+    <string name="error_load_place_details">Failed to load place details</string>
+    <string name="error_loading_3d_map">Error loading 3D map</string>
 </resources>
