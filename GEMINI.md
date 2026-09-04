@@ -36,8 +36,8 @@ For Clean Architecture and MVVM modules, decouple business logic, math calculati
 2. **Repositories (`*Repository.kt`):** Abstract external SDK and data access behind interfaces with injectable `CoroutineDispatcher`.
 3. **Pure Math Engine (`*Engine.kt`, `*Animator.kt`):** Pure deterministic trigonometric, altitude, and kinematic functions (Zero Android UI / View / Context dependencies).
 4. **Pure State Machine Controller (`*Controller.kt`):** Pure Kotlin state machine managing progress, time integration, and step transitions.
-5. **Presentation ViewModel (`*ViewModel.kt`, `*State.kt`):** Android ViewModel exposing immutable UI state via `StateFlow` (for Kotlin/Compose) and `LiveData` (for Java).
-6. **Thin View Layer (`*Activity.kt`, `*Activity.java`, Composable Screen):** Thin views (< 250 lines) that only observe ViewModel state, forward user clicks, and apply map rendering updates.
+5. **Presentation ViewModel (`*ViewModel.kt`, `*State.kt`):** Android ViewModel exposing immutable UI state via `StateFlow` (for Kotlin/Compose) and `LiveData` (for Java via `asLiveData()`). Pure Kotlin/Compose modules rely solely on `StateFlow`.
+6. **Thin View Layer (`*Activity.kt`, `*Activity.java`, Composable Screen):** Thin views (~250 lines soft guideline) that only observe ViewModel state, forward user clicks, and apply map rendering updates.
 
 ---
 
@@ -71,17 +71,13 @@ Whenever creating new features or undertaking architectural refactors, maintain 
 - **Consumable Camera Commands:** One-time camera animations (e.g. fly-to, auto-frame) must be consumed by the View and cleared immediately in the ViewModel via `onFlyToCompleted()` to prevent animation loops on recomposition.
 - **Explicit Altitude Modes:** Always specify `AltitudeMode` (`CLAMP_TO_GROUND`, `RELATIVE_TO_GROUND`, or `ABSOLUTE`). Never assume ground altitude is `0.0` over 3D terrain meshes.
 - **Hardware-Synchronized Tickers:** Use `Choreographer.FrameCallback` in Views and `withFrameNanos` / `withFrameMillis` in Compose for smooth 60/120fps animations.
-- **Resilient LiveData Updates in ViewModel:**
-  ```kotlin
-  private fun updateState(newState: FeatureState) {
-      _state.value = newState
-      try {
-          _liveData.value = newState
-      } catch (_: Exception) {
-          _liveData.postValue(newState)
-      }
-  }
-  ```
+- **StateFlow vs LiveData & `asLiveData()`:**
+  - Standardize on `StateFlow` for Kotlin Views and Jetpack Compose. Pure Kotlin/Compose modules must not expose `LiveData`.
+  - For shared hybrid ViewModels supporting Java Views (e.g. `Maps3DSamples/ApiDemos/common`), expose `LiveData` cleanly using `asLiveData()`:
+    ```kotlin
+    val liveData: LiveData<FeatureState> = _uiState.asLiveData()
+    ```
+    This automatically handles coroutine thread-dispatching and eliminates redundant mutable backing properties (`_liveData`) or manual `postValue()` helpers.
 
 ---
 
@@ -103,4 +99,7 @@ When generating, refactoring, or editing code, strictly adhere to these rules:
    - Externalize user-facing strings to `res/values/strings.xml`.
    - Prefer theme tokens (`MaterialTheme.colorScheme.*`) over hardcoded hex values. Document any canonical brand colors (e.g. `#F4B400` Google yellow) with an explanatory comment.
    - Compose state collections must use `collectAsStateWithLifecycle()` from `androidx.lifecycle.compose`.
+5. **Snippet Region Tag Discipline (`snippets/`):**
+   - When creating, modifying, or refactoring code in `snippets/`, always preserve and properly place region tags (`// [START ...]` and `// [END ...]`, along with `// [START_EXCLUDE]` / `// [END_EXCLUDE]`).
+   - Ensures snippet boundaries remain discoverable and fully compatible with automated catalog scripts (`SAMPLE_CATALOG.md`) and documentation extractors.
 
