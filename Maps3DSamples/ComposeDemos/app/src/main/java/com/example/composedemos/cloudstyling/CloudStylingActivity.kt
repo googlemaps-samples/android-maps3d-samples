@@ -24,13 +24,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps3d.Map3DInitConfig
+import com.google.android.gms.maps3d.model.Map3DMode
+import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.latLngAltitude
+import com.google.maps.android.compose3d.GoogleMap3D
 
 class CloudStylingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,20 +43,60 @@ class CloudStylingActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MaterialTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = "TODO: Cloud Map Styling sample will be implemented here.",
-                            style = MaterialTheme.typography.headlineSmall,
-                        )
-                    }
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    CloudStylingScreen()
                 }
             }
         }
+    }
+}
+
+@Composable
+fun CloudStylingScreen() {
+    val initialLocation = LatLng(37.7915, -122.4010)
+    val currentCameraState by remember {
+        mutableStateOf(
+            camera {
+                center = latLngAltitude {
+                    latitude = initialLocation.latitude
+                    longitude = initialLocation.longitude
+                    altitude = 250.0
+                }
+                heading = 45.0
+                tilt = 65.0
+                range = 800.0
+            },
+        )
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        GoogleMap3D(
+            camera = currentCameraState,
+            mapMode = Map3DMode.ROADMAP,
+            options = Map3DInitConfig.create(
+                centerLat = initialLocation.latitude,
+                centerLng = initialLocation.longitude,
+                centerAlt = 0.0,
+                heading = 45.0,
+                tilt = 65.0,
+                roll = 0.0,
+                range = 800.0,
+                minAltitude = 0.0,
+                maxAltitude = 1000000.0,
+                minHeading = 0.0,
+                maxHeading = 360.0,
+                minTilt = 0.0,
+                maxTilt = 90.0,
+                bounds = null,
+                mapMode = Map3DMode.ROADMAP,
+                mapId = "9a35234a36da44d2c47bf626",
+                language = java.util.Locale.getDefault().language,
+                region = java.util.Locale.getDefault().country,
+            ),
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }

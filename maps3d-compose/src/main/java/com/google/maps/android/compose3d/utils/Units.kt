@@ -137,7 +137,9 @@ fun getUnitsConverter(countryCode: String?): UnitsConverter {
 
 /** Class to render measurements in imperial units. */
 object ImperialUnitsConverter : UnitsConverter() {
-    override fun toDistanceUnits(meters: Meters): ValueWithUnitsTemplate = if (meters < 0.25.miles) {
+    override fun toDistanceUnits(meters: Meters): ValueWithUnitsTemplate = if (meters <
+        0.25.miles
+    ) {
         ValueWithUnitsTemplate(meters.toFeet, R.string.in_feet)
     } else {
         ValueWithUnitsTemplate(meters.toMiles, R.string.in_miles)
@@ -148,7 +150,9 @@ object ImperialUnitsConverter : UnitsConverter() {
 
 /** Class to render measurements in metric units. */
 object MetricUnitsConverter : UnitsConverter() {
-    override fun toDistanceUnits(meters: Meters): ValueWithUnitsTemplate = if (meters < 1000.meters) {
+    override fun toDistanceUnits(meters: Meters): ValueWithUnitsTemplate = if (meters <
+        1000.meters
+    ) {
         ValueWithUnitsTemplate(meters.toMeters, R.string.in_meters)
     } else {
         ValueWithUnitsTemplate(meters.toKilometers, R.string.in_kilometers)
