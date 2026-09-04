@@ -43,3 +43,5 @@ snippets/docs/
 .kotlin/
 .android/
 scratch/
+__pycache__/
+*.py[cod]
