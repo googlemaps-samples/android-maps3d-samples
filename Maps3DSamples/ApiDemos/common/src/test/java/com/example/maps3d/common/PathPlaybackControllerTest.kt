@@ -20,7 +20,6 @@ import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -173,6 +172,10 @@ class PathPlaybackControllerTest {
         controller.setAltitudeMode(AltitudeMode.ABSOLUTE)
         val absVertices = controller.getState().staticPolylineVertices
         assertTrue(absVertices.any { it.altitude > 0.0 })
+
+        controller.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND)
+        val relVertices = controller.getState().staticPolylineVertices
+        assertTrue(relVertices.all { it.altitude == controller.getState().pathAltitudeOffset })
     }
 
     @Test
@@ -187,8 +190,20 @@ class PathPlaybackControllerTest {
         assertEquals(0.0, state.elapsedDistance, 0.001)
         assertEquals(0f, state.progressRatio, 0.001f)
         assertFalse(state.isPlaying)
-        assertEquals(450.0, state.cameraRange, 0.001)
-        assertEquals(75.0, state.cameraTilt, 0.001)
+        val expectedProfile = PathEngine.profileRoute(newRoute)
+        assertEquals(expectedProfile.recommendedRange.toDouble(), state.cameraRange, 0.001)
+        assertEquals(expectedProfile.recommendedTilt.toDouble(), state.cameraTilt, 0.001)
+        assertEquals(expectedProfile.baseAltitude, state.groundAltitude, 0.001)
+    }
+
+    @Test
+    fun setRoute_mountainPath_calibratesProfile() {
+        val state = controller.setRoute(PathData.MOUNTAIN_PATH, applyDefaults = true)
+        assertEquals(PathData.MOUNTAIN_PATH, state.route)
+        assertEquals(48.0, state.cameraTilt, 0.001)
+        assertEquals(344.0, state.groundAltitude, 0.001)
+        assertEquals(344.0, state.routeProfile.baseAltitude, 0.001)
+        assertEquals(48.0f, state.routeProfile.recommendedTilt, 0.001f)
     }
 
     @Test

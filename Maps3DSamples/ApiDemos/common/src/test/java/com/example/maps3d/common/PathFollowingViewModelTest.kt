@@ -142,6 +142,17 @@ class PathFollowingViewModelTest {
     }
 
     @Test
+    fun setRoute_mountainPath_calibratesProfile() {
+        viewModel.setRoute(PathData.MOUNTAIN_PATH, applyDefaults = true)
+        val state = viewModel.currentState
+        assertEquals(PathData.MOUNTAIN_PATH, state.route)
+        assertEquals(48.0, state.cameraTilt, 0.001)
+        assertEquals(344.0, state.groundAltitude, 0.001)
+        assertEquals(344.0, state.routeProfile.baseAltitude, 0.001)
+        assertEquals(48.0f, state.routeProfile.recommendedTilt, 0.001f)
+    }
+
+    @Test
     fun advance_progressesPlayback() {
         viewModel.setPlaying(true)
         viewModel.advance(1.0)

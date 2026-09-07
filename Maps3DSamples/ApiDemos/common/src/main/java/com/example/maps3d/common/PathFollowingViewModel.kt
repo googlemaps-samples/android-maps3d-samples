@@ -20,9 +20,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import com.google.android.gms.maps3d.model.LatLngAltitude
+import java.net.HttpURLConnection
+import java.net.URL
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 /**
  * Shared Architecture ViewModel for 3D Path Following across Kotlin, Java, and Jetpack Compose.
@@ -78,6 +84,84 @@ class PathFollowingViewModel(
 
     fun setRoute(newRoute: List<LatLngAltitude>, applyDefaults: Boolean = true) {
         _uiState.value = controller.setRoute(newRoute, applyDefaults)
+    }
+
+    /**
+     * Fetches a real-time road route from the Google Routes API, decodes it, and sets it
+     * as the active route.
+     *
+     * @return true if route was successfully fetched and applied, false otherwise.
+     */
+    @Suppress("unused")
+    suspend fun fetchAndSetRoute(
+        apiKey: String,
+        originLat: Double,
+        originLng: Double,
+        destLat: Double,
+        destLng: Double,
+        ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    ): Boolean = withContext(ioDispatcher) {
+        try {
+            val url = URL("https://routes.googleapis.com/directions/v2:computeRoutes")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "POST"
+            connection.setRequestProperty("Content-Type", "application/json")
+            connection.setRequestProperty("X-Goog-Api-Key", apiKey)
+            connection.setRequestProperty("X-Goog-FieldMask", "routes.polyline.encodedPolyline")
+            connection.doOutput = true
+
+            val requestJson = JSONObject().apply {
+                put(
+                    "origin",
+                    JSONObject().put(
+                        "location",
+                        JSONObject().put(
+                            "latLng",
+                            JSONObject().apply {
+                                put("latitude", originLat)
+                                put("longitude", originLng)
+                            },
+                        ),
+                    ),
+                )
+                put(
+                    "destination",
+                    JSONObject().put(
+                        "location",
+                        JSONObject().put(
+                            "latLng",
+                            JSONObject().apply {
+                                put("latitude", destLat)
+                                put("longitude", destLng)
+                            },
+                        ),
+                    ),
+                )
+                put("travelMode", "DRIVE")
+            }
+
+            connection.outputStream.use { os ->
+                os.write(requestJson.toString().toByteArray(Charsets.UTF_8))
+            }
+
+            val response = connection.inputStream.bufferedReader().use { it.readText() }
+            val jsonResponse = JSONObject(response)
+            val routes = jsonResponse.optJSONArray("routes")
+            if (routes != null && routes.length() > 0) {
+                val encoded = routes.getJSONObject(0)
+                    .getJSONObject("polyline")
+                    .getString("encodedPolyline")
+                val decoded = PathData.decodePolyline(encoded)
+                withContext(Dispatchers.Main) {
+                    setRoute(decoded, applyDefaults = true)
+                }
+                true
+            } else {
+                false
+            }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     fun setAltitudeMode(mode: Int) {

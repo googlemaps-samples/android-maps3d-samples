@@ -13,7 +13,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Maps 3D Samples</string>
     <string name="title_activity_main">MainActivity</string>
 
@@ -185,17 +185,22 @@
     <string name="path_environment">Path Environment:</string>
     <string name="urban">Urban</string>
     <string name="rural">Rural</string>
+    <string name="mountain">Mountain</string>
     <string name="altitude_mode">Altitude Mode:</string>
     <string name="relative_to_ground">Relative to Ground</string>
     <string name="clamp_to_ground">Clamp to Ground</string>
     <string name="relative_to_mesh">Relative to Mesh</string>
     <string name="absolute">Absolute</string>
-    <string name="path_height_format">Path Height: %1$.1fm</string>
+    <string name="altitude_mode_info_title">Altitude Modes Explained</string>
+    <string name="altitude_mode_info_description">Altitude Modes Info</string>
+    <string name="altitude_mode_info_message" formatted="false">🌐 CLAMP TO GROUND\nAltitude values are ignored. The path is draped directly onto the surface terrain mesh.\n• Difference: Follows ground contours tightly with 0 elevation clearance.\n\n⛰️ RELATIVE TO GROUND\nAltitude is measured as an offset above the terrain surface at each coordinate.\n• Difference: Floats at a constant height above natural ground elevation.\n\n🏢 RELATIVE TO MESH\nAltitude is measured above the highest 3D mesh surface, including 3D buildings, bridges, and trees.\n• Difference: Rises over rooftops to prevent clipping through urban structures.\n\n🛰️ ABSOLUTE\nAltitude is measured from sea level (WGS84 ellipsoid datum), completely independent of terrain or buildings beneath.\n• Difference: Fixed global altitude, ideal for flight paths and aviation.</string>
+    <string name="path_height_format" tools:ignore="StringFormatInvalid">Path Height: %1$.1fm</string>
     <string name="camera_range_format">Camera Range: %1$dm</string>
     <string name="ground_altitude_format">Ground Altitude: %1$dm</string>
     <string name="heading_offset_format">Heading Offset: %1$d°</string>
     <string name="camera_tilt_format">Camera Tilt: %1$d°</string>
     <string name="follow_speed_format">Follow Speed: %1$d m/s</string>
+    <string name="follow_speed_with_suffix_format">Follow Speed: %1$d m/s%2$s</string>
     <string name="default_path_height">Path Height: 0.5m</string>
     <string name="default_camera_range">Camera Range: 300m</string>
     <string name="default_ground_altitude">Ground Altitude: 20m</string>
