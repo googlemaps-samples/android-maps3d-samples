@@ -51,8 +51,8 @@ Maps3DSamples/
 │   │   └── src/main/java/com/example/maps3dkotlin/<feature>/
 │   │       └── <Feature>Activity.kt                 # Layer 5: Thin View (~250 lines soft guideline) collecting StateFlow
 │   └── java-app/
-│   │   └── src/main/java/com/example/maps3djava/<feature>/
-│   │       └── <Feature>Activity.java               # Layer 5: Thin View (~250 lines soft guideline) observing LiveData
+│       └── src/main/java/com/example/maps3djava/<feature>/
+│           └── <Feature>Activity.java               # Layer 5: Thin View (~250 lines soft guideline) observing LiveData
 └── ComposeDemos/
     └── app/src/main/java/com/example/composedemos/<feature>/
         └── <Feature>Activity.kt                     # Layer 5: Thin View (~250 lines soft guideline) observing Compose state
