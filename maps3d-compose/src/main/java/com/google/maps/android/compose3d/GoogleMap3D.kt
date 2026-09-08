@@ -16,6 +16,7 @@
 
 package com.google.maps.android.compose3d
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -82,8 +83,7 @@ fun GoogleMap3D(
         minTilt = 0.0,
         maxTilt = 90.0,
         bounds = null,
-        // using the class from com.google.android.gms.maps3d.model.Map3DMode
-        mapMode = Map3DMode.SATELLITE,
+        mapMode = Map3DMode.SATELLITE, // using the class from com.google.android.gms.maps3d.model.Map3DMode
         mapId = null,
         minAltitude = 0.0,
         maxAltitude = 1000000.0,
@@ -130,10 +130,7 @@ fun GoogleMap3D(
 
                     if (currentOnMapClick != null || currentOnPlaceClick != null) {
                         googleMap3D.setMap3DClickListener { location, placeId ->
-                            android.util.Log.d(
-                                "GoogleMap3D",
-                                "Map clicked at $location, placeId: $placeId",
-                            )
+                            Log.d("GoogleMap3D", "Map clicked at $location, placeId: $placeId")
                             if (placeId != null) {
                                 currentOnPlaceClick?.invoke(placeId)
                             } else {

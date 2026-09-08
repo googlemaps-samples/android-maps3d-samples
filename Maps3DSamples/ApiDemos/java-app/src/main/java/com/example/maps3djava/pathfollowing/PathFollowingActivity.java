@@ -77,6 +77,9 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
     private Boolean lastStaticDrawsOccluded;
     private Double lastStaticAltitudeOffset;
     private double lastRenderedProgressDist = -1.0;
+    private Integer lastProgressAltitudeMode;
+    private Boolean lastProgressDrawsOccluded;
+    private boolean isMapInitialized = false;
     private long lastSliderUpdateMillis = 0L;
     private Boolean lastIsPlaying;
     private List<LatLngAltitude> lastRoute;
@@ -135,7 +138,16 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
         this.googleMap3D = googleMap3D;
 
         googleMap3D.setOnMapReadyListener(
-                initialTime -> runOnUiThread(this::resetPolylines));
+                initialTime -> {
+                    googleMap3D.setOnMapReadyListener(null);
+                    runOnUiThread(this::initializeMap);
+                });
+    }
+
+    private void initializeMap() {
+        if (isMapInitialized) return;
+        isMapInitialized = true;
+        resetPolylines();
     }
 
     private void setupCustomGestureHandling() {
@@ -465,13 +477,21 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
         lastStaticAltitudeMode = null;
         lastStaticDrawsOccluded = null;
         lastStaticAltitudeOffset = null;
+        lastProgressAltitudeMode = null;
+        lastProgressDrawsOccluded = null;
         lastRenderedProgressDist = -1.0;
         if (staticRoutePolyline != null) {
-            staticRoutePolyline.remove();
+            try {
+                staticRoutePolyline.remove();
+            } catch (Exception ignored) {
+            }
             staticRoutePolyline = null;
         }
         if (progressPolyline != null) {
-            progressPolyline.remove();
+            try {
+                progressPolyline.remove();
+            } catch (Exception ignored) {
+            }
             progressPolyline = null;
         }
         PathPlaybackState state = viewModel.getCurrentState();
@@ -512,11 +532,18 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
         if (googleMap3D == null || state == null || state.getProgressPolylineVertices().size() < 2) return;
 
         double distDelta = Math.abs(state.getElapsedDistance() - lastRenderedProgressDist);
-        if (!force && state.isPlaying() && distDelta < 15.0) {
+        boolean configChanged = progressPolyline == null
+                || lastProgressAltitudeMode == null || lastProgressAltitudeMode != state.getAltitudeMode()
+                || lastProgressDrawsOccluded == null || lastProgressDrawsOccluded != state.getDrawsOccludedSegments();
+
+        if (!force && !configChanged && distDelta <= 0.0) {
             return;
         }
 
         lastRenderedProgressDist = state.getElapsedDistance();
+        lastProgressAltitudeMode = state.getAltitudeMode();
+        lastProgressDrawsOccluded = state.getDrawsOccludedSegments();
+
         PolylineOptions progressOptions = new PolylineOptions();
         progressOptions.setId(PathEngine.PROGRESS_POLYLINE_ID);
         progressOptions.setPath(state.getProgressPolylineVertices());
@@ -530,11 +557,15 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
 
     private void observeViewModel() {
         viewModel.getLiveData().observe(this, state -> {
-            updateCameraFromState(state);
-            updateStaticPolyline(state);
-            updateProgressPolyline(state, false);
-            renderUiControls(state);
-            manageAnimationTicker(state.isPlaying());
+            try {
+                updateCameraFromState(state);
+                updateStaticPolyline(state);
+                updateProgressPolyline(state, false);
+                renderUiControls(state);
+                manageAnimationTicker(state.isPlaying());
+            } catch (Exception e) {
+                Log.e(TAG, "Error in UI state update: " + e.getMessage(), e);
+            }
         });
     }
 

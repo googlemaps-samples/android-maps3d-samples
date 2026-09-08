@@ -236,4 +236,31 @@ class PathPlaybackControllerTest {
         controller.skipRatio(-0.20f)
         assertEquals(totalDist * 0.40, controller.getState().elapsedDistance, 0.5)
     }
+
+    @Test
+    fun advance_updatesProgressVerticesSmoothlyOnSmallSteps() {
+        controller.setPlaying(true)
+        val initialVertices = controller.getState().progressPolylineVertices
+        assertTrue(initialVertices.size >= 2)
+
+        // Advance by 1 frame (16.6ms at default 30 m/s = ~0.5m)
+        controller.advance(0.0166)
+        val state1 = controller.getState()
+        assertTrue(state1.elapsedDistance > 0.0)
+        val vertices1 = state1.progressPolylineVertices
+        assertTrue(vertices1.size >= 2)
+        val tip1 = vertices1.last()
+        assertEquals(state1.currentPosition.latitude, tip1.latitude, 0.0001)
+        assertEquals(state1.currentPosition.longitude, tip1.longitude, 0.0001)
+
+        // Advance by another frame
+        controller.advance(0.0166)
+        val state2 = controller.getState()
+        assertTrue(state2.elapsedDistance > state1.elapsedDistance)
+        val vertices2 = state2.progressPolylineVertices
+        val tip2 = vertices2.last()
+        assertEquals(state2.currentPosition.latitude, tip2.latitude, 0.0001)
+        assertEquals(state2.currentPosition.longitude, tip2.longitude, 0.0001)
+        assertTrue(tip2.latitude != tip1.latitude || tip2.longitude != tip1.longitude)
+    }
 }

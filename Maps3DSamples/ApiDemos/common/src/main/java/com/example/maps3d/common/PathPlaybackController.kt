@@ -188,12 +188,14 @@ class PathPlaybackController(
 
     fun setPlaying(isPlaying: Boolean): PathPlaybackState {
         state = state.copy(isPlaying = isPlaying)
+        if (!isPlaying) {
+            return updateDistanceAndRecompute(state.elapsedDistance, updateProgressRatio = false)
+        }
         return state
     }
 
     fun togglePlayPause(): PathPlaybackState {
-        state = state.copy(isPlaying = !state.isPlaying)
-        return state
+        return setPlaying(!state.isPlaying)
     }
 
     fun setRoute(newRoute: List<LatLngAltitude>, applyDefaults: Boolean = true): PathPlaybackState {

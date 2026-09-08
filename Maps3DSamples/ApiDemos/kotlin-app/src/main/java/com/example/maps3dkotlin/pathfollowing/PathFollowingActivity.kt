@@ -82,6 +82,9 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private var lastStaticDrawsOccluded: Boolean? = null
     private var lastStaticAltitudeOffset: Double? = null
     private var lastRenderedProgressDist = -1.0
+    private var lastProgressAltitudeMode: Int? = null
+    private var lastProgressDrawsOccluded: Boolean? = null
+    private var isMapInitialized = false
     private var lastSliderUpdateMillis = 0L
     private var lastIsPlaying: Boolean? = null
     private var lastRoute: List<LatLngAltitude>? = null
@@ -136,14 +139,11 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         this.googleMap3D = googleMap3D
 
         googleMap3D.setOnMapReadyListener {
+            googleMap3D.setOnMapReadyListener(null)
             runOnUiThread {
-                lastStaticVertices = null
-                lastRenderedProgressDist = -1.0
-                val state = viewModel.currentState
-                updateStaticPolyline(state)
-                updateProgressPolyline(state)
-                updateCameraFromState(state)
-                renderUiControls(state)
+                if (isMapInitialized) return@runOnUiThread
+                isMapInitialized = true
+                resetPolylines()
             }
         }
     }
@@ -459,6 +459,8 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         lastStaticAltitudeMode = null
         lastStaticDrawsOccluded = null
         lastStaticAltitudeOffset = null
+        lastProgressAltitudeMode = null
+        lastProgressDrawsOccluded = null
         lastRenderedProgressDist = -1.0
         staticRoutePolyline?.remove()
         progressPolyline?.remove()
@@ -505,12 +507,19 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val map = googleMap3D ?: return
         if (state.progressPolylineVertices.size < 2) return
 
+        val configChanged = progressPolyline == null ||
+            lastProgressAltitudeMode != state.altitudeMode ||
+            lastProgressDrawsOccluded != state.drawsOccludedSegments
+
         val distDelta = abs(state.elapsedDistance - lastRenderedProgressDist)
-        if (!force && state.isPlaying && distDelta < 15.0) {
+        if (!force && !configChanged && distDelta <= 0.0) {
             return
         }
 
         lastRenderedProgressDist = state.elapsedDistance
+        lastProgressAltitudeMode = state.altitudeMode
+        lastProgressDrawsOccluded = state.drawsOccludedSegments
+
         val progressOptions = PolylineOptions().apply {
             id = PathEngine.PROGRESS_POLYLINE_ID
             path = state.progressPolylineVertices
@@ -527,11 +536,15 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    updateCameraFromState(state)
-                    updateStaticPolyline(state)
-                    updateProgressPolyline(state)
-                    renderUiControls(state)
-                    manageAnimationTicker(state.isPlaying)
+                    try {
+                        updateCameraFromState(state)
+                        updateStaticPolyline(state)
+                        updateProgressPolyline(state)
+                        renderUiControls(state)
+                        manageAnimationTicker(state.isPlaying)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error in UI state collection: ${e.message}", e)
+                    }
                 }
             }
         }

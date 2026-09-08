@@ -25,7 +25,6 @@ import com.google.android.gms.maps3d.model.Model
 import com.google.android.gms.maps3d.model.Polygon
 import com.google.android.gms.maps3d.model.Polyline
 import com.google.android.gms.maps3d.model.popoverOptions
-import com.google.maps.android.compose3d.utils.toValidLocation
 
 /**
  * Internal state holder for the Maps 3D Compose library.
@@ -103,21 +102,9 @@ class Map3DState {
             if (existing != null) {
                 val (oldConfig, polyline) = existing
                 if (oldConfig != config) {
-                    // Update existing polyline in-place to prevent flickering and unnecessary recreations
-                    polyline.path = config.points.map { it.toValidLocation() }
-                    polyline.strokeColor = config.color
-                    polyline.strokeWidth = config.width.toDouble()
-                    polyline.altitudeMode = config.altitudeMode
-                    polyline.zIndex = config.zIndex
-                    polyline.outerColor = config.outerColor
-                    polyline.outerWidth = config.outerWidth.toDouble()
-                    polyline.drawsOccludedSegments = config.drawsOccludedSegments
-                    config.onClick?.let { callback ->
-                        polyline.setClickListener {
-                            callback(polyline)
-                        }
-                    }
-                    polylines[config.key] = Pair(config, polyline)
+                    // Config changed, update by adding again with same ID!
+                    val newPolyline = createPolyline(map, config, polyline.id)
+                    polylines[config.key] = Pair(config, newPolyline)
                 }
             } else {
                 // New polyline

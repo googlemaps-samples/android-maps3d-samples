@@ -429,7 +429,7 @@ object PathEngine {
         val lastLatLng = LatLng(lastWaypoint.latitude, lastWaypoint.longitude)
         val distToLast = SphericalUtil.computeDistanceBetween(lastLatLng, currentLatLng)
 
-        if (distToLast >= 0.5) {
+        if (distToLast >= 0.05) {
             val p1 = path[clampedIndex]
             val p2 = if (clampedIndex < path.size - 1) path[clampedIndex + 1] else p1
             val totalDistance = cumulativeDistances.lastOrNull() ?: 0.0
@@ -454,7 +454,9 @@ object PathEngine {
         if (progressCoordinates.size < 2 && path.size >= 2) {
             val p0 = LatLng(path[0].latitude, path[0].longitude)
             val p1 = LatLng(path[1].latitude, path[1].longitude)
-            val tinyForward = SphericalUtil.interpolate(p0, p1, 0.005)
+            val segDist = SphericalUtil.computeDistanceBetween(p0, p1)
+            val tinyFraction = if (segDist > 0.0) (0.05 / segDist).coerceIn(0.0001, 0.1) else 0.001
+            val tinyForward = SphericalUtil.interpolate(p0, p1, tinyFraction)
             val startAlt = when (altitudeMode) {
                 AltitudeMode.CLAMP_TO_GROUND -> 0.0
                 AltitudeMode.ABSOLUTE -> path[0].altitude + pathAltitudeOffset + 0.4
