@@ -21,9 +21,11 @@ import android.util.AttributeSet
 import android.widget.ScrollView
 
 /**
- * A [ScrollView] that dynamically constrains its maximum measured height so that
- * collapsible control panels never cover the entire display across varied screen sizes
- * and orientations.
+ * A [ScrollView] that constrains its maximum measured height so that
+ * collapsible control panels never cover the entire display across varied screen sizes,
+ * orientations, and multi-window configurations.
+ *
+ * Supports specifying `android:maxHeight` in XML or defaults to 480dp.
  */
 class MaxHeightScrollView @JvmOverloads constructor(
     context: Context,
@@ -31,26 +33,40 @@ class MaxHeightScrollView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : ScrollView(context, attrs, defStyleAttr) {
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val displayMetrics = context.resources.displayMetrics
-        val density = displayMetrics.density
-        val screenHeight = displayMetrics.heightPixels
+    private var maxHeightPx: Int = -1
 
-        // Constrain height to at most 260dp or 60% of total screen height
-        val maxDpHeight = (480 * density).toInt()
-        val maxScreenShare = (screenHeight * 0.60f).toInt()
-        val effectiveMax = minOf(maxDpHeight, maxScreenShare)
+    init {
+        if (attrs != null) {
+            val typedArray = context.obtainStyledAttributes(attrs, intArrayOf(android.R.attr.maxHeight))
+            try {
+                maxHeightPx = typedArray.getDimensionPixelSize(0, -1)
+            } finally {
+                typedArray.recycle()
+            }
+        }
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val maxAllowed = if (maxHeightPx > 0) {
+            maxHeightPx
+        } else {
+            (DEFAULT_MAX_HEIGHT_DP * context.resources.displayMetrics.density).toInt()
+        }
 
         val originalSize = MeasureSpec.getSize(heightMeasureSpec)
         val originalMode = MeasureSpec.getMode(heightMeasureSpec)
 
         val targetHeight = if (originalMode != MeasureSpec.UNSPECIFIED && originalSize > 0) {
-            minOf(effectiveMax, originalSize)
+            minOf(maxAllowed, originalSize)
         } else {
-            effectiveMax
+            maxAllowed
         }
 
         val constrainedHeightSpec = MeasureSpec.makeMeasureSpec(targetHeight, MeasureSpec.AT_MOST)
         super.onMeasure(widthMeasureSpec, constrainedHeightSpec)
+    }
+
+    companion object {
+        private const val DEFAULT_MAX_HEIGHT_DP = 480
     }
 }

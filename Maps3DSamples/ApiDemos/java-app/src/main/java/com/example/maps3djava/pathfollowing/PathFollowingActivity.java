@@ -530,15 +530,11 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
 
     private void observeViewModel() {
         viewModel.getLiveData().observe(this, state -> {
-            try {
-                updateCameraFromState(state);
-                updateStaticPolyline(state);
-                updateProgressPolyline(state, false);
-                renderUiControls(state);
-                manageAnimationTicker(state.isPlaying());
-            } catch (Exception e) {
-                Log.e(TAG, "Error in UI state update: " + e.getMessage(), e);
-            }
+            updateCameraFromState(state);
+            updateStaticPolyline(state);
+            updateProgressPolyline(state, false);
+            renderUiControls(state);
+            manageAnimationTicker(state.isPlaying());
         });
     }
 

@@ -17,23 +17,14 @@
 package com.google.maps.android.compose3d
 
 import android.content.Context
-import android.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Popover
-import com.google.android.gms.maps3d.model.Glyph
-import com.google.android.gms.maps3d.model.Hole
 import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.Model
-import com.google.android.gms.maps3d.model.Orientation
-import com.google.android.gms.maps3d.model.PinConfiguration
 import com.google.android.gms.maps3d.model.Polygon
 import com.google.android.gms.maps3d.model.Polyline
-import com.google.android.gms.maps3d.model.markerOptions
-import com.google.android.gms.maps3d.model.orientation
-import com.google.android.gms.maps3d.model.polygonOptions
 import com.google.android.gms.maps3d.model.popoverOptions
-import com.google.android.gms.maps3d.model.vector3D
 import com.google.maps.android.compose3d.utils.toValidLocation
 
 /**
@@ -85,7 +76,11 @@ class Map3DState {
         }
     }
 
-    private fun createMarker(map: GoogleMap3D, config: MarkerConfig, overrideId: String? = null): Marker? {
+    private fun createMarker(
+        map: GoogleMap3D,
+        config: MarkerConfig,
+        overrideId: String? = null,
+    ): Marker? {
         val marker = map.addMarker(config.toMarkerOptions(overrideId))
         config.onClick?.let { callback ->
             marker?.setClickListener {
@@ -108,18 +103,26 @@ class Map3DState {
             if (existing != null) {
                 val (oldConfig, polyline) = existing
                 if (oldConfig != config) {
-                    // Config changed, update by adding again with same ID!
-                    val newPolyline = createPolyline(map, config, polyline.id)
-                    if (newPolyline != null) {
-                        polylines[config.key] = Pair(config, newPolyline)
+                    // Update existing polyline in-place to prevent flickering and unnecessary recreations
+                    polyline.path = config.points.map { it.toValidLocation() }
+                    polyline.strokeColor = config.color
+                    polyline.strokeWidth = config.width.toDouble()
+                    polyline.altitudeMode = config.altitudeMode
+                    polyline.zIndex = config.zIndex
+                    polyline.outerColor = config.outerColor
+                    polyline.outerWidth = config.outerWidth.toDouble()
+                    polyline.drawsOccludedSegments = config.drawsOccludedSegments
+                    config.onClick?.let { callback ->
+                        polyline.setClickListener {
+                            callback(polyline)
+                        }
                     }
+                    polylines[config.key] = Pair(config, polyline)
                 }
             } else {
                 // New polyline
                 val newPolyline = createPolyline(map, config)
-                if (newPolyline != null) {
-                    polylines[config.key] = Pair(config, newPolyline)
-                }
+                polylines[config.key] = Pair(config, newPolyline)
             }
         }
 
@@ -129,7 +132,11 @@ class Map3DState {
         }
     }
 
-    private fun createPolyline(map: GoogleMap3D, config: PolylineConfig, overrideId: String? = null): Polyline {
+    private fun createPolyline(
+        map: GoogleMap3D,
+        config: PolylineConfig,
+        overrideId: String? = null,
+    ): Polyline {
         val polyline = map.addPolyline(config.toPolylineOptions(overrideId))
         config.onClick?.let { callback ->
             polyline.setClickListener {
@@ -154,16 +161,12 @@ class Map3DState {
                 if (oldConfig != config) {
                     // Config changed, update by adding again with same ID!
                     val newPolygon = createPolygon(map, config, polygon.id)
-                    if (newPolygon != null) {
-                        polygons[config.key] = Pair(config, newPolygon)
-                    }
+                    polygons[config.key] = Pair(config, newPolygon)
                 }
             } else {
                 // New polygon
                 val newPolygon = createPolygon(map, config)
-                if (newPolygon != null) {
-                    polygons[config.key] = Pair(config, newPolygon)
-                }
+                polygons[config.key] = Pair(config, newPolygon)
             }
         }
 
@@ -173,7 +176,11 @@ class Map3DState {
         }
     }
 
-    private fun createPolygon(map: GoogleMap3D, config: PolygonConfig, overrideId: String? = null): Polygon {
+    private fun createPolygon(
+        map: GoogleMap3D,
+        config: PolygonConfig,
+        overrideId: String? = null,
+    ): Polygon {
         val polygon = map.addPolygon(config.toPolygonOptions(overrideId))
         config.onClick?.let { callback ->
             polygon.setClickListener {
@@ -201,16 +208,12 @@ class Map3DState {
                     // with the same underlying ID (`model.id`). Under the hood, this acts as a safe,
                     // efficient upsert operation to the renderer.
                     val newModel = createModel(map, config, model.id)
-                    if (newModel != null) {
-                        models[config.key] = Pair(config, newModel)
-                    }
+                    models[config.key] = Pair(config, newModel)
                 }
             } else {
                 // New model
                 val newModel = createModel(map, config)
-                if (newModel != null) {
-                    models[config.key] = Pair(config, newModel)
-                }
+                models[config.key] = Pair(config, newModel)
             }
         }
 
@@ -220,7 +223,11 @@ class Map3DState {
         }
     }
 
-    private fun createModel(map: GoogleMap3D, config: ModelConfig, overrideId: String? = null): Model {
+    private fun createModel(
+        map: GoogleMap3D,
+        config: ModelConfig,
+        overrideId: String? = null,
+    ): Model {
         val model = map.addModel(config.toModelOptions(overrideId))
         config.onClick?.let { callback ->
             model.setClickListener {

@@ -101,11 +101,10 @@ import com.example.maps3d.common.PathPlaybackState
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.Map3DMode
-import com.google.android.gms.maps3d.model.Polyline
-import com.google.android.gms.maps3d.model.PolylineOptions
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.maps.android.compose3d.GoogleMap3D
+import com.google.maps.android.compose3d.PolylineConfig
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -206,80 +205,43 @@ fun PathFollowingScreen(viewModel: PathFollowingViewModel = viewModel()) {
         }
     }
 
-    var googleMap3DInstance by remember {
-        mutableStateOf<com.google.android.gms.maps3d.GoogleMap3D?>(null)
-    }
-    var staticPolyline by remember { mutableStateOf<Polyline?>(null) }
-    var progressPolyline by remember { mutableStateOf<Polyline?>(null) }
-    var lastRenderedProgressDist by remember { mutableStateOf(-1.0) }
-
-    // Clear polylines when switching routes
-    LaunchedEffect(state.route) {
-        staticPolyline?.remove()
-        progressPolyline?.remove()
-        staticPolyline = null
-        progressPolyline = null
-        lastRenderedProgressDist = -1.0
-    }
-
-    // Static route polyline: rendered once upon route/altitude mode change
-    LaunchedEffect(
-        googleMap3DInstance,
+    val staticPolylineConfig = remember(
         state.staticPolylineVertices,
         state.altitudeMode,
         state.drawsOccludedSegments,
-        state.pathAltitudeOffset,
     ) {
-        val map = googleMap3DInstance ?: return@LaunchedEffect
-        if (state.staticPolylineVertices.size < 2) return@LaunchedEffect
-
-        val staticOptions = PolylineOptions().apply {
-            id = PathEngine.STATIC_POLYLINE_ID
-            path = state.staticPolylineVertices
-            strokeColor = "#4285F4".toColorInt()
-            strokeWidth = 10.0
-            zIndex = 1
-            altitudeMode = state.altitudeMode
-            drawsOccludedSegments = state.drawsOccludedSegments
+        if (state.staticPolylineVertices.size < 2) {
+            null
+        } else {
+            PolylineConfig(
+                key = PathEngine.STATIC_POLYLINE_ID,
+                points = state.staticPolylineVertices,
+                color = "#4285F4".toColorInt(),
+                width = 10f,
+                altitudeMode = state.altitudeMode,
+                drawsOccludedSegments = state.drawsOccludedSegments,
+                zIndex = 1,
+            )
         }
-        staticPolyline = map.addPolyline(staticOptions)
     }
 
-    // Progress polyline: throttled during playback to prevent GPU thrashing and flickering
-    LaunchedEffect(
-        googleMap3DInstance,
+    val progressPolylineConfig = remember(
         state.progressPolylineVertices,
         state.altitudeMode,
         state.drawsOccludedSegments,
-        state.isPlaying,
     ) {
-        val map = googleMap3DInstance ?: return@LaunchedEffect
-        if (state.progressPolylineVertices.size < 2) return@LaunchedEffect
-
-        val distDelta = abs(state.elapsedDistance - lastRenderedProgressDist)
-        if (state.isPlaying && distDelta < 15.0) {
-            return@LaunchedEffect
-        }
-
-        lastRenderedProgressDist = state.elapsedDistance
-        val progressOptions = PolylineOptions().apply {
-            id = PathEngine.PROGRESS_POLYLINE_ID
-            path = state.progressPolylineVertices
-            strokeColor = "#9C27B0".toColorInt()
-            strokeWidth = 8.0
-            zIndex = 2
-            altitudeMode = state.altitudeMode
-            drawsOccludedSegments = state.drawsOccludedSegments
-        }
-        progressPolyline = map.addPolyline(progressOptions)
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            staticPolyline?.remove()
-            progressPolyline?.remove()
-            staticPolyline = null
-            progressPolyline = null
+        if (state.progressPolylineVertices.size < 2) {
+            null
+        } else {
+            PolylineConfig(
+                key = PathEngine.PROGRESS_POLYLINE_ID,
+                points = state.progressPolylineVertices,
+                color = "#9C27B0".toColorInt(),
+                width = 8f,
+                altitudeMode = state.altitudeMode,
+                drawsOccludedSegments = state.drawsOccludedSegments,
+                zIndex = 2,
+            )
         }
     }
 
@@ -300,7 +262,7 @@ fun PathFollowingScreen(viewModel: PathFollowingViewModel = viewModel()) {
             modifier = Modifier.fillMaxSize(),
             camera = dynamicCamera,
             mapMode = Map3DMode.HYBRID,
-            onMapReady = { googleMap3DInstance = it },
+            polylines = listOfNotNull(staticPolylineConfig, progressPolylineConfig),
         )
 
         // Custom Gesture Overlay replacing built-in map gestures

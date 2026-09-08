@@ -527,15 +527,11 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    try {
-                        updateCameraFromState(state)
-                        updateStaticPolyline(state)
-                        updateProgressPolyline(state)
-                        renderUiControls(state)
-                        manageAnimationTicker(state.isPlaying)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error in UI state update: ${e.message}", e)
-                    }
+                    updateCameraFromState(state)
+                    updateStaticPolyline(state)
+                    updateProgressPolyline(state)
+                    renderUiControls(state)
+                    manageAnimationTicker(state.isPlaying)
                 }
             }
         }

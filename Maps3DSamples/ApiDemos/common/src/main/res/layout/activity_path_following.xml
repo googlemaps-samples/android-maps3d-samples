@@ -229,6 +229,7 @@
                 android:id="@+id/controls_scroll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:maxHeight="480dp"
                 android:scrollbars="vertical"
                 >
 

@@ -116,7 +116,7 @@ object PathData {
         LatLngAltitude(37.264310, -122.412160, 14.0),
         LatLngAltitude(37.265160, -122.411950, 13.1),
         LatLngAltitude(37.265870, -122.411680, 9.4),
-        LatLngAltitude(37.266480, -122.411390, 1.6),
+        LatLngAltitude(37.266480, -122.411390, 9.5),
         LatLngAltitude(37.267140, -122.411000, 9.6),
         LatLngAltitude(37.268110, -122.410400, 7.6),
         LatLngAltitude(37.268560, -122.410170, 6.6),
@@ -286,42 +286,4 @@ object PathData {
         LatLngAltitude(34.129210, -118.299270, 455.0),
         LatLngAltitude(34.129340, -118.298900, 457.0)
     )
-
-    /**
-     * Decodes an encoded polyline string from the Google Routes API into a list of [LatLngAltitude].
-     */
-    @JvmStatic
-    fun decodePolyline(encoded: String, altitude: Double = 0.0): List<LatLngAltitude> {
-        val poly = mutableListOf<LatLngAltitude>()
-        var index = 0
-        val len = encoded.length
-        var lat = 0
-        var lng = 0
-
-        while (index < len) {
-            var b: Int
-            var shift = 0
-            var result = 0
-            do {
-                b = encoded[index++].code - 63
-                result = result or (b and 0x1f shl shift)
-                shift += 5
-            } while (b >= 0x20)
-            val dlat = if (result and 1 != 0) (result shr 1).inv() else result shr 1
-            lat += dlat
-
-            shift = 0
-            result = 0
-            do {
-                b = encoded[index++].code - 63
-                result = result or (b and 0x1f shl shift)
-                shift += 5
-            } while (b >= 0x20)
-            val dlng = if (result and 1 != 0) (result shr 1).inv() else result shr 1
-            lng += dlng
-
-            poly.add(LatLngAltitude(lat / 1E5, lng / 1E5, altitude))
-        }
-        return poly
-    }
 }
