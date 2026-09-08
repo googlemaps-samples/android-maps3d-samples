@@ -16,9 +16,11 @@
 
 package com.example.maps3dkotlin.pathfollowing
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.Choreographer
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -37,6 +39,7 @@ import com.example.maps3d.common.PathEngine
 import com.example.maps3d.common.PathFollowingViewModel
 import com.example.maps3d.common.PathPlaybackState
 import com.example.maps3d.common.PathTouchHandler
+import com.example.maps3d.common.RouteProfile
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DView
@@ -63,6 +66,7 @@ import kotlin.math.abs
  */
 class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
+    private val TAG = "PathFollowingActivity"
     private val viewModel: PathFollowingViewModel by viewModels()
 
     // 3D Map View & Gesture Overlay
@@ -74,15 +78,23 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private var staticRoutePolyline: Polyline? = null
     private var progressPolyline: Polyline? = null
     private var lastStaticVertices: List<LatLngAltitude>? = null
+    private var lastStaticAltitudeMode: Int? = null
+    private var lastStaticDrawsOccluded: Boolean? = null
+    private var lastStaticAltitudeOffset: Double? = null
     private var lastRenderedProgressDist = -1.0
+    private var lastProgressAltitudeMode: Int? = null
+    private var lastProgressDrawsOccluded: Boolean? = null
+    private var isMapInitialized = false
     private var lastSliderUpdateMillis = 0L
     private var lastIsPlaying: Boolean? = null
+    private var lastRoute: List<LatLngAltitude>? = null
 
     // Control panel overlay bindings
     private var controlsCard: CardView? = null
     private var cardHeader: View? = null
     private var btnCollapse: MaterialButton? = null
     private var btnHelp: MaterialButton? = null
+    private var btnAltitudeModeInfo: MaterialButton? = null
     private var controlsScroll: View? = null
     private var isCollapsed = false
     private var chipGroupSpeed: ChipGroup? = null
@@ -127,14 +139,11 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         this.googleMap3D = googleMap3D
 
         googleMap3D.setOnMapReadyListener {
+            googleMap3D.setOnMapReadyListener(null)
             runOnUiThread {
-                lastStaticVertices = null
-                lastRenderedProgressDist = -1.0
-                val state = viewModel.currentState
-                updateStaticPolyline(state)
-                updateProgressPolyline(state)
-                updateCameraFromState(state)
-                renderUiControls(state)
+                if (isMapInitialized) return@runOnUiThread
+                isMapInitialized = true
+                resetPolylines()
             }
         }
     }
@@ -149,6 +158,7 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         controlsCard = findViewById(R.id.controls_card)
         cardHeader = findViewById(R.id.card_header)
         btnHelp = findViewById(R.id.btn_help)
+        btnAltitudeModeInfo = findViewById(R.id.btn_altitude_mode_info)
         chipGroupSpeed = findViewById(R.id.chip_group_speed)
         btnCollapse = findViewById(R.id.btn_collapse)
         controlsScroll = findViewById(R.id.controls_scroll)
@@ -171,9 +181,14 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         speedSliderLabel = findViewById(R.id.speed_slider_label)
     }
 
+    @SuppressLint("StringFormatInvalid", "ClickableViewAccessibility")
     private fun setupControlListeners() {
         btnHelp?.setOnClickListener {
             showHelpDialog()
+        }
+
+        btnAltitudeModeInfo?.setOnClickListener {
+            showAltitudeModeInfoDialog()
         }
 
         btnPlayPause.setOnClickListener {
@@ -182,16 +197,18 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
         chipGroupSpeed?.setOnCheckedStateChangeListener { _, checkedIds ->
             val checkedId = checkedIds.firstOrNull() ?: return@setOnCheckedStateChangeListener
-            val targetSpeed = when (checkedId) {
-                R.id.chip_speed_05x -> 15.0
-                R.id.chip_speed_1x -> 30.0
-                R.id.chip_speed_2x -> 60.0
-                R.id.chip_speed_3x -> 90.0
-                R.id.chip_speed_5x -> 120.0
-                else -> 30.0
+            val multiplier = when (checkedId) {
+                R.id.chip_speed_05x -> 0.5
+                R.id.chip_speed_1x -> 1.0
+                R.id.chip_speed_2x -> 2.0
+                R.id.chip_speed_3x -> 3.0
+                R.id.chip_speed_5x -> 5.0
+                else -> 1.0
             }
-            viewModel.setFollowSpeed(targetSpeed)
-            speedSlider.value = targetSpeed.toFloat()
+            val baseSpeed = viewModel.currentState.routeProfile.recommendedSpeed.toDouble()
+            val targetSpeed = (baseSpeed * multiplier).toFloat().coerceIn(speedSlider.valueFrom, speedSlider.valueTo)
+            viewModel.setFollowSpeed(targetSpeed.toDouble())
+            speedSlider.value = targetSpeed
         }
 
         fun setPanelCollapsed(collapsed: Boolean) {
@@ -201,6 +218,13 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             btnCollapse?.setIconResource(
                 if (isCollapsed) R.drawable.expand_less_24px else R.drawable.expand_more_24px
             )
+        }
+
+        findViewById<View>(R.id.layout_drag_handle)?.setOnClickListener {
+            setPanelCollapsed(!isCollapsed)
+        }
+        findViewById<View>(R.id.drag_handle)?.setOnClickListener {
+            setPanelCollapsed(!isCollapsed)
         }
 
         btnCollapse?.setOnClickListener {
@@ -242,8 +266,12 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             }
         }
 
-        controlsCard?.setOnTouchListener { _, event ->
-            cardSwipeDetector.onTouchEvent(event)
+        findViewById<View>(R.id.layout_drag_handle)?.setOnTouchListener { v, event ->
+            if (cardSwipeDetector.onTouchEvent(event)) {
+                true
+            } else {
+                v.onTouchEvent(event)
+            }
         }
 
         progressSlider.addOnChangeListener { _, value, fromUser ->
@@ -251,7 +279,7 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 viewModel.seekToRatio(value)
                 val state = viewModel.currentState
                 updateCameraFromState(state)
-                updateProgressPolyline(state)
+                updateProgressPolyline(state, force = true)
             }
         }
 
@@ -265,7 +293,7 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 viewModel.seekToRatio(slider.value)
                 val state = viewModel.currentState
                 updateCameraFromState(state)
-                updateProgressPolyline(state)
+                updateProgressPolyline(state, force = true)
             }
         })
 
@@ -329,12 +357,16 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         speedSlider.addOnChangeListener { _, value, fromUser ->
             if (fromUser) {
                 viewModel.setFollowSpeed(value.toDouble())
-                when (value.toInt()) {
-                    15 -> chipGroupSpeed?.check(R.id.chip_speed_05x)
-                    30 -> chipGroupSpeed?.check(R.id.chip_speed_1x)
-                    60 -> chipGroupSpeed?.check(R.id.chip_speed_2x)
-                    90 -> chipGroupSpeed?.check(R.id.chip_speed_3x)
-                    120 -> chipGroupSpeed?.check(R.id.chip_speed_5x)
+                val baseSpeed = viewModel.currentState.routeProfile.recommendedSpeed
+                if (baseSpeed > 0.0f) {
+                    val mult = value / baseSpeed
+                    when {
+                        abs(mult - 0.5f) < 0.15f -> chipGroupSpeed?.check(R.id.chip_speed_05x)
+                        abs(mult - 1.0f) < 0.15f -> chipGroupSpeed?.check(R.id.chip_speed_1x)
+                        abs(mult - 2.0f) < 0.15f -> chipGroupSpeed?.check(R.id.chip_speed_2x)
+                        abs(mult - 3.0f) < 0.15f -> chipGroupSpeed?.check(R.id.chip_speed_3x)
+                        abs(mult - 5.0f) < 0.15f -> chipGroupSpeed?.check(R.id.chip_speed_5x)
+                    }
                 }
             }
             val boostSuffix = when {
@@ -343,24 +375,67 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 viewModel.currentState.speedBoostMultiplier >= 1.5 -> " (2x Boost)"
                 else -> ""
             }
-            speedSliderLabel.text = getString(R.string.follow_speed_format, value.toInt()) + boostSuffix
+            speedSliderLabel.text = getString(
+                R.string.follow_speed_with_suffix_format,
+                value.toInt(),
+                boostSuffix,
+            )
         }
 
         rgEnvironment.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 R.id.rb_urban -> {
-                    viewModel.setRoute(PathData.URBAN_PATH)
-                    pathAltitudeSlider.valueTo = 20.0f
-                    altitudeSlider.valueTo = 500.0f
+                    viewModel.setRoute(PathData.URBAN_PATH, applyDefaults = true)
+                    configureSlider(pathAltitudeSlider, 0.0f, 20.0f, pathAltitudeSlider.value)
                 }
                 R.id.rb_rural -> {
-                    viewModel.setRoute(PathData.RURAL_PATH)
-                    pathAltitudeSlider.valueTo = 200.0f
-                    altitudeSlider.valueTo = 500.0f
+                    viewModel.setRoute(PathData.RURAL_PATH, applyDefaults = true)
+                    configureSlider(pathAltitudeSlider, 0.0f, 200.0f, pathAltitudeSlider.value)
+                }
+                R.id.rb_mountain -> {
+                    viewModel.setRoute(PathData.MOUNTAIN_PATH, applyDefaults = true)
+                    configureSlider(pathAltitudeSlider, 0.0f, 200.0f, pathAltitudeSlider.value)
                 }
             }
             resetPolylines()
         }
+    }
+
+    private fun configureSlider(slider: Slider, min: Float, max: Float, targetVal: Float) {
+        try {
+            val safeMin = minOf(min, max - 1f)
+            val safeMax = maxOf(max, safeMin + 1f)
+            val clampedTarget = targetVal.coerceIn(safeMin, safeMax)
+            // 4-step bound adjustment ensures valueFrom <= value <= valueTo invariant at every step
+            slider.valueFrom = minOf(slider.valueFrom, safeMin)
+            slider.valueTo = maxOf(slider.valueTo, safeMax)
+            slider.value = clampedTarget
+            slider.valueFrom = safeMin
+            slider.valueTo = safeMax
+        } catch (e: Exception) {
+            Log.e(TAG, "Error configuring slider: ${e.message}", e)
+        }
+    }
+
+    private fun applyRouteProfile(profile: RouteProfile) {
+        configureSlider(rangeSlider, profile.rangeSliderMin, profile.rangeSliderMax, profile.recommendedRange)
+        rangeSliderLabel.text = getString(R.string.camera_range_format, profile.recommendedRange.toInt())
+
+        configureSlider(
+            altitudeSlider,
+            profile.altitudeSliderMin,
+            profile.altitudeSliderMax,
+            profile.baseAltitude.toFloat()
+        )
+        altitudeSliderLabel.text = getString(R.string.ground_altitude_format, profile.baseAltitude.toInt())
+
+        configureSlider(speedSlider, profile.speedSliderMin, profile.speedSliderMax, profile.recommendedSpeed)
+        speedSliderLabel.text = getString(R.string.follow_speed_format, profile.recommendedSpeed.toInt())
+        chipGroupSpeed?.check(R.id.chip_speed_1x)
+
+        val clampedTilt = profile.recommendedTilt.coerceIn(tiltSlider.valueFrom, tiltSlider.valueTo)
+        tiltSlider.value = clampedTilt
+        tiltSliderLabel.text = getString(R.string.camera_tilt_format, clampedTilt.toInt())
     }
 
     private fun showHelpDialog() {
@@ -371,25 +446,56 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             .show()
     }
 
+    private fun showAltitudeModeInfoDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.altitude_mode_info_title)
+            .setMessage(R.string.altitude_mode_info_message)
+            .setPositiveButton(R.string.help_dialog_ok, null)
+            .show()
+    }
+
     private fun resetPolylines() {
         lastStaticVertices = null
+        lastStaticAltitudeMode = null
+        lastStaticDrawsOccluded = null
+        lastStaticAltitudeOffset = null
+        lastProgressAltitudeMode = null
+        lastProgressDrawsOccluded = null
         lastRenderedProgressDist = -1.0
+        staticRoutePolyline?.remove()
+        progressPolyline?.remove()
+        staticRoutePolyline = null
+        progressPolyline = null
         val state = viewModel.currentState
         updateStaticPolyline(state)
-        updateProgressPolyline(state)
+        updateProgressPolyline(state, force = true)
         updateCameraFromState(state)
+        renderUiControls(state)
     }
 
     private fun updateStaticPolyline(state: PathPlaybackState) {
         val map = googleMap3D ?: return
-        if (lastStaticVertices == state.staticPolylineVertices && staticRoutePolyline != null) return
+        if (state.staticPolylineVertices.size < 2) return
+
+        if (lastStaticVertices == state.staticPolylineVertices &&
+            lastStaticAltitudeMode == state.altitudeMode &&
+            lastStaticDrawsOccluded == state.drawsOccludedSegments &&
+            lastStaticAltitudeOffset == state.pathAltitudeOffset &&
+            staticRoutePolyline != null
+        ) {
+            return
+        }
 
         lastStaticVertices = state.staticPolylineVertices
+        lastStaticAltitudeMode = state.altitudeMode
+        lastStaticDrawsOccluded = state.drawsOccludedSegments
+        lastStaticAltitudeOffset = state.pathAltitudeOffset
+
         val staticOptions = PolylineOptions().apply {
             id = PathEngine.STATIC_POLYLINE_ID
             path = state.staticPolylineVertices
             strokeColor = "#4285F4".toColorInt()
-            strokeWidth = 16.0
+            strokeWidth = 10.0
             zIndex = 1
             altitudeMode = state.altitudeMode
             drawsOccludedSegments = state.drawsOccludedSegments
@@ -397,11 +503,23 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         staticRoutePolyline = map.addPolyline(staticOptions)
     }
 
-    private fun updateProgressPolyline(state: PathPlaybackState) {
+    private fun updateProgressPolyline(state: PathPlaybackState, force: Boolean = false) {
         val map = googleMap3D ?: return
         if (state.progressPolylineVertices.size < 2) return
 
+        val configChanged = progressPolyline == null ||
+            lastProgressAltitudeMode != state.altitudeMode ||
+            lastProgressDrawsOccluded != state.drawsOccludedSegments
+
+        val distDelta = abs(state.elapsedDistance - lastRenderedProgressDist)
+        if (!force && !configChanged && distDelta <= 0.0) {
+            return
+        }
+
         lastRenderedProgressDist = state.elapsedDistance
+        lastProgressAltitudeMode = state.altitudeMode
+        lastProgressDrawsOccluded = state.drawsOccludedSegments
+
         val progressOptions = PolylineOptions().apply {
             id = PathEngine.PROGRESS_POLYLINE_ID
             path = state.progressPolylineVertices
@@ -418,13 +536,15 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    updateCameraFromState(state)
-                    // Only update progress polyline if distance changed during playback or seek
-                    if (state.isPlaying || abs(state.elapsedDistance - lastRenderedProgressDist) > 0.1) {
+                    try {
+                        updateCameraFromState(state)
+                        updateStaticPolyline(state)
                         updateProgressPolyline(state)
+                        renderUiControls(state)
+                        manageAnimationTicker(state.isPlaying)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error in UI state collection: ${e.message}", e)
                     }
-                    renderUiControls(state)
-                    manageAnimationTicker(state.isPlaying)
                 }
             }
         }
@@ -446,7 +566,12 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         map.setCamera(newCamera)
     }
 
-        private fun renderUiControls(state: PathPlaybackState) {
+    private fun renderUiControls(state: PathPlaybackState) {
+        if (lastRoute != state.route) {
+            lastRoute = state.route
+            applyRouteProfile(state.routeProfile)
+        }
+
         if (lastIsPlaying != state.isPlaying) {
             lastIsPlaying = state.isPlaying
             btnPlayPause.setIconResource(
@@ -454,7 +579,7 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             )
         }
 
-        if (!state.isScrubbing) {
+        if (!state.isScrubbing && !progressSlider.isPressed) {
             val now = System.currentTimeMillis()
             if (now - lastSliderUpdateMillis >= 100L || !state.isPlaying) {
                 lastSliderUpdateMillis = now
@@ -467,25 +592,50 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             state.speedBoostMultiplier >= 1.5 -> " (2x Boost)"
             else -> ""
         }
-        speedSliderLabel.text = getString(R.string.follow_speed_format, state.followSpeedMps.toInt()) + boostSuffix
+        speedSliderLabel.text = getString(
+            R.string.follow_speed_with_suffix_format,
+            state.followSpeedMps.toInt(),
+            boostSuffix,
+        )
 
         if (!isCollapsed) {
-            val clampedRange = state.cameraRange.toFloat().coerceIn(rangeSlider.valueFrom, rangeSlider.valueTo)
-            if (abs(rangeSlider.value - clampedRange) >= 1.0f) {
-                rangeSlider.value = clampedRange
-                rangeSliderLabel.text = getString(R.string.camera_range_format, state.cameraRange.toInt())
+            if (!rangeSlider.isPressed) {
+                val clampedRange = state.cameraRange.toFloat().coerceIn(rangeSlider.valueFrom, rangeSlider.valueTo)
+                if (abs(rangeSlider.value - clampedRange) >= 1.0f) {
+                    rangeSlider.value = clampedRange
+                    rangeSliderLabel.text = getString(R.string.camera_range_format, state.cameraRange.toInt())
+                }
             }
 
-            val clampedTilt = state.cameraTilt.toFloat().coerceIn(tiltSlider.valueFrom, tiltSlider.valueTo)
-            if (abs(tiltSlider.value - clampedTilt) >= 0.5f) {
-                tiltSlider.value = clampedTilt
-                tiltSliderLabel.text = getString(R.string.camera_tilt_format, state.cameraTilt.toInt())
+            if (!tiltSlider.isPressed) {
+                val clampedTilt = state.cameraTilt.toFloat().coerceIn(tiltSlider.valueFrom, tiltSlider.valueTo)
+                if (abs(tiltSlider.value - clampedTilt) >= 0.5f) {
+                    tiltSlider.value = clampedTilt
+                    tiltSliderLabel.text = getString(R.string.camera_tilt_format, state.cameraTilt.toInt())
+                }
             }
 
-            val clampedHeading = state.headingOffset.toFloat().coerceIn(headingSlider.valueFrom, headingSlider.valueTo)
-            if (abs(headingSlider.value - clampedHeading) >= 0.5f) {
-                headingSlider.value = clampedHeading
-                headingSliderLabel.text = getString(R.string.heading_offset_format, state.headingOffset.toInt())
+            if (!headingSlider.isPressed) {
+                val clampedHeading = state.headingOffset.toFloat().coerceIn(headingSlider.valueFrom, headingSlider.valueTo)
+                if (abs(headingSlider.value - clampedHeading) >= 0.5f) {
+                    headingSlider.value = clampedHeading
+                    headingSliderLabel.text = getString(R.string.heading_offset_format, state.headingOffset.toInt())
+                }
+            }
+
+            if (!altitudeSlider.isPressed) {
+                val clampedAltitude = state.groundAltitude.toFloat().coerceIn(altitudeSlider.valueFrom, altitudeSlider.valueTo)
+                if (abs(altitudeSlider.value - clampedAltitude) >= 0.5f) {
+                    altitudeSlider.value = clampedAltitude
+                    altitudeSliderLabel.text = getString(R.string.ground_altitude_format, state.groundAltitude.toInt())
+                }
+            }
+
+            if (!speedSlider.isPressed) {
+                val clampedSpeed = state.followSpeedMps.toFloat().coerceIn(speedSlider.valueFrom, speedSlider.valueTo)
+                if (abs(speedSlider.value - clampedSpeed) >= 0.5f) {
+                    speedSlider.value = clampedSpeed
+                }
             }
         }
     }
@@ -562,6 +712,8 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             frameCallback = null
         }
         fadeHandler.removeCallbacksAndMessages(null)
+        staticRoutePolyline?.remove()
+        progressPolyline?.remove()
         staticRoutePolyline = null
         progressPolyline = null
         map3DView.onDestroy()

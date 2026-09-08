@@ -20,7 +20,6 @@ import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -173,6 +172,10 @@ class PathPlaybackControllerTest {
         controller.setAltitudeMode(AltitudeMode.ABSOLUTE)
         val absVertices = controller.getState().staticPolylineVertices
         assertTrue(absVertices.any { it.altitude > 0.0 })
+
+        controller.setAltitudeMode(AltitudeMode.RELATIVE_TO_GROUND)
+        val relVertices = controller.getState().staticPolylineVertices
+        assertTrue(relVertices.all { it.altitude == controller.getState().pathAltitudeOffset })
     }
 
     @Test
@@ -187,8 +190,20 @@ class PathPlaybackControllerTest {
         assertEquals(0.0, state.elapsedDistance, 0.001)
         assertEquals(0f, state.progressRatio, 0.001f)
         assertFalse(state.isPlaying)
-        assertEquals(450.0, state.cameraRange, 0.001)
-        assertEquals(75.0, state.cameraTilt, 0.001)
+        val expectedProfile = PathEngine.profileRoute(newRoute)
+        assertEquals(expectedProfile.recommendedRange.toDouble(), state.cameraRange, 0.001)
+        assertEquals(expectedProfile.recommendedTilt.toDouble(), state.cameraTilt, 0.001)
+        assertEquals(expectedProfile.baseAltitude, state.groundAltitude, 0.001)
+    }
+
+    @Test
+    fun setRoute_mountainPath_calibratesProfile() {
+        val state = controller.setRoute(PathData.MOUNTAIN_PATH, applyDefaults = true)
+        assertEquals(PathData.MOUNTAIN_PATH, state.route)
+        assertEquals(48.0, state.cameraTilt, 0.001)
+        assertEquals(344.0, state.groundAltitude, 0.001)
+        assertEquals(344.0, state.routeProfile.baseAltitude, 0.001)
+        assertEquals(48.0f, state.routeProfile.recommendedTilt, 0.001f)
     }
 
     @Test
@@ -220,5 +235,32 @@ class PathPlaybackControllerTest {
         // Skip backward 20%
         controller.skipRatio(-0.20f)
         assertEquals(totalDist * 0.40, controller.getState().elapsedDistance, 0.5)
+    }
+
+    @Test
+    fun advance_updatesProgressVerticesSmoothlyOnSmallSteps() {
+        controller.setPlaying(true)
+        val initialVertices = controller.getState().progressPolylineVertices
+        assertTrue(initialVertices.size >= 2)
+
+        // Advance by 1 frame (16.6ms at default 30 m/s = ~0.5m)
+        controller.advance(0.0166)
+        val state1 = controller.getState()
+        assertTrue(state1.elapsedDistance > 0.0)
+        val vertices1 = state1.progressPolylineVertices
+        assertTrue(vertices1.size >= 2)
+        val tip1 = vertices1.last()
+        assertEquals(state1.currentPosition.latitude, tip1.latitude, 0.0001)
+        assertEquals(state1.currentPosition.longitude, tip1.longitude, 0.0001)
+
+        // Advance by another frame
+        controller.advance(0.0166)
+        val state2 = controller.getState()
+        assertTrue(state2.elapsedDistance > state1.elapsedDistance)
+        val vertices2 = state2.progressPolylineVertices
+        val tip2 = vertices2.last()
+        assertEquals(state2.currentPosition.latitude, tip2.latitude, 0.0001)
+        assertEquals(state2.currentPosition.longitude, tip2.longitude, 0.0001)
+        assertTrue(tip2.latitude != tip1.latitude || tip2.longitude != tip1.longitude)
     }
 }

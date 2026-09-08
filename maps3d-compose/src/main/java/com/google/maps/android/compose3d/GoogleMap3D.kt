@@ -16,6 +16,7 @@
 
 package com.google.maps.android.compose3d
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -129,7 +130,7 @@ fun GoogleMap3D(
 
                     if (currentOnMapClick != null || currentOnPlaceClick != null) {
                         googleMap3D.setMap3DClickListener { location, placeId ->
-                            android.util.Log.d("GoogleMap3D", "Map clicked at $location, placeId: $placeId")
+                            Log.d("GoogleMap3D", "Map clicked at $location, placeId: $placeId")
                             if (placeId != null) {
                                 currentOnPlaceClick?.invoke(placeId)
                             } else {

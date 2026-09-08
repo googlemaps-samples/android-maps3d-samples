@@ -19,12 +19,14 @@ package com.example.maps3d.common
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.LatLngAltitude
+import kotlin.math.abs
 
 /**
  * Immutable state representation of the path following engine and camera position.
  */
 data class PathPlaybackState(
     val route: List<LatLngAltitude> = PathData.URBAN_PATH,
+    val routeProfile: RouteProfile = PathEngine.profileRoute(route),
     val totalDistance: Double = 0.0,
     val elapsedDistance: Double = 0.0,
     val progressRatio: Float = 0.0f,
@@ -35,7 +37,7 @@ data class PathPlaybackState(
     val cameraRange: Double = 300.0,
     val groundAltitude: Double = 20.0,
     val headingOffset: Double = 0.0,
-    val cameraTilt: Double = 70.0,
+    val cameraTilt: Double = 55.0,
     val altitudeMode: Int = AltitudeMode.CLAMP_TO_GROUND,
     val pathAltitudeOffset: Double = 0.5,
     val drawsOccludedSegments: Boolean = true,
@@ -46,17 +48,19 @@ data class PathPlaybackState(
     val staticPolylineVertices: List<LatLngAltitude> = emptyList(),
     val progressPolylineVertices: List<LatLngAltitude> = emptyList()
 ) {
-    val isSpeedBoosted: Boolean get() = kotlin.math.abs(speedBoostMultiplier - 1.0) > 0.01
+    val isSpeedBoosted: Boolean get() = abs(speedBoostMultiplier - 1.0) > 0.01
 
     val baseAltitude: Double
-        get() = if (route == PathData.RURAL_PATH) 45.0 else 50.0
+        get() = routeProfile.baseAltitude
 
     val cameraTargetAltitude: Double
         get() = PathEngine.calculateCameraAltitude(
             altitudeMode = altitudeMode,
             baseAltitude = baseAltitude,
             interpolatedAltitude = currentAltitude,
-            groundAltitude = groundAltitude
+            groundAltitude = groundAltitude,
+            cameraRange = cameraRange,
+            pathAltitudeOffset = pathAltitudeOffset
         )
 
     val effectiveHeading: Double
@@ -81,12 +85,11 @@ class PathPlaybackController(
 
     init {
         cumulativeDistances = PathEngine.calculateCumulativeDistances(initialRoute)
-        val totalDist = cumulativeDistances.lastOrNull() ?: 0.0
-        val baseAlt = if (initialRoute == PathData.RURAL_PATH) 45.0 else 50.0
+        val profile = PathEngine.profileRoute(initialRoute)
+        val totalDist = profile.totalDistance
         val staticVertices = PathEngine.buildStaticVertices(
             path = initialRoute,
             altitudeMode = AltitudeMode.CLAMP_TO_GROUND,
-            baseAltitude = baseAlt,
             pathAltitudeOffset = 0.5
         )
 
@@ -103,18 +106,22 @@ class PathPlaybackController(
             currentLatLng = point.latLng,
             waypointIndex = point.waypointIndex,
             altitudeMode = AltitudeMode.CLAMP_TO_GROUND,
-            baseAltitude = baseAlt,
             pathAltitudeOffset = 0.5
         )
 
         state = PathPlaybackState(
             route = initialRoute,
+            routeProfile = profile,
             totalDistance = totalDist,
             elapsedDistance = 0.0,
             progressRatio = 0f,
             isPlaying = false,
             isScrubbing = false,
             speedBoostMultiplier = 1.0,
+            followSpeedMps = profile.recommendedSpeed.toDouble(),
+            cameraRange = profile.recommendedRange.toDouble(),
+            groundAltitude = profile.baseAltitude,
+            cameraTilt = profile.recommendedTilt.toDouble(),
             currentPosition = point.latLng,
             currentAltitude = point.altitude,
             currentHeading = point.bearing,
@@ -182,23 +189,25 @@ class PathPlaybackController(
 
     fun setPlaying(isPlaying: Boolean): PathPlaybackState {
         state = state.copy(isPlaying = isPlaying)
+        if (!isPlaying) {
+            return updateDistanceAndRecompute(state.elapsedDistance, updateProgressRatio = false)
+        }
         return state
     }
 
     fun togglePlayPause(): PathPlaybackState {
-        state = state.copy(isPlaying = !state.isPlaying)
-        return state
+        return setPlaying(!state.isPlaying)
     }
 
     fun setRoute(newRoute: List<LatLngAltitude>, applyDefaults: Boolean = true): PathPlaybackState {
         cumulativeDistances = PathEngine.calculateCumulativeDistances(newRoute)
-        val totalDist = cumulativeDistances.lastOrNull() ?: 0.0
-        val isRural = newRoute == PathData.RURAL_PATH
+        val profile = PathEngine.profileRoute(newRoute)
+        val totalDist = profile.totalDistance
 
-        val range = if (applyDefaults) (if (isRural) 450.0 else 300.0) else state.cameraRange
-        val groundAlt = if (applyDefaults) (if (isRural) 40.0 else 20.0) else state.groundAltitude
-        val tilt = if (applyDefaults) (if (isRural) 75.0 else 70.0) else state.cameraTilt
-        val baseAlt = if (isRural) 45.0 else 50.0
+        val range = if (applyDefaults) profile.recommendedRange.toDouble() else state.cameraRange
+        val groundAlt = if (applyDefaults) profile.baseAltitude else state.groundAltitude
+        val tilt = if (applyDefaults) profile.recommendedTilt.toDouble() else state.cameraTilt
+        val speed = if (applyDefaults) profile.recommendedSpeed.toDouble() else state.followSpeedMps
 
         val point = PathEngine.interpolatePoint(
             path = newRoute,
@@ -209,7 +218,6 @@ class PathPlaybackController(
         val staticVertices = PathEngine.buildStaticVertices(
             path = newRoute,
             altitudeMode = state.altitudeMode,
-            baseAltitude = baseAlt,
             pathAltitudeOffset = state.pathAltitudeOffset
         )
 
@@ -220,12 +228,12 @@ class PathPlaybackController(
             currentLatLng = point.latLng,
             waypointIndex = point.waypointIndex,
             altitudeMode = state.altitudeMode,
-            baseAltitude = baseAlt,
             pathAltitudeOffset = state.pathAltitudeOffset
         )
 
         state = state.copy(
             route = newRoute,
+            routeProfile = profile,
             totalDistance = totalDist,
             elapsedDistance = 0.0,
             progressRatio = 0f,
@@ -233,6 +241,7 @@ class PathPlaybackController(
             cameraRange = range,
             groundAltitude = groundAlt,
             cameraTilt = tilt,
+            followSpeedMps = speed,
             currentPosition = point.latLng,
             currentAltitude = point.altitude,
             currentHeading = point.bearing,
@@ -264,7 +273,9 @@ class PathPlaybackController(
     }
 
     fun setGroundAltitude(altitude: Double): PathPlaybackState {
-        state = state.copy(groundAltitude = altitude.coerceIn(0.0, 500.0))
+        val minBound = minOf(0.0, state.routeProfile.altitudeSliderMin.toDouble())
+        val maxBound = maxOf(500.0, state.routeProfile.altitudeSliderMax.toDouble())
+        state = state.copy(groundAltitude = altitude.coerceIn(minBound, maxBound))
         return state
     }
 
@@ -353,7 +364,6 @@ class PathPlaybackController(
             currentLatLng = point.latLng,
             waypointIndex = point.waypointIndex,
             altitudeMode = state.altitudeMode,
-            baseAltitude = state.baseAltitude,
             pathAltitudeOffset = state.pathAltitudeOffset
         )
 
@@ -385,7 +395,6 @@ class PathPlaybackController(
         val staticVertices = PathEngine.buildStaticVertices(
             path = state.route,
             altitudeMode = state.altitudeMode,
-            baseAltitude = state.baseAltitude,
             pathAltitudeOffset = state.pathAltitudeOffset
         )
 
@@ -396,7 +405,6 @@ class PathPlaybackController(
             currentLatLng = point.latLng,
             waypointIndex = point.waypointIndex,
             altitudeMode = state.altitudeMode,
-            baseAltitude = state.baseAltitude,
             pathAltitudeOffset = state.pathAltitudeOffset
         )
 
