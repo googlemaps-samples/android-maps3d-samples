@@ -19,6 +19,7 @@ package com.example.maps3d.common
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.LatLngAltitude
+import kotlin.math.abs
 
 /**
  * Immutable state representation of the path following engine and camera position.
@@ -47,7 +48,7 @@ data class PathPlaybackState(
     val staticPolylineVertices: List<LatLngAltitude> = emptyList(),
     val progressPolylineVertices: List<LatLngAltitude> = emptyList()
 ) {
-    val isSpeedBoosted: Boolean get() = kotlin.math.abs(speedBoostMultiplier - 1.0) > 0.01
+    val isSpeedBoosted: Boolean get() = abs(speedBoostMultiplier - 1.0) > 0.01
 
     val baseAltitude: Double
         get() = routeProfile.baseAltitude

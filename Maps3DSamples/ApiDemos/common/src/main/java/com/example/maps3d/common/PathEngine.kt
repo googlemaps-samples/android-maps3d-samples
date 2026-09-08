@@ -21,6 +21,7 @@ import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.maps.android.SphericalUtil
 import kotlin.math.abs
+import kotlin.math.round
 
 /**
  * Result of path interpolation containing LatLng, segment index, lookahead bearing, and altitude.
@@ -132,19 +133,19 @@ object PathEngine {
 
         // 1. Camera Range: R = clamp(2.5 * avgSegLen, 65m, 250m)
         val recRange = (avgSegLen * 2.5).toFloat().coerceIn(65.0f, 250.0f)
-        val rangeMin = maxOf(20.0f, kotlin.math.round(recRange * 0.3f))
-        val rangeMax = minOf(1000.0f, kotlin.math.round(recRange * 2.5f))
+        val rangeMin = maxOf(20.0f, round(recRange * 0.3f))
+        val rangeMax = minOf(1000.0f, round(recRange * 2.5f))
 
         // 2. Base Altitude & Altitude Slider Bounds
-        val baseAlt = kotlin.math.round(minAlt)
+        val baseAlt = round(minAlt)
         val altMin: Float
         val altMax: Float
         if (minAlt > 50.0) {
-            altMin = maxOf(0.0f, kotlin.math.round(minAlt - 100.0).toFloat())
-            altMax = kotlin.math.round(maxAlt + 350.0).toFloat()
+            altMin = maxOf(0.0f, round(minAlt - 100.0).toFloat())
+            altMax = round(maxAlt + 350.0).toFloat()
         } else {
             altMin = 0.0f
-            altMax = maxOf(100.0f, kotlin.math.round(maxAlt + 50.0).toFloat())
+            altMax = maxOf(100.0f, round(maxAlt + 50.0).toFloat())
         }
 
         // 3. Camera Tilt: 48° for steep grades / mountain switchbacks, 55° for urban/open highways
