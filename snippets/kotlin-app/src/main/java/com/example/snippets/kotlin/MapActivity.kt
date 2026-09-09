@@ -54,7 +54,10 @@ class MapActivity : AppCompatActivity() {
         val groupTitle = intent.getStringExtra("group_title")
         val snippetTitle = intent.getStringExtra(EXTRA_SNIPPET_TITLE)
         val snippetList = SnippetRegistry.getSnippetGroups().flatMap { it.items }
-        var currentIndex = snippetList.indexOfFirst { it.title == snippetTitle && (groupTitle == null || it.groupTitle == groupTitle) }
+        var currentIndex = snippetList.indexOfFirst {
+            it.title == snippetTitle &&
+                (groupTitle == null || it.groupTitle == groupTitle)
+        }
 
         findViewById<MaterialButton>(R.id.snapshot_button).apply {
             setOnClickListener {
@@ -187,7 +190,10 @@ class MapActivity : AppCompatActivity() {
         if (snippetTitle == null) return
         val key = if (groupTitle != null) "$groupTitle - $snippetTitle" else snippetTitle
         val snippet = SnippetRegistry.snippets[key]
-            ?: SnippetRegistry.getSnippetGroups().flatMap { it.items }.find { it.title == snippetTitle }
+            ?: SnippetRegistry.getSnippetGroups().flatMap { it.items }.find {
+                it.title ==
+                    snippetTitle
+            }
             ?: return
         if (!::googleMap3D.isInitialized) return
 

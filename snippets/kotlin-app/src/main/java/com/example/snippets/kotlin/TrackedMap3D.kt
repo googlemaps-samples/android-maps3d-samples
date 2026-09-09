@@ -23,10 +23,7 @@ import com.google.android.gms.maps3d.model.PopoverOptions
 /**
  * Decorator wrapper around GoogleMap3D to track elements added during a snippet session.
  */
-class TrackedMap3D(
-    val delegate: GoogleMap3D,
-    private val items: MutableList<Any>,
-) {
+class TrackedMap3D(val delegate: GoogleMap3D, private val items: MutableList<Any>) {
 
     fun addMarker(options: MarkerOptions): Marker? {
         val marker = delegate.addMarker(options)
