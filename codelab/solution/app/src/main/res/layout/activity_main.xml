@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <com.google.android.gms.maps3d.Map3DView
+        android:id="@+id/map3dView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:mode="hybrid"
+        app:centerLat="21.3069"
+        app:centerLng="-157.8583"
+        app:centerAlt="0"
+        app:heading="0"
+        app:tilt="0"
+        app:range="5000000"
+        app:roll="0"
+        app:minAltitude="0"
+        app:maxAltitude="10000000"
+        app:minHeading="0"
+        app:maxHeading="360"
+        app:minTilt="0"
+        app:maxTilt="90"
+        app:layout_constraintBottom_toTopOf="@id/controls_scroll_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <HorizontalScrollView
+        android:id="@+id/controls_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="16dp"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:background="#FFFFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
+
+            <Button
+                android:id="@+id/btn_fly_honolulu"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_camera"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btn_show_markers"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_markers"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btn_show_custom_markers"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_custom_markers"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btn_show_polygons"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_polygons"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btn_show_polylines"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_polylines"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btn_show_balloon"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_models"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btn_show_popovers"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_popovers"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btn_tour"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_tour"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btn_clear"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_clear"
+                android:textColor="@android:color/holo_red_dark" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
