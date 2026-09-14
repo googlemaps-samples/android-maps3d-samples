@@ -172,13 +172,15 @@ You can now detect when a user taps anywhere on the map. This is useful for feat
 **Example:**
 ```kotlin
 // Set a click listener on the GoogleMap3D object
-googleMap3D.setMap3DClickListener { location, placeId ->
+googleMap3D.setMap3DClickListener { event ->
+    val placeId = event.placeId
     val message = if (placeId != null) {
         "Clicked on place with ID: $placeId"
     } else {
-        "Clicked on location: $location"
+        "Clicked on location: ${event.location}"
     }
     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    return@setMap3DClickListener true
 }
 ```
 </details>
@@ -189,16 +191,17 @@ googleMap3D.setMap3DClickListener { location, placeId ->
 **Example:**
 ```java
 // Set a click listener on the GoogleMap3D object
-googleMap3D.setMap3DClickListener((location, placeId) -> {
+googleMap3D.setMap3DClickListener(event -> {
     String message;
-    if (placeId != null) {
-        message = "Clicked on place with ID: " + placeId;
+    if (event.getPlaceId() != null) {
+        message = "Clicked on place with ID: " + event.getPlaceId();
     } else {
-        message = "Clicked on location: " + location;
+        message = "Clicked on location: " + event.getLocation();
     }
     runOnUiThread(() -> {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     });
+    return true;
 });
 ```
 </details>

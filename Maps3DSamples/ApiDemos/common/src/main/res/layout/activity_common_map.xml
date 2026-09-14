@@ -47,7 +47,7 @@
 
     <com.google.android.gms.maps3d.Map3DView
         android:id="@+id/map3dView"
-        map3d:mode="satellite"
+        map3d:mapMode="satellite"
         map3d:centerLat="40.748392"
         map3d:centerLng="-73.986060"
         map3d:centerAlt="175"
