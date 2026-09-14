@@ -82,7 +82,7 @@ class GeminiVisualTestHelper {
 
         val fullPrompt = "$systemPrompt\n\nCommand: \"$prompt\"\n\nUI Hierarchy:\n$hierarchyXml"
 
-        val modelName = "gemini-3.5-flash"
+        val modelName = System.getenv("GEMINI_MODEL") ?: "gemini-3.8-flash"
         
         val requestJson = JSONObject().apply {
             put("contents", JSONArray().apply {
@@ -207,7 +207,8 @@ class GeminiVisualTestHelper {
             })
         }
 
-        val response: HttpResponse = client.post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=$apiKey") {
+        val model = System.getenv("GEMINI_MODEL") ?: "gemini-3.8-flash"
+        val response: HttpResponse = client.post("https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey") {
             contentType(ContentType.Application.Json)
             setBody(requestJson.toString())
         }
