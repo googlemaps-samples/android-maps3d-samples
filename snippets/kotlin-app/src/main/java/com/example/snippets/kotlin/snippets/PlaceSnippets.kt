@@ -42,13 +42,16 @@ class PlaceSnippets(private val context: Context, private val map: TrackedMap3D)
     )
     fun listenToPlaceClicks() {
         // [START maps_android_3d_place_click_kt]
-        map.setMap3DClickListener { location, placeId ->
+        map.setMap3DClickListener { event ->
+            val placeId = event.placeId
             if (placeId != null) {
                 // Handle place click - Show a Toast on the UI thread
                 Handler(Looper.getMainLooper()).post {
                     Toast.makeText(context, "Clicked Place ID: $placeId", Toast.LENGTH_SHORT).show()
                 }
+                return@setMap3DClickListener true
             }
+            return@setMap3DClickListener false
         }
         // [END maps_android_3d_place_click_kt]
 

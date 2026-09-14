@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         map3d:mapId="your_map_id"
-        map3d:mode="hybrid"
+        map3d:mapMode="hybrid"
         map3d:centerLat="40.748392"
         map3d:centerLng="-73.986060"
         map3d:centerAlt="175"
