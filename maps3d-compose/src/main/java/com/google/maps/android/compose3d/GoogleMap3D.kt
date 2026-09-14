@@ -16,7 +16,6 @@
 
 package com.google.maps.android.compose3d
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -113,35 +112,45 @@ fun GoogleMap3D(
             val map3dView = Map3DView(context, options)
             map3dView.onCreate(null)
 
-            map3dView.getMap3DViewAsync(object : OnMap3DViewReadyCallback {
-                override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-                    googleMap3DState.value = googleMap3D
-                    Map3DRegistry.setInstance(googleMap3D)
+            map3dView.getMap3DViewAsync(
+                object : OnMap3DViewReadyCallback {
+                    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
+                        googleMap3DState.value = googleMap3D
+                        Map3DRegistry.setInstance(googleMap3D)
 
-                    googleMap3D.setOnMapSteadyListener { isSteady ->
-                        if (isSteady) {
-                            currentOnMapSteady()
-                        }
-                    }
-
-                    googleMap3D.setCameraChangedListener { camera ->
-                        currentOnCameraChanged(camera)
-                    }
-
-                    if (currentOnMapClick != null || currentOnPlaceClick != null) {
-                        googleMap3D.setMap3DClickListener { location, placeId ->
-                            Log.d("GoogleMap3D", "Map clicked at $location, placeId: $placeId")
-                            if (placeId != null) {
-                                currentOnPlaceClick?.invoke(placeId)
-                            } else {
-                                currentOnMapClick?.invoke(location)
+                        googleMap3D.setOnMapSteadyListener { isSteady ->
+                            if (isSteady) {
+                                currentOnMapSteady()
                             }
                         }
-                    }
-                }
 
-                override fun onError(error: Exception): Unit = throw error
-            })
+                        googleMap3D.setCameraChangedListener { camera ->
+                            currentOnCameraChanged(camera)
+                        }
+
+                        googleMap3D.setMap3DClickListener { event ->
+                            android.util.Log.d(
+                                "GoogleMap3D",
+                                "Map clicked at ${event.location}, placeId: ${event.placeId}",
+                            )
+                            val placeId = event.placeId
+                            val placeClickHandler = currentOnPlaceClick
+                            val mapClickHandler = currentOnMapClick
+
+                            if (placeId != null && placeClickHandler != null) {
+                                placeClickHandler(placeId)
+                                return@setMap3DClickListener true
+                            } else if (mapClickHandler != null) {
+                                mapClickHandler(event.location)
+                                return@setMap3DClickListener true
+                            }
+                            return@setMap3DClickListener false
+                        }
+                    }
+
+                    override fun onError(error: Exception): Unit = throw error
+                },
+            )
 
             map3dView
         },

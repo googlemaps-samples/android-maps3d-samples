@@ -72,7 +72,7 @@ public class MapInteractionsActivity extends SampleBaseActivity {
   @Override
   public void onMap3DViewReady(GoogleMap3D googleMap3D) {
     super.onMap3DViewReady(googleMap3D);
-    
+
     googleMap3D.setOnMapReadyListener((map) -> {
       googleMap3D.setOnMapReadyListener(null);
       initializeMap(googleMap3D);
@@ -94,18 +94,21 @@ public class MapInteractionsActivity extends SampleBaseActivity {
     googleMap3D.setMapMode(Map3DMode.HYBRID);
 
     // Listeners for map clicks.
-    googleMap3D.setMap3DClickListener((location, placeId) -> {
+      googleMap3D.setMap3DClickListener((event) -> {
       runOnUiThread(() -> {
         String message;
-        if (placeId != null) {
-          message = "Clicked Place ID: " + placeId;
+          if (event.getPlaceId() != null) {
+              message = "Clicked Place ID: " + event.getPlaceId();
         } else {
-          message = "Clicked Location: " + location.getLatitude() + ", " + location.getLongitude();
+              message = "Clicked Location: " + event.getLocation().getLatitude() + ", "
+                  + event.getLocation().getLongitude();
         }
         clickedInfoText.setText(message);
         clickedInfoText.setContentDescription(message);
         showToast(message);
+
       });
+          return true;
     });
   }
 
