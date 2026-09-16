@@ -37,7 +37,8 @@ import com.google.android.gms.maps3d.model.vector3D
 )
 class ModelSnippets(private val context: Context, private val map: TrackedMap3D) {
     companion object {
-        const val SAUCER_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/UFO.glb"
+        const val SAUCER_URL =
+            "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/UFO.glb"
     }
 
     /**

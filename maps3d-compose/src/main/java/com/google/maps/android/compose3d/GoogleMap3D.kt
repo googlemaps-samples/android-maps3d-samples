@@ -83,7 +83,7 @@ fun GoogleMap3D(
         minTilt = 0.0,
         maxTilt = 90.0,
         bounds = null,
-        mapMode = Map3DMode.SATELLITE, // using the class from com.google.android.gms.maps3d.model.Map3DMode
+        mapMode = Map3DMode.SATELLITE,
         mapId = null,
         minAltitude = 0.0,
         maxAltitude = 1000000.0,

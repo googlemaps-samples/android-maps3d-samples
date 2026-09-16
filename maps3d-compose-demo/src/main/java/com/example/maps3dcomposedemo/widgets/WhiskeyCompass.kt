@@ -73,7 +73,9 @@ fun WhiskeyCompass(
 
     showDegreeLabels: Boolean = true,
     degreeLabelInterval: Int = 15,
-    degreeLabelTextStyle: TextStyle = MaterialTheme.typography.labelSmall.copy(textAlign = TextAlign.Center),
+    degreeLabelTextStyle: TextStyle = MaterialTheme.typography.labelSmall.copy(
+        textAlign = TextAlign.Center,
+    ),
     degreeLabelVerticalOffset: Dp = 4.dp,
 
     showCardinalLabels: Boolean = true,
@@ -142,7 +144,9 @@ fun WhiskeyCompass(
                         val absoluteDegree = repetitionBaseDegree + degreeInRepetition
                         val xPos = absoluteDegree * pixelsPerDegree
 
-                        if (xPos < -xOffset + canvasWidth + canvasWidth && xPos > -xOffset - canvasWidth) {
+                        if (xPos < -xOffset + canvasWidth + canvasWidth &&
+                            xPos > -xOffset - canvasWidth
+                        ) {
                             val isMajorTickEquivalent = degreeInRepetition % 10 == 0
                             val isMinorTickEquivalent =
                                 degreeInRepetition % 5 == 0 && !isMajorTickEquivalent
@@ -167,7 +171,9 @@ fun WhiskeyCompass(
                                         textLayoutResult = measuredText,
                                         topLeft = Offset(
                                             x = xPos - measuredText.size.width / 2f,
-                                            y = tickTopY - measuredText.size.height - cardinalLabelVerticalOffsetPx,
+                                            y =
+                                            tickTopY - measuredText.size.height -
+                                                cardinalLabelVerticalOffsetPx,
                                         ),
                                     )
                                 }
@@ -272,7 +278,9 @@ private fun FlatWhiskeyCompassPreview() {
             lubberLineColor = Color(0xFFFFD600),
             pixelsPerDegree = 12f,
             degreeLabelInterval = 10,
-            degreeLabelTextStyle = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF81D4FA)),
+            degreeLabelTextStyle = MaterialTheme.typography.bodySmall.copy(
+                color = Color(0xFF81D4FA),
+            ),
             cardinalLabelTextStyle = MaterialTheme.typography.labelLarge.copy(
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
