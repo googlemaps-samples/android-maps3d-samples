@@ -92,6 +92,10 @@
             android:name=".CameraChangedActivity"
             android:exported="true"
             android:label="Camera Changed Listener" />
+        <activity
+            android:name=".Projection3DActivity"
+            android:exported="true"
+            android:label="3D Screen Projection" />
     </application>
 
 </manifest>

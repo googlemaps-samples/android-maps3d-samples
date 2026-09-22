@@ -137,6 +137,11 @@ fun CatalogScreen() {
                 context.startActivity(Intent(context, CameraChangedActivity::class.java))
             }
         }
+        item {
+            SampleItem("3D Screen Projection (HUD Overlay)") {
+                context.startActivity(Intent(context, Projection3DActivity::class.java))
+            }
+        }
     }
 }
 
