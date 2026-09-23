@@ -87,7 +87,7 @@ data class ScreenCoordinate(
  * @param viewportHeight Height of the 3D map viewport in pixels.
  * @param fovYDegrees Vertical field of view in degrees (defaults to standard 45.0° baseline).
  */
-class Projection3D(
+class Projection3D @JvmOverloads constructor(
     val camera: Camera,
     val viewportWidth: Int,
     val viewportHeight: Int,
