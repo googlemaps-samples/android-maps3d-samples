@@ -43,7 +43,9 @@ abstract class BaseVisualTest {
         key
     }
 
-    protected fun captureScreenshot(filename: String = "screenshot_${System.currentTimeMillis()}.png"): Bitmap {
+    protected fun captureScreenshot(
+        filename: String = "screenshot_${System.currentTimeMillis()}.png",
+    ): Bitmap {
         val screenshotFile = File(context.getExternalFilesDir(null), filename)
         val screenshotTaken = uiDevice.takeScreenshot(screenshotFile)
         assertTrue("Failed to take screenshot: $filename", screenshotTaken)
