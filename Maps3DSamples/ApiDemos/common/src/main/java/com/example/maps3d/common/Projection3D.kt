@@ -59,28 +59,28 @@ data class ScreenCoordinate(
  * Provides coordinate transformations between 3D world coordinates ([LatLngAltitude]) and
  * 2D screen viewport pixel space ([ScreenCoordinate] / [PointF]).
  *
- * ### Mathematical Mechanics & Literate Formulation
+ * ### Mathematical Mechanics & Formulation
  *
- * In the Google Maps 3D SDK, the camera pose is defined by its focal center $\mathbf{P}_0 = (\text{lat}_0, \text{lng}_0, \text{alt}_0)$,
- * viewing heading $H$, vertical tilt $\theta$, roll $\phi$, and observation range $R$:
+ * In the Google Maps 3D SDK, the camera pose is defined by its focal center
+ * P₀ = (lat₀, lng₀, alt₀), viewing heading H, vertical tilt θ, roll φ, and observation range R:
  *
  * 1. **Camera Eye Vantage Point**:
- *    In local East-North-Up (ENU) tangent space centered at $\mathbf{P}_0$, the physical camera eye is located:
- *    - $D = R \cdot \sin(\theta)$ (Horizontal Ground Distance)
- *    - $\Delta Z = R \cdot \cos(\theta)$ (Vertical Height above target center)
- *    - $\mathbf{E}_{\text{eye}} = -D \cdot \sin(H)$
- *    - $\mathbf{N}_{\text{eye}} = -D \cdot \cos(H)$
- *    - $\mathbf{U}_{\text{eye}} = \Delta Z$
+ *    In local East-North-Up (ENU) tangent space centered at P₀, the physical camera eye is located:
+ *    - D = R · sin(θ) (Horizontal Ground Distance)
+ *    - ΔZ = R · cos(θ) (Vertical Height above target center)
+ *    - E_eye = -D · sin(H)
+ *    - N_eye = -D · cos(H)
+ *    - U_eye = ΔZ
  *
  * 2. **Camera Orthonormal Basis**:
- *    - Forward vector: $\mathbf{f} = (\sin\theta \sin H, \; \sin\theta \cos H, \; -\cos\theta)$
- *    - Right vector: $\mathbf{r} = (\cos H, \; -\sin H, \; 0)$ (rotated by roll $\phi$)
- *    - Up vector: $\mathbf{u} = \mathbf{r} \times \mathbf{f}$ (rotated by roll $\phi$)
+ *    - Forward vector: f = (sin(θ) · sin(H), sin(θ) · cos(H), -cos(θ))
+ *    - Right vector: r = (cos(H), -sin(H), 0) (rotated by roll φ)
+ *    - Up vector: u = r × f (rotated by roll φ)
  *
  * 3. **Perspective Projection Matrix**:
- *    Transforms a world point $\mathbf{P} \to \mathbf{v} = \mathbf{P} - \mathbf{E}_{\text{eye}}$,
- *    projects onto camera axes $(X_{\text{cam}}, Y_{\text{cam}}, Z_{\text{cam}})$, and calculates
- *    Normalized Device Coordinates (NDC) scaled by viewport aspect ratio and Field of View (FOV).
+ *    Transforms a world point P → v = P - Eye, projects onto camera axes (X_cam, Y_cam, Z_cam),
+ *    and calculates Normalized Device Coordinates (NDC) scaled by viewport aspect ratio and Field
+ *    of View (FOV).
  *
  * @param camera The active [Camera] pose from the 3D map.
  * @param viewportWidth Width of the 3D map viewport in pixels.

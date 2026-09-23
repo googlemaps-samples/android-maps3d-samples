@@ -16,4 +16,21 @@
 -->
 <resources>
     <string name="app_name">Maps 3D Compose Demo</string>
+
+    <!-- 3D Screen Projection Demo Strings -->
+    <string name="projection_3d_title">3D to 2D Projection Engine</string>
+    <string name="projection_3d_target_in_frustum">Target in Frustum: VISIBLE</string>
+    <string name="projection_3d_target_out_of_frustum">Target out of Frustum / Behind Camera</string>
+    <string name="projection_3d_telemetry_format">Heading: %1$d° | Tilt: %2$d° | Range: %3$dm</string>
+    <string name="projection_3d_tap_hint">Tap map anywhere to re-project target position</string>
+    <string name="projection_3d_select_target_label">Select Landmark Focus Target:</string>
+    <string name="projection_3d_screen_coords_format">Screen: (%1$dpx, %2$dpx)</string>
+    <string name="projection_3d_depth_altitude_format">Alt: %1$dm | Depth: %2$dm</string>
+    <string name="landmark_transamerica_pyramid">Transamerica Pyramid</string>
+    <string name="landmark_transamerica_short">Transamerica</string>
+    <string name="landmark_coit_tower">Coit Tower</string>
+    <string name="landmark_coit_short">Coit</string>
+    <string name="landmark_ferry_building_clock">Ferry Building Clock</string>
+    <string name="landmark_ferry_short">Ferry</string>
+    <string name="landmark_custom_pin">Custom Ground Pin</string>
 </resources>

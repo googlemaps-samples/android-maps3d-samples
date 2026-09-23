@@ -103,7 +103,7 @@ public class Projection3DActivity extends SampleBaseActivity {
 
     // --- State ---
 
-    private String activeLandmarkName = SF_LANDMARKS.get(0).name;
+    private int activeLandmarkNameRes = SF_LANDMARKS.get(0).nameRes;
     private LatLngAltitude activeLocation = SF_LANDMARKS.get(0).location;
     private boolean isCollapsed = false;
 
@@ -177,7 +177,7 @@ public class Projection3DActivity extends SampleBaseActivity {
 
         // Enable surface tap to re-project arbitrary coordinates
         googleMap3D.setMap3DClickListener((location, placeId) -> {
-            activeLandmarkName = "Custom Ground Pin";
+            activeLandmarkNameRes = R.string.landmark_custom_pin;
             activeLocation = location;
             Camera cam = googleMap3D.getCamera();
             if (cam != null) {
@@ -190,7 +190,7 @@ public class Projection3DActivity extends SampleBaseActivity {
     }
 
     private void selectLandmark(LandmarkData landmark) {
-        activeLandmarkName = landmark.name;
+        activeLandmarkNameRes = landmark.nameRes;
         activeLocation = landmark.location;
 
         if (googleMap3D != null) {
@@ -227,8 +227,9 @@ public class Projection3DActivity extends SampleBaseActivity {
         ScreenCoordinate screenCoord = projection.toScreenCoordinate(activeLocation);
 
         runOnUiThread(() -> {
+            String landmarkName = getString(activeLandmarkNameRes);
             if (tvTarget != null) {
-                tvTarget.setText(getString(R.string.projection_target_format, activeLandmarkName));
+                tvTarget.setText(getString(R.string.projection_target_format, landmarkName));
             }
 
             if (screenCoord.isVisible() && !Float.isNaN(screenCoord.getX()) && !Float.isNaN(screenCoord.getY())) {
@@ -248,7 +249,7 @@ public class Projection3DActivity extends SampleBaseActivity {
                     floatingCallout.setVisibility(View.VISIBLE);
                 }
                 if (calloutTitle != null) {
-                    calloutTitle.setText(activeLandmarkName);
+                    calloutTitle.setText(landmarkName);
                 }
                 if (calloutCoords != null) {
                     calloutCoords.setText(getString(
@@ -307,18 +308,18 @@ public class Projection3DActivity extends SampleBaseActivity {
     }
 
     private static class LandmarkData {
-        final String name;
+        final int nameRes;
         final LatLngAltitude location;
 
-        LandmarkData(String name, LatLngAltitude location) {
-            this.name = name;
+        LandmarkData(int nameRes, LatLngAltitude location) {
+            this.nameRes = nameRes;
             this.location = location;
         }
     }
 
     private static final List<LandmarkData> SF_LANDMARKS = Arrays.asList(
-        new LandmarkData("Transamerica Pyramid", new LatLngAltitude(37.7952, -122.4028, 260.0)),
-        new LandmarkData("Coit Tower", new LatLngAltitude(37.8024, -122.4058, 110.0)),
-        new LandmarkData("Ferry Building", new LatLngAltitude(37.7955, -122.3937, 75.0))
+        new LandmarkData(R.string.landmark_transamerica_pyramid, new LatLngAltitude(37.7952, -122.4028, 260.0)),
+        new LandmarkData(R.string.landmark_coit_tower, new LatLngAltitude(37.8024, -122.4058, 110.0)),
+        new LandmarkData(R.string.landmark_ferry_building, new LatLngAltitude(37.7955, -122.3937, 75.0))
     );
 }

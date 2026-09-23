@@ -92,7 +92,7 @@ class Projection3DActivity : SampleBaseActivity() {
 
     // --- State ---
 
-    private var activeLandmarkName: String = SF_LANDMARKS[0].name
+    private var activeLandmarkNameRes: Int = SF_LANDMARKS[0].nameRes
     private var activeLocation: LatLngAltitude = SF_LANDMARKS[0].location
     private var isCollapsed: Boolean = false
 
@@ -156,7 +156,7 @@ class Projection3DActivity : SampleBaseActivity() {
 
         // Enable surface tap to re-project arbitrary coordinates
         googleMap3D.setMap3DClickListener { location, _ ->
-            activeLandmarkName = "Custom Ground Pin"
+            activeLandmarkNameRes = R.string.landmark_custom_pin
             activeLocation = location
             googleMap3D.getCamera()?.let { cam ->
                 updateProjection(cam)
@@ -172,7 +172,7 @@ class Projection3DActivity : SampleBaseActivity() {
     }
 
     private fun selectLandmark(landmark: LandmarkData) {
-        activeLandmarkName = landmark.name
+        activeLandmarkNameRes = landmark.nameRes
         activeLocation = landmark.location
 
         googleMap3D?.let { map ->
@@ -206,7 +206,8 @@ class Projection3DActivity : SampleBaseActivity() {
         val screenCoord = projection.toScreenCoordinate(activeLocation)
 
         runOnUiThread {
-            tvTarget?.text = getString(R.string.projection_target_format, activeLandmarkName)
+            val landmarkName = getString(activeLandmarkNameRes)
+            tvTarget?.text = getString(R.string.projection_target_format, landmarkName)
 
             if (screenCoord.isVisible && !screenCoord.x.isNaN() && !screenCoord.y.isNaN()) {
                 tvScreenCoords?.text = getString(
@@ -218,7 +219,7 @@ class Projection3DActivity : SampleBaseActivity() {
                 tvStatus?.setTextColor(0xFF2E7D32.toInt())
 
                 floatingCallout?.visibility = View.VISIBLE
-                calloutTitle?.text = activeLandmarkName
+                calloutTitle?.text = landmarkName
                 calloutCoords?.text = getString(
                     R.string.projection_coords_simple_format,
                     screenCoord.x.toInt(),
@@ -256,15 +257,15 @@ class Projection3DActivity : SampleBaseActivity() {
     }
 
     private data class LandmarkData(
-        val name: String,
+        val nameRes: Int,
         val location: LatLngAltitude
     )
 
     companion object {
         private val SF_LANDMARKS = listOf(
-            LandmarkData("Transamerica Pyramid", LatLngAltitude(37.7952, -122.4028, 260.0)),
-            LandmarkData("Coit Tower", LatLngAltitude(37.8024, -122.4058, 110.0)),
-            LandmarkData("Ferry Building", LatLngAltitude(37.7955, -122.3937, 75.0))
+            LandmarkData(R.string.landmark_transamerica_pyramid, LatLngAltitude(37.7952, -122.4028, 260.0)),
+            LandmarkData(R.string.landmark_coit_tower, LatLngAltitude(37.8024, -122.4058, 110.0)),
+            LandmarkData(R.string.landmark_ferry_building, LatLngAltitude(37.7955, -122.3937, 75.0))
         )
     }
 }

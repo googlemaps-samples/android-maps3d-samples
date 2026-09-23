@@ -54,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
@@ -97,18 +98,31 @@ class Projection3DActivity : ComponentActivity() {
     }
 }
 
-private data class Landmark(val name: String, val location: LatLngAltitude)
+private data class Landmark(val nameRes: Int, val shortNameRes: Int, val location: LatLngAltitude)
 
 private val SF_LANDMARKS = listOf(
-    Landmark("Transamerica Pyramid", LatLngAltitude(37.7952, -122.4028, 260.0)),
-    Landmark("Coit Tower", LatLngAltitude(37.8024, -122.4058, 110.0)),
-    Landmark("Ferry Building Clock", LatLngAltitude(37.7955, -122.3937, 75.0)),
+    Landmark(
+        nameRes = R.string.landmark_transamerica_pyramid,
+        shortNameRes = R.string.landmark_transamerica_short,
+        location = LatLngAltitude(37.7952, -122.4028, 260.0),
+    ),
+    Landmark(
+        nameRes = R.string.landmark_coit_tower,
+        shortNameRes = R.string.landmark_coit_short,
+        location = LatLngAltitude(37.8024, -122.4058, 110.0),
+    ),
+    Landmark(
+        nameRes = R.string.landmark_ferry_building_clock,
+        shortNameRes = R.string.landmark_ferry_short,
+        location = LatLngAltitude(37.7955, -122.3937, 75.0),
+    ),
 )
 
 @Composable
 fun Projection3DScreen() {
     var selectedLandmark by remember { mutableStateOf(SF_LANDMARKS[0]) }
     var activeLocation by remember { mutableStateOf(selectedLandmark.location) }
+    var customLocationNameRes by remember { mutableStateOf<Int?>(null) }
     var nativeMap by remember { mutableStateOf<NativeGoogleMap3D?>(null) }
 
     val initialCamera = remember {
@@ -154,6 +168,7 @@ fun Projection3DScreen() {
             onCameraChanged = { updatedCamera -> liveCamera = updatedCamera },
             onMapClick = { clickedLocation ->
                 activeLocation = clickedLocation
+                customLocationNameRes = R.string.landmark_custom_pin
             },
         )
 
@@ -184,21 +199,29 @@ fun Projection3DScreen() {
                         modifier = Modifier.padding(bottom = 6.dp),
                     ) {
                         Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                            val landmarkTitle = customLocationNameRes?.let { stringResource(it) }
+                                ?: stringResource(selectedLandmark.nameRes)
                             Text(
-                                text = selectedLandmark.name,
+                                text = landmarkTitle,
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
                             )
                             Text(
-                                text = "Screen: (${screenCoord.x.toInt()}px, " +
-                                    "${screenCoord.y.toInt()}px)",
+                                text = stringResource(
+                                    R.string.projection_3d_screen_coords_format,
+                                    screenCoord.x.toInt(),
+                                    screenCoord.y.toInt(),
+                                ),
                                 style = MaterialTheme.typography.bodySmall,
                                 fontFamily = FontFamily.Monospace,
                             )
                             Text(
-                                text = "Alt: ${activeLocation.altitude.toInt()}m | " +
-                                    "Depth: ${screenCoord.depth.toInt()}m",
+                                text = stringResource(
+                                    R.string.projection_3d_depth_altitude_format,
+                                    activeLocation.altitude.toInt(),
+                                    screenCoord.depth.toInt(),
+                                ),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -228,30 +251,36 @@ fun Projection3DScreen() {
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
-                    text = "3D to 2D Projection Engine",
+                    text = stringResource(R.string.projection_3d_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                 )
+                val statusText = if (screenCoord.isVisible) {
+                    stringResource(R.string.projection_3d_target_in_frustum)
+                } else {
+                    stringResource(R.string.projection_3d_target_out_of_frustum)
+                }
                 Text(
-                    text = if (screenCoord.isVisible) {
-                        "Target in Frustum: VISIBLE"
-                    } else {
-                        "Target out of Frustum / Behind Camera"
-                    },
+                    text = statusText,
                     color = if (screenCoord.isVisible) Color(0xFF2E7D32) else Color(0xFFC62828),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
-                val headingStr = "${liveCamera.heading?.toInt() ?: 0}°"
-                val tiltStr = "${liveCamera.tilt?.toInt() ?: 0}°"
-                val rangeStr = "${liveCamera.range?.toInt() ?: 0}m"
+                val headingVal = liveCamera.heading?.toInt() ?: 0
+                val tiltVal = liveCamera.tilt?.toInt() ?: 0
+                val rangeVal = liveCamera.range?.toInt() ?: 0
                 Text(
-                    text = "Heading: $headingStr | Tilt: $tiltStr | Range: $rangeStr",
+                    text = stringResource(
+                        R.string.projection_3d_telemetry_format,
+                        headingVal,
+                        tiltVal,
+                        rangeVal,
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = "Tap map anywhere to re-project target position",
+                    text = stringResource(R.string.projection_3d_tap_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary,
                 )
@@ -270,7 +299,7 @@ fun Projection3DScreen() {
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Select Landmark Focus Target:",
+                    text = stringResource(R.string.projection_3d_select_target_label),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 8.dp),
@@ -284,6 +313,7 @@ fun Projection3DScreen() {
                             onClick = {
                                 selectedLandmark = landmark
                                 activeLocation = landmark.location
+                                customLocationNameRes = null
                                 nativeMap?.flyCameraTo(
                                     flyToOptions {
                                         endCamera = camera {
@@ -299,7 +329,7 @@ fun Projection3DScreen() {
                             modifier = Modifier.weight(1f),
                         ) {
                             Text(
-                                text = landmark.name.split(" ").first(),
+                                text = stringResource(landmark.shortNameRes),
                                 style = MaterialTheme.typography.labelSmall,
                             )
                         }

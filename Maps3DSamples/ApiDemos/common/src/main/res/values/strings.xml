@@ -257,8 +257,10 @@
     <string name="projection_culled">Frustum: CULLED / OFF-SCREEN</string>
     <string name="projection_hint">Drag or tilt map to observe real-time projected coordinate tracking</string>
     <string name="landmark_transamerica">Transamerica</string>
+    <string name="landmark_transamerica_pyramid">Transamerica Pyramid</string>
     <string name="landmark_coit_tower">Coit Tower</string>
     <string name="landmark_ferry_building">Ferry Building</string>
+    <string name="landmark_custom_pin">Custom Ground Pin</string>
     <string name="landmark_targets_label">Landmark Targets:</string>
     <string name="projection_coords_simple_format">(%1$d px, %2$d px)</string>
     <string name="projection_out_of_view">Screen: (Out of view)</string>
