@@ -21,6 +21,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
@@ -62,86 +64,91 @@ fun CatalogScreen() {
     LazyColumn(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
         item {
             Text(
-                text = "Maps 3D Compose Samples",
+                text = stringResource(R.string.catalog_title),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(16.dp),
             )
         }
         item {
-            SampleItem("Basic Map with Marker & Polyline") {
+            SampleItem(R.string.sample_title_basic_map) {
                 context.startActivity(Intent(context, BasicMapActivity::class.java))
             }
         }
         item {
-            SampleItem("Hello Map") {
+            SampleItem(R.string.sample_title_hello_map) {
                 context.startActivity(Intent(context, HelloMapActivity::class.java))
             }
         }
         item {
-            SampleItem("Camera Controls") {
+            SampleItem(R.string.sample_title_camera_controls) {
                 context.startActivity(Intent(context, CameraControlsActivity::class.java))
             }
         }
         item {
-            SampleItem("Map Interactions") {
+            SampleItem(R.string.sample_title_map_interactions) {
                 context.startActivity(Intent(context, MapInteractionsActivity::class.java))
             }
         }
         item {
-            SampleItem("Markers") {
+            SampleItem(R.string.sample_title_markers) {
                 context.startActivity(Intent(context, MarkersActivity::class.java))
             }
         }
         item {
-            SampleItem("Custom Markers (PinConfig)") {
+            SampleItem(R.string.sample_title_custom_markers) {
                 context.startActivity(Intent(context, CustomMarkersActivity::class.java))
             }
         }
         item {
-            SampleItem("Place Clicks") {
+            SampleItem(R.string.sample_title_place_clicks) {
                 context.startActivity(Intent(context, PlaceClickActivity::class.java))
             }
         }
         item {
-            SampleItem("Models") {
+            SampleItem(R.string.sample_title_models) {
                 context.startActivity(Intent(context, ModelsActivity::class.java))
             }
         }
         item {
-            SampleItem("Polygons") {
+            SampleItem(R.string.sample_title_polygons) {
                 context.startActivity(Intent(context, PolygonsActivity::class.java))
             }
         }
         item {
-            SampleItem("Polylines") {
+            SampleItem(R.string.sample_title_polylines) {
                 context.startActivity(Intent(context, PolylinesActivity::class.java))
             }
         }
         item {
-            SampleItem("Popovers") {
+            SampleItem(R.string.sample_title_popovers) {
                 context.startActivity(Intent(context, PopoversActivity::class.java))
             }
         }
         item {
-            SampleItem("Map Options") {
+            SampleItem(R.string.sample_title_map_options) {
                 context.startActivity(Intent(context, MapOptionsActivity::class.java))
             }
         }
         item {
-            SampleItem("Camera Animations") {
+            SampleItem(R.string.sample_title_camera_animations) {
                 context.startActivity(Intent(context, CameraAnimationsActivity::class.java))
             }
         }
         item {
-            SampleItem("Camera Changed Listener (Whiskey Compass)") {
+            SampleItem(R.string.sample_title_camera_changed) {
                 context.startActivity(Intent(context, CameraChangedActivity::class.java))
+            }
+        }
+        item {
+            SampleItem(R.string.sample_title_projection_3d) {
+                context.startActivity(Intent(context, Projection3DActivity::class.java))
             }
         }
     }
 }
 
 @Composable
-fun SampleItem(title: String, onClick: () -> Unit) {
+fun SampleItem(@StringRes titleRes: Int, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -150,7 +157,7 @@ fun SampleItem(title: String, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Text(
-            text = title,
+            text = stringResource(titleRes),
             modifier = Modifier.padding(16.dp),
             style = MaterialTheme.typography.bodyLarge,
         )

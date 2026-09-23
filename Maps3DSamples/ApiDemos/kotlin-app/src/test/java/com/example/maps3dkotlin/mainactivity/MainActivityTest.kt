@@ -32,7 +32,7 @@ class MainActivityTest {
         field.isAccessible = true
         val samples = field.get(activity) as List<*>
 
-        assertThat(samples).hasSize(22)
+        assertThat(samples).hasSize(23)
         
         // Extract the activityClass from each Sample object
         val sampleClasses = samples.map { 
@@ -44,5 +44,6 @@ class MainActivityTest {
         
         assertThat(sampleClasses).contains(com.example.maps3dkotlin.popovers.PopoversActivity::class.java)
         assertThat(sampleClasses).contains(com.example.maps3dkotlin.mapinteractions.MapInteractionsActivity::class.java)
+        assertThat(sampleClasses).contains(com.example.maps3dkotlin.projection3d.Projection3DActivity::class.java)
     }
 }
