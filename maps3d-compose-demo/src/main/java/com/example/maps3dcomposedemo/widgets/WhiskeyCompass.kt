@@ -20,8 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontFamily
@@ -124,94 +127,32 @@ fun WhiskeyCompass(
     ) {
         // Canvas 1: Scrolling Compass Strip (ticks, degree labels, cardinal labels)
         Canvas(modifier = Modifier.matchParentSize()) {
-            val majorTickHeightPx = majorTickHeight.toPx()
-            val minorTickHeightPx = minorTickHeight.toPx()
-            val majorTickStrokeWidthPx = majorTickStrokeWidth.toPx()
-            val minorTickStrokeWidthPx = minorTickStrokeWidth.toPx()
-            val degreeLabelVerticalOffsetPx = degreeLabelVerticalOffset.toPx()
-            val cardinalLabelVerticalOffsetPx = cardinalLabelVerticalOffset.toPx()
-
-            val canvasWidth = size.width
-            val canvasCenterY = center.y
+            val params = CompassStripParams(
+                tickColor = tickColor,
+                majorTickHeightPx = majorTickHeight.toPx(),
+                minorTickHeightPx = minorTickHeight.toPx(),
+                majorTickStrokeWidthPx = majorTickStrokeWidth.toPx(),
+                minorTickStrokeWidthPx = minorTickStrokeWidth.toPx(),
+                showCardinalLabels = showCardinalLabels,
+                measuredCardinalLabels = measuredCardinalLabels,
+                cardinalLabelVerticalOffsetPx = cardinalLabelVerticalOffset.toPx(),
+                showDegreeLabels = showDegreeLabels,
+                degreeLabelInterval = degreeLabelInterval,
+                degreeLabelTextStyle = degreeLabelTextStyle,
+                degreeLabelVerticalOffsetPx = degreeLabelVerticalOffset.toPx(),
+                textMeasurer = textMeasurer,
+            )
 
             val xOffset = center.x - (normalizedHeading * pixelsPerDegree)
-            val tickCenterY = canvasCenterY
 
             translate(left = xOffset) {
-                for (repetition in -1..1) {
-                    val repetitionBaseDegree = repetition * 360
-                    for (degreeInRepetition in 0 until 360) {
-                        val absoluteDegree = repetitionBaseDegree + degreeInRepetition
-                        val xPos = absoluteDegree * pixelsPerDegree
-
-                        if (xPos < -xOffset + canvasWidth + canvasWidth &&
-                            xPos > -xOffset - canvasWidth
-                        ) {
-                            val isMajorTickEquivalent = degreeInRepetition % 10 == 0
-                            val isMinorTickEquivalent =
-                                degreeInRepetition % 5 == 0 && !isMajorTickEquivalent
-
-                            if (isMajorTickEquivalent) {
-                                val tickTopY = tickCenterY - majorTickHeightPx / 2f
-                                val tickBottomY = tickCenterY + majorTickHeightPx / 2f
-                                drawLine(
-                                    color = tickColor,
-                                    start = Offset(x = xPos, y = tickTopY),
-                                    end = Offset(x = xPos, y = tickBottomY),
-                                    strokeWidth = majorTickStrokeWidthPx,
-                                )
-
-                                if (showCardinalLabels && measuredCardinalLabels.containsKey(
-                                        degreeInRepetition,
-                                    )
-                                ) {
-                                    val measuredText =
-                                        measuredCardinalLabels.getValue(degreeInRepetition)
-                                    drawText(
-                                        textLayoutResult = measuredText,
-                                        topLeft = Offset(
-                                            x = xPos - measuredText.size.width / 2f,
-                                            y =
-                                            tickTopY - measuredText.size.height -
-                                                cardinalLabelVerticalOffsetPx,
-                                        ),
-                                    )
-                                }
-                            } else if (isMinorTickEquivalent) {
-                                val tickTopY = tickCenterY - minorTickHeightPx / 2f
-                                val tickBottomY = tickCenterY + minorTickHeightPx / 2f
-                                drawLine(
-                                    color = tickColor,
-                                    start = Offset(x = xPos, y = tickTopY),
-                                    end = Offset(x = xPos, y = tickBottomY),
-                                    strokeWidth = minorTickStrokeWidthPx,
-                                )
-                            }
-
-                            if (showDegreeLabels && degreeInRepetition % degreeLabelInterval == 0) {
-                                val tickBottomY = tickCenterY + (
-                                    if (isMajorTickEquivalent) {
-                                        majorTickHeightPx
-                                    } else if (isMinorTickEquivalent) {
-                                        minorTickHeightPx
-                                    } else {
-                                        0f
-                                    }
-                                    ) / 2f
-                                val labelText = degreeInRepetition.toString()
-                                val measuredText =
-                                    textMeasurer.measure(labelText, style = degreeLabelTextStyle)
-                                drawText(
-                                    textLayoutResult = measuredText,
-                                    topLeft = Offset(
-                                        x = xPos - measuredText.size.width / 2f,
-                                        y = tickBottomY + degreeLabelVerticalOffsetPx,
-                                    ),
-                                )
-                            }
-                        }
-                    }
-                }
+                drawCompassStrip(
+                    params = params,
+                    pixelsPerDegree = pixelsPerDegree,
+                    xOffset = xOffset,
+                    canvasWidth = size.width,
+                    tickCenterY = center.y,
+                )
             }
         }
 
@@ -227,6 +168,139 @@ fun WhiskeyCompass(
             )
         }
     }
+}
+
+private data class CompassStripParams(
+    val tickColor: Color,
+    val majorTickHeightPx: Float,
+    val minorTickHeightPx: Float,
+    val majorTickStrokeWidthPx: Float,
+    val minorTickStrokeWidthPx: Float,
+    val showCardinalLabels: Boolean,
+    val measuredCardinalLabels: Map<Int, TextLayoutResult>,
+    val cardinalLabelVerticalOffsetPx: Float,
+    val showDegreeLabels: Boolean,
+    val degreeLabelInterval: Int,
+    val degreeLabelTextStyle: TextStyle,
+    val degreeLabelVerticalOffsetPx: Float,
+    val textMeasurer: TextMeasurer,
+)
+
+private fun DrawScope.drawCompassStrip(
+    params: CompassStripParams,
+    pixelsPerDegree: Float,
+    xOffset: Float,
+    canvasWidth: Float,
+    tickCenterY: Float,
+) {
+    for (repetition in -1..1) {
+        val repetitionBaseDegree = repetition * 360
+        for (degreeInRepetition in 0 until 360) {
+            val absoluteDegree = repetitionBaseDegree + degreeInRepetition
+            val xPos = absoluteDegree * pixelsPerDegree
+
+            if (xPos < -xOffset + 2 * canvasWidth && xPos > -xOffset - canvasWidth) {
+                drawDegreeTick(
+                    degree = degreeInRepetition,
+                    xPos = xPos,
+                    tickCenterY = tickCenterY,
+                    params = params,
+                )
+            }
+        }
+    }
+}
+
+private fun DrawScope.drawDegreeTick(
+    degree: Int,
+    xPos: Float,
+    tickCenterY: Float,
+    params: CompassStripParams,
+) {
+    val isMajorTickEquivalent = degree % 10 == 0
+    val isMinorTickEquivalent = degree % 5 == 0 && !isMajorTickEquivalent
+
+    if (isMajorTickEquivalent) {
+        val tickTopY = tickCenterY - params.majorTickHeightPx / 2f
+        val tickBottomY = tickCenterY + params.majorTickHeightPx / 2f
+        drawLine(
+            color = params.tickColor,
+            start = Offset(x = xPos, y = tickTopY),
+            end = Offset(x = xPos, y = tickBottomY),
+            strokeWidth = params.majorTickStrokeWidthPx,
+        )
+
+        if (params.showCardinalLabels && params.measuredCardinalLabels.containsKey(degree)) {
+            val measuredText = params.measuredCardinalLabels.getValue(degree)
+            drawCardinalLabel(
+                xPos = xPos,
+                tickTopY = tickTopY,
+                measuredText = measuredText,
+                verticalOffsetPx = params.cardinalLabelVerticalOffsetPx,
+            )
+        }
+    } else if (isMinorTickEquivalent) {
+        val tickTopY = tickCenterY - params.minorTickHeightPx / 2f
+        val tickBottomY = tickCenterY + params.minorTickHeightPx / 2f
+        drawLine(
+            color = params.tickColor,
+            start = Offset(x = xPos, y = tickTopY),
+            end = Offset(x = xPos, y = tickBottomY),
+            strokeWidth = params.minorTickStrokeWidthPx,
+        )
+    }
+
+    if (params.showDegreeLabels && degree % params.degreeLabelInterval == 0) {
+        val tickHeightPx = when {
+            isMajorTickEquivalent -> params.majorTickHeightPx
+            isMinorTickEquivalent -> params.minorTickHeightPx
+            else -> 0f
+        }
+        val tickBottomY = tickCenterY + tickHeightPx / 2f
+        val labelText = degree.toString()
+        val measuredText = params.textMeasurer.measure(
+            labelText,
+            style = params.degreeLabelTextStyle,
+        )
+        drawDegreeLabel(
+            xPos = xPos,
+            tickBottomY = tickBottomY,
+            measuredText = measuredText,
+            verticalOffsetPx = params.degreeLabelVerticalOffsetPx,
+        )
+    }
+}
+
+private fun DrawScope.drawCardinalLabel(
+    xPos: Float,
+    tickTopY: Float,
+    measuredText: TextLayoutResult,
+    verticalOffsetPx: Float,
+) {
+    val labelTopY = tickTopY - measuredText.size.height - verticalOffsetPx
+    drawText(
+        textLayoutResult = measuredText,
+        topLeft = Offset(
+            x = xPos - measuredText.size.width / 2f,
+            y = labelTopY,
+        ),
+    )
+}
+
+private fun DrawScope.drawDegreeLabel(
+    xPos: Float,
+    tickBottomY: Float,
+    measuredText: TextLayoutResult,
+    verticalOffsetPx: Float,
+) {
+    val labelTopY = tickBottomY + verticalOffsetPx
+    drawText(
+        textLayoutResult = measuredText,
+        topLeft = Offset(
+            x = xPos - measuredText.size.width / 2f,
+            y = labelTopY,
+        ),
+    )
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF222222)
