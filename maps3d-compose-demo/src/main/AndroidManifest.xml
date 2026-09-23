@@ -95,7 +95,7 @@
         <activity
             android:name=".Projection3DActivity"
             android:exported="true"
-            android:label="3D Screen Projection" />
+            android:label="@string/sample_title_projection_3d" />
     </application>
 
 </manifest>
