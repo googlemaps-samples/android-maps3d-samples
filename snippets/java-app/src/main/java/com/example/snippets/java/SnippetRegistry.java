@@ -55,6 +55,7 @@ public class SnippetRegistry {
     private static final List<Class<?>> snippetClasses =
             Arrays.asList(
                     MapInitSnippets.class,
+                    MapLocalizationSnippets.class,
                     CameraControlSnippets.class,
                     MarkerSnippets.class,
                     PolygonSnippets.class,

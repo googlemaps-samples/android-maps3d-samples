@@ -200,6 +200,13 @@
             android:exported="true"
             />
 
+        <activity
+            android:name="com.example.maps3djava.mapslocalization.MapsLocalizationActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_maps_localization"
+            android:exported="true"
+            />
+
     </application>
 
 </manifest>

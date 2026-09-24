@@ -67,6 +67,7 @@ import com.example.maps3dkotlin.datavisualization.DataVisualizationActivity
 import com.example.maps3dkotlin.cloudstyling.CloudStylingActivity
 import com.example.maps3dkotlin.roadmapmode.RoadmapModeActivity
 import com.example.maps3dkotlin.fieldofview.FieldOfViewActivity
+import com.example.maps3dkotlin.mapslocalization.MapsLocalizationActivity
 import com.example.maps3dkotlin.theme.Maps3DSamplesTheme
 import kotlinx.coroutines.launch
 
@@ -114,6 +115,7 @@ class MainActivity : ComponentActivity() {
         Sample(R.string.feature_title_cloud_styling, CloudStylingActivity::class.java),
         Sample(R.string.feature_title_roadmap_mode, RoadmapModeActivity::class.java),
         Sample(R.string.feature_title_field_of_view, FieldOfViewActivity::class.java),
+        Sample(R.string.feature_title_maps_localization, MapsLocalizationActivity::class.java),
     )
 
     @OptIn(ExperimentalMaterial3Api::class)

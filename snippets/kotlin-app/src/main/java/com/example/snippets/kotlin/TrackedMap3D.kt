@@ -10,6 +10,7 @@ import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.CameraRestriction
 import com.google.android.gms.maps3d.model.FlyAroundOptions
 import com.google.android.gms.maps3d.model.FlyToOptions
+import com.google.android.gms.maps3d.model.LocaleOptions
 import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.MarkerOptions
 import com.google.android.gms.maps3d.model.Model
@@ -71,4 +72,5 @@ class TrackedMap3D(
     fun setOnMapSteadyListener(listener: OnMapSteadyListener?) = delegate.setOnMapSteadyListener(listener)
     fun setCameraRestriction(restriction: CameraRestriction?) = delegate.setCameraRestriction(restriction)
     fun getCameraRestriction() = delegate.getCameraRestriction()
+    fun setLocale(options: LocaleOptions) = delegate.setLocale(options)
 }

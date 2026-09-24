@@ -21,6 +21,7 @@ import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
 import com.example.snippets.kotlin.snippets.CameraControlSnippets
 import com.example.snippets.kotlin.snippets.MapInitSnippets
+import com.example.snippets.kotlin.snippets.MapLocalizationSnippets
 import com.example.snippets.kotlin.snippets.MarkerSnippets
 import com.example.snippets.kotlin.snippets.ModelSnippets
 import com.example.snippets.kotlin.snippets.PlaceSnippets
@@ -70,6 +71,7 @@ object SnippetRegistry {
 
     private val snippetClasses = listOf(
         MapInitSnippets::class.java,
+        MapLocalizationSnippets::class.java,
         CameraControlSnippets::class.java,
         MarkerSnippets::class.java,
         PolygonSnippets::class.java,
