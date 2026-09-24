@@ -46,6 +46,7 @@ import com.example.composedemos.fieldofview.FieldOfViewActivity
 import com.example.composedemos.flightsimulator.FlightSimulatorActivity
 import com.example.composedemos.hellomap.HelloMapActivity
 import com.example.composedemos.mapinteractions.MapInteractionsActivity
+import com.example.composedemos.mapslocalization.MapsLocalizationActivity
 import com.example.composedemos.markers.MarkersActivity
 import com.example.composedemos.models.ModelsActivity
 import com.example.composedemos.pathfollowing.PathFollowingActivity
@@ -205,6 +206,11 @@ fun CatalogScreen() {
         item {
             SampleItem("Field Of View") {
                 context.startActivity(Intent(context, FieldOfViewActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Maps Localization") {
+                context.startActivity(Intent(context, MapsLocalizationActivity::class.java))
             }
         }
     }

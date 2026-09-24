@@ -44,6 +44,7 @@
     <string name="feature_title_cloud_styling">Cloud Map Styling</string>
     <string name="feature_title_roadmap_mode">Roadmap Mode</string>
     <string name="feature_title_field_of_view">Field Of View</string>
+    <string name="feature_title_maps_localization">Maps Localization</string>
 
     <string name="feature_not_implemented">Coming soon!</string>
 
@@ -246,4 +247,11 @@
     <string name="model_animation_mode_title">3D Model Animation Mode:</string>
     <string name="fly_to_mode_synchronized">Synchronized (High CPU)</string>
     <string name="fly_to_mode_midpoint">Midpoint Jump (Low CPU)</string>
+
+    <!-- Maps Localization strings -->
+    <string name="localization_controls_title">3D Map Localization Controls</string>
+    <string name="change_language_button">Change Language &amp; Region</string>
+    <string name="language_button_format">%1$s [%2$s]</string>
+    <string name="localization_applied_format">Applied %1$s [%2$s]</string>
+    <string name="localization_location">Location: San Francisco Bay, USA</string>
 </resources>
