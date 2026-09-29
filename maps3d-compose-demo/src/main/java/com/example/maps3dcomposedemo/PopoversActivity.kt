@@ -16,32 +16,48 @@
 
 package com.example.maps3dcomposedemo
 
+import android.graphics.Point
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.sp
+import com.google.android.gms.maps3d.Popover
 import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.CollisionBehavior
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
+import com.google.android.gms.maps3d.model.popoverShadow
+import com.google.android.gms.maps3d.model.popoverStyle
 import com.google.maps.android.compose3d.GoogleMap3D
 import com.google.maps.android.compose3d.MarkerConfig
 import com.google.maps.android.compose3d.PopoverConfig
+import kotlinx.coroutines.launch
+import android.graphics.Color as AndroidColor
+
+private const val TAG = "PopoversActivity"
+private const val CONTENT_LAT = 37.820642
+private const val CONTENT_LNG = -122.478227
+private const val CONTENT_ALT = 0.0
 
 class PopoversActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,76 +78,124 @@ class PopoversActivity : ComponentActivity() {
 
 @Composable
 fun PopoversScreen() {
-    var popovers by remember { mutableStateOf(emptyList<PopoverConfig>()) }
+    val scope = rememberCoroutineScope()
     var isMapSteady by remember { mutableStateOf(false) }
+    var popover by remember { mutableStateOf<Popover?>(null) }
+    var popoverToggleCount by remember { mutableIntStateOf(0) }
 
-    // Camera centered on Devils Tower
-    val devilsTowerCamera = remember {
+    val initialCamera = remember {
         camera {
             center = latLngAltitude {
-                latitude = 44.589994
-                longitude = -104.715326
-                altitude = 1508.9
+                latitude = CONTENT_LAT
+                longitude = CONTENT_LNG
+                altitude = CONTENT_ALT
             }
-            heading = 1.0
-            tilt = 75.0
-            range = 1635.0
-            roll = 0.0
+            heading = 0.0
+            tilt = 45.0
+            range = 4075.0
         }
     }
 
-    // Sample marker that will trigger the popover
-    val marker = remember {
-        MarkerConfig(
-            key = "popover_marker",
-            position = latLngAltitude {
-                latitude = 44.59054845363309
-                longitude = -104.715177415273
-                altitude = 10.0
-            },
+    val goldenGatePopoverConfig = remember {
+        PopoverConfig(
+            key = "golden_gate_popover",
+            positionAnchorKey = "golden_gate_marker",
             altitudeMode = AltitudeMode.RELATIVE_TO_MESH,
-            label = "Click me for Popover",
-            isExtruded = true,
-            isDrawnWhenOccluded = true,
-            onClick = {
-                popovers = listOf(
-                    PopoverConfig(
-                        key = "popover_1",
-                        positionAnchorKey = "popover_marker",
-                        autoPanEnabled = false,
-                        autoCloseEnabled = false,
-                        content = {
-                            Surface(
-                                color = Color.White,
-                                shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.padding(8.dp),
-                            ) {
-                                Text(
-                                    text = "This is a Popover anchored to a marker!",
-                                    modifier = Modifier.padding(16.dp),
-                                    color = Color.Black,
-                                )
-                            }
-                        },
-                    ),
-                )
+            autoPanEnabled = true,
+            autoCloseEnabled = true,
+            anchorOffset = Point(0, 0),
+            popoverStyle = popoverStyle {
+                padding = 20.0f
+                backgroundColor = AndroidColor.WHITE
+                borderRadius = 8.0f
+                shadow = popoverShadow {
+                    color = AndroidColor.argb(77, 0, 0, 0)
+                    offsetX = 2.0f
+                    offsetY = 4.0f
+                    radius = 4.0f
+                }
+            },
+            onPopoverCreated = { createdPopover ->
+                popover = createdPopover
+                Log.d(TAG, "Popover created")
+            },
+            content = {
+                GoldenGateInfoContent()
             },
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    val popovers = remember { listOf(goldenGatePopoverConfig) }
+
+    val markerInGoldenGate = remember {
+        MarkerConfig(
+            key = "golden_gate_marker",
+            position = latLngAltitude {
+                latitude = 37.819852
+                longitude = -122.478549
+                altitude = 0.0
+            },
+            label = "Golden Gate Bridge",
+            zIndex = 1,
+            isExtruded = true,
+            isDrawnWhenOccluded = true,
+            collisionBehavior = CollisionBehavior.REQUIRED,
+            altitudeMode = AltitudeMode.RELATIVE_TO_MESH,
+            onClick = {
+                scope.launch {
+                    Log.d(TAG, "Marker clicked")
+                    if (popoverToggleCount > 5) {
+                        popover?.remove()
+                        Log.d(TAG, "Popover removed")
+                        popoverToggleCount = 0
+                    } else {
+                        Log.d(TAG, "Popover toggled")
+                        popover?.toggle()
+                        popoverToggleCount++
+                    }
+                }
+            },
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { contentDescription = if (isMapSteady) "MapSteady" else "MapLoading" },
+    ) {
         GoogleMap3D(
-            camera = devilsTowerCamera,
-            markers = listOf(marker),
+            camera = initialCamera,
+            markers = listOf(markerInGoldenGate),
             popovers = popovers,
-            mapMode = Map3DMode.HYBRID,
+            mapMode = Map3DMode.SATELLITE,
             modifier = Modifier.fillMaxSize(),
             onMapSteady = {
                 isMapSteady = true
             },
-            onMapClick = {
-                popovers = emptyList()
-            },
+        )
+    }
+}
+
+@Composable
+private fun GoldenGateInfoContent() {
+    Column {
+        Text(
+            text = "The Golden Gate Bridge",
+            fontSize = 18.sp,
+            color = Color.Black,
+        )
+        Text(
+            text = "San Francisco, CA",
+            fontSize = 14.sp,
+            color = Color.DarkGray,
+        )
+        Text(
+            text = "The Golden Gate Bridge is a suspension bridge\n" +
+                " spanning the one-mile-wide strait connecting\n" +
+                " San Francisco Bay and the Pacific Ocean.\n" +
+                " The bridge was completed in 1937.",
+            fontSize = 12.sp,
+            color = Color.Gray,
         )
     }
 }

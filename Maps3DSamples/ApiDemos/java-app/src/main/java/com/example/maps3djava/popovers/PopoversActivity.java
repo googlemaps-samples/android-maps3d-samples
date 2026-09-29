@@ -89,6 +89,7 @@ public class PopoversActivity extends SampleBaseActivity {
     if (isInitialized) return;
     isInitialized = true;
 
+    googleMap3D.setCamera(getInitialCamera());
     googleMap3D.setMapMode(Map3DMode.SATELLITE);
     setupPopover(googleMap3D);
   }
