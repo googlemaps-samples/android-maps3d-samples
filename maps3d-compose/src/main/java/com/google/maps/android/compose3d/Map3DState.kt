@@ -17,6 +17,7 @@
 package com.google.maps.android.compose3d
 
 import android.content.Context
+import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Popover
@@ -263,6 +264,10 @@ class Map3DState {
         val marker = markers[config.positionAnchorKey]?.second ?: return null
 
         val composeView = ComposeView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            )
             setContent {
                 config.content()
             }
@@ -275,10 +280,38 @@ class Map3DState {
                 content = composeView
                 autoCloseEnabled = config.autoCloseEnabled
                 autoPanEnabled = config.autoPanEnabled
+                config.anchorOffset?.let { anchorOffset = it }
+                config.popoverStyle?.let { popoverStyle = it }
             },
         )
 
-        popover.show()
+        // When PopoverManagerImpl first receives the anchor's DrawingState, popover.content is
+        // still View.GONE (width = 0, height = 0), so its initial (x, y) is placed at the raw
+        // anchor coordinates before ComposeView measures. Adjust (x, y) when layout size changes.
+        popover.content.addOnLayoutChangeListener {
+                view,
+                left,
+                top,
+                right,
+                bottom,
+                oldLeft,
+                oldTop,
+                oldRight,
+                oldBottom,
+            ->
+            val oldWidth = oldRight - oldLeft
+            val oldHeight = oldBottom - oldTop
+            val newWidth = right - left
+            val newHeight = bottom - top
+            if ((oldWidth != newWidth || oldHeight != newHeight) &&
+                (view.x != 0f || view.y != 0f)
+            ) {
+                view.x -= (newWidth - oldWidth) / 2f
+                view.y -= (newHeight - oldHeight).toFloat()
+            }
+        }
+
+        config.onPopoverCreated?.invoke(popover)
         return popover
     }
 

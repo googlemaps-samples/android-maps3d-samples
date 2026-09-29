@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DInitConfig
@@ -71,19 +72,19 @@ fun GoogleMap3D(
     cameraRestriction: CameraRestriction? = null,
     @Map3DMode mapMode: Int = Map3DMode.SATELLITE,
     options: Map3DInitConfig = Map3DInitConfig.create(
-        centerLat = 0.0,
-        centerLng = 0.0,
-        centerAlt = 0.0,
-        heading = 0.0,
-        tilt = 0.0,
-        roll = 0.0,
-        range = 10_000_000.0, // Default range wide view
+        centerLat = camera.center.latitude,
+        centerLng = camera.center.longitude,
+        centerAlt = camera.center.altitude,
+        heading = camera.heading ?: 0.0,
+        tilt = camera.tilt ?: 0.0,
+        roll = camera.roll ?: 0.0,
+        range = camera.range ?: 10_000_000.0,
         minHeading = 0.0,
         maxHeading = 360.0,
         minTilt = 0.0,
         maxTilt = 90.0,
         bounds = null,
-        mapMode = Map3DMode.SATELLITE, // using the class from com.google.android.gms.maps3d.model.Map3DMode
+        mapMode = mapMode,
         mapId = null,
         minAltitude = 0.0,
         maxAltitude = 1000000.0,
@@ -96,9 +97,12 @@ fun GoogleMap3D(
     onPlaceClick: ((String) -> Unit)? = null,
     onCameraChanged: (Camera) -> Unit = {},
 ) {
+    val hostContext = LocalContext.current
     val state = remember { Map3DState() }
+    val isMapReady = remember { mutableStateOf(false) }
     val hasCalledOnMapReady = remember { mutableStateOf(false) }
     val googleMap3DState = remember { mutableStateOf<GoogleMap3D?>(null) }
+    val lastSyncedCamera = remember { mutableStateOf<Camera?>(null) }
 
     // Use rememberUpdatedState to avoid capturing stale lambdas in the async callback
     val currentOnMapSteady by rememberUpdatedState(onMapSteady)
@@ -112,11 +116,26 @@ fun GoogleMap3D(
         factory = { context ->
             val map3dView = Map3DView(context, options)
             map3dView.onCreate(null)
+            map3dView.onResume()
 
             map3dView.getMap3DViewAsync(object : OnMap3DViewReadyCallback {
                 override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
                     googleMap3DState.value = googleMap3D
                     Map3DRegistry.setInstance(googleMap3D)
+
+                    googleMap3D.setOnMapReadyListener {
+                        googleMap3D.setOnMapReadyListener(null)
+                        Map3DRegistry.markReady()
+                        isMapReady.value = true
+                    }
+
+                    // Ensure readiness triggers even on delayed or reused map instances
+                    map3dView.postDelayed({
+                        if (!isMapReady.value) {
+                            Map3DRegistry.markReady()
+                            isMapReady.value = true
+                        }
+                    }, 2_000L)
 
                     googleMap3D.setOnMapSteadyListener { isSteady ->
                         if (isSteady) {
@@ -147,41 +166,36 @@ fun GoogleMap3D(
         },
         update = { map3dView ->
             val googleMap3D = googleMap3DState.value
-            if (googleMap3D != null) {
-                fun applyUpdates() {
-                    if (!hasCalledOnMapReady.value) {
-                        currentOnMapReady(googleMap3D)
-                        hasCalledOnMapReady.value = true
-                    }
-
-                    // Sync hoisted state with the imperative map instance
-                    googleMap3D.setCamera(camera.toValidCamera())
-                    googleMap3D.setCameraRestriction(cameraRestriction.toValidCameraRestriction())
-                    googleMap3D.setMapMode(mapMode)
-
-                    state.syncMarkers(googleMap3D, markers)
-                    state.syncPolylines(googleMap3D, polylines)
-                    state.syncPolygons(googleMap3D, polygons)
-                    state.syncModels(googleMap3D, models)
-                    state.syncPopovers(map3dView.context, googleMap3D, popovers)
+            if (googleMap3D != null && isMapReady.value) {
+                val validCamera = camera.toValidCamera()
+                if (!hasCalledOnMapReady.value) {
+                    currentOnMapReady(googleMap3D)
+                    hasCalledOnMapReady.value = true
+                    // Ensure native map viewport has stabilized before applying initial camera
+                    map3dView.postDelayed({
+                        lastSyncedCamera.value?.let { googleMap3D.setCamera(it) }
+                    }, 350L)
                 }
 
-                if (Map3DRegistry.isMapReady) {
-                    // Map was already ready (e.g. reused instance), apply updates immediately
-                    applyUpdates()
-                } else {
-                    // First time initialization, must wait for listener
-                    googleMap3D.setOnMapReadyListener {
-                        googleMap3D.setOnMapReadyListener(null) // Clear it immediately
-                        Map3DRegistry.markReady()
-                        applyUpdates()
-                    }
+                // Sync hoisted state with the imperative map instance
+                if (lastSyncedCamera.value != validCamera) {
+                    googleMap3D.setCamera(validCamera)
+                    lastSyncedCamera.value = validCamera
                 }
+                googleMap3D.setCameraRestriction(cameraRestriction.toValidCameraRestriction())
+                googleMap3D.setMapMode(mapMode)
+
+                state.syncMarkers(googleMap3D, markers)
+                state.syncPolylines(googleMap3D, polylines)
+                state.syncPolygons(googleMap3D, polygons)
+                state.syncModels(googleMap3D, models)
+                state.syncPopovers(hostContext, googleMap3D, popovers)
             }
         },
         onRelease = { map3dView ->
             state.clear()
             Map3DRegistry.clearInstance()
+            map3dView.onPause()
             map3dView.onDestroy()
         },
     )

@@ -124,7 +124,7 @@ public class PolygonsActivity extends SampleBaseActivity {
         options.setFillColor(faceFillColor);
         options.setStrokeColor(faceStrokeColor);
         options.setStrokeWidth(faceStrokeWidth);
-        options.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
+        options.setAltitudeMode(AltitudeMode.ABSOLUTE);
         options.setGeodesic(false);
         options.setDrawsOccludedSegments(true);
         return options;

@@ -16,9 +16,11 @@
 
 package com.google.maps.android.compose3d
 
+import android.graphics.Point
 import androidx.annotation.WorkerThread
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import com.google.android.gms.maps3d.Popover
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.CollisionBehavior
 import com.google.android.gms.maps3d.model.ImageView
@@ -27,6 +29,7 @@ import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.Model
 import com.google.android.gms.maps3d.model.Polygon
 import com.google.android.gms.maps3d.model.Polyline
+import com.google.android.gms.maps3d.model.PopoverStyle
 
 /**
  * Sealed class representing the glyph (icon/text) inside a pin marker.
@@ -97,6 +100,8 @@ data class PolygonConfig(
     val strokeColor: Int,
     val strokeWidth: Float,
     val altitudeMode: Int = AltitudeMode.CLAMP_TO_GROUND,
+    val geodesic: Boolean = false,
+    val drawsOccludedSegments: Boolean = false,
     val onClick: ((Polygon) -> Unit)? = null,
 )
 
@@ -135,4 +140,7 @@ data class PopoverConfig(
     val altitudeMode: Int = AltitudeMode.CLAMP_TO_GROUND,
     val autoCloseEnabled: Boolean = true,
     val autoPanEnabled: Boolean = true,
+    val anchorOffset: Point? = null,
+    val popoverStyle: PopoverStyle? = null,
+    val onPopoverCreated: ((Popover) -> Unit)? = null,
 )
