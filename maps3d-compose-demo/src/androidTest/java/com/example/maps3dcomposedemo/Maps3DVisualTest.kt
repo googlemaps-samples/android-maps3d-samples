@@ -408,7 +408,9 @@ class Maps3DVisualTest : BaseVisualTest() {
 
             // Parse JSON and click
             try {
-                val jsonStr = geminiResponse?.substringAfter("{")?.substringBeforeLast("}")?.let { "{$it}" } ?: ""
+                val jsonStr =
+                    geminiResponse?.substringAfter("{")?.substringBeforeLast("}")?.let { "{$it}" }
+                        ?: ""
                 val json = org.json.JSONObject(jsonStr)
                 val x = json.getDouble("x")
                 val y = json.getDouble("y")
@@ -418,7 +420,9 @@ class Maps3DVisualTest : BaseVisualTest() {
 
                 uiDevice.click(clickX, clickY)
             } catch (e: Exception) {
-                org.junit.Assert.fail("Failed to parse coordinates from Gemini response: $geminiResponse. Error: ${e.message}")
+                org.junit.Assert.fail(
+                    "Failed to parse coordinates from Gemini response: $geminiResponse. Error: ${e.message}",
+                )
             }
 
             // Wait for UI to update

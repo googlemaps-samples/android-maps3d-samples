@@ -68,10 +68,16 @@ fun TiltScale(tilt: Float, modifier: Modifier = Modifier) {
                     )
 
                     if (isMajor) {
-                        val measuredText = textMeasurer.measure(i.toString(), style = TextStyle(color = onPrimaryColor, fontSize = 12.sp))
+                        val measuredText = textMeasurer.measure(
+                            i.toString(),
+                            style = TextStyle(color = onPrimaryColor, fontSize = 12.sp),
+                        )
                         drawText(
                             textLayoutResult = measuredText,
-                            topLeft = Offset(centerLineX + 20f, yPos - measuredText.size.height / 2f),
+                            topLeft = Offset(
+                                centerLineX + 20f,
+                                yPos - measuredText.size.height / 2f,
+                            ),
                         )
                     }
                 }

@@ -63,7 +63,8 @@ sealed class CameraUpdate {
 
 fun FlyToOptions.toCameraUpdate(): CameraUpdate = CameraUpdate.FlyTo(this.toValidFlyToOptions())
 
-fun FlyAroundOptions.toCameraUpdate(): CameraUpdate = CameraUpdate.FlyAround(this.toValidFlyAroundOptions())
+fun FlyAroundOptions.toCameraUpdate(): CameraUpdate =
+    CameraUpdate.FlyAround(this.toValidFlyAroundOptions())
 
 fun FlyToOptions.toValidFlyToOptions(): FlyToOptions = this.copy(
     endCamera = this.endCamera.toValidCamera(),

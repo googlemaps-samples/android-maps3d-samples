@@ -95,7 +95,10 @@ fun MapInteractionsScreen() {
                 map3dInstance = instance
                 // Set up click listener directly on the instance
                 instance.setMap3DClickListener { location, placeId ->
-                    Log.d("MapInteractionsActivity", "Map clicked at ${location.latitude}, ${location.longitude}")
+                    Log.d(
+                        "MapInteractionsActivity",
+                        "Map clicked at ${location.latitude}, ${location.longitude}",
+                    )
                     clickedInfo = if (placeId != null) {
                         "Clicked Place ID: $placeId\nAt: ${location.latitude}, ${location.longitude}"
                     } else {
