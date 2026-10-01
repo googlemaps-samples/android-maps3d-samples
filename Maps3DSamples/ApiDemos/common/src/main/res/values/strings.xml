@@ -44,6 +44,7 @@
     <string name="feature_title_cloud_styling">Cloud Map Styling</string>
     <string name="feature_title_roadmap_mode">Roadmap Mode</string>
     <string name="feature_title_field_of_view">Field Of View</string>
+    <string name="feature_title_projection_3d">3D Screen Projection</string>
 
     <string name="feature_not_implemented">Coming soon!</string>
 
@@ -246,4 +247,21 @@
     <string name="model_animation_mode_title">3D Model Animation Mode:</string>
     <string name="fly_to_mode_synchronized">Synchronized (High CPU)</string>
     <string name="fly_to_mode_midpoint">Midpoint Jump (Low CPU)</string>
+
+    <!-- 3D Screen Projection strings -->
+    <string name="projection_controls_title">3D Screen Projection</string>
+    <string name="projection_target_format">Target: %1$s</string>
+    <string name="projection_screen_coords_format">Screen: (%1$d px, %2$d px)</string>
+    <string name="projection_depth_format">Depth: %1$d m | Target Alt: %2$d m</string>
+    <string name="projection_visible">Frustum: VISIBLE</string>
+    <string name="projection_culled">Frustum: CULLED / OFF-SCREEN</string>
+    <string name="projection_hint">Drag or tilt map to observe real-time projected coordinate tracking</string>
+    <string name="landmark_transamerica">Transamerica</string>
+    <string name="landmark_transamerica_pyramid">Transamerica Pyramid</string>
+    <string name="landmark_coit_tower">Coit Tower</string>
+    <string name="landmark_ferry_building">Ferry Building</string>
+    <string name="landmark_custom_pin">Custom Ground Pin</string>
+    <string name="landmark_targets_label">Landmark Targets:</string>
+    <string name="projection_coords_simple_format">(%1$d px, %2$d px)</string>
+    <string name="projection_out_of_view">Screen: (Out of view)</string>
 </resources>

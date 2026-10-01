@@ -35,8 +35,9 @@ public class MainActivityTest {
         field.setAccessible(true);
         Map<Integer, Class<?>> samples = (Map<Integer, Class<?>>) field.get(activity);
 
-        assertThat(samples).hasSize(22);
+        assertThat(samples).hasSize(23);
         assertThat(samples.values()).contains(com.example.maps3djava.popovers.PopoversActivity.class);
         assertThat(samples.values()).contains(com.example.maps3djava.mapinteractions.MapInteractionsActivity.class);
+        assertThat(samples.values()).contains(com.example.maps3djava.projection3d.Projection3DActivity.class);
     }
 }

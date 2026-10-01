@@ -203,6 +203,13 @@
             android:exported="true"
             />
 
+        <activity
+            android:name=".projection3d.Projection3DActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_projection_3d"
+            android:exported="true"
+            />
+
     </application>
 
 </manifest>
