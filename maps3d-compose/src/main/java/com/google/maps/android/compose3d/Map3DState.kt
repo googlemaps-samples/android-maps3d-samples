@@ -21,6 +21,8 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Popover
+import com.google.android.gms.maps3d.model.Camera
+import com.google.android.gms.maps3d.model.CameraRestriction
 import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.Model
 import com.google.android.gms.maps3d.model.Polygon
@@ -41,6 +43,40 @@ class Map3DState {
     private val polygons = mutableMapOf<String, Pair<PolygonConfig, Polygon>>()
     private val models = mutableMapOf<String, Pair<ModelConfig, Model>>()
     private val popovers = mutableMapOf<String, Pair<PopoverConfig, Popover>>()
+    private var lastSyncedCamera: Camera? = null
+    private var lastSyncedCameraRestriction: CameraRestriction? = null
+    private var lastSyncedMapMode: Int? = null
+    var hasCalledOnMapReady: Boolean = false
+
+    /**
+     * Synchronizes the camera on the map only when the target [camera] has changed.
+     */
+    fun syncCamera(map: GoogleMap3D, camera: Camera) {
+        if (lastSyncedCamera != camera) {
+            map.setCamera(camera)
+            lastSyncedCamera = camera
+        }
+    }
+
+    /**
+     * Synchronizes the camera restriction on the map only when [restriction] has changed.
+     */
+    fun syncCameraRestriction(map: GoogleMap3D, restriction: CameraRestriction?) {
+        if (lastSyncedCameraRestriction != restriction) {
+            map.setCameraRestriction(restriction)
+            lastSyncedCameraRestriction = restriction
+        }
+    }
+
+    /**
+     * Synchronizes the map mode only when [mapMode] has changed.
+     */
+    fun syncMapMode(map: GoogleMap3D, mapMode: Int) {
+        if (lastSyncedMapMode != mapMode) {
+            map.setMapMode(mapMode)
+            lastSyncedMapMode = mapMode
+        }
+    }
 
     /**
      * Synchronizes the markers on the map with the provided list of configurations.
@@ -311,6 +347,9 @@ class Map3DState {
             }
         }
 
+        if (config.startVisible) {
+            popover.show()
+        }
         config.onPopoverCreated?.invoke(popover)
         return popover
     }
@@ -329,5 +368,9 @@ class Map3DState {
         models.clear()
         popovers.values.forEach { it.second.remove() }
         popovers.clear()
+        lastSyncedCamera = null
+        lastSyncedCameraRestriction = null
+        lastSyncedMapMode = null
+        hasCalledOnMapReady = false
     }
 }

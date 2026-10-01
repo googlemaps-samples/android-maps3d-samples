@@ -153,8 +153,8 @@ fun CameraControlsScreen() {
     LaunchedEffect(isMapSteady, googleMap3D) {
         val map = googleMap3D
         if (isMapSteady && map != null && !hasTriggeredInitialFlyTo) {
-            hasTriggeredInitialFlyTo = true
             delay(2000.milliseconds)
+            hasTriggeredInitialFlyTo = true
             flyToEmpireStateBuilding(map)
         }
     }

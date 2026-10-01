@@ -142,5 +142,6 @@ data class PopoverConfig(
     val autoPanEnabled: Boolean = true,
     val anchorOffset: Point? = null,
     val popoverStyle: PopoverStyle? = null,
+    val startVisible: Boolean = true,
     val onPopoverCreated: ((Popover) -> Unit)? = null,
 )

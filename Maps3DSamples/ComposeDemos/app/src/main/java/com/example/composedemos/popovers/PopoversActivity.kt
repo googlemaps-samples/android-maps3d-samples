@@ -136,6 +136,7 @@ fun PopoversScreen() {
             autoPanEnabled = true,
             autoCloseEnabled = true,
             anchorOffset = Point(0, 0),
+            startVisible = false,
             popoverStyle = popoverStyle {
                 padding = 20.0f
                 backgroundColor = AndroidColor.WHITE
