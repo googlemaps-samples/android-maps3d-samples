@@ -33,8 +33,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -59,7 +57,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CatalogScreen() {
     val context = LocalContext.current
-    LazyColumn(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
+    LazyColumn(modifier = Modifier
+        .fillMaxSize()
+        .safeDrawingPadding()) {
         item {
             Text(
                 text = "Maps 3D Compose Samples",
@@ -78,7 +78,7 @@ fun CatalogScreen() {
             }
         }
         item {
-            SampleItem("Camera Controls") {
+            SampleItem("Camera controls and restrictions") {
                 context.startActivity(Intent(context, CameraControlsActivity::class.java))
             }
         }
