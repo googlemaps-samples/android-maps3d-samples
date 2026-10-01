@@ -90,12 +90,13 @@ import com.google.maps.android.compose3d.MarkerConfig
 import com.google.maps.android.compose3d.PinConfig
 import com.google.maps.android.compose3d.PopoverConfig
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import android.graphics.Color as AndroidColor
 import com.example.maps3dcommon.R as CommonR
@@ -140,6 +141,7 @@ fun MarkersScreen() {
     val scope = rememberCoroutineScope()
 
     var isMapSteady by remember { mutableStateOf(false) }
+    val mapSteadyFlow = remember { MutableStateFlow(false) }
     var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
     var popovers by remember { mutableStateOf(emptyList<PopoverConfig>()) }
     var isTouring by remember { mutableStateOf(false) }
@@ -399,9 +401,9 @@ fun MarkersScreen() {
     fun stopMonsterTour() {
         if (isTouring) {
             isTouring = false
+            googleMap3D?.stopCameraAnimation()
+            googleMap3D?.setCameraAnimationEndListener(null)
         }
-        googleMap3D?.stopCameraAnimation()
-        googleMap3D?.setCameraAnimationEndListener(null)
     }
 
     // Automated Monster Tour coroutine
@@ -428,7 +430,9 @@ fun MarkersScreen() {
             if (!isActive || !isTouring) break
 
             // 2. Wait for the 3D mesh building geometry to load (up to 5 seconds)
-            map.awaitMapSteady(5.seconds) { isMapSteady = true }
+            withTimeoutOrNull(5.seconds) {
+                mapSteadyFlow.first { it }
+            }
             if (!isActive || !isTouring) break
 
             // 3. Orbit around the monster
@@ -475,6 +479,9 @@ fun MarkersScreen() {
             },
             onMapSteady = {
                 isMapSteady = true
+            },
+            onMapSteadyChange = { steady ->
+                mapSteadyFlow.value = steady
             },
             onMapClick = {
                 popovers = emptyList()
@@ -723,10 +730,6 @@ private suspend fun GoogleMap3D.awaitCameraAnimation(options: FlyToOptions) {
             setCameraAnimationEndListener(null)
             if (cont.isActive) cont.resume(Unit)
         }
-        cont.invokeOnCancellation {
-            stopCameraAnimation()
-            setCameraAnimationEndListener(null)
-        }
         flyCameraTo(options)
     }
 }
@@ -740,40 +743,8 @@ private suspend fun GoogleMap3D.awaitCameraAnimation(options: FlyAroundOptions) 
             setCameraAnimationEndListener(null)
             if (cont.isActive) cont.resume(Unit)
         }
-        cont.invokeOnCancellation {
-            stopCameraAnimation()
-            setCameraAnimationEndListener(null)
-        }
         flyCameraAround(options)
     }
-}
-
-/**
- * Suspends until the map reports it is steady (finished rendering 3D tiles), up to [timeout].
- */
-private suspend fun GoogleMap3D.awaitMapSteady(
-    timeout: Duration,
-    onSteadyRestored: () -> Unit,
-): Boolean {
-    val result = withTimeoutOrNull(timeout) {
-        suspendCancellableCoroutine { cont ->
-            setOnMapSteadyListener { isSteady ->
-                if (isSteady) {
-                    onSteadyRestored()
-                    if (cont.isActive) cont.resume(Unit)
-                }
-            }
-            cont.invokeOnCancellation {
-                setOnMapSteadyListener { isSteady ->
-                    if (isSteady) onSteadyRestored()
-                }
-            }
-        }
-    }
-    setOnMapSteadyListener { isSteady ->
-        if (isSteady) onSteadyRestored()
-    }
-    return result != null
 }
 
 /**
