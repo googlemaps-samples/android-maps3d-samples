@@ -116,7 +116,8 @@ class PolygonSnippets(private val context: Context, private val map: TrackedMap3
     @Suppress("unused")
     @SnippetItem(
         title = "2. Extruded",
-        description = "Draws a semi-transparent red extruded polygon (height 50m) around a small area",
+        description = "Draws a semi-transparent red extruded polygon (height 50m) around a " +
+            "small area",
     )
     fun addExtrudedPolygon() {
         // [START maps_android_3d_polygon_extruded_kt]

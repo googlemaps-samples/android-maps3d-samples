@@ -16,7 +16,7 @@ package com.example.advancedmaps3dsamples.scenarios
 
 import com.example.advancedmaps3dsamples.R
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.ktx.utils.latLngListEncode
+import com.google.maps.android.latLngListEncode
 
 const val PLANE_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb"
 const val PLANE_SCALE = 0.05
