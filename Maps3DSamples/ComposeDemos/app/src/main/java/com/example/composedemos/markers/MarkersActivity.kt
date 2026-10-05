@@ -525,6 +525,7 @@ fun MarkersScreen() {
             ) {
                 if (!isTouring) {
                     // Tour Monsters Button (🗺️)
+                    val tourMonstersDescription = stringResource(CommonR.string.tour_monsters)
                     FilledTonalButton(
                         onClick = {
                             if (monsterCameras.isNotEmpty()) {
@@ -535,7 +536,7 @@ fun MarkersScreen() {
                             .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
                             .alpha(0.85f)
                             .semantics {
-                                contentDescription = context.getString(CommonR.string.tour_monsters)
+                                contentDescription = tourMonstersDescription
                             },
                     ) {
                         Text(text = "🗺️", fontSize = 20.sp)
@@ -555,6 +556,9 @@ fun MarkersScreen() {
 
                 // Fly to Random Monster Button (🎲) with Long-Press Monster Picker Menu
                 Box {
+                    val flyRandomDescription = stringResource(
+                        CommonR.string.content_description_fly_random,
+                    )
                     Surface(
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.secondaryContainer,
@@ -581,9 +585,7 @@ fun MarkersScreen() {
                                 },
                             )
                             .semantics {
-                                contentDescription = context.getString(
-                                    CommonR.string.content_description_fly_random,
-                                )
+                                contentDescription = flyRandomDescription
                             },
                     ) {
                         Box(
