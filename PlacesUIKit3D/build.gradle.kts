@@ -129,6 +129,8 @@ android {
 // The `dependencies` block is where we declare all the external libraries the app needs.
 // These are fetched from repositories like Maven Central and Google's Maven repository.
 dependencies {
+    implementation(project(":library"))
+
     // --- Core AndroidX & UI Libraries ---
     // These are foundational libraries for building modern Android apps.
     implementation(libs.androidx.core.ktx)

@@ -6,14 +6,12 @@ plugins:
   - - "@google/semantic-release-replace-plugin"
     - replacements:
         - files:
-            - "./Maps3DSamples/ApiDemos/kotlin-app/build.gradle.kts"
-            - "./Maps3DSamples/advanced/app/build.gradle.kts"
-          from: "versionName = \".*\""
-          to: "versionName = \"${nextRelease.version}\""
+            - "./build.gradle.kts"
+          from: "version = \".*\""
+          to: "version = \"${nextRelease.version}\""
   - - "@semantic-release/git"
     - assets:
-        - "Maps3DSamples/ApiDemos/kotlin-app/build.gradle.kts"
-        - "Maps3DSamples/advanced/app/build.gradle.kts"
+        - "build.gradle.kts"
   - - "@semantic-release/github"
     - assets:
         - "./advanced-kotlin-debug.apk"

@@ -35,7 +35,7 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "1.13.0"
+        versionName = project.version.toString()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -104,6 +104,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.play.services.base) // "com.google.android.gms:play-services-base:18.10.0"
+    implementation(project(":library"))
     implementation(project(":Maps3DSamples:ApiDemos:common"))
 }
 

@@ -38,6 +38,9 @@ mapsUtils = "6.0.0"
 androidx-core-ktx = "1.8.9"
 androidxArchCoreTesting = "2.2.0"
 kotlinxCoroutines = "1.8.0"
+mockk = "1.14.11"
+startup-runtime = "1.2.0"
+playServicesMaps = "20.0.0"
 
 [libraries]
 androidx-arch-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "androidxArchCoreTesting" }
@@ -86,6 +89,9 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 android-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "mapsUtils" }
 android-maps-utils-core = { module = "com.google.maps.android:android-maps-utils-core", version.ref = "mapsUtils" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+startup-runtime = { module = "androidx.startup:startup-runtime", version.ref = "startup-runtime" }
+play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -21,6 +21,12 @@ plugins {
     alias(libs.plugins.spotless) apply false
 }
 
+allprojects {
+    // {x-release-please-start-version}
+    version = "1.13.0"
+    // {x-release-please-end}
+}
+
 subprojects {
     tasks.withType<Test>().configureEach {
         jvmArgs("--add-opens=java.base/jdk.internal.access=ALL-UNNAMED")

@@ -81,6 +81,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.play.services.base) // "com.google.android.gms:play-services-base:18.10.0"
+    implementation(project(":library"))
     implementation(project(":Maps3DSamples:ApiDemos:common"))
 
     testImplementation(libs.junit) // "junit:junit:4.13.2"

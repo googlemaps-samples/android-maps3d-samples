@@ -69,3 +69,6 @@ include(":maps3d-compose-demo")
 
 // Visual Testing
 include(":visual-testing")
+
+// Attribution Library
+include(":library")

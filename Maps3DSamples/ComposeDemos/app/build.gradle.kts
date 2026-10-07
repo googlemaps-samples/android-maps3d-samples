@@ -88,6 +88,7 @@ android {
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
+    implementation(project(":library"))
     implementation(project(":maps3d-compose"))
     implementation(project(":Maps3DSamples:ApiDemos:common"))
 

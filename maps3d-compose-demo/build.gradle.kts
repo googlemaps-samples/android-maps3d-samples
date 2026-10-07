@@ -84,6 +84,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":library"))
     implementation(project(":maps3d-compose"))
 
     implementation(libs.androidx.core.ktx)

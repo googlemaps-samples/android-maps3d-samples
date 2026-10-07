@@ -93,6 +93,24 @@ under [releases](https://github.com/googlemaps/android-maps3d-samples/releases) 
 
 If you are upgrading from an older version of the SDK, please refer to the [Migration Guide](MIGRATION_GUIDE.md) for details on breaking changes and how to update your codebase.
 
+## Internal usage attribution ID
+
+This library calls the `addInternalUsageAttributionId` method, which helps Google understand which libraries and samples are helpful to developers and is optional. Instructions for opting out of the identifier are provided below.
+
+If you wish to disable this, you can do so by removing the initializer in your `AndroidManifest.xml` using the `tools:node="remove"` attribute:
+
+```xml
+<provider
+    android:name="androidx.startup.InitializationProvider"
+    android:authorities="${applicationId}.androidx-startup"
+    android:exported="false"
+    tools:node="merge">
+    <meta-data
+        android:name="com.example.maps3dsamples.library.utils.attribution.AttributionIdInitializer"
+        tools:node="remove" />
+</provider>
+```
+
 ## Contributing
 
 Contributions are welcome and encouraged! If you'd like to contribute, send us a [pull request] and refer to our [code of conduct] and [contributing guide].
