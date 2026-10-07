@@ -21,29 +21,29 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.example.maps3dcommon.R
+import com.example.maps3dkotlin.common.awaitCameraAnimation
+import com.example.maps3dkotlin.common.awaitMapSteady
+import com.example.maps3dkotlin.markers.data.MonsterParser
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.CollisionBehavior
 import com.google.android.gms.maps3d.model.Glyph
 import com.google.android.gms.maps3d.model.ImageView
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.Marker
-import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.markerOptions
 import com.google.android.gms.maps3d.model.pinConfiguration
 import com.google.android.gms.maps3d.model.popoverOptions
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import com.example.maps3dkotlin.common.awaitCameraAnimation
-import com.example.maps3dkotlin.common.awaitMapSteady
-import com.example.maps3dkotlin.markers.data.MonsterParser
-import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.launch
 
 /**
  * This activity demonstrates the various altitude modes available for markers on a 3D map.
@@ -92,7 +92,7 @@ class MarkersActivity : SampleBaseActivity() {
     private var monsterMarkers: List<Marker> = emptyList()
     private var monsterIds: List<String> = emptyList()
     private var monsterLabels: List<String> = emptyList()
-    
+
     private var tourJob: kotlinx.coroutines.Job? = null
 
     // The initial camera position is defined declaratively, providing a clear overview of
@@ -174,7 +174,7 @@ class MarkersActivity : SampleBaseActivity() {
                 }
             }
         }
-        
+
         findViewById<Button>(R.id.stop_button)?.apply {
             setOnClickListener {
                 stopMonsterTour()
@@ -184,12 +184,16 @@ class MarkersActivity : SampleBaseActivity() {
         lifecycleScope.launch(Dispatchers.Default) {
             addMarkers(googleMap3D)
         }
-        
-        googleMap3D.setMap3DClickListener { _, _ ->
-            lifecycleScope.launch(Dispatchers.Main) {
-                activePopover?.remove()
-                activePopover = null
+
+        googleMap3D.setMap3DClickListener { _ ->
+            val hadActivePopover = activePopover != null
+            if (hadActivePopover) {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    activePopover?.remove()
+                    activePopover = null
+                }
             }
+            return@setMap3DClickListener hadActivePopover
         }
     }
 
@@ -197,22 +201,22 @@ class MarkersActivity : SampleBaseActivity() {
         val stopButton = findViewById<Button>(R.id.stop_button)
         val tourButton = findViewById<Button>(R.id.tour_monsters_button)
         val map = googleMap3D ?: return
-        
+
         runOnUiThread {
             stopButton?.visibility = View.VISIBLE
             tourButton?.visibility = View.GONE
         }
-        
+
         tourJob = lifecycleScope.launch(Dispatchers.Main) {
             var i = 0
             while (isActive) {
                 activePopover?.remove()
                 activePopover = null
-                
+
                 val camera = monsterCameras[i]
                 val marker = monsterMarkers[i]
                 val monsterId = monsterIds[i]
-                
+
                 // Fly to the monster
                 map.awaitCameraAnimation(flyToOptions {
                     endCamera = camera
@@ -232,9 +236,9 @@ class MarkersActivity : SampleBaseActivity() {
                 if (!isActive) break
 
                 showMonsterPopover(marker, getMonsterBlurbResId(monsterId), map)
-                
+
                 delay(4.seconds)
-                
+
                 i = (i + 1) % monsterCameras.size
             }
         }
@@ -246,7 +250,7 @@ class MarkersActivity : SampleBaseActivity() {
         googleMap3D?.stopCameraAnimation()
         googleMap3D?.setCameraAnimationEndListener(null)
         googleMap3D?.setOnMapSteadyListener(null)
-        
+
         runOnUiThread {
             findViewById<Button>(R.id.stop_button)?.visibility = View.GONE
             findViewById<Button>(R.id.tour_monsters_button)?.visibility = View.VISIBLE
@@ -356,7 +360,7 @@ class MarkersActivity : SampleBaseActivity() {
                         autoCloseEnabled = true
                         autoPanEnabled = false
                     })
-                    
+
                     activePopover?.remove()
                     activePopover = newPopover
                     activePopover?.show()
@@ -408,12 +412,12 @@ class MarkersActivity : SampleBaseActivity() {
         try {
             val jsonString = assets.open("monsters.json").bufferedReader().use { it.readText() }
             val parsedMonsters = MonsterParser.parse(jsonString)
-            
+
             val cameras = mutableListOf<Camera>()
             val markers = mutableListOf<Marker>()
             val ids = mutableListOf<String>()
             val labels = mutableListOf<String>()
-            
+
             for (monster in parsedMonsters) {
                 val cam = camera {
                     center = latLngAltitude {
@@ -425,15 +429,15 @@ class MarkersActivity : SampleBaseActivity() {
                     tilt = monster.tilt
                     range = monster.range
                 }
-                
+
                 val markerPos = latLngAltitude {
                     latitude = monster.markerLatitude
                     longitude = monster.markerLongitude
                     altitude = monster.markerAltitude
                 }
-                
+
                 val drawableId = getMonsterDrawableId(monster.drawable)
-                
+
                 if (drawableId != 0) {
                     val m = googleMap3D.addMarker(markerOptions {
                         position = markerPos
@@ -443,7 +447,7 @@ class MarkersActivity : SampleBaseActivity() {
                         this.altitudeMode = monster.altitudeMode
                         setStyle(ImageView(drawableId))
                     })
-                    
+
                     if (m != null) {
                         cameras.add(cam)
                         markers.add(m)

@@ -39,7 +39,7 @@
     <com.google.android.gms.maps3d.Map3DView
         android:id="@+id/map3dView"
         map3d:mapId="bcce776b92de1336e22c569f"
-        map3d:mode="hybrid"
+        map3d:mapMode="hybrid"
         map3d:centerLat="38.743498"
         map3d:centerLng="-109.499307"
         map3d:centerAlt="1467"

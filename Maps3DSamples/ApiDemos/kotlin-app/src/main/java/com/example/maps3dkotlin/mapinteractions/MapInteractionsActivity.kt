@@ -62,17 +62,18 @@ class MapInteractionsActivity : SampleBaseActivity() {
 
         // Listeners for map clicks. We use lifecycleScope to ensure coroutines are cancelled when the activity is destroyed.
         lifecycleScope.launch {
-            googleMap3D.setMap3DClickListener { location, placeId ->
+            googleMap3D.setMap3DClickListener { event ->
                 runOnUiThread {
-                    val message = if (placeId != null) {
-                        "Clicked Place ID: $placeId"
+                    val message = if (event.placeId != null) {
+                        "Clicked Place ID: ${event.placeId}"
                     } else {
-                        "Clicked Location: ${location.latitude}, ${location.longitude}"
+                        "Clicked Location: ${event.location.latitude}, ${event.location.longitude}"
                     }
                     clickedInfoText.text = message
                     clickedInfoText.contentDescription = message
                     showToast(message)
                 }
+                return@setMap3DClickListener true
             }
         }
     }

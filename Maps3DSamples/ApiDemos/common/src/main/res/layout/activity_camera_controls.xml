@@ -53,7 +53,7 @@
         map3d:minAltitude="0"
         map3d:minHeading="0"
         map3d:minTilt="0"
-        map3d:mode="satellite"
+        map3d:mapMode="satellite"
         map3d:range="4000"
         map3d:roll="0"
         map3d:tilt="67" />

@@ -21,7 +21,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import com.example.snippets.java.TrackedMap3D;
 import com.example.snippets.java.annotations.SnippetGroup;
 import com.example.snippets.java.annotations.SnippetItem;
@@ -29,6 +28,7 @@ import com.google.android.gms.maps3d.OnMap3DClickListener;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
+import com.google.android.gms.maps3d.model.Map3DClickEvent;
 
 @SnippetGroup(
         title = "Places",
@@ -54,8 +54,8 @@ public class PlaceSnippets {
         map.setMap3DClickListener(
                 new OnMap3DClickListener() {
                     @Override
-                    public void onMap3DClick(
-                            @NonNull LatLngAltitude location, @Nullable String placeId) {
+                    public boolean onMap3DClick(@NonNull Map3DClickEvent event) {
+                        String placeId = event.getPlaceId();
                         if (placeId != null) {
                             // Handle place click - Show a Toast on the UI thread
                             new Handler(Looper.getMainLooper())
@@ -67,7 +67,9 @@ public class PlaceSnippets {
                                                                 Toast.LENGTH_SHORT)
                                                         .show();
                                             });
+                            return true;
                         }
+                        return false;
                     }
                 });
         // [END maps_android_3d_place_click_java]
