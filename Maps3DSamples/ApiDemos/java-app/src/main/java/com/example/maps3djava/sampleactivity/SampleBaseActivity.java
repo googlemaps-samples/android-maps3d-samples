@@ -23,7 +23,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.CallSuper;
@@ -33,6 +37,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.maps3d.common.Map3DQuickSettingsButton;
+import com.example.maps3d.common.Map3DUiControls;
 import com.example.maps3dcommon.R;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.Map3DView;
@@ -78,6 +84,51 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
 
     private OnCameraChangedListener cameraChangedListener;
 
+    private int lastStatusBarTop = 0;
+
+    private int calculateFabMarginDp(Map3DUiControls ui) {
+        int count = 0;
+        if (ui.getZoom()) count++;
+        if (ui.getTilt()) count++;
+        if (ui.getRotate()) count++;
+        return count > 0 ? 16 + count * 104 + 8 : 16;
+    }
+
+    private void applyStatusBarInsetsToMapControls(int statusBarTop, Map3DUiControls uiControls) {
+        if (statusBarTop <= 0) return;
+        lastStatusBarTop = statusBarTop;
+        float density = getResources().getDisplayMetrics().density;
+        int baseMargin = (int) (16 * density);
+        int targetTopMargin = statusBarTop + baseMargin;
+
+        if (map3DView != null) {
+            for (int i = 0; i < map3DView.getChildCount(); i++) {
+                View child = map3DView.getChildAt(i);
+                if (child instanceof LinearLayout) {
+                    FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) child.getLayoutParams();
+                    if (lp != null && (lp.gravity & Gravity.TOP) != 0 && lp.topMargin != targetTopMargin) {
+                        lp.topMargin = targetTopMargin;
+                        child.setLayoutParams(lp);
+                    }
+                }
+            }
+        }
+
+        Map3DQuickSettingsButton quickSettingsButton = findViewById(R.id.quick_settings_button);
+        if (quickSettingsButton != null) {
+            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) quickSettingsButton.getLayoutParams();
+            if (lp != null) {
+                Map3DUiControls currentUi = uiControls != null ? uiControls : quickSettingsButton.getSettings().getUiControls();
+                int baseMarginDp = calculateFabMarginDp(currentUi);
+                int targetButtonMargin = statusBarTop + (int) (baseMarginDp * density);
+                if (lp.topMargin != targetButtonMargin) {
+                    lp.topMargin = targetButtonMargin;
+                    quickSettingsButton.setLayoutParams(lp);
+                }
+            }
+        }
+    }
+
     @CallSuper
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +151,8 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
             if (appBarLayout != null) {
                 appBarLayout.setPadding(0, statusBarInsets.top, 0, 0);
             }
+            applyStatusBarInsetsToMapControls(statusBarInsets.top, null);
+
             View controlScrollView = findViewById(R.id.control_scroll_view);
             if (controlScrollView != null) {
                 android.view.ViewGroup.MarginLayoutParams layoutParams = (android.view.ViewGroup.MarginLayoutParams) controlScrollView
@@ -113,6 +166,22 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
         });
 
         map3DView = findViewById(R.id.map3dView);
+        map3DView.setOnHierarchyChangeListener(new ViewGroup.OnHierarchyChangeListener() {
+            @Override
+            public void onChildViewAdded(View parent, View child) {
+                if (child instanceof LinearLayout && lastStatusBarTop > 0) {
+                    FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) child.getLayoutParams();
+                    if (lp != null && (lp.gravity & Gravity.TOP) != 0) {
+                        int baseMargin = (int) (16 * getResources().getDisplayMetrics().density);
+                        lp.topMargin = lastStatusBarTop + baseMargin;
+                        child.setLayoutParams(lp);
+                    }
+                }
+            }
+
+            @Override
+            public void onChildViewRemoved(View parent, View child) {}
+        });
         map3DView.onCreate(savedInstanceState);
         map3DView.getMap3DViewAsync(this);
 
@@ -183,6 +252,15 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
     @Override
     public void onMap3DViewReady(GoogleMap3D googleMap3D) {
         this.googleMap3D = googleMap3D;
+
+        Map3DQuickSettingsButton quickSettings = findViewById(R.id.quick_settings_button);
+        if (quickSettings != null) {
+            quickSettings.attachMap(googleMap3D);
+            quickSettings.setOnSettingsChangedListener(updatedSettings -> {
+                applyStatusBarInsetsToMapControls(lastStatusBarTop, updatedSettings.getUiControls());
+            });
+        }
+        applyStatusBarInsetsToMapControls(lastStatusBarTop, null);
 
         // Workaround: The Maps 3D SDK onMap3DViewReady callback fires when the map object
         // is instantiated, but the internal native rendering pipeline and layout pass may briefly

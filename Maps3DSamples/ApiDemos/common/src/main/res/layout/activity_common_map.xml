@@ -184,4 +184,16 @@
         </LinearLayout>
     </HorizontalScrollView>
 
+    <com.example.maps3d.common.Map3DQuickSettingsButton
+        android:id="@+id/quick_settings_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="340dp"
+        android:elevation="8dp"
+        android:translationZ="8dp"
+        app:fabCustomSize="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
