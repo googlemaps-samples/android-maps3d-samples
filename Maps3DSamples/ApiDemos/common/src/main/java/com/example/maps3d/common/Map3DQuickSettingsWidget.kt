@@ -49,7 +49,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.example.maps3dcommon.R
-import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Map3DMode
 
 // [START maps_3d_quick_settings_compose_widget]
@@ -57,17 +56,16 @@ import com.google.android.gms.maps3d.model.Map3DMode
  * A self-contained Jetpack Compose quick settings widget for 3D map layouts.
  *
  * Renders a compact [FloatingActionButton] that opens a modal [AlertDialog] to select
- * Map Mode (Satellite, Hybrid, Roadmap) and Color Scheme (Follow System, Light, Dark).
+ * Map Mode (Satellite, Hybrid, Roadmap), Color Scheme (Follow System, Light, Dark), and
+ * toggle camera UI controls.
  *
  * @param modifier Layout modifier applied to the button (e.g. alignment inside a Box).
- * @param googleMap3D Optional live [GoogleMap3D] instance to apply settings directly.
  * @param initialSettings The initial [Map3DSettings] configuration.
  * @param onSettingsChanged Callback invoked when map settings are modified.
  */
 @Composable
 fun Map3DQuickSettingsWidget(
     modifier: Modifier = Modifier,
-    googleMap3D: GoogleMap3D? = null,
     initialSettings: Map3DSettings = Map3DSettings(),
     onSettingsChanged: (Map3DSettings) -> Unit = {},
 ) {
@@ -76,7 +74,6 @@ fun Map3DQuickSettingsWidget(
 
     fun updateSettings(newSettings: Map3DSettings) {
         settings = newSettings
-        googleMap3D?.let { newSettings.applyTo(it) }
         onSettingsChanged(newSettings)
     }
 
