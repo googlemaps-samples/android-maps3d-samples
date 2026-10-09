@@ -74,7 +74,7 @@ class HelloMapActivity : ComponentActivity() {
 @Composable
 fun HelloMapScreen() {
     var isMapSteady by remember { mutableStateOf(false) }
-    var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
+    val currentMap = remember { arrayOfNulls<GoogleMap3D>(1) }
 
     val delicateArchCamera = remember {
         camera {
@@ -101,7 +101,7 @@ fun HelloMapScreen() {
             camera = delicateArchCamera,
             modifier = Modifier.fillMaxSize(),
             onMapReady = { map ->
-                googleMap3D = map
+                currentMap[0] = map
             },
             onMapSteady = {
                 isMapSteady = true
@@ -131,7 +131,9 @@ fun HelloMapScreen() {
                 .align(Alignment.TopEnd)
                 .statusBarsPadding()
                 .padding(top = 8.dp, end = 8.dp),
-            googleMap3D = googleMap3D,
+            onSettingsChanged = { settings ->
+                currentMap[0]?.let { settings.applyTo(it) }
+            },
         )
     }
 }
