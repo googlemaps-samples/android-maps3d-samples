@@ -42,6 +42,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.maps.android.compose3d.GoogleMap3D
@@ -72,6 +74,7 @@ class HelloMapActivity : ComponentActivity() {
 @Composable
 fun HelloMapScreen() {
     var isMapSteady by remember { mutableStateOf(false) }
+    val currentMap = remember { arrayOfNulls<GoogleMap3D>(1) }
 
     val delicateArchCamera = remember {
         camera {
@@ -97,6 +100,9 @@ fun HelloMapScreen() {
         GoogleMap3D(
             camera = delicateArchCamera,
             modifier = Modifier.fillMaxSize(),
+            onMapReady = { map ->
+                currentMap[0] = map
+            },
             onMapSteady = {
                 isMapSteady = true
             },
@@ -118,5 +124,16 @@ fun HelloMapScreen() {
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
+
+        // 3. Quick Settings Overlay
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            onSettingsChanged = { settings ->
+                currentMap[0]?.let { settings.applyTo(it) }
+            },
+        )
     }
 }

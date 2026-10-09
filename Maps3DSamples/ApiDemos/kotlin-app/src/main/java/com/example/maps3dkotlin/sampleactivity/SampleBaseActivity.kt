@@ -18,8 +18,12 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
@@ -30,6 +34,16 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.example.maps3d.common.DEFAULT_CAMERA
+import com.example.maps3d.common.Map3DQuickSettingsButton
+import com.example.maps3d.common.Map3DUiControls
+import com.google.android.gms.maps3d.UiControlSettings.ControlPlacement
+import com.google.android.gms.maps3d.model.CompassControl
+import com.google.android.gms.maps3d.model.PanHorizontalControl
+import com.google.android.gms.maps3d.model.PanVerticalControl
+import com.google.android.gms.maps3d.model.RotateControl
+import com.google.android.gms.maps3d.model.Spacer
+import com.google.android.gms.maps3d.model.TiltControl
+import com.google.android.gms.maps3d.model.ZoomControl
 import com.example.maps3d.common.toCameraString
 import com.example.maps3d.common.toValidCamera
 import com.example.maps3d.common.toHeading
@@ -129,6 +143,51 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         }
     }
 
+    private var lastStatusBarTop: Int = 0
+
+    private fun calculateFabMarginDp(ui: Map3DUiControls): Int {
+        var count = 0
+        if (ui.zoom) count++
+        if (ui.tilt) count++
+        if (ui.rotate) count++
+        return if (count > 0) 16 + count * 104 + 8 else 16
+    }
+
+    private fun applyStatusBarInsetsToMapControls(
+        statusBarTop: Int = lastStatusBarTop,
+        uiControls: Map3DUiControls? = null,
+    ) {
+        if (statusBarTop <= 0) return
+        lastStatusBarTop = statusBarTop
+        val density = resources.displayMetrics.density
+        val baseMargin = (16 * density).toInt()
+        val targetTopMargin = statusBarTop + baseMargin
+
+        // Offset any top-anchored edge layout within Map3DView below the status bar
+        for (i in 0 until map3DView.childCount) {
+            val child = map3DView.getChildAt(i)
+            if (child is LinearLayout) {
+                val lp = child.layoutParams as? FrameLayout.LayoutParams ?: continue
+                if ((lp.gravity and Gravity.TOP) != 0 && lp.topMargin != targetTopMargin) {
+                    lp.topMargin = targetTopMargin
+                    child.layoutParams = lp
+                }
+            }
+        }
+
+        // Keep the Quick Settings FAB directly below the active trailing controls
+        findViewById<Map3DQuickSettingsButton>(R.id.quick_settings_button)?.let { button ->
+            val lp = button.layoutParams as? android.view.ViewGroup.MarginLayoutParams ?: return@let
+            val currentUi = uiControls ?: button.getSettings().uiControls
+            val baseMarginDp = calculateFabMarginDp(currentUi)
+            val targetButtonMargin = statusBarTop + (baseMarginDp * density).toInt()
+            if (lp.topMargin != targetButtonMargin) {
+                lp.topMargin = targetButtonMargin
+                button.layoutParams = lp
+            }
+        }
+    }
+
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -145,6 +204,7 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
             val navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
 
             findViewById<View>(R.id.app_bar_layout)?.updatePadding(top = statusBarInsets.top)
+            applyStatusBarInsetsToMapControls(statusBarInsets.top)
 
             findViewById<View>(R.id.control_scroll_view)?.let { scrollView ->
                 val layoutParams = scrollView.layoutParams as android.view.ViewGroup.MarginLayoutParams
@@ -157,6 +217,20 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         }
 
         map3DView = findViewById(R.id.map3dView)
+        map3DView.setOnHierarchyChangeListener(object : ViewGroup.OnHierarchyChangeListener {
+            override fun onChildViewAdded(parent: View?, child: View?) {
+                if (child is LinearLayout && lastStatusBarTop > 0) {
+                    val lp = child.layoutParams as? FrameLayout.LayoutParams ?: return
+                    if ((lp.gravity and Gravity.TOP) != 0) {
+                        val baseMargin = (16 * resources.displayMetrics.density).toInt()
+                        lp.topMargin = lastStatusBarTop + baseMargin
+                        child.layoutParams = lp
+                    }
+                }
+            }
+
+            override fun onChildViewRemoved(parent: View?, child: View?) {}
+        })
         map3DView.onCreate(savedInstanceState)
         map3DView.getMap3DViewAsync(this)
 
@@ -228,6 +302,42 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         if (isMapInitialized) return
         isMapInitialized = true
         Log.d(TAG, "onMapReady called (guaranteed once)")
+        findViewById<Map3DQuickSettingsButton?>(R.id.quick_settings_button)?.apply {
+            attachMap(googleMap3D)
+            setOnSettingsChangedListener { updatedSettings ->
+                applyStatusBarInsetsToMapControls(lastStatusBarTop, updatedSettings.uiControls)
+            }
+        }
+
+        // Configure Maps 3D SDK built-in UI controls (fallback if quick settings button is not present)
+        try {
+            if (findViewById<View?>(R.id.quick_settings_button) == null) {
+                googleMap3D.getUiControlSettings()?.let { uiControls ->
+                    Log.d(TAG, "Configuring Maps 3D uiControlSettings default fallback...")
+                    val zoom = ZoomControl(null)
+                    val tilt = TiltControl(null)
+                    val rotate = RotateControl(null)
+                    val spacer = Spacer()
+                    val compass = CompassControl()
+                    val panV = PanVerticalControl(null)
+                    val panH = PanHorizontalControl(null)
+
+                    uiControls.setUiControlsPlacement(
+                        listOf(zoom, tilt, rotate, spacer, compass),
+                        ControlPlacement.TRAILING
+                    )
+                    uiControls.setUiControlsPlacement(
+                        listOf(panV, panH),
+                        ControlPlacement.LEADING
+                    )
+                }
+            }
+            applyStatusBarInsetsToMapControls()
+            Log.d(TAG, "Maps 3D uiControlSettings configured successfully")
+        } catch (e: Throwable) {
+            Log.e(TAG, "Failed to configure uiControlSettings", e)
+        }
+
         // Workaround: The Maps 3D SDK onMapReady callback fires when the map object
         // is instantiated, but the internal native rendering pipeline and layout pass may briefly
         // override initial programmatic camera positions. A short delay ensures the native map viewport

@@ -203,10 +203,11 @@ fun GoogleMap3D(
                         }
                         return@setMap3DClickListener false
                     }
+                }
 
-                    override fun onError(error: Exception): Unit = throw error
-                },
-            )
+                override fun onError(error: Exception): Unit = throw error
+            },
+        )
 
             map3DViewState.value = map3dView
             map3dView

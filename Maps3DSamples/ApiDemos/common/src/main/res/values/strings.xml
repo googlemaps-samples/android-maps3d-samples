@@ -264,4 +264,25 @@
     <string name="landmark_targets_label">Landmark Targets:</string>
     <string name="projection_coords_simple_format">(%1$d px, %2$d px)</string>
     <string name="projection_out_of_view">Screen: (Out of view)</string>
+
+    <!-- Map 3D Quick Settings -->
+    <string name="map3d_settings_title">3D Map Settings</string>
+    <string name="map3d_mode_section">Map Mode</string>
+    <string name="map3d_mode_satellite">Satellite (3D Mesh)</string>
+    <string name="map3d_mode_hybrid">Hybrid (3D Mesh + Roads &amp; Labels)</string>
+    <string name="map3d_mode_roadmap">Roadmap (Vector Roads)</string>
+    <string name="map3d_color_scheme_section">Color Scheme</string>
+    <string name="map3d_color_scheme_system">Follow System</string>
+    <string name="map3d_color_scheme_light">Light Mode</string>
+    <string name="map3d_color_scheme_dark">Dark Mode</string>
+    <string name="map3d_controls_section">Camera Controls</string>
+    <string name="map3d_controls_toggle_all">All Controls</string>
+    <string name="map3d_control_zoom">Zoom (+ / -)</string>
+    <string name="map3d_control_tilt">Tilt (Up / Down)</string>
+    <string name="map3d_control_rotate">Rotate (Heading)</string>
+    <string name="map3d_control_compass">Compass (Reset North)</string>
+    <string name="map3d_control_pan_v">Pan Vertical (Up / Down)</string>
+    <string name="map3d_control_pan_h">Pan Horizontal (Left / Right)</string>
+    <string name="map3d_settings_done">Done</string>
+    <string name="map3d_settings_button_description">Open 3D map quick settings</string>
 </resources>
