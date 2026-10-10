@@ -43,6 +43,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.Map3DSettings
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
@@ -102,6 +103,7 @@ fun HelloMapScreen() {
             modifier = Modifier.fillMaxSize(),
             onMapReady = { map ->
                 currentMap[0] = map
+                Map3DSettings().applyTo(map)
             },
             onMapSteady = {
                 isMapSteady = true

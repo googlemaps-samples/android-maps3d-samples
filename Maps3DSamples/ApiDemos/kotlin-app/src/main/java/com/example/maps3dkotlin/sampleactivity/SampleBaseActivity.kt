@@ -350,11 +350,15 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
 
         // Workaround: The Maps 3D SDK onMapReady callback fires when the map object
         // is instantiated, but the internal native rendering pipeline and layout pass may briefly
-        // override initial programmatic camera positions. A short delay ensures the native map viewport
-        // has fully stabilized before applying the initial camera position.
+        // override initial programmatic camera positions or control hierarchies. A short delay ensures
+        // the native map viewport has fully stabilized before applying camera and ensuring UI controls are present.
         Handler(Looper.getMainLooper()).postDelayed({
             if (!isDestroyed && !isFinishing) {
-                this.googleMap3D?.setCamera(initialCamera)
+                this.googleMap3D?.let { map ->
+                    map.setCamera(initialCamera)
+                    findViewById<Map3DQuickSettingsButton?>(R.id.quick_settings_button)?.getSettings()?.applyTo(map)
+                    applyStatusBarInsetsToMapControls()
+                }
             }
         }, 350L)
     }

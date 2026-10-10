@@ -75,6 +75,12 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
         this.attachedMap = googleMap3D
         if (googleMap3D != null) {
             controller.getSettings().applyTo(googleMap3D)
+            // Re-apply after a short delay to ensure native engine layout pass preserves controls
+            postDelayed({
+                if (attachedMap == googleMap3D) {
+                    controller.getSettings().applyTo(googleMap3D)
+                }
+            }, 350L)
         }
     }
 
