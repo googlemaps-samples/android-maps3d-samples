@@ -24,6 +24,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.maps3d.common.Map3DQuickSettingsButton;
+import com.example.maps3d.common.Map3DSettingsController;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.Map3DView;
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback;
@@ -31,6 +33,7 @@ import com.example.maps3dcommon.R;
 import com.google.android.gms.maps3d.OnMapReadyListener;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
+import com.google.android.gms.maps3d.model.Map3DMode;
 
 /**
  * `HelloMapActivity` is an Android activity that demonstrates the usage of the `Map3DView`.  This
@@ -104,6 +107,15 @@ public class HelloMapActivity extends Activity implements OnMap3DViewReadyCallba
         isInitialized = true;
         
         Log.i(TAG, "Initializing map position to Delicate Arch");
+
+        Map3DSettingsController.getShared().onSampleEntered(Map3DMode.HYBRID);
+        Map3DSettingsController.getShared().getSettings().applyTo(googleMap3D);
+        Map3DQuickSettingsButton quickSettings = findViewById(R.id.quick_settings_button);
+        if (quickSettings != null) {
+            quickSettings.setSettingsController(Map3DSettingsController.getShared());
+            quickSettings.setSampleDefaultMapMode(Map3DMode.HYBRID);
+            quickSettings.attachToMap(googleMap3D);
+        }
         
         LatLngAltitude center = new LatLngAltitude(38.743502, -109.499374, 1467.0);
         Camera camera = new Camera(center, 349.6, 58.1, 0.0, 138.2);
@@ -120,6 +132,9 @@ public class HelloMapActivity extends Activity implements OnMap3DViewReadyCallba
     protected void onResume() {
         super.onResume();
         map3DView.onResume();
+        if (googleMap3D != null) {
+            Map3DSettingsController.getShared().getSettings().applyTo(googleMap3D);
+        }
     }
 
     @Override

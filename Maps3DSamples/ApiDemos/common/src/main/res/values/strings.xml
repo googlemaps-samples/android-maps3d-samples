@@ -284,5 +284,6 @@
     <string name="map3d_control_pan_v">Pan Vertical (Up / Down)</string>
     <string name="map3d_control_pan_h">Pan Horizontal (Left / Right)</string>
     <string name="map3d_settings_done">Done</string>
+    <string name="map3d_settings_reset">Reset to Defaults</string>
     <string name="map3d_settings_button_description">Open 3D map quick settings</string>
 </resources>

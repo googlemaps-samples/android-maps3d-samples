@@ -100,9 +100,11 @@ class MarkersActivity : SampleBaseActivity() {
     // scene without digging into the logic of the activity.
     override val initialCamera = nycCamera
 
+    @Map3DMode
+    override val defaultMapMode: Int = Map3DMode.SATELLITE
+
     override fun onMapReady(googleMap3D: GoogleMap3D) {
         super.onMapReady(googleMap3D)
-        googleMap3D.setMapMode(Map3DMode.SATELLITE)
 
         findViewById<Button>(R.id.fly_berlin_button)?.apply {
             runOnUiThread {

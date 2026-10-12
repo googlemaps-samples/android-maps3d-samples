@@ -58,9 +58,11 @@ class PopoversActivity : SampleBaseActivity() {
         range = 4075.0
     }
 
+    @Map3DMode
+    override val defaultMapMode: Int = Map3DMode.SATELLITE
+
     override fun onMapReady(googleMap3D: GoogleMap3D) {
         super.onMapReady(googleMap3D)
-        googleMap3D.setMapMode(Map3DMode.SATELLITE)
         setupPopover(googleMap3D)
     }
 

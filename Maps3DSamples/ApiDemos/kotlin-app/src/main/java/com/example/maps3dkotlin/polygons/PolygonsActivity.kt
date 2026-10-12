@@ -27,7 +27,6 @@ import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Hole
-import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.Polygon
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyToOptions
@@ -88,7 +87,6 @@ class PolygonsActivity : SampleBaseActivity() {
 
     override fun onMapReady(googleMap3D: GoogleMap3D) {
         super.onMapReady(googleMap3D)
-        googleMap3D.setMapMode(Map3DMode.HYBRID)
 
         // The camera is animated to the initial position.
         googleMap3D.flyCameraTo(

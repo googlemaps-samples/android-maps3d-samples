@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,7 +41,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,7 +49,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.Map3DSettingsController
+import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
@@ -80,7 +84,9 @@ class RoadmapModeActivity : ComponentActivity() {
 
 @Composable
 fun RoadmapModeScreen() {
-    var selectedMapMode by remember { mutableIntStateOf(Map3DMode.ROADMAP) }
+    var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.ROADMAP)
+    val selectedMapMode = settings.mapMode
 
     val initialLocation = RoadmapModeActivity.SF_LOCATION
     val currentCameraState by remember {
@@ -103,6 +109,9 @@ fun RoadmapModeScreen() {
             camera = currentCameraState,
             mapMode = selectedMapMode,
             modifier = Modifier.fillMaxSize(),
+            onMapReady = { map ->
+                googleMap3D = map
+            },
         )
 
         Card(
@@ -143,7 +152,9 @@ fun RoadmapModeScreen() {
                             modifier = Modifier
                                 .selectable(
                                     selected = (selectedMapMode == modeValue),
-                                    onClick = { selectedMapMode = modeValue },
+                                    onClick = {
+                                        Map3DSettingsController.shared.setMapMode(modeValue)
+                                    },
                                     role = Role.RadioButton,
                                 )
                                 .padding(vertical = 4.dp),
@@ -163,5 +174,14 @@ fun RoadmapModeScreen() {
                 }
             }
         }
+
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.ROADMAP,
+            googleMap3D = googleMap3D,
+        )
     }
 }

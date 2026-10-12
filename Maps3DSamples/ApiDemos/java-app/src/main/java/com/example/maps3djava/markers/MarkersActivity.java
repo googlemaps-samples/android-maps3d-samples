@@ -92,6 +92,12 @@ public class MarkersActivity extends SampleBaseActivity {
     private boolean isInitialized = false;
 
     @Override
+    @Map3DMode
+    protected int getDefaultMapMode() {
+        return Map3DMode.SATELLITE;
+    }
+
+    @Override
     public final Camera getInitialCamera() {
         return toValidCamera(new Camera(
                 new LatLngAltitude(
@@ -128,9 +134,9 @@ public class MarkersActivity extends SampleBaseActivity {
     private void initializeMap(GoogleMap3D googleMap3D) {
         if (isInitialized) return;
         isInitialized = true;
+        super.onMapReady(googleMap3D);
 
         googleMap3D.setCamera(getInitialCamera());
-        googleMap3D.setMapMode(Map3DMode.SATELLITE);
 
         Button flyBerlinButton = findViewById(R.id.fly_berlin_button);
         if (flyBerlinButton != null) {

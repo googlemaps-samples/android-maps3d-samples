@@ -49,6 +49,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
@@ -70,7 +72,7 @@ class ModelsActivity : ComponentActivity() {
 
         // Hide system tray (immersive mode)
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-        windowInsetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
         windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
@@ -92,6 +94,7 @@ private fun ModelsScreen() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var isMapSteady by remember { mutableStateOf(false) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.SATELLITE)
 
     val initialCamera = remember {
         camera {
@@ -141,7 +144,7 @@ private fun ModelsScreen() {
         GoogleMap3D(
             camera = cameraState,
             models = models,
-            mapMode = Map3DMode.SATELLITE,
+            mapMode = settings.mapMode,
             modifier = Modifier.fillMaxSize(),
             onMapReady = { googleMap3D ->
                 mapInstance = googleMap3D
@@ -210,6 +213,16 @@ private fun ModelsScreen() {
         ) {
             Text(text = "Stop")
         }
+
+        // 4. Quick Settings Overlay
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.SATELLITE,
+            googleMap3D = mapInstance,
+        )
     }
 }
 

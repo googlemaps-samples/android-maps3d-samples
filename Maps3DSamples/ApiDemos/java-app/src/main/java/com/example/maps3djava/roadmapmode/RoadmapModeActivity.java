@@ -31,6 +31,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
+import com.example.maps3d.common.Map3DSettings;
+import com.example.maps3d.common.Map3DSettingsController;
 import com.example.maps3dcommon.R;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps.model.LatLng;
@@ -85,6 +87,7 @@ public class RoadmapModeActivity extends SampleBaseActivity {
   // --- State Variables ---
 
   private boolean isCollapsed = false;
+  private boolean isSyncingRadioGroup = false;
 
   // --- Handlers & Runnables ---
 
@@ -104,6 +107,12 @@ public class RoadmapModeActivity extends SampleBaseActivity {
   @Override
   public String getTAG() {
     return "RoadmapModeActivity";
+  }
+
+  @Override
+  @Map3DMode
+  protected int getDefaultMapMode() {
+    return Map3DMode.ROADMAP;
   }
 
   @NonNull
@@ -176,21 +185,51 @@ public class RoadmapModeActivity extends SampleBaseActivity {
 
     if (rgMapMode != null) {
       rgMapMode.setOnCheckedChangeListener((group, checkedId) -> {
-        if (googleMap3D == null) {
+        if (isSyncingRadioGroup) {
           return;
         }
+        int mode;
         if (checkedId == R.id.rb_roadmap) {
-          googleMap3D.setMapMode(Map3DMode.ROADMAP);
+          mode = Map3DMode.ROADMAP;
         } else if (checkedId == R.id.rb_hybrid) {
-          googleMap3D.setMapMode(Map3DMode.HYBRID);
+          mode = Map3DMode.HYBRID;
         } else if (checkedId == R.id.rb_satellite) {
-          googleMap3D.setMapMode(Map3DMode.SATELLITE);
+          mode = Map3DMode.SATELLITE;
+        } else {
+          return;
+        }
+        Map3DSettingsController.getShared().setMapMode(mode);
+        if (googleMap3D != null) {
+          Map3DSettingsController.getShared().getSettings().applyTo(googleMap3D);
         }
       });
     }
 
     // Schedule subtle initial auto-fade for unobstructed viewing
     fadeHandler.postDelayed(fadeOutRunnable, 3000L);
+  }
+
+  @Override
+  protected void onQuickSettingsChanged(@NonNull Map3DSettings settings) {
+    if (rgMapMode == null) {
+      return;
+    }
+    int targetId;
+    int mapMode = settings.getMapMode();
+    if (mapMode == Map3DMode.ROADMAP) {
+      targetId = R.id.rb_roadmap;
+    } else if (mapMode == Map3DMode.HYBRID) {
+      targetId = R.id.rb_hybrid;
+    } else if (mapMode == Map3DMode.SATELLITE) {
+      targetId = R.id.rb_satellite;
+    } else {
+      return;
+    }
+    if (rgMapMode.getCheckedRadioButtonId() != targetId) {
+      isSyncingRadioGroup = true;
+      rgMapMode.check(targetId);
+      isSyncingRadioGroup = false;
+    }
   }
 
   // --- UI Collapse / Expand Mechanics ---
@@ -248,13 +287,9 @@ public class RoadmapModeActivity extends SampleBaseActivity {
   // --- 3D Map Setup ---
 
   @Override
-  public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
-    super.onMap3DViewReady(googleMap3D);
-    googleMap3D.setOnMapReadyListener(sceneReadiness -> {
-      googleMap3D.setOnMapReadyListener(null);
-      googleMap3D.setMapMode(Map3DMode.ROADMAP);
-      googleMap3D.setCamera(getInitialCamera());
-    });
+  protected void onMapReady(@NonNull GoogleMap3D googleMap3D) {
+    super.onMapReady(googleMap3D);
+    googleMap3D.setCamera(getInitialCamera());
   }
 
   // --- Teardown ---

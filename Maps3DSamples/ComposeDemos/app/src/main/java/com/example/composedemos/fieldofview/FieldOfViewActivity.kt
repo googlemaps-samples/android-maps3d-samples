@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -50,6 +51,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Map3DMode
@@ -85,6 +88,7 @@ class FieldOfViewActivity : ComponentActivity() {
 @Composable
 fun FieldOfViewScreen() {
     var fovValue by remember { mutableFloatStateOf(45.0f) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.SATELLITE)
 
     val initialCamera = remember {
         camera {
@@ -133,7 +137,7 @@ fun FieldOfViewScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
         GoogleMap3D(
             camera = cameraState,
-            mapMode = Map3DMode.SATELLITE,
+            mapMode = settings.mapMode,
             onMapReady = { mapInstance = it },
             modifier = Modifier.fillMaxSize(),
         )
@@ -232,5 +236,14 @@ fun FieldOfViewScreen() {
                 }
             }
         }
+
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.SATELLITE,
+            googleMap3D = mapInstance,
+        )
     }
 }

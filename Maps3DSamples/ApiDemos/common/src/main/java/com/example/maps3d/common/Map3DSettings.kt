@@ -16,8 +16,17 @@
 
 package com.example.maps3d.common
 
+import android.annotation.SuppressLint
 import android.util.Log
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.UiControlSettings.ControlPlacement
 import com.google.android.gms.maps3d.model.CompassControl
@@ -79,6 +88,18 @@ data class Map3DUiControls(
         panVertical = enabled,
         panHorizontal = enabled,
     )
+
+    /**
+     * Calculates the top margin (in dp) required to place a floating action button directly
+     * below the active top-anchored trailing camera controls ([zoom], [tilt], [rotate]).
+     */
+    fun calculateFabMarginDp(): Int {
+        var count = 0
+        if (zoom) count++
+        if (tilt) count++
+        if (rotate) count++
+        return if (count > 0) 16 + count * 104 + 8 else 16
+    }
 }
 // [END maps_3d_quick_settings_ui_controls_model]
 
@@ -93,7 +114,7 @@ data class Map3DUiControls(
  * @property uiControls Visibility state for built-in 3D camera UI controls.
  */
 data class Map3DSettings(
-    @Map3DMode val mapMode: Int = Map3DMode.HYBRID,
+    @param:Map3DMode @get:Map3DMode val mapMode: Int = Map3DMode.HYBRID,
     val colorScheme: Map3DColorScheme = Map3DColorScheme.FOLLOW_SYSTEM,
     val uiControls: Map3DUiControls = Map3DUiControls(),
 ) {
@@ -148,6 +169,163 @@ data class Map3DSettings(
             }
         } catch (e: Throwable) {
             Log.e("Map3DSettings", "Could not apply UI controls placement to GoogleMap3D", e)
+        }
+
+        // Keep top-anchored UI controls below the status bar on full-screen maps
+        resolveMapView(googleMap3D)?.let { mapView ->
+            applyStatusBarInsetsToMapView(mapView)
+            mapView.post { applyStatusBarInsetsToMapView(mapView) }
+            mapView.postDelayed({ applyStatusBarInsetsToMapView(mapView) }, 100L)
+        }
+    }
+
+    companion object {
+        /**
+         * Resolves the underlying [ViewGroup] (`Map3DView`) associated with a [GoogleMap3D] instance.
+         */
+        @JvmStatic
+        fun resolveMapView(googleMap3D: GoogleMap3D): ViewGroup? {
+            return try {
+                val field = googleMap3D.javaClass.declaredFields.firstOrNull {
+                    ViewGroup::class.java.isAssignableFrom(it.type)
+                } ?: return null
+                field.isAccessible = true
+                field.get(googleMap3D) as? ViewGroup
+            } catch (_: Throwable) {
+                null
+            }
+        }
+
+        /**
+         * Resolves the status bar height (in pixels) for the given [view].
+         */
+        @SuppressLint("InternalInsetResource", "DiscouragedApi")
+        @JvmStatic
+        @JvmOverloads
+        fun resolveStatusBarHeightPx(view: View, explicitStatusBarTop: Int? = null): Int {
+            if (explicitStatusBarTop != null && explicitStatusBarTop > 0) {
+                return explicitStatusBarTop
+            }
+            val rootInsets = ViewCompat.getRootWindowInsets(view)
+            if (rootInsets != null) {
+                val barType = WindowInsetsCompat.Type.statusBars() or
+                    WindowInsetsCompat.Type.displayCutout()
+                val visibleTop = rootInsets.getInsets(barType).top
+                if (visibleTop > 0) {
+                    return visibleTop
+                }
+                if (!rootInsets.isVisible(WindowInsetsCompat.Type.statusBars())) {
+                    return rootInsets.getInsets(WindowInsetsCompat.Type.displayCutout()).top
+                }
+            }
+            val resId = view.resources.getIdentifier("status_bar_height", "dimen", "android")
+            return if (resId > 0) view.resources.getDimensionPixelSize(resId) else 0
+        }
+
+        /**
+         * Computes how many vertical pixels of the status bar overlap the top of [view].
+         *
+         * Returns `> 0` for full-screen maps that extend behind the status bar, and `0` when
+         * the map is positioned below a non-overlay toolbar (`top_bar`).
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun resolveStatusBarOverlapPx(view: View, explicitStatusBarTop: Int? = null): Int {
+            val parentView = view.parent as? ViewGroup
+            if (parentView != null &&
+                parentView.findViewById<View?>(R.id.top_bar) != null &&
+                parentView.findViewById<View?>(R.id.app_bar_layout) == null
+            ) {
+                return 0
+            }
+            val statusBarTop = resolveStatusBarHeightPx(view, explicitStatusBarTop)
+            if (statusBarTop <= 0) return 0
+
+            return if (view.isLaidOut) {
+                val location = IntArray(2)
+                view.getLocationInWindow(location)
+                val viewTopInWindow = location[1]
+                (statusBarTop - viewTopInWindow).coerceAtLeast(0)
+            } else {
+                statusBarTop
+            }
+        }
+
+        /**
+         * Offsets top-anchored SDK UI control containers (`ControlPlacement.LEADING` and
+         * `ControlPlacement.TRAILING`) inside [mapView] so the status bar does not overlap them
+         * when [mapView] is rendered full-screen.
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun applyStatusBarInsetsToMapView(
+            mapView: ViewGroup,
+            explicitStatusBarTop: Int? = null,
+        ) {
+            val statusBarOverlap = resolveStatusBarOverlapPx(mapView, explicitStatusBarTop)
+            val baseMarginPx = (16 * mapView.resources.displayMetrics.density).toInt()
+            offsetTopControlContainers(mapView, statusBarOverlap, baseMarginPx)
+            ensureMapViewInsetListeners(mapView)
+        }
+
+        private fun ensureMapViewInsetListeners(mapView: ViewGroup) {
+            if (mapView.getTag(R.id.map3dView) == true) return
+            mapView.setTag(R.id.map3dView, true)
+
+            mapView.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+                val group = v as? ViewGroup ?: return@addOnLayoutChangeListener
+                val overlap = resolveStatusBarOverlapPx(group)
+                val baseMarginPx = (16 * group.resources.displayMetrics.density).toInt()
+                offsetTopControlContainers(group, overlap, baseMarginPx)
+            }
+
+            mapView.setOnHierarchyChangeListener(
+                object : ViewGroup.OnHierarchyChangeListener {
+                    override fun onChildViewAdded(parent: View?, child: View?) {
+                        mapView.post { applyStatusBarInsetsToMapView(mapView) }
+                    }
+
+                    override fun onChildViewRemoved(parent: View?, child: View?) {}
+                },
+            )
+        }
+
+        private fun offsetTopControlContainers(
+            group: ViewGroup,
+            statusBarOverlap: Int,
+            baseMarginPx: Int,
+        ) {
+            for (i in 0 until group.childCount) {
+                val child = group.getChildAt(i) ?: continue
+                if (child is LinearLayout) {
+                    val lp = child.layoutParams as? ViewGroup.MarginLayoutParams
+                    val isTopAligned = when (lp) {
+                        is FrameLayout.LayoutParams -> {
+                            val vGravity = lp.gravity and Gravity.VERTICAL_GRAVITY_MASK
+                            vGravity != Gravity.BOTTOM && vGravity != Gravity.CENTER_VERTICAL
+                        }
+                        null -> false
+                        else -> !child.isLaidOut || child.top <= group.height / 2
+                    }
+                    if (lp != null && isTopAligned) {
+                        val effectiveBase = if (child.paddingTop > 0) 0 else baseMarginPx
+                        val targetTopMargin = if (statusBarOverlap > 0) {
+                            statusBarOverlap + effectiveBase
+                        } else {
+                            effectiveBase
+                        }
+                        if (lp.topMargin != targetTopMargin) {
+                            lp.topMargin = targetTopMargin
+                            child.layoutParams = lp
+                        }
+                        // Do not recurse into individual control views inside a control container
+                        continue
+                    }
+                }
+                if (child is ViewGroup) {
+                    offsetTopControlContainers(child, statusBarOverlap, baseMarginPx)
+                }
+            }
         }
     }
 }

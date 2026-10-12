@@ -32,6 +32,7 @@ import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Camera
+import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.material.appbar.MaterialToolbar
@@ -68,6 +69,9 @@ import kotlinx.coroutines.launch
 class FieldOfViewActivity : SampleBaseActivity() {
 
   override val TAG = "FieldOfViewActivity"
+
+  @Map3DMode
+  override val defaultMapMode: Int = Map3DMode.SATELLITE
 
   override val initialCamera: Camera
     get() = camera {

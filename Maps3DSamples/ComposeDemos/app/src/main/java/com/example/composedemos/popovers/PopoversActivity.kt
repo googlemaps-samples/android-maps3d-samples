@@ -58,6 +58,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.example.maps3d.common.toCameraString
 import com.example.maps3d.common.toValidCamera
 import com.google.android.gms.maps3d.GoogleMap3D
@@ -111,6 +113,7 @@ fun PopoversScreen() {
     val scope = rememberCoroutineScope()
     var isMapSteady by remember { mutableStateOf(false) }
     var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.SATELLITE)
     var popover by remember { mutableStateOf<Popover?>(null) }
     var popoverToggleCount by remember { mutableIntStateOf(0) }
 
@@ -202,7 +205,7 @@ fun PopoversScreen() {
             camera = initialCamera,
             markers = listOf(markerInGoldenGate),
             popovers = popovers,
-            mapMode = Map3DMode.SATELLITE,
+            mapMode = settings.mapMode,
             modifier = Modifier.fillMaxSize(),
             onMapReady = { map ->
                 googleMap3D = map
@@ -278,6 +281,16 @@ fun PopoversScreen() {
                 }
             }
         }
+
+        // 4. Quick Settings Overlay
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.SATELLITE,
+            googleMap3D = googleMap3D,
+        )
     }
 }
 

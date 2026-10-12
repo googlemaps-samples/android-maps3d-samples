@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:map3d="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/map_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
@@ -55,5 +56,17 @@
         app:layout_constraintStart_toStartOf="parent"
         android:contentDescription="@string/map_interactions_clicked_info"
         />
+
+    <com.example.maps3d.common.Map3DQuickSettingsButton
+        android:id="@+id/quick_settings_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="340dp"
+        android:layout_marginEnd="16dp"
+        android:elevation="8dp"
+        android:translationZ="8dp"
+        app:fabCustomSize="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -98,10 +98,12 @@ class ModelsActivity : SampleBaseActivity() {
         }
     }
 
+    @Map3DMode
+    override val defaultMapMode: Int = Map3DMode.SATELLITE
+
     @OptIn(FlowPreview::class)
     override fun onMapReady(googleMap3D: GoogleMap3D) {
         super.onMapReady(googleMap3D)
-        googleMap3D.setMapMode(Map3DMode.SATELLITE)
 
         // Loading and adding models can be synonymous with network or disk I/O, so we do it on a background thread.
         lifecycleScope.launch(Dispatchers.Default) {

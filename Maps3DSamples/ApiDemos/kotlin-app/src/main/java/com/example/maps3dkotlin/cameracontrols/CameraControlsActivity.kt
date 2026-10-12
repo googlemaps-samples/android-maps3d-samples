@@ -15,6 +15,7 @@
 package com.example.maps3dkotlin.cameracontrols
 
 import android.os.Bundle
+import android.view.View
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.core.view.WindowCompat
@@ -38,6 +39,8 @@ import com.example.maps3dkotlin.cameracontrols.DataModel.nycCameraRestriction
 import com.example.maps3dkotlin.cameracontrols.DataModel.nycPolygonOptions
 import com.example.maps3dkotlin.cameracontrols.DataModel.EMPIRE_STATE_BUILDING_LATITUDE
 import com.example.maps3dkotlin.cameracontrols.DataModel.EMPIRE_STATE_BUILDING_LONGITUDE
+import com.example.maps3d.common.Map3DSettings
+import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3d.common.copy
 import com.example.maps3d.common.toCompassDirection
 import com.example.maps3d.common.toValidCamera
@@ -49,9 +52,13 @@ import com.google.android.material.slider.Slider
 class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
     override val TAG = this::class.java.simpleName
 
+    @Map3DMode
+    override val defaultMapMode: Int = Map3DMode.SATELLITE
+
     private lateinit var cameraStateText: TextView
     private lateinit var rollSlider: Slider
     private lateinit var rollSliderLabel: TextView
+    private var isSyncingRadioGroup = false
 
     private var restrictionCubeFaces: MutableList<Polygon> = mutableListOf()
 
@@ -127,9 +134,15 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
 
         // Set listener for RadioGroup
         findViewById<RadioGroup>(R.id.map_mode_radio_group).setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                R.id.map_mode_hybrid -> googleMap3D?.setMapMode(Map3DMode.HYBRID)
-                R.id.map_mode_satellite -> googleMap3D?.setMapMode(Map3DMode.SATELLITE)
+            if (isSyncingRadioGroup) return@setOnCheckedChangeListener
+            val mode = when (checkedId) {
+                R.id.map_mode_hybrid -> Map3DMode.HYBRID
+                R.id.map_mode_satellite -> Map3DMode.SATELLITE
+                else -> return@setOnCheckedChangeListener
+            }
+            Map3DSettingsController.shared.setMapMode(mode)
+            googleMap3D?.let { map ->
+                Map3DSettingsController.shared.settings.value.applyTo(map)
             }
         }
 
@@ -146,6 +159,24 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
             rollSlider.value = resetValue
             updateRollSliderLabel(resetValue)
             updateMapRoll(resetValue.toDouble())
+        }
+    }
+
+    override fun onQuickSettingsChanged(settings: Map3DSettings) {
+        val group = findViewById<RadioGroup?>(R.id.map_mode_radio_group) ?: return
+        val targetId = when (settings.mapMode) {
+            Map3DMode.HYBRID -> R.id.map_mode_hybrid
+            Map3DMode.SATELLITE -> R.id.map_mode_satellite
+            else -> View.NO_ID
+        }
+        if (group.checkedRadioButtonId != targetId) {
+            isSyncingRadioGroup = true
+            if (targetId == View.NO_ID) {
+                group.clearCheck()
+            } else {
+                group.check(targetId)
+            }
+            isSyncingRadioGroup = false
         }
     }
 

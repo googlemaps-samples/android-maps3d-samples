@@ -38,6 +38,9 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,37 +52,71 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.example.maps3dcommon.R
+import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Map3DMode
+import kotlinx.coroutines.delay
 
 // [START maps_3d_quick_settings_compose_widget]
+/**
+ * Remembers and observes the application-level [Map3DSettings] session state for a Compose screen.
+ *
+ * Automatically notifies [controller] via [Map3DSettingsController.onSampleEntered] with
+ * [defaultMapMode] so that if the user has not explicitly overridden the map mode during the
+ * current session, the sample starts in its natural default mode.
+ *
+ * @param defaultMapMode The sample's default [Map3DMode] (defaults to [Map3DMode.HYBRID]).
+ * @param controller The [Map3DSettingsController] managing session state.
+ */
+@Composable
+fun rememberMap3DSessionSettings(
+    @Map3DMode defaultMapMode: Int = Map3DMode.HYBRID,
+    controller: Map3DSettingsController = Map3DSettingsController.shared,
+): State<Map3DSettings> {
+    LaunchedEffect(defaultMapMode, controller) {
+        controller.onSampleEntered(defaultMapMode)
+    }
+    return controller.settings.collectAsState()
+}
+
 /**
  * A self-contained Jetpack Compose quick settings widget for 3D map layouts.
  *
  * Renders a compact [FloatingActionButton] that opens a modal [AlertDialog] to select
- * Map Mode (Satellite, Hybrid, Roadmap), Color Scheme (Follow System, Light, Dark), and
- * toggle camera UI controls.
+ * Map Mode (Satellite, Hybrid, Roadmap), Color Scheme (Follow System, Light, Dark),
+ * toggle camera UI controls, and reset to defaults.
  *
  * @param modifier Layout modifier applied to the button (e.g. alignment inside a Box).
- * @param initialSettings The initial [Map3DSettings] configuration.
- * @param onSettingsChanged Callback invoked when map settings are modified.
+ * @param settingsController The [Map3DSettingsController] backing the widget (defaults to [Map3DSettingsController.shared]).
+ * @param sampleDefaultMapMode The hosting sample's default [Map3DMode] restored on Reset.
+ * @param googleMap3D Optional live [GoogleMap3D] instance to automatically apply settings changes.
+ * @param onSettingsChanged Optional callback invoked when map settings are modified.
  */
 @Composable
 fun Map3DQuickSettingsWidget(
     modifier: Modifier = Modifier,
-    initialSettings: Map3DSettings = Map3DSettings(),
+    settingsController: Map3DSettingsController = Map3DSettingsController.shared,
+    @Map3DMode sampleDefaultMapMode: Int = Map3DMode.HYBRID,
+    googleMap3D: GoogleMap3D? = null,
     onSettingsChanged: (Map3DSettings) -> Unit = {},
 ) {
-    var settings by remember { mutableStateOf(initialSettings) }
+    val settings by settingsController.settings.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
 
-    fun updateSettings(newSettings: Map3DSettings) {
-        settings = newSettings
-        onSettingsChanged(newSettings)
+    LaunchedEffect(googleMap3D, settings) {
+        if (googleMap3D != null) {
+            settings.applyTo(googleMap3D)
+            delay(350L)
+            settings.applyTo(googleMap3D)
+        }
     }
+
+    val extraTopPadding = (settings.uiControls.calculateFabMarginDp() - 8).coerceAtLeast(0).dp
 
     FloatingActionButton(
         onClick = { showDialog = true },
-        modifier = modifier.size(40.dp),
+        modifier = modifier
+            .padding(top = extraTopPadding, end = 8.dp)
+            .size(40.dp),
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
@@ -122,7 +159,10 @@ fun Map3DQuickSettingsWidget(
                                     .height(40.dp)
                                     .selectable(
                                         selected = (settings.mapMode == mode),
-                                        onClick = { updateSettings(settings.copy(mapMode = mode)) },
+                                        onClick = {
+                                            val updated = settingsController.setMapMode(mode)
+                                            onSettingsChanged(updated)
+                                        },
                                         role = Role.RadioButton,
                                     ),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -163,7 +203,10 @@ fun Map3DQuickSettingsWidget(
                                     .height(40.dp)
                                     .selectable(
                                         selected = (settings.colorScheme == scheme),
-                                        onClick = { updateSettings(settings.copy(colorScheme = scheme)) },
+                                        onClick = {
+                                            val updated = settingsController.setColorScheme(scheme)
+                                            onSettingsChanged(updated)
+                                        },
                                         role = Role.RadioButton,
                                     ),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -199,29 +242,36 @@ fun Map3DQuickSettingsWidget(
                         Switch(
                             checked = settings.uiControls.allEnabled,
                             onCheckedChange = { checked ->
-                                updateSettings(settings.copy(uiControls = settings.uiControls.withAll(checked)))
+                                val updated = settingsController.setAllUiControls(checked)
+                                onSettingsChanged(updated)
                             },
                         )
                     }
 
                     val controlItems = listOf(
                         Triple(stringResource(id = R.string.map3d_control_zoom), settings.uiControls.zoom) { checked: Boolean ->
-                            updateSettings(settings.copy(uiControls = settings.uiControls.copy(zoom = checked)))
+                            val updated = settingsController.updateUiControl(zoom = checked)
+                            onSettingsChanged(updated)
                         },
                         Triple(stringResource(id = R.string.map3d_control_tilt), settings.uiControls.tilt) { checked: Boolean ->
-                            updateSettings(settings.copy(uiControls = settings.uiControls.copy(tilt = checked)))
+                            val updated = settingsController.updateUiControl(tilt = checked)
+                            onSettingsChanged(updated)
                         },
                         Triple(stringResource(id = R.string.map3d_control_rotate), settings.uiControls.rotate) { checked: Boolean ->
-                            updateSettings(settings.copy(uiControls = settings.uiControls.copy(rotate = checked)))
+                            val updated = settingsController.updateUiControl(rotate = checked)
+                            onSettingsChanged(updated)
                         },
                         Triple(stringResource(id = R.string.map3d_control_compass), settings.uiControls.compass) { checked: Boolean ->
-                            updateSettings(settings.copy(uiControls = settings.uiControls.copy(compass = checked)))
+                            val updated = settingsController.updateUiControl(compass = checked)
+                            onSettingsChanged(updated)
                         },
                         Triple(stringResource(id = R.string.map3d_control_pan_v), settings.uiControls.panVertical) { checked: Boolean ->
-                            updateSettings(settings.copy(uiControls = settings.uiControls.copy(panVertical = checked)))
+                            val updated = settingsController.updateUiControl(panVertical = checked)
+                            onSettingsChanged(updated)
                         },
                         Triple(stringResource(id = R.string.map3d_control_pan_h), settings.uiControls.panHorizontal) { checked: Boolean ->
-                            updateSettings(settings.copy(uiControls = settings.uiControls.copy(panHorizontal = checked)))
+                            val updated = settingsController.updateUiControl(panHorizontal = checked)
+                            onSettingsChanged(updated)
                         },
                     )
 
@@ -243,6 +293,16 @@ fun Map3DQuickSettingsWidget(
                             )
                         }
                     }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        val updated = settingsController.reset(sampleDefaultMapMode)
+                        onSettingsChanged(updated)
+                    },
+                ) {
+                    Text(text = stringResource(id = R.string.map3d_settings_reset))
                 }
             },
             confirmButton = {

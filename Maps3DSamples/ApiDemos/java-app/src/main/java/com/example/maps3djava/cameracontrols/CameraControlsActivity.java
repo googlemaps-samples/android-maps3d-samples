@@ -20,12 +20,15 @@ import static com.example.maps3d.common.UtilitiesKt.wrapIn;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.view.WindowCompat;
 
+import com.example.maps3d.common.Map3DSettings;
+import com.example.maps3d.common.Map3DSettingsController;
 import com.example.maps3dcommon.R;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
@@ -51,9 +54,16 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
         return this.getClass().getSimpleName();
     }
 
+    @Override
+    @Map3DMode
+    protected int getDefaultMapMode() {
+        return Map3DMode.SATELLITE;
+    }
+
     private TextView cameraStateText;
     private Slider rollSlider;
     private TextView rollSliderLabel;
+    private boolean isSyncingRadioGroup = false;
 
     private final List<Polygon> restrictionCubeFaces = new ArrayList<>();
 
@@ -138,12 +148,20 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
 
 
         ((RadioGroup) findViewById(R.id.map_mode_radio_group)).setOnCheckedChangeListener((group, checkedId) -> {
+            if (isSyncingRadioGroup) {
+                return;
+            }
+            int mode;
+            if (checkedId == R.id.map_mode_hybrid) {
+                mode = Map3DMode.HYBRID;
+            } else if (checkedId == R.id.map_mode_satellite) {
+                mode = Map3DMode.SATELLITE;
+            } else {
+                return;
+            }
+            Map3DSettingsController.getShared().setMapMode(mode);
             if (googleMap3D != null) {
-                if (checkedId == R.id.map_mode_hybrid) {
-                    googleMap3D.setMapMode(Map3DMode.HYBRID);
-                } else if (checkedId == R.id.map_mode_satellite) {
-                    googleMap3D.setMapMode(Map3DMode.SATELLITE);
-                }
+                Map3DSettingsController.getShared().getSettings().applyTo(googleMap3D);
             }
         });
 
@@ -161,6 +179,30 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
             updateRollSliderLabel(resetValue);
             updateMapRoll(resetValue);
         });
+    }
+
+    @Override
+    protected void onQuickSettingsChanged(@NonNull Map3DSettings settings) {
+        RadioGroup group = findViewById(R.id.map_mode_radio_group);
+        if (group == null) {
+            return;
+        }
+        int targetId = View.NO_ID;
+        int mapMode = settings.getMapMode();
+        if (mapMode == Map3DMode.HYBRID) {
+            targetId = R.id.map_mode_hybrid;
+        } else if (mapMode == Map3DMode.SATELLITE) {
+            targetId = R.id.map_mode_satellite;
+        }
+        if (group.getCheckedRadioButtonId() != targetId) {
+            isSyncingRadioGroup = true;
+            if (targetId == View.NO_ID) {
+                group.clearCheck();
+            } else {
+                group.check(targetId);
+            }
+            isSyncingRadioGroup = false;
+        }
     }
 
     private void updateRollSliderLabel(float value) {

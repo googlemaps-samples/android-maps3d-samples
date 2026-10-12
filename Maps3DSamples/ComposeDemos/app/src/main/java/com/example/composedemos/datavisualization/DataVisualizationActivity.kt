@@ -55,6 +55,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
@@ -98,6 +100,7 @@ fun DataVisualizationScreen() {
     val context = LocalContext.current
     var isMapSteady by remember { mutableStateOf(false) }
     var googleMap3DInstance by remember { mutableStateOf<GoogleMap3D?>(null) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.HYBRID)
     var currentFloodElevation by remember { mutableDoubleStateOf(10.0) }
     var isSimulating by remember { mutableStateOf(false) }
     var activePolygon by remember { mutableStateOf<Polygon?>(null) }
@@ -176,11 +179,10 @@ fun DataVisualizationScreen() {
     ) {
         GoogleMap3D(
             camera = initialCamera,
-            mapMode = Map3DMode.HYBRID,
+            mapMode = settings.mapMode,
             modifier = Modifier.fillMaxSize(),
             onMapReady = { map ->
                 googleMap3DInstance = map
-                map.setMapMode(Map3DMode.HYBRID)
                 map.flyCameraTo(
                     flyToOptions {
                         endCamera = initialCamera
@@ -275,6 +277,16 @@ fun DataVisualizationScreen() {
                 }
             }
         }
+
+        // Quick Settings Overlay
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.HYBRID,
+            googleMap3D = googleMap3DInstance,
+        )
     }
 }
 

@@ -49,7 +49,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -70,7 +69,10 @@ import com.example.composedemos.cameracontrols.DataModel.EMPIRE_STATE_BUILDING_L
 import com.example.composedemos.cameracontrols.DataModel.EMPIRE_STATE_BUILDING_LONGITUDE
 import com.example.composedemos.cameracontrols.DataModel.nycCameraRestriction
 import com.example.composedemos.cameracontrols.DataModel.nycPolygonConfigs
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3d.common.copy
+import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.example.maps3d.common.toCompassDirection
 import com.example.maps3d.common.toValidCamera
 import com.example.maps3d.common.wrapIn
@@ -117,6 +119,7 @@ fun CameraControlsScreen() {
     var isMapSteady by remember { mutableStateOf(false) }
     var hasTriggeredInitialFlyTo by remember { mutableStateOf(false) }
     var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.SATELLITE)
 
     val initialCamera = remember {
         camera {
@@ -133,7 +136,7 @@ fun CameraControlsScreen() {
 
     var showRestriction by remember { mutableStateOf(false) }
     var isCameraRestricted by remember { mutableStateOf(false) }
-    var selectedMapMode by remember { mutableIntStateOf(Map3DMode.SATELLITE) }
+    val selectedMapMode = settings.mapMode
     var rollValue by remember { mutableFloatStateOf(0.0f) }
     var telemetryCamera by remember { mutableStateOf(initialCamera) }
 
@@ -320,7 +323,9 @@ fun CameraControlsScreen() {
                                 .weight(1f)
                                 .selectable(
                                     selected = (selectedMapMode == modeValue),
-                                    onClick = { selectedMapMode = modeValue },
+                                    onClick = {
+                                        Map3DSettingsController.shared.setMapMode(modeValue)
+                                    },
                                     role = Role.RadioButton,
                                 )
                                 .padding(vertical = 4.dp),
@@ -393,6 +398,16 @@ fun CameraControlsScreen() {
                 )
             }
         }
+
+        // 4. Quick Settings Overlay
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.SATELLITE,
+            googleMap3D = googleMap3D,
+        )
     }
 }
 

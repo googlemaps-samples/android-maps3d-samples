@@ -18,9 +18,11 @@ package com.example.maps3d.common
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
+import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 // [START maps_3d_quick_settings_button]
@@ -29,10 +31,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
  *
  * Can be positioned anywhere in a layout (e.g., top-end or bottom-end of the map).
  * Clicking the button opens a modal [Map3DQuickSettingsDialog] allowing the user
- * to switch map modes (Satellite, Hybrid, Roadmap) and color schemes (System, Light, Dark).
+ * to switch map modes (Satellite, Hybrid, Roadmap), color schemes (System, Light, Dark),
+ * and camera UI controls.
  *
- * When attached to a [GoogleMap3D] instance via [attachMap], changes are automatically
- * applied in real time to the 3D map.
+ * Defaults to [Map3DSettingsController.shared] so user choices stay consistent across
+ * all samples during an app session.
  */
 class Map3DQuickSettingsButton @JvmOverloads constructor(
     context: Context,
@@ -44,7 +47,45 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
         fun onSettingsChanged(settings: Map3DSettings)
     }
 
-    private val controller = Map3DSettingsController()
+    private val controllerListener: (Map3DSettings) -> Unit = { updatedSettings ->
+        val map = attachedMap ?: mapProvider?.invoke()
+        map?.let { updatedSettings.applyTo(it) }
+        updateTopMarginForUiControls(updatedSettings.uiControls)
+        onSettingsChangedListener?.onSettingsChanged(updatedSettings)
+    }
+
+    /**
+     * Controller backing this button's settings state.
+     * Defaults to the application-scoped [Map3DSettingsController.shared] instance.
+     */
+    var settingsController: Map3DSettingsController = Map3DSettingsController.shared
+        set(value) {
+            if (field !== value) {
+                field.removeListener(controllerListener)
+                field = value
+                field.addListener(controllerListener)
+                updateTopMarginForUiControls(field.getSettings().uiControls)
+            }
+        }
+
+    /**
+     * The hosting sample's default [Map3DMode], restored if the user taps "Reset to Defaults".
+     */
+    @Map3DMode
+    var sampleDefaultMapMode: Int = Map3DMode.HYBRID
+
+    /**
+     * Additional top inset (in pixels) to add when the map and button are laid out edge-to-edge
+     * behind the status bar.
+     */
+    var statusBarTopOffsetPx: Int = 0
+        set(value) {
+            if (field != value) {
+                field = value
+                updateTopMarginForUiControls()
+            }
+        }
+
     private var attachedMap: GoogleMap3D? = null
     private var mapProvider: (() -> GoogleMap3D?)? = null
     private var activeDialog: AlertDialog? = null
@@ -55,14 +96,48 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
         contentDescription = context.getString(R.string.map3d_settings_button_description)
         size = SIZE_MINI
 
-        controller.addListener { updatedSettings ->
-            val map = attachedMap ?: mapProvider?.invoke()
-            map?.let { updatedSettings.applyTo(it) }
-            onSettingsChangedListener?.onSettingsChanged(updatedSettings)
-        }
+        settingsController.addListener(controllerListener)
 
         setOnClickListener {
             showDialog()
+        }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        settingsController.addListener(controllerListener)
+        updateTopMarginForUiControls()
+        post { updateTopMarginForUiControls() }
+    }
+
+    override fun onDetachedFromWindow() {
+        settingsController.removeListener(controllerListener)
+        super.onDetachedFromWindow()
+    }
+
+    private fun resolveEffectiveStatusBarOffsetPx(): Int {
+        if (statusBarTopOffsetPx > 0) return statusBarTopOffsetPx
+        val parentGroup = parent as? ViewGroup ?: return 0
+        val mapView = (attachedMap ?: mapProvider?.invoke())?.let {
+            Map3DSettings.resolveMapView(it)
+        } ?: parentGroup.findViewById<ViewGroup?>(R.id.map3dView)
+        return Map3DSettings.resolveStatusBarOverlapPx(mapView ?: parentGroup)
+    }
+
+    /**
+     * Adjusts this button's top margin so it sits directly below the active trailing camera UI
+     * controls ([Map3DUiControls.zoom], [Map3DUiControls.tilt], [Map3DUiControls.rotate]).
+     */
+    @JvmOverloads
+    fun updateTopMarginForUiControls(uiControls: Map3DUiControls = getSettings().uiControls) {
+        val lp = layoutParams as? ViewGroup.MarginLayoutParams ?: return
+        val density = resources.displayMetrics.density
+        val baseMarginDp = uiControls.calculateFabMarginDp()
+        val effectiveStatusBarOffset = resolveEffectiveStatusBarOffsetPx()
+        val targetTopMargin = effectiveStatusBarOffset + (baseMarginDp * density).toInt()
+        if (lp.topMargin != targetTopMargin) {
+            lp.topMargin = targetTopMargin
+            layoutParams = lp
         }
     }
 
@@ -73,15 +148,26 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
      */
     fun attachMap(googleMap3D: GoogleMap3D?) {
         this.attachedMap = googleMap3D
+        val currentSettings = settingsController.getSettings()
+        updateTopMarginForUiControls(currentSettings.uiControls)
         if (googleMap3D != null) {
-            controller.getSettings().applyTo(googleMap3D)
+            currentSettings.applyTo(googleMap3D)
             // Re-apply after a short delay to ensure native engine layout pass preserves controls
             postDelayed({
                 if (attachedMap == googleMap3D) {
-                    controller.getSettings().applyTo(googleMap3D)
+                    val latest = settingsController.getSettings()
+                    latest.applyTo(googleMap3D)
+                    updateTopMarginForUiControls(latest.uiControls)
                 }
             }, 350L)
         }
+    }
+
+    /**
+     * Attaches a [GoogleMap3D] instance (alias for [attachMap]).
+     */
+    fun attachToMap(googleMap3D: GoogleMap3D?) {
+        attachMap(googleMap3D)
     }
 
     /**
@@ -92,15 +178,15 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
     }
 
     /** Returns the current [Map3DSettings] snapshot. */
-    fun getSettings(): Map3DSettings = controller.getSettings()
+    fun getSettings(): Map3DSettings = settingsController.getSettings()
 
     /** Programmatically sets new [Map3DSettings]. */
     fun setSettings(settings: Map3DSettings) {
-        controller.setSettings(settings)
+        settingsController.setSettings(settings)
     }
 
     /** Sets a callback invoked whenever the user updates settings in the dialog. */
-    fun setOnSettingsChangedListener(listener: OnSettingsChangedListener) {
+    fun setOnSettingsChangedListener(listener: OnSettingsChangedListener?) {
         this.onSettingsChangedListener = listener
     }
 
@@ -110,8 +196,9 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
         activeDialog?.dismiss()
         activeDialog = Map3DQuickSettingsDialog.show(
             context = context,
-            controller = controller,
+            controller = settingsController,
             googleMap3D = map,
+            sampleDefaultMapMode = sampleDefaultMapMode,
             onDismiss = { activeDialog = null },
         )
     }

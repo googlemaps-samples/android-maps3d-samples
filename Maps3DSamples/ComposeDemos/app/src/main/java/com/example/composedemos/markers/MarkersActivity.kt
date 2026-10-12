@@ -70,6 +70,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.composedemos.markers.data.Monster
 import com.example.composedemos.markers.data.MonsterParser
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.example.maps3d.common.toCameraString
 import com.example.maps3d.common.toValidCamera
 import com.google.android.gms.maps3d.GoogleMap3D
@@ -143,6 +145,7 @@ fun MarkersScreen() {
     var isMapSteady by remember { mutableStateOf(false) }
     val mapSteadyFlow = remember { MutableStateFlow(false) }
     var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.SATELLITE)
     var popovers by remember { mutableStateOf(emptyList<PopoverConfig>()) }
     var isTouring by remember { mutableStateOf(false) }
     var showMonsterMenu by remember { mutableStateOf(false) }
@@ -470,7 +473,7 @@ fun MarkersScreen() {
         // 1. Map fills the entire screen
         GoogleMap3D(
             camera = nycCamera,
-            mapMode = Map3DMode.SATELLITE,
+            mapMode = settings.mapMode,
             markers = allMarkers,
             popovers = popovers,
             modifier = Modifier.fillMaxSize(),
@@ -695,6 +698,16 @@ fun MarkersScreen() {
                 }
             }
         }
+
+        // 4. Quick Settings Overlay
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.SATELLITE,
+            googleMap3D = googleMap3D,
+        )
     }
 }
 

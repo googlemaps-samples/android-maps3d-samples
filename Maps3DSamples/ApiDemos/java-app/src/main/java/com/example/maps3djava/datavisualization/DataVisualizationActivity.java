@@ -41,7 +41,6 @@ import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
-import com.google.android.gms.maps3d.model.Map3DMode;
 import com.google.android.gms.maps3d.model.Polygon;
 import com.google.android.gms.maps3d.model.PolygonOptions;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -306,16 +305,10 @@ public class DataVisualizationActivity extends SampleBaseActivity {
   // --- 3D Map Setup & Extrusion Engine ---
 
   @Override
-  public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
-    super.onMap3DViewReady(googleMap3D);
-
-    googleMap3D.setMapMode(Map3DMode.HYBRID);
-
-    googleMap3D.setOnMapReadyListener(sceneReadiness -> {
-      googleMap3D.setOnMapReadyListener(null);
-      googleMap3D.flyCameraTo(new FlyToOptions(getInitialCamera(), 1200));
-      runOnUiThread(() -> updateFloodElevation(currentFloodElevation));
-    });
+  protected void onMapReady(@NonNull GoogleMap3D googleMap3D) {
+    super.onMapReady(googleMap3D);
+    googleMap3D.flyCameraTo(new FlyToOptions(getInitialCamera(), 1200));
+    runOnUiThread(() -> updateFloodElevation(currentFloodElevation));
   }
 
   /**

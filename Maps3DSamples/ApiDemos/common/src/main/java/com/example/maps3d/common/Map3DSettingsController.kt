@@ -17,12 +17,15 @@
 package com.example.maps3d.common
 
 import com.google.android.gms.maps3d.model.Map3DMode
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 // [START maps_3d_quick_settings_controller]
 /**
  * Pure Kotlin state machine controller for managing 3D map settings.
  *
- * Manages transitions between map rendering modes and color schemes.
+ * Manages transitions between map rendering modes, color schemes, and camera UI controls.
  * Completely decoupled from Android UI and Views for deterministic JVM unit testing.
  *
  * @param initialSettings Initial settings snapshot (defaults to [Map3DMode.HYBRID] and [Map3DColorScheme.FOLLOW_SYSTEM]).
@@ -30,70 +33,129 @@ import com.google.android.gms.maps3d.model.Map3DMode
 class Map3DSettingsController(
     initialSettings: Map3DSettings = Map3DSettings(),
 ) {
-    private var state: Map3DSettings = initialSettings
+    companion object {
+        /**
+         * Application-scoped in-memory singleton instance.
+         *
+         * Persists user choices across sample activities during a single app session
+         * and resets cleanly when a new process session starts.
+         */
+        @JvmStatic
+        val shared = Map3DSettingsController()
+    }
+
+    private val _settings = MutableStateFlow(initialSettings)
+
+    /** Reactive stream of the current [Map3DSettings] snapshot. */
+    @get:JvmName("getSettingsFlow")
+    val settings: StateFlow<Map3DSettings> = _settings.asStateFlow()
+
+    /**
+     * Tracks whether the user has explicitly selected a Map Mode during the current session.
+     *
+     * When `false`, entering a sample via [onSampleEntered] adopts that sample's default map mode.
+     * When `true`, the user's explicit choice is preserved across all samples until [reset] is called.
+     */
+    var hasUserOverriddenMapMode: Boolean = false
+        private set
+
     private val listeners = mutableListOf<(Map3DSettings) -> Unit>()
 
     /** Returns the current [Map3DSettings] snapshot. */
-    fun getSettings(): Map3DSettings = state
+    fun getSettings(): Map3DSettings = _settings.value
+
+    /**
+     * Called when a sample activity or screen is entered.
+     *
+     * If the user has not explicitly overridden the map mode during this session,
+     * updates the active map mode to [sampleDefaultMapMode].
+     */
+    fun onSampleEntered(@Map3DMode sampleDefaultMapMode: Int) {
+        if (!hasUserOverriddenMapMode) {
+            val sanitized = sanitizeMapMode(sampleDefaultMapMode) ?: return
+            if (sanitized != _settings.value.mapMode) {
+                _settings.value = _settings.value.copy(mapMode = sanitized)
+                notifyListeners()
+            }
+        }
+    }
+
+    /**
+     * Resets all settings to defaults (`FOLLOW_SYSTEM`, all UI controls enabled,
+     * and [sampleDefaultMapMode]) and clears [hasUserOverriddenMapMode].
+     */
+    @JvmOverloads
+    fun reset(@Map3DMode sampleDefaultMapMode: Int = Map3DMode.HYBRID): Map3DSettings {
+        hasUserOverriddenMapMode = false
+        val sanitized = sanitizeMapMode(sampleDefaultMapMode) ?: Map3DMode.HYBRID
+        val defaultSettings = Map3DSettings(mapMode = sanitized)
+        if (_settings.value != defaultSettings) {
+            _settings.value = defaultSettings
+            notifyListeners()
+        }
+        return _settings.value
+    }
 
     /**
      * Updates the map rendering mode ([Map3DMode.SATELLITE], [Map3DMode.HYBRID], or [Map3DMode.ROADMAP]).
      *
-     * Invalid or unknown modes are ignored.
+     * Marks [hasUserOverriddenMapMode] as `true` for valid modes so the user's choice persists
+     * across samples. Invalid or unknown modes are ignored.
      */
     fun setMapMode(@Map3DMode mode: Int): Map3DSettings {
-        val sanitized = sanitizeMapMode(mode)
-        if (sanitized == null || sanitized == state.mapMode) {
-            return state
+        val sanitized = sanitizeMapMode(mode) ?: return _settings.value
+        hasUserOverriddenMapMode = true
+        if (sanitized == _settings.value.mapMode) {
+            return _settings.value
         }
-        state = state.copy(mapMode = sanitized)
+        _settings.value = _settings.value.copy(mapMode = sanitized)
         notifyListeners()
-        return state
+        return _settings.value
     }
 
     /**
      * Updates the color scheme ([Map3DColorScheme.FOLLOW_SYSTEM], [Map3DColorScheme.LIGHT], or [Map3DColorScheme.DARK]).
      */
     fun setColorScheme(scheme: Map3DColorScheme): Map3DSettings {
-        if (scheme == state.colorScheme) {
-            return state
+        if (scheme == _settings.value.colorScheme) {
+            return _settings.value
         }
-        state = state.copy(colorScheme = scheme)
+        _settings.value = _settings.value.copy(colorScheme = scheme)
         notifyListeners()
-        return state
+        return _settings.value
     }
 
     /**
      * Updates the UI controls visibility configuration.
      */
     fun setUiControls(uiControls: Map3DUiControls): Map3DSettings {
-        if (uiControls == state.uiControls) {
-            return state
+        if (uiControls == _settings.value.uiControls) {
+            return _settings.value
         }
-        state = state.copy(uiControls = uiControls)
+        _settings.value = _settings.value.copy(uiControls = uiControls)
         notifyListeners()
-        return state
+        return _settings.value
     }
 
     /**
      * Toggles all UI controls on or off simultaneously.
      */
     fun setAllUiControls(enabled: Boolean): Map3DSettings {
-        return setUiControls(state.uiControls.withAll(enabled))
+        return setUiControls(_settings.value.uiControls.withAll(enabled))
     }
 
     /**
      * Updates a single UI control's visibility.
      */
     fun updateUiControl(
-        zoom: Boolean = state.uiControls.zoom,
-        tilt: Boolean = state.uiControls.tilt,
-        rotate: Boolean = state.uiControls.rotate,
-        compass: Boolean = state.uiControls.compass,
-        panVertical: Boolean = state.uiControls.panVertical,
-        panHorizontal: Boolean = state.uiControls.panHorizontal,
+        zoom: Boolean = _settings.value.uiControls.zoom,
+        tilt: Boolean = _settings.value.uiControls.tilt,
+        rotate: Boolean = _settings.value.uiControls.rotate,
+        compass: Boolean = _settings.value.uiControls.compass,
+        panVertical: Boolean = _settings.value.uiControls.panVertical,
+        panHorizontal: Boolean = _settings.value.uiControls.panHorizontal,
     ): Map3DSettings {
-        val updatedControls = state.uiControls.copy(
+        val updatedControls = _settings.value.uiControls.copy(
             zoom = zoom,
             tilt = tilt,
             rotate = rotate,
@@ -108,17 +170,20 @@ class Map3DSettingsController(
      * Replaces the entire settings snapshot.
      */
     fun setSettings(newSettings: Map3DSettings): Map3DSettings {
-        if (newSettings == state) {
-            return state
+        if (newSettings == _settings.value) {
+            return _settings.value
         }
-        val sanitizedMode = sanitizeMapMode(newSettings.mapMode) ?: state.mapMode
-        state = Map3DSettings(
+        val sanitizedMode = sanitizeMapMode(newSettings.mapMode) ?: _settings.value.mapMode
+        if (sanitizedMode != _settings.value.mapMode) {
+            hasUserOverriddenMapMode = true
+        }
+        _settings.value = Map3DSettings(
             mapMode = sanitizedMode,
             colorScheme = newSettings.colorScheme,
             uiControls = newSettings.uiControls,
         )
         notifyListeners()
-        return state
+        return _settings.value
     }
 
     /** Registers a listener invoked whenever settings change. */
@@ -141,8 +206,8 @@ class Map3DSettingsController(
     }
 
     private fun notifyListeners() {
-        val currentSnapshot = state
-        for (listener in listeners) {
+        val currentSnapshot = _settings.value
+        for (listener in listeners.toList()) {
             listener(currentSnapshot)
         }
     }

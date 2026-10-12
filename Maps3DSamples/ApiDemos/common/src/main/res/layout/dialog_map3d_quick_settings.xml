@@ -192,5 +192,14 @@
                 android:text="@string/map3d_control_pan_h" />
         </LinearLayout>
 
+        <!-- Reset to Defaults Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_reset_settings"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="@string/map3d_settings_reset" />
+
     </LinearLayout>
 </ScrollView>
