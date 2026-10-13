@@ -16,6 +16,7 @@
 
 package com.example.maps3d.common
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,6 +38,8 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -54,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Map3DMode
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 
 // [START maps_3d_quick_settings_compose_widget]
@@ -72,10 +76,32 @@ fun rememberMap3DSessionSettings(
     @Map3DMode defaultMapMode: Int = Map3DMode.HYBRID,
     controller: Map3DSettingsController = Map3DSettingsController.shared,
 ): State<Map3DSettings> {
-    LaunchedEffect(defaultMapMode, controller) {
+    remember(defaultMapMode, controller) {
         controller.onSampleEntered(defaultMapMode)
+        true
     }
     return controller.settings.collectAsState()
+}
+
+/**
+ * Material3 theme wrapper that selects [darkColorScheme] or [lightColorScheme] based on
+ * the current [Map3DSettings.colorScheme] in [controller].
+ */
+@Composable
+fun Map3DSessionTheme(
+    controller: Map3DSettingsController = Map3DSettingsController.shared,
+    content: @Composable () -> Unit,
+) {
+    val settings by controller.settings.collectAsState()
+    val useDarkTheme = when (settings.colorScheme) {
+        Map3DColorScheme.LIGHT -> false
+        Map3DColorScheme.DARK -> true
+        Map3DColorScheme.FOLLOW_SYSTEM -> isSystemInDarkTheme()
+    }
+    MaterialTheme(
+        colorScheme = if (useDarkTheme) darkColorScheme() else lightColorScheme(),
+        content = content,
+    )
 }
 
 /**
@@ -102,32 +128,38 @@ fun Map3DQuickSettingsWidget(
     val settings by settingsController.settings.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(googleMap3D, settings) {
+    LaunchedEffect(googleMap3D as Any?, settings) {
         if (googleMap3D != null) {
             settings.applyTo(googleMap3D)
-            delay(350L)
-            settings.applyTo(googleMap3D)
+        }
+    }
+
+    LaunchedEffect(googleMap3D as Any?) {
+        if (googleMap3D != null) {
+            delay(350.milliseconds)
+            settingsController.settings.value.applyTo(googleMap3D)
         }
     }
 
     val extraTopPadding = (settings.uiControls.calculateFabMarginDp() - 8).coerceAtLeast(0).dp
 
-    FloatingActionButton(
-        onClick = { showDialog = true },
-        modifier = modifier
-            .padding(top = extraTopPadding, end = 8.dp)
-            .size(40.dp),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.settings_24px),
-            contentDescription = stringResource(id = R.string.map3d_settings_button_description),
-            modifier = Modifier.size(20.dp),
-        )
-    }
+    Map3DSessionTheme(controller = settingsController) {
+        FloatingActionButton(
+            onClick = { showDialog = true },
+            modifier = modifier
+                .padding(top = extraTopPadding, end = 8.dp)
+                .size(40.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.settings_24px),
+                contentDescription = stringResource(id = R.string.map3d_settings_button_description),
+                modifier = Modifier.size(20.dp),
+            )
+        }
 
-    if (showDialog) {
+        if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
             title = {
@@ -311,6 +343,7 @@ fun Map3DQuickSettingsWidget(
                 }
             },
         )
+        }
     }
 }
 // [END maps_3d_quick_settings_compose_widget]

@@ -14,7 +14,7 @@
 
 package com.example.maps3djava.hellomap;
 
-import android.app.Activity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -40,7 +40,7 @@ import com.google.android.gms.maps3d.model.Map3DMode;
  * is close the minimal activity.  It inflates the `activity_hello_map.xml` layout file and
  * demonstrates how to initialize the `Map3DView` and get a `GoogleMap3D` reference.
  */
-public class HelloMapActivity extends Activity implements OnMap3DViewReadyCallback, OnMapReadyListener {
+public class HelloMapActivity extends AppCompatActivity implements OnMap3DViewReadyCallback, OnMapReadyListener {
     private final String TAG = this.getClass().getSimpleName();
     private Map3DView map3DView;
     private GoogleMap3D googleMap3D = null;

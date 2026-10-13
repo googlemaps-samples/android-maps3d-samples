@@ -232,10 +232,17 @@ data class Map3DSettings(
         @JvmOverloads
         fun resolveStatusBarOverlapPx(view: View, explicitStatusBarTop: Int? = null): Int {
             val parentView = view.parent as? ViewGroup
-            if (parentView != null &&
-                parentView.findViewById<View?>(R.id.top_bar) != null &&
-                parentView.findViewById<View?>(R.id.app_bar_layout) == null
-            ) {
+            val topBar = parentView?.findViewById<View?>(R.id.top_bar)
+            val appBarLayout = parentView?.findViewById<View?>(R.id.app_bar_layout)
+            if (topBar != null && appBarLayout == null) {
+                if (view.isLaidOut && topBar.isLaidOut && topBar.visibility == View.VISIBLE) {
+                    val viewLoc = IntArray(2)
+                    val barLoc = IntArray(2)
+                    view.getLocationInWindow(viewLoc)
+                    topBar.getLocationInWindow(barLoc)
+                    val barBottom = barLoc[1] + topBar.height
+                    return (barBottom - viewLoc[1]).coerceAtLeast(0)
+                }
                 return 0
             }
             val statusBarTop = resolveStatusBarHeightPx(view, explicitStatusBarTop)

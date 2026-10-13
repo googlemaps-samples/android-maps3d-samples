@@ -14,10 +14,10 @@
 
 package com.example.maps3dkotlin.hellomap
 
-import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -37,7 +37,7 @@ import com.google.android.gms.maps3d.model.Map3DMode
  * map, initializing the `Map3DView`, and obtaining a reference to the `GoogleMap3D` object
  * to interact with the map programmatically.
  */
-class HelloMapActivity : Activity(), OnMap3DViewReadyCallback {
+class HelloMapActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     // Using a companion object for the TAG is a common Kotlin pattern. It's static, final,
     // and accessible via the class name, making it a good practice for logging.
     companion object {

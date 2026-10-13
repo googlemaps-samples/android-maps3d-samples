@@ -70,6 +70,7 @@ import com.example.composedemos.cameracontrols.DataModel.EMPIRE_STATE_BUILDING_L
 import com.example.composedemos.cameracontrols.DataModel.nycCameraRestriction
 import com.example.composedemos.cameracontrols.DataModel.nycPolygonConfigs
 import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.Map3DSessionTheme
 import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3d.common.copy
 import com.example.maps3d.common.rememberMap3DSessionSettings
@@ -101,7 +102,7 @@ class CameraControlsActivity : ComponentActivity() {
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
-            MaterialTheme {
+            Map3DSessionTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,

@@ -63,7 +63,9 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
             if (field !== value) {
                 field.removeListener(controllerListener)
                 field = value
-                field.addListener(controllerListener)
+                if (isAttachedToWindow) {
+                    field.addListener(controllerListener)
+                }
                 updateTopMarginForUiControls(field.getSettings().uiControls)
             }
         }
@@ -96,8 +98,6 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
         contentDescription = context.getString(R.string.map3d_settings_button_description)
         size = SIZE_MINI
 
-        settingsController.addListener(controllerListener)
-
         setOnClickListener {
             showDialog()
         }
@@ -111,6 +111,8 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
     }
 
     override fun onDetachedFromWindow() {
+        activeDialog?.dismiss()
+        activeDialog = null
         settingsController.removeListener(controllerListener)
         super.onDetachedFromWindow()
     }

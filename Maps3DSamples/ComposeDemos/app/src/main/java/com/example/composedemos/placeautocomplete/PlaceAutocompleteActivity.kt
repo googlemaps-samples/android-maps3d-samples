@@ -23,16 +23,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.example.maps3d.common.Map3DQuickSettingsWidget
-import com.example.maps3d.common.rememberMap3DSessionSettings
-import com.google.android.gms.maps3d.model.Map3DMode
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 class PlaceAutocompleteActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,7 +38,6 @@ class PlaceAutocompleteActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MaterialTheme {
-                rememberMap3DSessionSettings(defaultMapMode = Map3DMode.HYBRID)
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Box(
                         modifier = Modifier
@@ -51,13 +48,6 @@ class PlaceAutocompleteActivity : ComponentActivity() {
                         Text(
                             text = "TODO: Place Autocomplete sample will be implemented here.",
                             style = MaterialTheme.typography.headlineSmall,
-                        )
-                        Map3DQuickSettingsWidget(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .statusBarsPadding()
-                                .padding(top = 8.dp, end = 8.dp),
-                            sampleDefaultMapMode = Map3DMode.HYBRID,
                         )
                     }
                 }

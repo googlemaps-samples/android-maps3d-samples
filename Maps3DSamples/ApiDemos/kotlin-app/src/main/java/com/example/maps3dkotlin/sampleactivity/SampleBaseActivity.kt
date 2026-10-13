@@ -299,6 +299,7 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         isMapInitialized = true
         Log.d(TAG, "onMapReady called (guaranteed once)")
 
+        googleMap3D.setCamera(initialCamera)
         Map3DSettingsController.shared.onSampleEntered(defaultMapMode)
         val initialSettings = Map3DSettingsController.shared.settings.value
         initialSettings.applyTo(googleMap3D)
@@ -317,12 +318,11 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
 
         // Workaround: The Maps 3D SDK onMapReady callback fires when the map object
         // is instantiated, but the internal native rendering pipeline and layout pass may briefly
-        // override initial programmatic camera positions or control hierarchies. A short delay ensures
-        // the native map viewport has fully stabilized before applying camera and ensuring UI controls are present.
+        // override control hierarchies. A short delay ensures
+        // the native map viewport has fully stabilized before ensuring UI controls are present.
         Handler(Looper.getMainLooper()).postDelayed({
             if (!isDestroyed && !isFinishing) {
                 this.googleMap3D?.let { map ->
-                    map.setCamera(initialCamera)
                     val currentSettings = Map3DSettingsController.shared.settings.value
                     currentSettings.applyTo(map)
                     onQuickSettingsChanged(currentSettings)

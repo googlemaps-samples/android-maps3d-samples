@@ -93,6 +93,7 @@ import com.example.maps3d.common.AnimationApproach
 import com.example.maps3d.common.CameraKeyframe
 import com.example.maps3d.common.EntityPose
 import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.Map3DSessionTheme
 import com.example.maps3d.common.SimpleFlyToMode
 import com.example.maps3d.common.StationaryCameraTracker
 import com.example.maps3d.common.TourData
@@ -127,7 +128,7 @@ class AdvancedCameraAnimationActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaterialTheme {
+            Map3DSessionTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                         AdvancedCameraAnimationScreen()

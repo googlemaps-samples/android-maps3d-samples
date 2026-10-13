@@ -255,6 +255,7 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
         isMapInitialized = true;
         Log.d(getTAG(), "onMapReady called (guaranteed once)");
 
+        googleMap3D.setCamera(getInitialCamera());
         Map3DSettingsController.getShared().onSampleEntered(getDefaultMapMode());
         Map3DSettings initialSettings = Map3DSettingsController.getShared().getSettings();
         initialSettings.applyTo(googleMap3D);
@@ -272,10 +273,9 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
         }
         applyStatusBarInsetsToMapControls(lastStatusBarTop, null);
 
-        // Re-apply and position camera after viewport stabilizes
+        // Re-apply settings and UI controls after viewport stabilizes
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (!isDestroyed() && !isFinishing() && this.googleMap3D != null) {
-                this.googleMap3D.setCamera(getInitialCamera());
                 Map3DSettings currentSettings = Map3DSettingsController.getShared().getSettings();
                 currentSettings.applyTo(this.googleMap3D);
                 onQuickSettingsChanged(currentSettings);
