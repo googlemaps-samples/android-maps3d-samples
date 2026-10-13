@@ -43,57 +43,62 @@ val DEFAULT_LOCALIZATION_CAMERA: Camera = camera {
 enum class MapLocalePreset(
     val displayName: String,
     val nativeLabel: String,
-    val language: String,
-    val region: String,
+    private val rawLanguage: String? = null,
+    private val rawRegion: String? = null,
 ) {
     ENGLISH_US(
         displayName = "English (US)",
         nativeLabel = "en-US",
-        language = "en",
-        region = "US",
+        rawLanguage = "en",
+        rawRegion = "US",
     ),
     CHINESE_CHINA(
         displayName = "Chinese (China)",
         nativeLabel = "中文 (zh-CN)",
-        language = "zh",
-        region = "CN",
+        rawLanguage = "zh",
+        rawRegion = "CN",
     ),
     FRENCH_FRANCE(
         displayName = "French (France)",
         nativeLabel = "Français (fr-FR)",
-        language = "fr",
-        region = "FR",
+        rawLanguage = "fr",
+        rawRegion = "FR",
     ),
     JAPANESE_JAPAN(
         displayName = "Japanese (Japan)",
         nativeLabel = "日本語 (ja-JP)",
-        language = "ja",
-        region = "JP",
+        rawLanguage = "ja",
+        rawRegion = "JP",
     ),
     SPANISH_SPAIN(
         displayName = "Spanish (Spain)",
         nativeLabel = "Español (es-ES)",
-        language = "es",
-        region = "ES",
+        rawLanguage = "es",
+        rawRegion = "ES",
     ),
     ARABIC_SAUDI_ARABIA(
         displayName = "Arabic (Saudi Arabia)",
         nativeLabel = "العربية (ar-SA)",
-        language = "ar",
-        region = "SA",
+        rawLanguage = "ar",
+        rawRegion = "SA",
     ),
     GERMAN_GERMANY(
         displayName = "German (Germany)",
         nativeLabel = "Deutsch (de-DE)",
-        language = "de",
-        region = "DE",
+        rawLanguage = "de",
+        rawRegion = "DE",
     ),
     SYSTEM_DEFAULT(
         displayName = "System Default",
         nativeLabel = SYSTEM_DEFAULT_CODE,
-        language = Locale.getDefault().language,
-        region = Locale.getDefault().country,
-    )
+    ),
+    ;
+
+    val language: String
+        get() = rawLanguage ?: Locale.getDefault().language
+
+    val region: String
+        get() = rawRegion ?: Locale.getDefault().country
 }
 
 /**

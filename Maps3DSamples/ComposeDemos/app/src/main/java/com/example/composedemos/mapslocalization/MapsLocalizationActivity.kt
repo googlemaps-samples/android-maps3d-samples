@@ -129,7 +129,7 @@ fun MapsLocalizationScreen(
     var googleMap3DInstance by remember { mutableStateOf<GoogleMap3D?>(null) }
     var isPanelExpanded by remember { mutableStateOf(true) }
 
-    LaunchedEffect(googleMap3DInstance, state.selectedPreset) {
+    LaunchedEffect(googleMap3DInstance, state.languageCode, state.regionCode) {
         googleMap3DInstance?.setLocale(state.toLocaleOptions())
     }
 

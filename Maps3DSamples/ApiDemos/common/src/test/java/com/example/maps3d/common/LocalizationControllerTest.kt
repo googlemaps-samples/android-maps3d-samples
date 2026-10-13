@@ -77,6 +77,24 @@ class LocalizationControllerTest {
     }
 
     @Test
+    fun `selectPreset SYSTEM_DEFAULT dynamically reflects runtime Locale changes`() {
+        val originalDefault = Locale.getDefault()
+        try {
+            Locale.setDefault(Locale.ITALY)
+            val italyState = controller.selectPreset(MapLocalePreset.SYSTEM_DEFAULT)
+            assertThat(italyState.languageCode).isEqualTo("it")
+            assertThat(italyState.regionCode).isEqualTo("IT")
+
+            Locale.setDefault(Locale.KOREA)
+            val koreaState = controller.selectPreset(MapLocalePreset.SYSTEM_DEFAULT)
+            assertThat(koreaState.languageCode).isEqualTo("ko")
+            assertThat(koreaState.regionCode).isEqualTo("KR")
+        } finally {
+            Locale.setDefault(originalDefault)
+        }
+    }
+
+    @Test
     fun `setMapMode updates mapMode cleanly`() {
         val updatedState = controller.setMapMode(Map3DMode.ROADMAP)
         assertThat(updatedState.mapMode).isEqualTo(Map3DMode.ROADMAP)
