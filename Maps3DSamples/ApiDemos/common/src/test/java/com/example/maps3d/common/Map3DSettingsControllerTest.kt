@@ -271,4 +271,26 @@ class Map3DSettingsControllerTest {
         assertEquals(128, Map3DUiControls(zoom = true, tilt = false, rotate = false).calculateFabMarginDp())
         assertEquals(16, Map3DUiControls(zoom = false, tilt = false, rotate = false).calculateFabMarginDp())
     }
+
+    @Test
+    fun setControlsPosition_leading_updatesPlacementAndAdjustsFabMargin() {
+        assertEquals(UiControlsPlacementPosition.TRAILING, controller.getSettings().uiControls.controlsPosition)
+
+        val updated = controller.setControlsPosition(UiControlsPlacementPosition.LEADING)
+
+        assertEquals(UiControlsPlacementPosition.LEADING, updated.uiControls.controlsPosition)
+        assertEquals(288, updated.uiControls.calculateFabMarginDp())
+        assertEquals(
+            232,
+            updated.uiControls.copy(compass = false).calculateFabMarginDp(),
+        )
+        assertEquals(
+            184,
+            updated.uiControls.copy(panHorizontal = false).calculateFabMarginDp(),
+        )
+        assertEquals(
+            16,
+            updated.uiControls.copy(panVertical = false, panHorizontal = false, compass = false).calculateFabMarginDp(),
+        )
+    }
 }

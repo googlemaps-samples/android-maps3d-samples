@@ -35,7 +35,6 @@ import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.PanHorizontalControl
 import com.google.android.gms.maps3d.model.PanVerticalControl
 import com.google.android.gms.maps3d.model.RotateControl
-import com.google.android.gms.maps3d.model.Spacer
 import com.google.android.gms.maps3d.model.TiltControl
 import com.google.android.gms.maps3d.model.ZoomControl
 
@@ -57,22 +56,30 @@ enum class Map3DColorScheme(val value: Int) {
 
 // [START maps_3d_quick_settings_ui_controls_model]
 /**
- * Visibility state for built-in 3D camera UI controls.
- *
- * @property zoom Zoom in/out (+ / -) control on trailing edge.
- * @property tilt Pitch up/down control on trailing edge.
- * @property rotate Heading rotation (CW / CCW) control on trailing edge.
- * @property compass North orientation indicator & reset control on trailing edge.
- * @property panVertical North/South pan control on leading edge.
- * @property panHorizontal East/West pan control on leading edge.
+ * Placement edge constant alias for [ControlPlacement] ([ControlPlacement.TRAILING] vs [ControlPlacement.LEADING]).
  */
-data class Map3DUiControls(
+typealias UiControlsPlacementPosition = ControlPlacement
+
+/**
+ * Visibility and placement state for built-in 3D camera UI controls.
+ *
+ * @property zoom Zoom in/out (+ / -) control.
+ * @property tilt Pitch up/down control.
+ * @property rotate Heading rotation (CW / CCW) control.
+ * @property compass North orientation indicator & reset control.
+ * @property panVertical North/South pan control.
+ * @property panHorizontal East/West pan control.
+ * @property controlsPosition Screen edge for main controls ([UiControlsPlacementPosition.TRAILING] or [UiControlsPlacementPosition.LEADING]); pan and compass controls are placed on the opposite edge.
+ */
+data class Map3DUiControls @JvmOverloads constructor(
     val zoom: Boolean = true,
     val tilt: Boolean = true,
     val rotate: Boolean = true,
     val compass: Boolean = true,
     val panVertical: Boolean = true,
     val panHorizontal: Boolean = true,
+    @param:ControlPlacement @get:ControlPlacement
+    val controlsPosition: Int = UiControlsPlacementPosition.TRAILING,
 ) {
     val allEnabled: Boolean
         get() = zoom && tilt && rotate && compass && panVertical && panHorizontal
@@ -91,14 +98,20 @@ data class Map3DUiControls(
 
     /**
      * Calculates the top margin (in dp) required to place a floating action button directly
-     * below the active top-anchored trailing camera controls ([zoom], [tilt], [rotate]).
+     * below the active top-anchored trailing camera controls.
      */
     fun calculateFabMarginDp(): Int {
-        var count = 0
-        if (zoom) count++
-        if (tilt) count++
-        if (rotate) count++
-        return if (count > 0) 16 + count * 104 + 8 else 16
+        var totalHeightDp = 0
+        if (controlsPosition == UiControlsPlacementPosition.LEADING) {
+            if (panVertical) totalHeightDp += 104
+            if (panHorizontal) totalHeightDp += 104
+            if (compass) totalHeightDp += 56
+        } else {
+            if (zoom) totalHeightDp += 104
+            if (tilt) totalHeightDp += 104
+            if (rotate) totalHeightDp += 104
+        }
+        return if (totalHeightDp > 0) 16 + totalHeightDp + 8 else 16
     }
 }
 // [END maps_3d_quick_settings_ui_controls_model]
@@ -150,22 +163,29 @@ data class Map3DSettings(
         // Apply built-in UI controls configuration
         try {
             googleMap3D.getUiControlSettings()?.let { settings ->
-                val trailingControls = mutableListOf<Map3DControl>()
-                if (uiControls.zoom) trailingControls.add(ZoomControl(null))
-                if (uiControls.tilt) trailingControls.add(TiltControl(null))
-                if (uiControls.rotate) trailingControls.add(RotateControl(null))
-                if (uiControls.compass) {
-                    if (trailingControls.isNotEmpty()) {
-                        trailingControls.add(Spacer())
-                    }
-                    trailingControls.add(CompassControl())
-                }
-                settings.setUiControlsPlacement(trailingControls, ControlPlacement.TRAILING)
+                val mainControls = mutableListOf<Map3DControl>()
+                if (uiControls.zoom) mainControls.add(ZoomControl(null))
+                if (uiControls.tilt) mainControls.add(TiltControl(null))
+                if (uiControls.rotate) mainControls.add(RotateControl(null))
 
-                val leadingControls = mutableListOf<Map3DControl>()
-                if (uiControls.panVertical) leadingControls.add(PanVerticalControl(null))
-                if (uiControls.panHorizontal) leadingControls.add(PanHorizontalControl(null))
-                settings.setUiControlsPlacement(leadingControls, ControlPlacement.LEADING)
+                val panControls = mutableListOf<Map3DControl>()
+                if (uiControls.panVertical) panControls.add(PanVerticalControl(null))
+                if (uiControls.panHorizontal) panControls.add(PanHorizontalControl(null))
+                if (uiControls.compass) panControls.add(CompassControl())
+
+                val mainPosition = if (uiControls.controlsPosition == UiControlsPlacementPosition.LEADING) {
+                    ControlPlacement.LEADING
+                } else {
+                    ControlPlacement.TRAILING
+                }
+                val panPosition = if (mainPosition == ControlPlacement.TRAILING) {
+                    ControlPlacement.LEADING
+                } else {
+                    ControlPlacement.TRAILING
+                }
+
+                settings.setUiControlsPlacement(mainControls, mainPosition)
+                settings.setUiControlsPlacement(panControls, panPosition)
             }
         } catch (e: Throwable) {
             Log.e("Map3DSettings", "Could not apply UI controls placement to GoogleMap3D", e)

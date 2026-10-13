@@ -16,6 +16,7 @@
 
 package com.example.maps3d.common
 
+import com.google.android.gms.maps3d.UiControlSettings.ControlPlacement
 import com.google.android.gms.maps3d.model.Map3DMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -145,8 +146,22 @@ class Map3DSettingsController(
     }
 
     /**
-     * Updates a single UI control's visibility.
+     * Updates the screen placement edge ([UiControlsPlacementPosition.TRAILING] or [UiControlsPlacementPosition.LEADING])
+     * for the main camera controls, placing pan controls on the opposite edge.
      */
+    fun setControlsPosition(@ControlPlacement position: Int): Map3DSettings {
+        val sanitized = if (position == UiControlsPlacementPosition.LEADING) {
+            UiControlsPlacementPosition.LEADING
+        } else {
+            UiControlsPlacementPosition.TRAILING
+        }
+        return setUiControls(_settings.value.uiControls.copy(controlsPosition = sanitized))
+    }
+
+    /**
+     * Updates individual UI control visibility or placement flags.
+     */
+    @JvmOverloads
     fun updateUiControl(
         zoom: Boolean = _settings.value.uiControls.zoom,
         tilt: Boolean = _settings.value.uiControls.tilt,
@@ -154,6 +169,7 @@ class Map3DSettingsController(
         compass: Boolean = _settings.value.uiControls.compass,
         panVertical: Boolean = _settings.value.uiControls.panVertical,
         panHorizontal: Boolean = _settings.value.uiControls.panHorizontal,
+        @ControlPlacement controlsPosition: Int = _settings.value.uiControls.controlsPosition,
     ): Map3DSettings {
         val updatedControls = _settings.value.uiControls.copy(
             zoom = zoom,
@@ -162,6 +178,7 @@ class Map3DSettingsController(
             compass = compass,
             panVertical = panVertical,
             panHorizontal = panHorizontal,
+            controlsPosition = controlsPosition,
         )
         return setUiControls(updatedControls)
     }

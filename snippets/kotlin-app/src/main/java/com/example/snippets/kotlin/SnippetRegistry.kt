@@ -27,8 +27,11 @@ import com.example.snippets.kotlin.snippets.PlaceSnippets
 import com.example.snippets.kotlin.snippets.PolygonSnippets
 import com.example.snippets.kotlin.snippets.PolylineSnippets
 import com.example.snippets.kotlin.snippets.PopoverSnippets
+import com.example.snippets.kotlin.snippets.UiControlSnippets
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Popover
+import com.google.android.gms.maps3d.UiControlSettings
+import com.google.android.gms.maps3d.UiControlSettings.ControlPlacement
 import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.Model
 import com.google.android.gms.maps3d.model.Polygon
@@ -60,6 +63,12 @@ object SnippetRegistry {
                     is Polygon -> item.remove()
                     is Model -> item.remove()
                     is Popover -> item.remove()
+                    is UiControlSettings -> {
+                        item.setUiControlsPlacement(emptyList(), ControlPlacement.TRAILING)
+                        item.setUiControlsPlacement(emptyList(), ControlPlacement.LEADING)
+                        item.setUiControlsPlacement(emptyList(), ControlPlacement.TOP)
+                        item.setUiControlsPlacement(emptyList(), ControlPlacement.BOTTOM)
+                    }
                 }
             } catch (e: Exception) {
                 // Ignore failures to avoid crashing if already cleanup or invalid
@@ -71,6 +80,7 @@ object SnippetRegistry {
     private val snippetClasses = listOf(
         MapInitSnippets::class.java,
         CameraControlSnippets::class.java,
+        UiControlSnippets::class.java,
         MarkerSnippets::class.java,
         PolygonSnippets::class.java,
         PolylineSnippets::class.java,

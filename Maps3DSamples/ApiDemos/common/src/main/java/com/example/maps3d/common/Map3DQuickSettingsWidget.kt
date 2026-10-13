@@ -293,16 +293,16 @@ fun Map3DQuickSettingsWidget(
                             val updated = settingsController.updateUiControl(rotate = checked)
                             onSettingsChanged(updated)
                         },
-                        Triple(stringResource(id = R.string.map3d_control_compass), settings.uiControls.compass) { checked: Boolean ->
-                            val updated = settingsController.updateUiControl(compass = checked)
-                            onSettingsChanged(updated)
-                        },
                         Triple(stringResource(id = R.string.map3d_control_pan_v), settings.uiControls.panVertical) { checked: Boolean ->
                             val updated = settingsController.updateUiControl(panVertical = checked)
                             onSettingsChanged(updated)
                         },
                         Triple(stringResource(id = R.string.map3d_control_pan_h), settings.uiControls.panHorizontal) { checked: Boolean ->
                             val updated = settingsController.updateUiControl(panHorizontal = checked)
+                            onSettingsChanged(updated)
+                        },
+                        Triple(stringResource(id = R.string.map3d_control_compass), settings.uiControls.compass) { checked: Boolean ->
+                            val updated = settingsController.updateUiControl(compass = checked)
                             onSettingsChanged(updated)
                         },
                     )
