@@ -184,6 +184,128 @@ val denverPolygon = """
 val scenarios =
     listOf(
         createScenario(
+            name = "seattle_cinematic_reveal",
+            titleId = R.string.scenarios_seattle_cinematic_reveal,
+            initialState =
+                "mode=roadmap;camera=lat=47.6100,lng=-122.3950,alt=1200.0,hdg=55.0,tilt=60.0,range=7500.0",
+            animationString =
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                // Stop 1: Space Needle, Seattle (Fly-in in ROADMAP, orbit, and reveal HYBRID mid-orbit)
+                "setMapMode=roadmap;" +
+                "flyTo=lat=47.620506,lng=-122.349277,alt=120.0,hdg=135.0,tilt=67.0,range=650.0,dur=4500;" +
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                "flyAround=lat=47.620506,lng=-122.349277,alt=120.0,hdg=135.0,tilt=67.0,range=650.0,dur=20000,count=1.0,switchmode=hybrid,switchdelay=6000;" +
+                "delay=dur=1500;" +
+                // Stop 2: Downtown Seattle & Columbia Center (Glide to downtown high-rises in HYBRID)
+                "flyTo=lat=47.604500,lng=-122.330700,alt=180.0,hdg=315.0,tilt=68.0,range=750.0,dur=4000;" +
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                "flyAround=lat=47.604500,lng=-122.330700,alt=180.0,hdg=315.0,tilt=68.0,range=750.0,dur=18000,count=1.0;" +
+                "delay=dur=1500",
+            loop = true,
+        ),
+        createScenario(
+            name = "uk_shard_to_tower_bridge",
+            titleId = R.string.scenarios_uk_shard_tower_bridge,
+            initialState =
+                "mode=satellite;camera=lat=51.504500,lng=-0.086500,alt=140.0,hdg=35.0,tilt=55.0,range=1200.0",
+            animationString =
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                // Stop 1: The Shard, London
+                "setMapMode=satellite;" +
+                "flyTo=lat=51.504500,lng=-0.086500,alt=140.0,hdg=35.0,tilt=68.0,range=650.0,dur=3500;" +
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                "flyAround=lat=51.504500,lng=-0.086500,alt=140.0,hdg=35.0,tilt=68.0,range=650.0,dur=12000,count=1.0,switchmode=hybrid,switchdelay=6000;" +
+                "delay=dur=1000;" +
+                // Stop 2: Tower Bridge, London
+                "setMapMode=satellite;" +
+                "flyTo=lat=51.505500,lng=-0.075400,alt=20.0,hdg=-16.4,tilt=65.0,range=564.0,dur=3500;" +
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                "flyAround=lat=51.505500,lng=-0.075400,alt=20.0,hdg=-16.4,tilt=65.0,range=564.0,dur=12000,count=1.0,switchmode=hybrid,switchdelay=6000;" +
+                "delay=dur=1000;" +
+                "setMapMode=satellite",
+            loop = true,
+        ),
+        createScenario(
+            name = "brazil_copacabana_to_ipanema",
+            titleId = R.string.scenarios_brazil_copacabana_ipanema,
+            initialState =
+                "mode=satellite;camera=lat=-22.971100,lng=-43.182500,alt=25.0,hdg=38.0,tilt=55.0,range=2200.0",
+            animationString =
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                // Stop 1: Copacabana Beach, Rio de Janeiro
+                "setMapMode=satellite;" +
+                "flyTo=lat=-22.971100,lng=-43.182500,alt=25.0,hdg=38.0,tilt=68.0,range=1350.0,dur=3500;" +
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                "flyAround=lat=-22.971100,lng=-43.182500,alt=25.0,hdg=38.0,tilt=68.0,range=1350.0,dur=12000,count=1.0,switchmode=hybrid,switchdelay=6000;" +
+                "delay=dur=1000;" +
+                // Stop 2: Ipanema Beach & Arpoador, Rio de Janeiro
+                "setMapMode=satellite;" +
+                "flyTo=lat=-22.988800,lng=-43.192600,alt=25.0,hdg=282.0,tilt=67.0,range=1150.0,dur=3500;" +
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                "flyAround=lat=-22.988800,lng=-43.192600,alt=25.0,hdg=282.0,tilt=67.0,range=1150.0,dur=12000,count=1.0,switchmode=hybrid,switchdelay=6000;" +
+                "delay=dur=1000;" +
+                "setMapMode=satellite",
+            loop = true,
+        ),
+        createScenario(
+            name = "scenic_world_tour",
+            titleId = R.string.scenarios_scenic_world_tour,
+            initialState =
+                "mode=satellite;camera=lat=51.504500,lng=-0.086500,alt=140.0,hdg=35.0,tilt=55.0,range=1200.0",
+            animationString =
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                // 1. UK: The Shard, London
+                "setMapMode=satellite;" +
+                "flyTo=lat=51.504500,lng=-0.086500,alt=140.0,hdg=35.0,tilt=68.0,range=650.0,dur=3500;" +
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                "flyAround=lat=51.504500,lng=-0.086500,alt=140.0,hdg=35.0,tilt=68.0,range=650.0,dur=12000,count=1.0,switchmode=hybrid,switchdelay=6000;" +
+                "delay=dur=1000;" +
+                // 2. UK: Tower Bridge, London
+                "setMapMode=satellite;" +
+                "flyTo=lat=51.505500,lng=-0.075400,alt=20.0,hdg=-16.4,tilt=65.0,range=564.0,dur=3500;" +
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                "flyAround=lat=51.505500,lng=-0.075400,alt=20.0,hdg=-16.4,tilt=65.0,range=564.0,dur=12000,count=1.0,switchmode=hybrid,switchdelay=6000;" +
+                "delay=dur=1000;" +
+                // 3. Brazil: Copacabana Beach, Rio de Janeiro
+                "setMapMode=satellite;" +
+                "flyTo=lat=-22.971100,lng=-43.182500,alt=25.0,hdg=38.0,tilt=68.0,range=1350.0,dur=4500;" +
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                "flyAround=lat=-22.971100,lng=-43.182500,alt=25.0,hdg=38.0,tilt=68.0,range=1350.0,dur=12000,count=1.0,switchmode=hybrid,switchdelay=6000;" +
+                "delay=dur=1000;" +
+                // 4. Brazil: Ipanema Beach & Arpoador, Rio de Janeiro
+                "setMapMode=satellite;" +
+                "flyTo=lat=-22.988800,lng=-43.192600,alt=25.0,hdg=282.0,tilt=67.0,range=1150.0,dur=3500;" +
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                "flyAround=lat=-22.988800,lng=-43.192600,alt=25.0,hdg=282.0,tilt=67.0,range=1150.0,dur=12000,count=1.0,switchmode=hybrid,switchdelay=6000;" +
+                "delay=dur=1000;" +
+                // 5. USA: Golden Gate Bridge & Marin Headlands (wide framing to capture full span and bay)
+                "setMapMode=satellite;" +
+                "flyTo=lat=37.819900,lng=-122.478300,alt=180.0,hdg=106.0,tilt=62.0,range=4000.0,dur=4500;" +
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                "flyAround=lat=37.819900,lng=-122.478300,alt=180.0,hdg=106.0,tilt=62.0,range=4000.0,dur=12000,count=1.0,switchmode=hybrid,switchdelay=6000;" +
+                "delay=dur=1000;" +
+                // 6. USA: Grand Canyon South Rim (panoramic vista of canyon gorges and red strata)
+                "setMapMode=satellite;" +
+                "flyTo=lat=36.057000,lng=-112.143000,alt=2200.0,hdg=35.0,tilt=68.0,range=14000.0,dur=4000;" +
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                "flyAround=lat=36.057000,lng=-112.143000,alt=2200.0,hdg=35.0,tilt=68.0,range=14000.0,dur=12000,count=1.0,switchmode=hybrid,switchdelay=6000;" +
+                "delay=dur=1000;" +
+                // 7. USA: Delicate Arch, Arches National Park
+                "setMapMode=satellite;" +
+                "flyTo=lat=38.743502,lng=-109.499374,alt=1467.0,hdg=-10.4,tilt=58.1,range=180.0,dur=3500;" +
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                "flyAround=lat=38.743502,lng=-109.499374,alt=1467.0,hdg=-10.4,tilt=58.1,range=180.0,dur=12000,count=1.0,switchmode=hybrid,switchdelay=6000;" +
+                "delay=dur=1000;" +
+                // 8. Japan: Mount Fuji Summit Crater
+                "setMapMode=satellite;" +
+                "flyTo=lat=35.360600,lng=138.727400,alt=3650.0,hdg=145.0,tilt=64.0,range=4200.0,dur=4500;" +
+                "waitUntilTheMapIsSteady=timeout=10000;" +
+                "flyAround=lat=35.360600,lng=138.727400,alt=3650.0,hdg=145.0,tilt=64.0,range=4200.0,dur=12000,count=1.0,switchmode=hybrid,switchdelay=6000;" +
+                "delay=dur=1000;" +
+                "setMapMode=satellite",
+            loop = true,
+        ),
+        createScenario(
             name = "tower_bridge",
             titleId = R.string.scenarios_tower_bridge,
             initialState =
