@@ -128,13 +128,13 @@ fun Map3DQuickSettingsWidget(
     val settings by settingsController.settings.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(googleMap3D as Any?, settings) {
+    LaunchedEffect(googleMap3D, settings) {
         if (googleMap3D != null) {
             settings.applyTo(googleMap3D)
         }
     }
 
-    LaunchedEffect(googleMap3D as Any?) {
+    LaunchedEffect(googleMap3D) {
         if (googleMap3D != null) {
             delay(350.milliseconds)
             settingsController.settings.value.applyTo(googleMap3D)

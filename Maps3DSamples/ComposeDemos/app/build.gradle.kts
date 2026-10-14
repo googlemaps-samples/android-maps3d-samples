@@ -85,6 +85,10 @@ android {
     }
 }
 
+composeCompiler {
+    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose_stability.conf"))
+}
+
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
