@@ -214,6 +214,13 @@
             android:exported="true"
             />
 
+        <activity
+            android:name="com.example.maps3djava.uicontrols.UiControlsActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_ui_controls"
+            android:exported="true"
+            />
+
     </application>
 
 </manifest>
