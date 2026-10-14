@@ -53,7 +53,6 @@ import com.example.maps3djava.roadmapmode.RoadmapModeActivity;
 import com.example.maps3djava.fieldofview.FieldOfViewActivity;
 import com.example.maps3djava.projection3d.Projection3DActivity;
 import com.example.maps3djava.mapslocalization.MapsLocalizationActivity;
-import com.example.maps3djava.uicontrols.UiControlsActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.LinkedHashMap;
@@ -83,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
         put(R.string.feature_title_data_visualization, DataVisualizationActivity.class);
         put(R.string.feature_title_cloud_styling, CloudStylingActivity.class);
         put(R.string.feature_title_roadmap_mode, RoadmapModeActivity.class);
-        put(R.string.feature_title_ui_controls, UiControlsActivity.class);
         put(R.string.feature_title_field_of_view, FieldOfViewActivity.class);
         put(R.string.feature_title_projection_3d, Projection3DActivity.class);
         put(R.string.feature_title_maps_localization, MapsLocalizationActivity.class);
