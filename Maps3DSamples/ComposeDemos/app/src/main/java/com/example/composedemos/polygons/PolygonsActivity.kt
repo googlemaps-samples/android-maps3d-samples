@@ -56,7 +56,10 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.Map3DSessionTheme
 import com.example.maps3d.common.miles
+import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.example.maps3d.common.toCameraString
 import com.example.maps3d.common.toMeters
 import com.example.maps3d.common.toValidCamera
@@ -89,7 +92,7 @@ class PolygonsActivity : ComponentActivity() {
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
-            MaterialTheme {
+            Map3DSessionTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -107,6 +110,7 @@ fun PolygonsScreen() {
     val scope = rememberCoroutineScope()
     var isMapSteady by remember { mutableStateOf(false) }
     var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.HYBRID)
 
     val museumAltitude = remember { 1.miles.toMeters }
 
@@ -270,7 +274,7 @@ fun PolygonsScreen() {
         // 1. Map fills the entire screen
         GoogleMap3D(
             camera = denverCamera,
-            mapMode = Map3DMode.HYBRID,
+            mapMode = settings.mapMode,
             polygons = listOf(zooPolygonConfig) + museumPolygons,
             modifier = Modifier.fillMaxSize(),
             onMapReady = { map ->
@@ -353,6 +357,16 @@ fun PolygonsScreen() {
                 }
             }
         }
+
+        // 4. Quick Settings Overlay
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.HYBRID,
+            googleMap3D = googleMap3D,
+        )
     }
 }
 

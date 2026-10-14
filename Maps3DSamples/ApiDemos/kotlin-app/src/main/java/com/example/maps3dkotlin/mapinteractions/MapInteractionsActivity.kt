@@ -24,7 +24,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.maps3dcommon.R
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import kotlinx.coroutines.launch
@@ -58,7 +57,6 @@ class MapInteractionsActivity : SampleBaseActivity() {
 
     override fun onMapReady(googleMap3D: GoogleMap3D) {
         super.onMapReady(googleMap3D)
-        googleMap3D.setMapMode(Map3DMode.HYBRID)
 
         // Listeners for map clicks. We use lifecycleScope to ensure coroutines are cancelled when the activity is destroyed.
         lifecycleScope.launch {

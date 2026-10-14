@@ -25,13 +25,13 @@ import androidx.annotation.NonNull;
 import com.example.snippets.java.annotations.SnippetGroup;
 import com.example.snippets.java.annotations.SnippetItem;
 import com.google.android.gms.maps3d.GoogleMap3D;
-import com.google.android.gms.maps3d.Map3DInitConfig;
 import com.google.android.gms.maps3d.Map3DView;
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback;
 import com.google.android.gms.maps3d.OnMapReadyListener;
 import com.google.android.gms.maps3d.OnMapSteadyListener;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
+import com.google.android.gms.maps3d.model.Map3DMode;
 
 @SnippetGroup(
         title = "Map Initialization",
@@ -44,7 +44,7 @@ public class MapInitSnippets {
     @SuppressWarnings("unused")
     public void basicMap3D(Context context) {
         // [START maps_android_3d_init_basic_java]
-        Map3DView map3DView = new Map3DView(context, Map3DInitConfig.create());
+        Map3DView map3DView = new Map3DView(context, Map3DMode.HYBRID);
 
         // Get the map asynchronously
         map3DView.getMap3DViewAsync(

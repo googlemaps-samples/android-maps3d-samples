@@ -40,6 +40,7 @@
             map3d:centerLng="-122.551679"
             map3d:defaultUiDisabled="false"
             map3d:heading="330"
+            map3d:mapMode="hybrid"
             map3d:maxAltitude="1000000"
             map3d:maxHeading="360"
             map3d:maxTilt="90"

@@ -28,7 +28,6 @@ import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
-import com.google.android.gms.maps3d.model.Map3DMode;
 
 public class MapInteractionsActivity extends SampleBaseActivity {
 
@@ -90,8 +89,7 @@ public class MapInteractionsActivity extends SampleBaseActivity {
   private void initializeMap(@NonNull GoogleMap3D googleMap3D) {
     if (isInitialized) return;
     isInitialized = true;
-
-    googleMap3D.setMapMode(Map3DMode.HYBRID);
+    super.onMapReady(googleMap3D);
 
     // Listeners for map clicks.
     googleMap3D.setMap3DClickListener((event) -> {

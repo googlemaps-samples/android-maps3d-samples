@@ -37,6 +37,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
+import com.google.android.gms.maps3d.model.Map3DMode;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.slider.Slider;
@@ -115,6 +116,12 @@ public class FieldOfViewActivity extends SampleBaseActivity {
   @Override
   public String getTAG() {
     return "FieldOfViewActivity";
+  }
+
+  @Override
+  @Map3DMode
+  protected int getDefaultMapMode() {
+    return Map3DMode.SATELLITE;
   }
 
   @NonNull
@@ -286,12 +293,9 @@ public class FieldOfViewActivity extends SampleBaseActivity {
   // --- 3D Map Setup & Perspective Scaling Engine ---
 
   @Override
-  public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
-    super.onMap3DViewReady(googleMap3D);
-    googleMap3D.setOnMapReadyListener(sceneReadiness -> {
-      googleMap3D.setOnMapReadyListener(null);
-      runOnUiThread(() -> updateFov((float) currentFov));
-    });
+  protected void onMapReady(@NonNull GoogleMap3D googleMap3D) {
+    super.onMapReady(googleMap3D);
+    runOnUiThread(() -> updateFov((float) currentFov));
   }
 
   /**

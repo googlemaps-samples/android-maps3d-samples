@@ -42,6 +42,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.Map3DSessionTheme
+import com.example.maps3d.common.rememberMap3DSessionSettings
+import com.google.android.gms.maps3d.GoogleMap3D
+import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.maps.android.compose3d.GoogleMap3D
@@ -57,7 +62,7 @@ class HelloMapActivity : ComponentActivity() {
         windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
-            MaterialTheme {
+            Map3DSessionTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -72,6 +77,8 @@ class HelloMapActivity : ComponentActivity() {
 @Composable
 fun HelloMapScreen() {
     var isMapSteady by remember { mutableStateOf(false) }
+    var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.HYBRID)
 
     val delicateArchCamera = remember {
         camera {
@@ -96,7 +103,11 @@ fun HelloMapScreen() {
         // 1. Map fills the entire screen
         GoogleMap3D(
             camera = delicateArchCamera,
+            mapMode = settings.mapMode,
             modifier = Modifier.fillMaxSize(),
+            onMapReady = { map ->
+                googleMap3D = map
+            },
             onMapSteady = {
                 isMapSteady = true
             },
@@ -118,5 +129,15 @@ fun HelloMapScreen() {
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
+
+        // 3. Quick Settings Overlay
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.HYBRID,
+            googleMap3D = googleMap3D,
+        )
     }
 }

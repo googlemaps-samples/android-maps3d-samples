@@ -24,6 +24,9 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import com.example.snippets.common.R;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.Map3DView;
@@ -48,6 +51,7 @@ public class MapActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+        enableImmersiveMode();
         setContentView(R.layout.activity_map);
         map3DView = findViewById(R.id.map);
         map3DView.onCreate(savedInstanceState);
@@ -215,6 +219,24 @@ public class MapActivity extends AppCompatActivity {
         }
     }
 
+    private void enableImmersiveMode() {
+        WindowInsetsControllerCompat insetsController =
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (insetsController != null) {
+            insetsController.setSystemBarsBehavior(
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            insetsController.hide(WindowInsetsCompat.Type.systemBars());
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            enableImmersiveMode();
+        }
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -224,6 +246,7 @@ public class MapActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        enableImmersiveMode();
         if (map3DView != null) map3DView.onResume();
     }
 

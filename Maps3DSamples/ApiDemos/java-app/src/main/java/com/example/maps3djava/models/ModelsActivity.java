@@ -100,11 +100,15 @@ public class ModelsActivity extends SampleBaseActivity {
     }
 
     @Override
+    @Map3DMode
+    protected int getDefaultMapMode() {
+        return Map3DMode.SATELLITE;
+    }
+
+    @Override
     public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
         super.onMap3DViewReady(googleMap3D);
         this.googleMap3D = googleMap3D;
-
-        googleMap3D.setMapMode(Map3DMode.SATELLITE);
 
         ModelOptions modelOptions = new ModelOptions();
         modelOptions.setId("plane_model");

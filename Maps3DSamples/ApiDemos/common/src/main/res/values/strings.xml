@@ -43,6 +43,7 @@
     <string name="feature_title_data_visualization">Data Visualization</string>
     <string name="feature_title_cloud_styling">Cloud Map Styling</string>
     <string name="feature_title_roadmap_mode">Roadmap Mode</string>
+    <string name="feature_title_ui_controls">UI Controls</string>
     <string name="feature_title_field_of_view">Field Of View</string>
     <string name="feature_title_projection_3d">3D Screen Projection</string>
     <string name="feature_title_maps_localization">Maps Localization</string>
@@ -274,4 +275,41 @@
     <string name="localization_applied_format">Applied %1$s [%2$s]</string>
     <string name="localization_location">Location: San Francisco Bay, USA</string>
     <string name="navigate_up">Navigate up</string>
+
+    <!-- Map 3D Quick Settings -->
+    <string name="map3d_settings_title">3D Map Settings</string>
+    <string name="map3d_mode_section">Map Mode</string>
+    <string name="map3d_mode_satellite">Satellite (3D Mesh)</string>
+    <string name="map3d_mode_hybrid">Hybrid (3D Mesh + Roads &amp; Labels)</string>
+    <string name="map3d_mode_roadmap">Roadmap (Vector Roads)</string>
+    <string name="map3d_color_scheme_section">Color Scheme</string>
+    <string name="map3d_color_scheme_system">Follow System</string>
+    <string name="map3d_color_scheme_light">Light Mode</string>
+    <string name="map3d_color_scheme_dark">Dark Mode</string>
+    <string name="map3d_controls_section">Camera Controls</string>
+    <string name="map3d_controls_toggle_all">All Controls</string>
+    <string name="map3d_control_zoom">Zoom (+ / -)</string>
+    <string name="map3d_control_tilt">Tilt (Up / Down)</string>
+    <string name="map3d_control_rotate">Rotate (Heading)</string>
+    <string name="map3d_control_compass">Compass (Reset North)</string>
+    <string name="map3d_control_pan_v">Pan Vertical (Up / Down)</string>
+    <string name="map3d_control_pan_h">Pan Horizontal (Left / Right)</string>
+    <string name="map3d_settings_done">Done</string>
+    <string name="map3d_settings_reset">Reset to Defaults</string>
+    <string name="map3d_settings_button_description">Open 3D map quick settings</string>
+
+    <!-- Dedicated UI Controls Sample strings -->
+    <string name="ui_controls_panel_title">3D Map UI Controls</string>
+    <string name="ui_controls_visibility_label">Visible Controls</string>
+    <string name="ui_controls_placement_label">Main Controls Placement</string>
+    <string name="ui_controls_placement_trailing">Trailing (Right)</string>
+    <string name="ui_controls_placement_leading">Leading (Left)</string>
+    <string name="ui_controls_show_all">Show All</string>
+    <string name="ui_controls_hide_all">Hide All</string>
+    <string name="ui_control_chip_zoom">Zoom</string>
+    <string name="ui_control_chip_tilt">Tilt</string>
+    <string name="ui_control_chip_rotate">Rotate</string>
+    <string name="ui_control_chip_compass">Compass</string>
+    <string name="ui_control_chip_pan_vertical">Pan Vertical</string>
+    <string name="ui_control_chip_pan_horizontal">Pan Horizontal</string>
 </resources>

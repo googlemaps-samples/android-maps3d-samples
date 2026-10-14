@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.CallSuper;
@@ -33,7 +34,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
+import com.example.maps3d.common.Map3DQuickSettingsButton;
+import com.example.maps3d.common.Map3DSettings;
+import com.example.maps3d.common.Map3DSettingsController;
+import com.example.maps3d.common.Map3DUiControls;
 import com.example.maps3dcommon.R;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.Map3DView;
@@ -41,6 +47,7 @@ import com.google.android.gms.maps3d.OnCameraChangedListener;
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyToOptions;
+import com.google.android.gms.maps3d.model.Map3DMode;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 
@@ -84,6 +91,65 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
 
     private OnCameraChangedListener cameraChangedListener;
 
+    private int lastStatusBarTop = 0;
+
+    private void applyStatusBarInsetsToMapControls(int statusBarTop, Map3DUiControls uiControls) {
+        if (statusBarTop > 0) {
+            lastStatusBarTop = statusBarTop;
+        }
+
+        Map3DQuickSettingsButton quickSettingsButton = findViewById(R.id.quick_settings_button);
+        if (quickSettingsButton != null) {
+            Map3DUiControls currentUi = uiControls != null ? uiControls : quickSettingsButton.getSettings().getUiControls();
+            quickSettingsButton.setStatusBarTopOffsetPx(lastStatusBarTop);
+            quickSettingsButton.updateTopMarginForUiControls(currentUi);
+        }
+    }
+
+    @Override
+    public void setContentView(int layoutResID) {
+        super.setContentView(layoutResID);
+        bindWindowInsetsAndMapHierarchy();
+    }
+
+    private void bindWindowInsetsAndMapHierarchy() {
+        View rootView = findViewById(R.id.map_container);
+        boolean hasOverlayAppBar = findViewById(R.id.app_bar_layout) != null;
+        if (!hasOverlayAppBar) {
+            lastStatusBarTop = 0;
+            Map3DQuickSettingsButton button = findViewById(R.id.quick_settings_button);
+            if (button != null) {
+                button.setStatusBarTopOffsetPx(0);
+                button.updateTopMarginForUiControls();
+            }
+            return;
+        }
+
+        if (rootView != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, windowInsets) -> {
+                Insets statusBarInsets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars());
+                Insets navInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars());
+
+                View appBarLayout = findViewById(R.id.app_bar_layout);
+                if (appBarLayout != null) {
+                    appBarLayout.setPadding(0, statusBarInsets.top, 0, 0);
+                }
+                applyStatusBarInsetsToMapControls(statusBarInsets.top, null);
+
+                View controlScrollView = findViewById(R.id.control_scroll_view);
+                if (controlScrollView != null) {
+                    ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) controlScrollView
+                            .getLayoutParams();
+                    int margin16dp = (int) (16 * getResources().getDisplayMetrics().density);
+                    layoutParams.bottomMargin = navInsets.bottom + margin16dp;
+                    controlScrollView.setLayoutParams(layoutParams);
+                }
+
+                return WindowInsetsCompat.CONSUMED;
+            });
+        }
+    }
+
     @CallSuper
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +157,7 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
 
         // This tells the system that the app will handle drawing behind the system bars.
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        enableImmersiveMode();
 
         setContentView(getLayoutResId());
         View rootView = findViewById(R.id.map_container);
@@ -109,6 +176,8 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
                 if (appBarLayout != null) {
                     appBarLayout.setPadding(0, statusBarInsets.top, 0, 0);
                 }
+                applyStatusBarInsetsToMapControls(statusBarInsets.top, null);
+
                 View controlScrollView = findViewById(R.id.control_scroll_view);
                 if (controlScrollView != null) {
                     android.view.ViewGroup.MarginLayoutParams layoutParams = (android.view.ViewGroup.MarginLayoutParams) controlScrollView
@@ -121,7 +190,6 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
                 return WindowInsetsCompat.CONSUMED;
             });
         }
-
         map3DView = findViewById(R.id.map3dView);
         map3DView.onCreate(savedInstanceState);
         map3DView.getMap3DViewAsync(this);
@@ -145,11 +213,38 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
         }
     }
 
+    /**
+     * Enables sticky immersive mode so the 3D map canvas occupies the entire display,
+     * hiding status and navigation bars while allowing transient reveal on edge swipes.
+     */
+    protected void enableImmersiveMode() {
+        WindowInsetsControllerCompat insetsController = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (insetsController != null) {
+            insetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            insetsController.hide(WindowInsetsCompat.Type.systemBars());
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            enableImmersiveMode();
+        }
+    }
+
     @CallSuper
     @Override
     protected void onResume() {
         super.onResume();
+        enableImmersiveMode();
         map3DView.onResume();
+        if (googleMap3D != null) {
+            Map3DSettings currentSettings = Map3DSettingsController.getShared().getSettings();
+            currentSettings.applyTo(googleMap3D);
+            onQuickSettingsChanged(currentSettings);
+            applyStatusBarInsetsToMapControls(lastStatusBarTop, currentSettings.getUiControls());
+        }
     }
 
     @CallSuper
@@ -185,11 +280,63 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
     }
 
     /**
+     * Default Map Mode for this sample when the user has not explicitly overridden the mode in the
+     * current app session.
+     */
+    @Map3DMode
+    protected int getDefaultMapMode() {
+        return Map3DMode.HYBRID;
+    }
+
+    /**
+     * Hook invoked whenever Quick Settings change so subclasses with inline controls can stay in
+     * sync.
+     */
+    protected void onQuickSettingsChanged(@NonNull Map3DSettings settings) {}
+
+    private boolean isMapInitialized = false;
+
+    /**
+     * Called when the map is guaranteed ready and rendering has stabilized.
+     * Subclasses can override this to perform entity addition and map setup.
+     */
+    @CallSuper
+    protected void onMapReady(@NonNull GoogleMap3D googleMap3D) {
+        if (isMapInitialized) return;
+        isMapInitialized = true;
+        Log.d(getTAG(), "onMapReady called (guaranteed once)");
+
+        googleMap3D.setCamera(getInitialCamera());
+        Map3DSettingsController.getShared().onSampleEntered(getDefaultMapMode());
+        Map3DSettings initialSettings = Map3DSettingsController.getShared().getSettings();
+        initialSettings.applyTo(googleMap3D);
+        onQuickSettingsChanged(initialSettings);
+
+        Map3DQuickSettingsButton quickSettings = findViewById(R.id.quick_settings_button);
+        if (quickSettings != null) {
+            quickSettings.setSettingsController(Map3DSettingsController.getShared());
+            quickSettings.setSampleDefaultMapMode(getDefaultMapMode());
+            quickSettings.attachMap(googleMap3D);
+            quickSettings.setOnSettingsChangedListener(updatedSettings -> {
+                onQuickSettingsChanged(updatedSettings);
+                applyStatusBarInsetsToMapControls(lastStatusBarTop, updatedSettings.getUiControls());
+            });
+        }
+        applyStatusBarInsetsToMapControls(lastStatusBarTop, null);
+
+        // Re-apply settings and UI controls after viewport stabilizes
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (!isDestroyed() && !isFinishing() && this.googleMap3D != null) {
+                Map3DSettings currentSettings = Map3DSettingsController.getShared().getSettings();
+                currentSettings.applyTo(this.googleMap3D);
+                onQuickSettingsChanged(currentSettings);
+                applyStatusBarInsetsToMapControls(lastStatusBarTop, currentSettings.getUiControls());
+            }
+        }, 350L);
+    }
+
+    /**
      * Called when the [Map3DView] is ready to be used.
-     * <p>
-     * This method is called after the [Map3DView] has been initialized and is ready to receive
-     * commands. It sets the internal [googleMap3D] reference and sets the initial camera
-     * position and orientation.
      *
      * @param googleMap3D The [GoogleMap3D] instance that is ready to be used.
      */
@@ -197,16 +344,13 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
     @Override
     public void onMap3DViewReady(GoogleMap3D googleMap3D) {
         this.googleMap3D = googleMap3D;
+        Log.d(getTAG(), "onMap3DViewReady called");
 
-        // Workaround: The Maps 3D SDK onMap3DViewReady callback fires when the map object
-        // is instantiated, but the internal native rendering pipeline and layout pass may briefly
-        // override initial programmatic camera positions. A short delay ensures the native map viewport
-        // has fully stabilized before applying the initial camera position.
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (!isDestroyed() && !isFinishing() && this.googleMap3D != null) {
-                this.googleMap3D.setCamera(getInitialCamera());
-            }
-        }, 350L);
+        // Wire up the standardized listener
+        googleMap3D.setOnMapReadyListener(map -> {
+            googleMap3D.setOnMapReadyListener(null);
+            onMapReady(googleMap3D);
+        });
 
         // Mark map view as steady when rendering stabilizes for automated visual tests
         googleMap3D.setOnMapSteadyListener(isSceneSteady -> {
@@ -215,11 +359,15 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
             }
         });
 
+        // Ensure onMapReady triggers even on delayed or reused fragments.
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            onMapReady(googleMap3D);
+        }, 2000L);
+
         // Initialize and set the camera changed listener
         cameraChangedListener = cameraPosition -> {
         };
         googleMap3D.setCameraChangedListener(cameraChangedListener);
-
     }
 
     @CallSuper

@@ -14,19 +14,18 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:map3d="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
     <!-- Fullscreen 3D Map View -->
     <com.google.android.gms.maps3d.Map3DView
         android:id="@+id/map3dView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        />
+        map3d:mapMode="hybrid" />
 
     <!-- Transparent Touch Gesture Overlay replacing built-in map gestures -->
     <View
@@ -482,4 +481,16 @@
         </com.example.maps3d.common.MaxHeightScrollView>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
+    <com.example.maps3d.common.Map3DQuickSettingsButton
+        android:id="@+id/quick_settings_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="340dp"
+        android:layout_marginEnd="16dp"
+        android:elevation="8dp"
+        android:translationZ="8dp"
+        app:fabCustomSize="40dp" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

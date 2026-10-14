@@ -176,16 +176,15 @@ fun CameraAnimationsScreen() {
 }
 
 // Helper extensions
-suspend fun com.google.android.gms.maps3d.GoogleMap3D.awaitCameraAnimation() =
-    suspendCancellableCoroutine { continuation ->
-        setCameraAnimationEndListener {
-            setCameraAnimationEndListener(null) // Cleanup
-            if (continuation.isActive) {
-                continuation.resume(Unit)
-            }
-        }
-
-        continuation.invokeOnCancellation {
-            setCameraAnimationEndListener(null)
+suspend fun com.google.android.gms.maps3d.GoogleMap3D.awaitCameraAnimation() = suspendCancellableCoroutine { continuation ->
+    setCameraAnimationEndListener {
+        setCameraAnimationEndListener(null) // Cleanup
+        if (continuation.isActive) {
+            continuation.resume(Unit)
         }
     }
+
+    continuation.invokeOnCancellation {
+        setCameraAnimationEndListener(null)
+    }
+}

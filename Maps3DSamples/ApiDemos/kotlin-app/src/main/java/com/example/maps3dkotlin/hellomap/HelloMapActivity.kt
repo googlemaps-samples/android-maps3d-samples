@@ -14,19 +14,22 @@
 
 package com.example.maps3dkotlin.hellomap
 
-import android.app.Activity
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import androidx.core.view.ViewCompat
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
+import androidx.core.view.WindowInsetsControllerCompat
+import com.example.maps3d.common.Map3DQuickSettingsButton
+import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.LatLngAltitude
+import com.google.android.gms.maps3d.model.Map3DMode
 
 /**
  * `HelloMapActivity` serves as a foundational example for integrating `Map3DView` into an
@@ -34,7 +37,7 @@ import com.google.android.gms.maps3d.model.LatLngAltitude
  * map, initializing the `Map3DView`, and obtaining a reference to the `GoogleMap3D` object
  * to interact with the map programmatically.
  */
-class HelloMapActivity : Activity(), OnMap3DViewReadyCallback {
+class HelloMapActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     // Using a companion object for the TAG is a common Kotlin pattern. It's static, final,
     // and accessible via the class name, making it a good practice for logging.
     companion object {
@@ -51,33 +54,29 @@ class HelloMapActivity : Activity(), OnMap3DViewReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        enableImmersiveMode()
         setContentView(R.layout.activity_hello_map)
-
-        // The root view is identified once and then used for setting up window insets.
-        // This is a clean way to handle the view hierarchy.
-        val rootView = findViewById<View>(R.id.map_container)
-        ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
-            // We retrieve the insets for the status and navigation bars to adjust the padding.
-            // This ensures that the map content is not obscured by the system UI.
-            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val navigationBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-
-            // The padding of the view is updated to account for the system bars.
-            // This is a more robust way to handle window insets than manual calculations.
-            view.updatePadding(
-                top = view.paddingTop + statusBarInsets.top,
-                bottom = view.paddingBottom + navigationBarInsets.bottom
-            )
-
-            // We consume the insets to prevent further processing by other views.
-            WindowInsetsCompat.CONSUMED
-        }
 
         // The Map3DView is initialized and its lifecycle is managed by forwarding the
         // activity's lifecycle events. This is a required step for the map to function correctly.
         map3DView = findViewById(R.id.map3dView)
         map3DView.onCreate(savedInstanceState)
         map3DView.getMap3DViewAsync(this)
+    }
+
+    private fun enableImmersiveMode() {
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        insetsController.hide(WindowInsetsCompat.Type.systemBars())
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            enableImmersiveMode()
+        }
     }
 
     /**
@@ -110,6 +109,14 @@ class HelloMapActivity : Activity(), OnMap3DViewReadyCallback {
 
         Log.i(TAG, "Initializing map position to Delicate Arch")
 
+        Map3DSettingsController.shared.onSampleEntered(Map3DMode.HYBRID)
+        Map3DSettingsController.shared.settings.value.applyTo(map)
+        findViewById<Map3DQuickSettingsButton?>(R.id.quick_settings_button)?.apply {
+            settingsController = Map3DSettingsController.shared
+            sampleDefaultMapMode = Map3DMode.HYBRID
+            attachMap(map)
+        }
+
         val center = LatLngAltitude(38.743502, -109.499374, 1467.0)
         val initialCamera = Camera(center, 349.6, 58.1, 0.0, 138.2)
 
@@ -128,7 +135,6 @@ class HelloMapActivity : Activity(), OnMap3DViewReadyCallback {
         // It's important to log errors to aid in debugging. In a production application,
         // you might also want to display a user-friendly message.
         Log.e(TAG, "Error loading map", error)
-        super.onError(error)
     }
 
     // The following methods are lifecycle callbacks that must be forwarded to the Map3DView.
@@ -138,7 +144,11 @@ class HelloMapActivity : Activity(), OnMap3DViewReadyCallback {
 
     override fun onResume() {
         super.onResume()
+        enableImmersiveMode()
         map3DView.onResume()
+        googleMap3D?.let { map ->
+            Map3DSettingsController.shared.settings.value.applyTo(map)
+        }
     }
 
     override fun onPause() {

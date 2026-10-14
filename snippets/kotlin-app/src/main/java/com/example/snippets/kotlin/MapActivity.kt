@@ -21,6 +21,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.snippets.common.R
 import com.google.android.gms.maps3d.GoogleMap3D
@@ -46,6 +48,7 @@ class MapActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableImmersiveMode()
         setContentView(R.layout.activity_map)
 
         map3DView = findViewById(R.id.map)
@@ -152,6 +155,20 @@ class MapActivity : AppCompatActivity() {
         })
     }
 
+    private fun enableImmersiveMode() {
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        insetsController.hide(WindowInsetsCompat.Type.systemBars())
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            enableImmersiveMode()
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         map3DView.onStart()
@@ -159,6 +176,7 @@ class MapActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        enableImmersiveMode()
         map3DView.onResume()
     }
 
