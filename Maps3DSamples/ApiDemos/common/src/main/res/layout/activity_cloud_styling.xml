@@ -89,7 +89,7 @@
                 style="@style/TextAppearance.Material3.LabelLarge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Map Mode"
+                android:text="@string/map_mode"
                 android:textStyle="bold"
                 />
 
@@ -108,7 +108,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:checked="true"
-                    android:text="Roadmap"
+                    android:text="@string/roadmap"
                     />
 
                 <RadioButton
@@ -116,7 +116,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Hybrid"
+                    android:text="@string/hybrid"
                     />
 
                 <RadioButton
@@ -124,7 +124,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Satellite"
+                    android:text="@string/satellite"
                     />
             </RadioGroup>
         </LinearLayout>
