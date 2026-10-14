@@ -22,6 +22,7 @@ import android.view.KeyEvent
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.CallSuper
+import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -83,6 +84,9 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
     abstract val initialCamera: Camera
     abstract val TAG: String
 
+    @get:LayoutRes
+    protected open val layoutResId: Int = R.layout.activity_common_map
+
     // Private mutable state to hold the current camera position
     // This is updated by the listener when it's active.
     private val _currentCamera = MutableStateFlow(DEFAULT_CAMERA)
@@ -134,49 +138,55 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        setContentView(R.layout.activity_common_map)
+        setContentView(layoutResId)
         val rootView = findViewById<View>(R.id.map_container)
         val topBar = findViewById<MaterialToolbar>(R.id.top_bar)
-        
-        topBar.title = title
 
-        ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, insets ->
-            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+        topBar?.title = title
 
-            findViewById<View>(R.id.app_bar_layout)?.updatePadding(top = statusBarInsets.top)
+        if (rootView != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, insets ->
+                val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+                val navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
 
-            findViewById<View>(R.id.control_scroll_view)?.let { scrollView ->
-                val layoutParams = scrollView.layoutParams as android.view.ViewGroup.MarginLayoutParams
-                val margin16dp = (16 * scrollView.resources.displayMetrics.density).toInt()
-                layoutParams.bottomMargin = navInsets.bottom + margin16dp
-                scrollView.layoutParams = layoutParams
+                findViewById<View>(R.id.app_bar_layout)?.updatePadding(top = statusBarInsets.top)
+
+                findViewById<View>(R.id.control_scroll_view)?.let { scrollView ->
+                    val layoutParams = scrollView.layoutParams as android.view.ViewGroup.MarginLayoutParams
+                    val margin16dp = (16 * scrollView.resources.displayMetrics.density).toInt()
+                    layoutParams.bottomMargin = navInsets.bottom + margin16dp
+                    scrollView.layoutParams = layoutParams
+                }
+
+                WindowInsetsCompat.CONSUMED
             }
-
-            WindowInsetsCompat.CONSUMED
         }
 
         map3DView = findViewById(R.id.map3dView)
         map3DView.onCreate(savedInstanceState)
         map3DView.getMap3DViewAsync(this)
 
-        snapshotButton = findViewById<MaterialButton>(R.id.snapshot_button).apply {
-            setOnClickListener {
-                snapshot()
+        findViewById<MaterialButton>(R.id.snapshot_button)?.let { button ->
+            snapshotButton = button.apply {
+                setOnClickListener {
+                    snapshot()
+                }
+                visibility = View.VISIBLE
             }
-            visibility = View.VISIBLE
         }
 
-        recenterButton = findViewById<MaterialButton>(R.id.reset_view_button).apply {
-            setOnClickListener {
-                googleMap3D?.flyCameraTo(
-                    flyToOptions {
-                        endCamera = initialCamera
-                        durationInMillis = 2_000
-                    }
-                )
+        findViewById<MaterialButton>(R.id.reset_view_button)?.let { button ->
+            recenterButton = button.apply {
+                setOnClickListener {
+                    googleMap3D?.flyCameraTo(
+                        flyToOptions {
+                            endCamera = initialCamera
+                            durationInMillis = 2_000
+                        },
+                    )
+                }
+                visibility = View.VISIBLE
             }
-            visibility = View.VISIBLE
         }
     }
 
