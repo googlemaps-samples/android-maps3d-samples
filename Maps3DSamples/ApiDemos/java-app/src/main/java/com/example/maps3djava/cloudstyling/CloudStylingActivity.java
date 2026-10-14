@@ -20,6 +20,7 @@ import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
 
 import android.os.Bundle;
 import android.widget.RadioGroup;
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.example.maps3dcommon.R;
@@ -39,6 +40,7 @@ public class CloudStylingActivity extends SampleBaseActivity {
 
   public static final LatLng SF_LOCATION = new LatLng(37.7915, -122.4010);
 
+  @Map3DMode
   private int currentMapMode = Map3DMode.ROADMAP;
 
   @NonNull
@@ -61,6 +63,7 @@ public class CloudStylingActivity extends SampleBaseActivity {
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
+      EdgeToEdge.enable(this);
     super.onCreate(savedInstanceState);
 
     // Set dedicated standalone layout with declarative mapId="9a35234a36da44d2c47bf626"
@@ -99,5 +102,9 @@ public class CloudStylingActivity extends SampleBaseActivity {
   public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
     super.onMap3DViewReady(googleMap3D);
     googleMap3D.setMapMode(currentMapMode);
+      googleMap3D.setOnMapReadyListener(sceneReadiness -> {
+          googleMap3D.setOnMapReadyListener(null);
+          googleMap3D.setMapMode(currentMapMode);
+      });
   }
 }
