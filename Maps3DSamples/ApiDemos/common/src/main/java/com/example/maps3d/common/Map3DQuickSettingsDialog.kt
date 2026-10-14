@@ -18,9 +18,13 @@ package com.example.maps3d.common
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.RadioGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Map3DMode
@@ -177,7 +181,18 @@ object Map3DQuickSettingsDialog {
             }
             .create()
 
+        dialog.window?.setFlags(
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+        )
         dialog.show()
+        dialog.window?.let { dialogWindow ->
+            val insetsController = WindowCompat.getInsetsController(dialogWindow, dialogWindow.decorView)
+            insetsController.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            insetsController.hide(WindowInsetsCompat.Type.systemBars())
+            dialogWindow.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+        }
         return dialog
     }
 }

@@ -20,9 +20,9 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.example.maps3d.common.Map3DQuickSettingsButton;
 import com.example.maps3d.common.Map3DSettingsController;
@@ -49,26 +49,31 @@ public class HelloMapActivity extends AppCompatActivity implements OnMap3DViewRe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        enableImmersiveMode();
         setContentView(R.layout.activity_hello_map);
-
-        View rootView = findViewById(R.id.map_container);
-        ViewCompat.setOnApplyWindowInsetsListener(rootView, (view, insets) -> {
-            Insets statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars());
-            Insets navigationBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
-
-            view.setPadding(
-                    view.getPaddingLeft(),
-                    view.getPaddingTop() + statusBarInsets.top,
-                    view.getPaddingRight(),
-                    view.getPaddingBottom() + navigationBarInsets.bottom
-            );
-
-            return WindowInsetsCompat.CONSUMED;
-        });
 
         map3DView = findViewById(R.id.map3dView);
         map3DView.onCreate(savedInstanceState);
         map3DView.getMap3DViewAsync(this);
+    }
+
+    private void enableImmersiveMode() {
+        WindowInsetsControllerCompat insetsController =
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (insetsController != null) {
+            insetsController.setSystemBarsBehavior(
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            insetsController.hide(WindowInsetsCompat.Type.systemBars());
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            enableImmersiveMode();
+        }
     }
 
     /**
@@ -131,6 +136,7 @@ public class HelloMapActivity extends AppCompatActivity implements OnMap3DViewRe
     @Override
     protected void onResume() {
         super.onResume();
+        enableImmersiveMode();
         map3DView.onResume();
         if (googleMap3D != null) {
             Map3DSettingsController.getShared().getSettings().applyTo(googleMap3D);

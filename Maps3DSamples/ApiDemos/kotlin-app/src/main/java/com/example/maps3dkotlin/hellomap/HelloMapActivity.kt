@@ -16,11 +16,11 @@ package com.example.maps3dkotlin.hellomap
 
 import android.os.Bundle
 import android.util.Log
-import android.view.View
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.maps3d.common.Map3DQuickSettingsButton
 import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3dcommon.R
@@ -54,33 +54,29 @@ class HelloMapActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        enableImmersiveMode()
         setContentView(R.layout.activity_hello_map)
-
-        // The root view is identified once and then used for setting up window insets.
-        // This is a clean way to handle the view hierarchy.
-        val rootView = findViewById<View>(R.id.map_container)
-        ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
-            // We retrieve the insets for the status and navigation bars to adjust the padding.
-            // This ensures that the map content is not obscured by the system UI.
-            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val navigationBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-
-            // The padding of the view is updated to account for the system bars.
-            // This is a more robust way to handle window insets than manual calculations.
-            view.updatePadding(
-                top = view.paddingTop + statusBarInsets.top,
-                bottom = view.paddingBottom + navigationBarInsets.bottom
-            )
-
-            // We consume the insets to prevent further processing by other views.
-            WindowInsetsCompat.CONSUMED
-        }
 
         // The Map3DView is initialized and its lifecycle is managed by forwarding the
         // activity's lifecycle events. This is a required step for the map to function correctly.
         map3DView = findViewById(R.id.map3dView)
         map3DView.onCreate(savedInstanceState)
         map3DView.getMap3DViewAsync(this)
+    }
+
+    private fun enableImmersiveMode() {
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        insetsController.hide(WindowInsetsCompat.Type.systemBars())
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            enableImmersiveMode()
+        }
     }
 
     /**
@@ -148,6 +144,7 @@ class HelloMapActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
     override fun onResume() {
         super.onResume()
+        enableImmersiveMode()
         map3DView.onResume()
         googleMap3D?.let { map ->
             Map3DSettingsController.shared.settings.value.applyTo(map)

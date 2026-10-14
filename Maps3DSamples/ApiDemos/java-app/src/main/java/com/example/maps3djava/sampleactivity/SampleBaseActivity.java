@@ -34,6 +34,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.example.maps3d.common.Map3DQuickSettingsButton;
 import com.example.maps3d.common.Map3DSettings;
@@ -156,6 +157,7 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
 
         // This tells the system that the app will handle drawing behind the system bars.
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        enableImmersiveMode();
 
         setContentView(getLayoutResId());
         View rootView = findViewById(R.id.map_container);
@@ -211,10 +213,31 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
         }
     }
 
+    /**
+     * Enables sticky immersive mode so the 3D map canvas occupies the entire display,
+     * hiding status and navigation bars while allowing transient reveal on edge swipes.
+     */
+    protected void enableImmersiveMode() {
+        WindowInsetsControllerCompat insetsController = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (insetsController != null) {
+            insetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            insetsController.hide(WindowInsetsCompat.Type.systemBars());
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            enableImmersiveMode();
+        }
+    }
+
     @CallSuper
     @Override
     protected void onResume() {
         super.onResume();
+        enableImmersiveMode();
         map3DView.onResume();
         if (googleMap3D != null) {
             Map3DSettings currentSettings = Map3DSettingsController.getShared().getSettings();

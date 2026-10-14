@@ -16,10 +16,15 @@
 
 package com.example.maps3d.common
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.util.AttributeSet
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Map3DMode
@@ -105,9 +110,35 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        hideHostSystemBars()
         settingsController.addListener(controllerListener)
         updateTopMarginForUiControls()
-        post { updateTopMarginForUiControls() }
+        post {
+            hideHostSystemBars()
+            updateTopMarginForUiControls()
+        }
+    }
+
+    override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
+        super.onWindowFocusChanged(hasWindowFocus)
+        if (hasWindowFocus) {
+            hideHostSystemBars()
+        }
+    }
+
+    private fun hideHostSystemBars() {
+        var ctx: Context? = context
+        while (ctx is ContextWrapper) {
+            if (ctx is Activity) {
+                val window = ctx.window
+                val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+                insetsController.systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                insetsController.hide(WindowInsetsCompat.Type.systemBars())
+                break
+            }
+            ctx = ctx.baseContext
+        }
     }
 
     override fun onDetachedFromWindow() {

@@ -26,7 +26,9 @@ import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
@@ -197,6 +199,7 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        enableImmersiveMode()
 
         setContentView(layoutResId)
         val rootView = findViewById<View>(R.id.map_container)
@@ -251,9 +254,28 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         }
     }
 
+    /**
+     * Enables sticky immersive mode so the 3D map canvas occupies the entire display,
+     * hiding status and navigation bars while allowing transient reveal on edge swipes.
+     */
+    protected fun enableImmersiveMode() {
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        insetsController.hide(WindowInsetsCompat.Type.systemBars())
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            enableImmersiveMode()
+        }
+    }
+
     @CallSuper
     override fun onResume() {
         super.onResume()
+        enableImmersiveMode()
         map3DView.onResume()
         googleMap3D?.let { map ->
             val currentSettings = Map3DSettingsController.shared.settings.value
