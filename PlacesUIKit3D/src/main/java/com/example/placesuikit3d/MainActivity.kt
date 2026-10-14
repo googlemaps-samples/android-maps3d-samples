@@ -105,9 +105,9 @@ import com.google.android.libraries.places.widget.PlaceDetailsCompactFragment
 import com.google.android.libraries.places.widget.PlaceLoadListener
 import com.google.android.libraries.places.widget.model.Orientation
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Main Activity hosting the Places UI Kit & Google Maps 3D Showcase in Pure Jetpack Compose.
