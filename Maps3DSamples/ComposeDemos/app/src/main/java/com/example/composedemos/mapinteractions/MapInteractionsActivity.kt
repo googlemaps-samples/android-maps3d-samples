@@ -41,9 +41,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.maps.android.compose3d.GoogleMap3D
@@ -101,12 +99,13 @@ fun MapInteractionsScreen() {
             camera = calibratedCamera,
             modifier = Modifier.fillMaxSize(),
             onMapReady = { instance ->
-                instance.setMap3DClickListener { location, placeId ->
-                    clickedInfo = if (placeId != null) {
-                        "Clicked Place ID: $placeId"
+                instance.setMap3DClickListener { event ->
+                    clickedInfo = if (event.placeId != null) {
+                        "Clicked Place ID: ${event.placeId}"
                     } else {
-                        "Clicked Location: ${location.latitude}, ${location.longitude}"
+                        "Clicked Location: ${event.location.latitude}, ${event.location.longitude}"
                     }
+                    return@setMap3DClickListener true
                 }
             },
             onMapSteady = {

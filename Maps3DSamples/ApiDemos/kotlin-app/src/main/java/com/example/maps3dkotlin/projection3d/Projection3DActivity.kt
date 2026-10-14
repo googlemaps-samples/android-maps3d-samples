@@ -155,12 +155,13 @@ class Projection3DActivity : SampleBaseActivity() {
         super.onMapReady(googleMap3D)
 
         // Enable surface tap to re-project arbitrary coordinates
-        googleMap3D.setMap3DClickListener { location, _ ->
+        googleMap3D.setMap3DClickListener { event ->
             activeLandmarkNameRes = R.string.landmark_custom_pin
-            activeLocation = location
+            activeLocation = event.location
             googleMap3D.getCamera()?.let { cam ->
                 updateProjection(cam)
             }
+            return@setMap3DClickListener true
         }
 
         // Collect camera updates from base activity flow

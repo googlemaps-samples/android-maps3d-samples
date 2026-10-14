@@ -176,13 +176,14 @@ public class Projection3DActivity extends SampleBaseActivity {
         super.onMap3DViewReady(googleMap3D);
 
         // Enable surface tap to re-project arbitrary coordinates
-        googleMap3D.setMap3DClickListener((location, placeId) -> {
+        googleMap3D.setMap3DClickListener((event) -> {
             activeLandmarkNameRes = R.string.landmark_custom_pin;
-            activeLocation = location;
+            activeLocation = event.getLocation();
             Camera cam = googleMap3D.getCamera();
             if (cam != null) {
                 updateProjection(cam);
             }
+            return true;
         });
 
         // Listen for camera updates

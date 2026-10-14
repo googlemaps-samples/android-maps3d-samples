@@ -16,7 +16,6 @@
 
 package com.google.maps.android.compose3d
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -63,6 +62,9 @@ import com.google.maps.android.compose3d.utils.toValidCameraRestriction
  * @param modifier The modifier to apply to the layout.
  * @param options The options to initialize the [Map3DView] with.
  * @param onMapReady Optional callback invoked when the [GoogleMap3D] instance is ready.
+ * @param onMapClick Optional callback invoked with the clicked [LatLngAltitude] when the map is
+ *   tapped (or when a place is tapped and [onPlaceClick] is not provided).
+ * @param onPlaceClick Optional callback invoked with the place ID when a place on the map is tapped.
  */
 @Composable
 fun GoogleMap3D(
@@ -155,50 +157,56 @@ fun GoogleMap3D(
             val map3dView = Map3DView(context, options)
             map3dView.onCreate(null)
 
-            map3dView.getMap3DViewAsync(object : OnMap3DViewReadyCallback {
-                override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-                    googleMap3DState.value = googleMap3D
-                    Map3DRegistry.setInstance(googleMap3D)
+            map3dView.getMap3DViewAsync(
+                object : OnMap3DViewReadyCallback {
+                    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
+                        googleMap3DState.value = googleMap3D
+                        Map3DRegistry.setInstance(googleMap3D)
 
-                    googleMap3D.setOnMapReadyListener {
-                        googleMap3D.setOnMapReadyListener(null)
-                        Map3DRegistry.markReady()
-                        isMapReady.value = true
-                    }
-
-                    // Ensure readiness triggers even on delayed or reused map instances
-                    map3dView.postDelayed({
-                        if (!isMapReady.value) {
+                        googleMap3D.setOnMapReadyListener {
+                            googleMap3D.setOnMapReadyListener(null)
                             Map3DRegistry.markReady()
                             isMapReady.value = true
                         }
-                    }, 2_000L)
 
-                    googleMap3D.setOnMapSteadyListener { isSteady ->
-                        currentOnMapSteadyChange(isSteady)
-                        if (isSteady) {
-                            currentOnMapSteady()
-                        }
-                    }
+                        // Ensure readiness triggers even on delayed or reused map instances
+                        map3dView.postDelayed({
+                            if (!isMapReady.value) {
+                                Map3DRegistry.markReady()
+                                isMapReady.value = true
+                            }
+                        }, 2000L)
 
-                    googleMap3D.setCameraChangedListener { camera ->
-                        currentOnCameraChanged(camera)
-                    }
-
-                    if (currentOnMapClick != null || currentOnPlaceClick != null) {
-                        googleMap3D.setMap3DClickListener { location, placeId ->
-                            Log.d("GoogleMap3D", "Map clicked at $location, placeId: $placeId")
-                            if (placeId != null) {
-                                currentOnPlaceClick?.invoke(placeId)
-                            } else {
-                                currentOnMapClick?.invoke(location)
+                        googleMap3D.setOnMapSteadyListener { isSteady ->
+                            currentOnMapSteadyChange(isSteady)
+                            if (isSteady) {
+                                currentOnMapSteady()
                             }
                         }
-                    }
-                }
 
-                override fun onError(error: Exception): Unit = throw error
-            })
+                        googleMap3D.setCameraChangedListener { camera ->
+                            currentOnCameraChanged(camera)
+                        }
+
+                        googleMap3D.setMap3DClickListener { event ->
+                            val placeId = event.placeId
+                            val placeClickHandler = currentOnPlaceClick
+                            val mapClickHandler = currentOnMapClick
+
+                            if (placeId != null && placeClickHandler != null) {
+                                placeClickHandler(placeId)
+                                return@setMap3DClickListener true
+                            } else if (mapClickHandler != null) {
+                                mapClickHandler(event.location)
+                                return@setMap3DClickListener true
+                            }
+                            return@setMap3DClickListener false
+                        }
+                    }
+
+                    override fun onError(error: Exception): Unit = throw error
+                },
+            )
 
             map3DViewState.value = map3dView
             map3dView
