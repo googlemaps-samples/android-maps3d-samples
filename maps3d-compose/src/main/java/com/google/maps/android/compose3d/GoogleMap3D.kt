@@ -62,6 +62,9 @@ import com.google.maps.android.compose3d.utils.toValidCameraRestriction
  * @param modifier The modifier to apply to the layout.
  * @param options The options to initialize the [Map3DView] with.
  * @param onMapReady Optional callback invoked when the [GoogleMap3D] instance is ready.
+ * @param onMapClick Optional callback invoked with the clicked [LatLngAltitude] when the map is
+ *   tapped (or when a place is tapped and [onPlaceClick] is not provided).
+ * @param onPlaceClick Optional callback invoked with the place ID when a place on the map is tapped.
  */
 @Composable
 fun GoogleMap3D(
@@ -160,48 +163,45 @@ fun GoogleMap3D(
                         googleMap3DState.value = googleMap3D
                         Map3DRegistry.setInstance(googleMap3D)
 
-                    googleMap3D.setOnMapReadyListener {
-                        googleMap3D.setOnMapReadyListener(null)
-                        Map3DRegistry.markReady()
-                        isMapReady.value = true
-                    }
-
-                    // Ensure readiness triggers even on delayed or reused map instances
-                    map3dView.postDelayed({
-                        if (!isMapReady.value) {
+                        googleMap3D.setOnMapReadyListener {
+                            googleMap3D.setOnMapReadyListener(null)
                             Map3DRegistry.markReady()
                             isMapReady.value = true
                         }
-                    }, 2_000L)
 
-                    googleMap3D.setOnMapSteadyListener { isSteady ->
-                        currentOnMapSteadyChange(isSteady)
-                        if (isSteady) {
-                            currentOnMapSteady()
+                        // Ensure readiness triggers even on delayed or reused map instances
+                        map3dView.postDelayed({
+                            if (!isMapReady.value) {
+                                Map3DRegistry.markReady()
+                                isMapReady.value = true
+                            }
+                        }, 2000L)
+
+                        googleMap3D.setOnMapSteadyListener { isSteady ->
+                            currentOnMapSteadyChange(isSteady)
+                            if (isSteady) {
+                                currentOnMapSteady()
+                            }
                         }
-                    }
 
-                    googleMap3D.setCameraChangedListener { camera ->
-                        currentOnCameraChanged(camera)
-                    }
-
-                    googleMap3D.setMap3DClickListener { event ->
-                        android.util.Log.d(
-                            "GoogleMap3D",
-                            "Map clicked at ${event.location}, placeId: ${event.placeId}",
-                        )
-                        val placeId = event.placeId
-                        val placeClickHandler = currentOnPlaceClick
-                        val mapClickHandler = currentOnMapClick
-
-                        if (placeId != null && placeClickHandler != null) {
-                            placeClickHandler(placeId)
-                            return@setMap3DClickListener true
-                        } else if (mapClickHandler != null) {
-                            mapClickHandler(event.location)
-                            return@setMap3DClickListener true
+                        googleMap3D.setCameraChangedListener { camera ->
+                            currentOnCameraChanged(camera)
                         }
-                        return@setMap3DClickListener false
+
+                        googleMap3D.setMap3DClickListener { event ->
+                            val placeId = event.placeId
+                            val placeClickHandler = currentOnPlaceClick
+                            val mapClickHandler = currentOnMapClick
+
+                            if (placeId != null && placeClickHandler != null) {
+                                placeClickHandler(placeId)
+                                return@setMap3DClickListener true
+                            } else if (mapClickHandler != null) {
+                                mapClickHandler(event.location)
+                                return@setMap3DClickListener true
+                            }
+                            return@setMap3DClickListener false
+                        }
                     }
 
                     override fun onError(error: Exception): Unit = throw error

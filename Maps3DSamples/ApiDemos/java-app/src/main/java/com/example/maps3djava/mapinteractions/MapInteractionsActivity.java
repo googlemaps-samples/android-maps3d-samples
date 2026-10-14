@@ -94,21 +94,20 @@ public class MapInteractionsActivity extends SampleBaseActivity {
     googleMap3D.setMapMode(Map3DMode.HYBRID);
 
     // Listeners for map clicks.
-      googleMap3D.setMap3DClickListener((event) -> {
+    googleMap3D.setMap3DClickListener((event) -> {
       runOnUiThread(() -> {
         String message;
-          if (event.getPlaceId() != null) {
-              message = "Clicked Place ID: " + event.getPlaceId();
+        if (event.getPlaceId() != null) {
+          message = "Clicked Place ID: " + event.getPlaceId();
         } else {
-              message = "Clicked Location: " + event.getLocation().getLatitude() + ", "
-                  + event.getLocation().getLongitude();
+          message = "Clicked Location: " + event.getLocation().getLatitude() + ", "
+              + event.getLocation().getLongitude();
         }
         clickedInfoText.setText(message);
         clickedInfoText.setContentDescription(message);
         showToast(message);
-
       });
-          return true;
+      return true;
     });
   }
 

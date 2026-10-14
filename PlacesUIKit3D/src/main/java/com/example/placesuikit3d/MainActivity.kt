@@ -130,7 +130,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class MainActivity :
     AppCompatActivity(),
     OnMap3DViewReadyCallback {
-    private val TAG = this::class.java.simpleName
+    private val tag = this::class.java.simpleName
     private var googleMap3D: GoogleMap3D? = null
     private val cameraAnimator = Camera3DAnimator()
     private val activeMarkers = mutableMapOf<String, Marker>()
@@ -438,7 +438,7 @@ class MainActivity :
             val fragment =
                 supportFragmentManager.findFragmentById(containerId) as? PlaceDetailsCompactFragment
             if (fragment != null) {
-                Log.d(TAG, "Updating existing fragment for placeId: $placeId")
+                Log.d(tag, "Updating existing fragment for placeId: $placeId")
                 fragment.loadWithPlaceId(placeId)
             }
         }
@@ -628,7 +628,7 @@ class MainActivity :
 
         googleMap3D.setMap3DClickListener { event ->
             val placeId = event.placeId
-            Log.d(TAG, "Map clicked: placeId=$placeId")
+            Log.d(tag, "Map clicked: placeId=$placeId")
             if (!placeId.isNullOrEmpty()) {
                 runOnUiThread {
                     viewModel.onPlaceSelected(placeId)
@@ -709,7 +709,7 @@ class MainActivity :
     }
 
     override fun onError(error: Exception) {
-        Log.e(TAG, "Error loading 3D map", error)
+        Log.e(tag, "Error loading 3D map", error)
         super.onError(error)
     }
 }
