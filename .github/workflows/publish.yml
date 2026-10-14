@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up JDK 21
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
@@ -41,6 +43,7 @@ jobs:
           cp Maps3DSamples/advanced/app/build/outputs/apk/debug/app-debug.apk advanced-kotlin-debug.apk
 
       - name: Upload APKs to release
-        run: gh release upload "${{ github.event.release.tag_name }}" ApiDemos-kotlin-debug.apk advanced-kotlin-debug.apk --clobber
+        run: gh release upload "$TAG_NAME" ApiDemos-kotlin-debug.apk advanced-kotlin-debug.apk --clobber
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
