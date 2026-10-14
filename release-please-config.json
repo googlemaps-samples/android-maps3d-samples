@@ -1,0 +1,11 @@
+{
+    "packages": {
+        ".": {
+            "release-type": "simple",
+            "extra-files": [
+                "Maps3DSamples/ApiDemos/kotlin-app/build.gradle.kts",
+                "Maps3DSamples/advanced/app/build.gradle.kts"
+            ]
+        }
+    }
+}
