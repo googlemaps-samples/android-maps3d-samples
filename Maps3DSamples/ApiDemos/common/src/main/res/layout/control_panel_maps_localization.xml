@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/control_panel"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Card Header with title and collapse/expand button -->
+        <LinearLayout
+            android:id="@+id/card_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/localization_controls_title"
+                android:textStyle="bold"
+                style="@style/TextAppearance.Material3.TitleSmall" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_collapse"
+                style="?attr/materialIconButtonStyle"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:contentDescription="@string/collapse_controls"
+                android:padding="0dp"
+                app:icon="@drawable/expand_more_24px"
+                app:iconSize="20dp"
+                app:iconTint="?attr/colorOnSurfaceVariant" />
+        </LinearLayout>
+
+        <!-- Collapsible Content Section -->
+        <LinearLayout
+            android:id="@+id/card_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="10dp">
+
+            <!-- Compact Language Selection Dropdown Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_change_language"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:ellipsize="end"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:minHeight="40dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:singleLine="true"
+                android:text="@string/change_language_button"
+                android:textAlignment="viewStart"
+                android:textSize="13sp"
+                app:cornerRadius="8dp"
+                app:icon="@drawable/arrow_drop_down_24px"
+                app:iconGravity="end" />
+
+            <!-- Location displayed below the language change button -->
+            <TextView
+                android:id="@+id/tv_location"
+                style="@style/TextAppearance.Material3.BodySmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:paddingVertical="2dp"
+                android:text="@string/localization_location"
+                android:textColor="?android:attr/textColorSecondary" />
+
+            <!-- Map Mode Selection (Hybrid vs Roadmap for inspecting localized labels) -->
+            <RadioGroup
+                android:id="@+id/rg_localization_map_mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rb_mode_hybrid"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="@string/hybrid" />
+
+                <RadioButton
+                    android:id="@+id/rb_mode_roadmap"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:text="@string/roadmap" />
+            </RadioGroup>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
