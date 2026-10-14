@@ -49,7 +49,14 @@
         <activity
             android:name=".scenarios.ScenariosActivity"
             android:exported="true"
-            />
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="scenario" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".route.RouteSampleActivity"
             android:exported="true"
