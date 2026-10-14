@@ -38,73 +38,73 @@ import com.google.android.material.appbar.MaterialToolbar;
  */
 public class CloudStylingActivity extends SampleBaseActivity {
 
-  public static final LatLng SF_LOCATION = new LatLng(37.7915, -122.4010);
+    public static final LatLng SF_LOCATION = new LatLng(37.7915, -122.4010);
 
-  @Map3DMode
-  private int currentMapMode = Map3DMode.ROADMAP;
+    @Map3DMode
+    private int currentMapMode = Map3DMode.ROADMAP;
 
-  @NonNull
-  @Override
-  public String getTAG() {
-    return getClass().getSimpleName();
-  }
-
-  @NonNull
-  @Override
-  public Camera getInitialCamera() {
-    return toValidCamera(new Camera(
-        new LatLngAltitude(SF_LOCATION.latitude, SF_LOCATION.longitude, 250.0),
-        45.0,
-        65.0,
-        0.0,
-        800.0
-    ));
-  }
-
-  @Override
-  protected void onCreate(@Nullable Bundle savedInstanceState) {
-      EdgeToEdge.enable(this);
-    super.onCreate(savedInstanceState);
-
-    // Set dedicated standalone layout with declarative mapId="9a35234a36da44d2c47bf626"
-    setContentView(R.layout.activity_cloud_styling);
-
-    MaterialToolbar topBar = findViewById(R.id.top_bar);
-    if (topBar != null) {
-      topBar.setTitle(R.string.feature_title_cloud_styling);
-      topBar.setNavigationOnClickListener(v -> finish());
+    @NonNull
+    @Override
+    public String getTAG() {
+        return getClass().getSimpleName();
     }
 
-    map3DView = findViewById(R.id.map3dView);
-    if (map3DView != null) {
-      map3DView.onCreate(savedInstanceState);
-      map3DView.getMap3DViewAsync(this);
+    @NonNull
+    @Override
+    public Camera getInitialCamera() {
+        return toValidCamera(new Camera(
+                new LatLngAltitude(SF_LOCATION.latitude, SF_LOCATION.longitude, 250.0),
+                45.0,
+                65.0,
+                0.0,
+                800.0
+        ));
     }
 
-    RadioGroup rgMapMode = findViewById(R.id.rg_map_mode);
-    if (rgMapMode != null) {
-      rgMapMode.setOnCheckedChangeListener((group, checkedId) -> {
-        int newMode = Map3DMode.ROADMAP;
-        if (checkedId == R.id.rb_hybrid) {
-          newMode = Map3DMode.HYBRID;
-        } else if (checkedId == R.id.rb_satellite) {
-          newMode = Map3DMode.SATELLITE;
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        EdgeToEdge.enable(this);
+        super.onCreate(savedInstanceState);
+
+        // Set dedicated standalone layout with declarative mapId="9a35234a36da44d2c47bf626"
+        setContentView(R.layout.activity_cloud_styling);
+
+        MaterialToolbar topBar = findViewById(R.id.top_bar);
+        if (topBar != null) {
+            topBar.setTitle(R.string.feature_title_cloud_styling);
+            topBar.setNavigationOnClickListener(v -> finish());
         }
-        currentMapMode = newMode;
-        if (googleMap3D != null) {
-          googleMap3D.setMapMode(newMode);
-        }
-      });
-    }
-  }
 
-  @Override
-  public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
-    super.onMap3DViewReady(googleMap3D);
-    googleMap3D.setMapMode(currentMapMode);
-      googleMap3D.setOnMapReadyListener(sceneReadiness -> {
-          googleMap3D.setOnMapReadyListener(null);
-          googleMap3D.setMapMode(currentMapMode);
-      });
-  }
+        map3DView = findViewById(R.id.map3dView);
+        if (map3DView != null) {
+            map3DView.onCreate(savedInstanceState);
+            map3DView.getMap3DViewAsync(this);
+        }
+
+        RadioGroup rgMapMode = findViewById(R.id.rg_map_mode);
+        if (rgMapMode != null) {
+            rgMapMode.setOnCheckedChangeListener((group, checkedId) -> {
+                int newMode = Map3DMode.ROADMAP;
+                if (checkedId == R.id.rb_hybrid) {
+                    newMode = Map3DMode.HYBRID;
+                } else if (checkedId == R.id.rb_satellite) {
+                    newMode = Map3DMode.SATELLITE;
+                }
+                currentMapMode = newMode;
+                if (googleMap3D != null) {
+                    googleMap3D.setMapMode(newMode);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
+        super.onMap3DViewReady(googleMap3D);
+        googleMap3D.setMapMode(currentMapMode);
+        googleMap3D.setOnMapReadyListener(sceneReadiness -> {
+            googleMap3D.setOnMapReadyListener(null);
+            googleMap3D.setMapMode(currentMapMode);
+        });
+    }
 }

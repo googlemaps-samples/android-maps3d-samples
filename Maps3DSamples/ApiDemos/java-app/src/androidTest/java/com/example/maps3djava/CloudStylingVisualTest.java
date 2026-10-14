@@ -72,8 +72,8 @@ public class CloudStylingVisualTest extends BaseVisualTest {
 
         // Assert on Gemini's response
         assertTrue(
-            "Visual verification failed. Gemini response: " + geminiResponse,
-            geminiResponse != null && geminiResponse.toUpperCase().contains("PASSED")
+                "Visual verification failed. Gemini response: " + geminiResponse,
+                geminiResponse != null && geminiResponse.toUpperCase().contains("PASSED")
         );
     }
 }
