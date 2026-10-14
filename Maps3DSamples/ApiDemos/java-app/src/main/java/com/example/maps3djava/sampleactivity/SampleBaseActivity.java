@@ -27,6 +27,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.CallSuper;
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -76,6 +77,11 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
     public abstract Camera getInitialCamera();
     public abstract String getTAG();
 
+    @LayoutRes
+    protected int getLayoutResId() {
+        return R.layout.activity_common_map;
+    }
+
     private OnCameraChangedListener cameraChangedListener;
 
     @CallSuper
@@ -86,49 +92,57 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
         // This tells the system that the app will handle drawing behind the system bars.
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
-        setContentView(R.layout.activity_common_map);
+        setContentView(getLayoutResId());
         View rootView = findViewById(R.id.map_container);
         MaterialToolbar topBar = findViewById(R.id.top_bar);
 
-        topBar.setTitle(getTitle());
+        if (topBar != null) {
+            topBar.setTitle(getTitle());
+        }
 
-        ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, windowInsets) -> {
-            Insets statusBarInsets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars());
-            Insets navInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars());
+        if (rootView != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, windowInsets) -> {
+                Insets statusBarInsets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars());
+                Insets navInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars());
 
-            View appBarLayout = findViewById(R.id.app_bar_layout);
-            if (appBarLayout != null) {
-                appBarLayout.setPadding(0, statusBarInsets.top, 0, 0);
-            }
-            View controlScrollView = findViewById(R.id.control_scroll_view);
-            if (controlScrollView != null) {
-                android.view.ViewGroup.MarginLayoutParams layoutParams = (android.view.ViewGroup.MarginLayoutParams) controlScrollView
-                        .getLayoutParams();
-                int margin16dp = (int) (16 * getResources().getDisplayMetrics().density);
-                layoutParams.bottomMargin = navInsets.bottom + margin16dp;
-                controlScrollView.setLayoutParams(layoutParams);
-            }
+                View appBarLayout = findViewById(R.id.app_bar_layout);
+                if (appBarLayout != null) {
+                    appBarLayout.setPadding(0, statusBarInsets.top, 0, 0);
+                }
+                View controlScrollView = findViewById(R.id.control_scroll_view);
+                if (controlScrollView != null) {
+                    android.view.ViewGroup.MarginLayoutParams layoutParams = (android.view.ViewGroup.MarginLayoutParams) controlScrollView
+                            .getLayoutParams();
+                    int margin16dp = (int) (16 * getResources().getDisplayMetrics().density);
+                    layoutParams.bottomMargin = navInsets.bottom + margin16dp;
+                    controlScrollView.setLayoutParams(layoutParams);
+                }
 
-            return WindowInsetsCompat.CONSUMED;
-        });
+                return WindowInsetsCompat.CONSUMED;
+            });
+        }
 
         map3DView = findViewById(R.id.map3dView);
         map3DView.onCreate(savedInstanceState);
         map3DView.getMap3DViewAsync(this);
 
         snapshotButton = findViewById(R.id.snapshot_button);
-        snapshotButton.setOnClickListener(v -> snapshot());
-        snapshotButton.setVisibility(View.VISIBLE);
+        if (snapshotButton != null) {
+            snapshotButton.setOnClickListener(v -> snapshot());
+            snapshotButton.setVisibility(View.VISIBLE);
+        }
 
         recenterButton = findViewById(R.id.reset_view_button);
-        recenterButton.setOnClickListener(v -> {
-            if (googleMap3D != null) {
-                googleMap3D.flyCameraTo(
-                        new FlyToOptions(getInitialCamera(), 2000)
-                );
-            }
-        });
-        recenterButton.setVisibility(View.VISIBLE);
+        if (recenterButton != null) {
+            recenterButton.setOnClickListener(v -> {
+                if (googleMap3D != null) {
+                    googleMap3D.flyCameraTo(
+                            new FlyToOptions(getInitialCamera(), 2000)
+                    );
+                }
+            });
+            recenterButton.setVisibility(View.VISIBLE);
+        }
     }
 
     @CallSuper

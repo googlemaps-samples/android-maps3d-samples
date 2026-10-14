@@ -43,7 +43,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -57,7 +56,6 @@ import androidx.compose.ui.unit.dp
 import com.example.maps3d.common.toValidCamera
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
@@ -90,22 +88,19 @@ class CloudStylingActivity : ComponentActivity() {
 fun CloudStylingScreen() {
     val currentLocale = Locale.current
     var selectedMapMode by remember { mutableIntStateOf(Map3DMode.ROADMAP) }
-    var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
 
     val initialLocation = CloudStylingActivity.SF_LOCATION
-    val currentCameraState by remember {
-        mutableStateOf(
-            camera {
-                center = latLngAltitude {
-                    latitude = initialLocation.latitude
-                    longitude = initialLocation.longitude
-                    altitude = 250.0
-                }
-                heading = 45.0
-                tilt = 65.0
-                range = 800.0
-            }.toValidCamera(),
-        )
+    val currentCameraState = remember {
+        camera {
+            center = latLngAltitude {
+                latitude = initialLocation.latitude
+                longitude = initialLocation.longitude
+                altitude = 250.0
+            }
+            heading = 45.0
+            tilt = 65.0
+            range = 800.0
+        }.toValidCamera()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -133,10 +128,6 @@ fun CloudStylingScreen() {
                 language = currentLocale.language,
                 region = currentLocale.region,
             ),
-            onMapReady = { map ->
-                googleMap3D = map
-                map.setMapMode(selectedMapMode)
-            },
             modifier = Modifier.fillMaxSize(),
         )
 
@@ -198,7 +189,6 @@ fun CloudStylingScreen() {
                                     selected = (selectedMapMode == modeValue),
                                     onClick = {
                                         selectedMapMode = modeValue
-                                        googleMap3D?.setMapMode(modeValue)
                                     },
                                     role = Role.RadioButton,
                                 )

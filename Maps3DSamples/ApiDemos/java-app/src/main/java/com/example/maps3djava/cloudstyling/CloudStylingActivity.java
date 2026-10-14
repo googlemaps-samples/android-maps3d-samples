@@ -20,7 +20,6 @@ import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
 
 import android.os.Bundle;
 import android.widget.RadioGroup;
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.example.maps3dcommon.R;
@@ -49,6 +48,11 @@ public class CloudStylingActivity extends SampleBaseActivity {
         return getClass().getSimpleName();
     }
 
+    @Override
+    protected int getLayoutResId() {
+        return R.layout.activity_cloud_styling;
+    }
+
     @NonNull
     @Override
     public Camera getInitialCamera() {
@@ -63,22 +67,12 @@ public class CloudStylingActivity extends SampleBaseActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
-
-        // Set dedicated standalone layout with declarative mapId="9a35234a36da44d2c47bf626"
-        setContentView(R.layout.activity_cloud_styling);
 
         MaterialToolbar topBar = findViewById(R.id.top_bar);
         if (topBar != null) {
             topBar.setTitle(R.string.feature_title_cloud_styling);
             topBar.setNavigationOnClickListener(v -> finish());
-        }
-
-        map3DView = findViewById(R.id.map3dView);
-        if (map3DView != null) {
-            map3DView.onCreate(savedInstanceState);
-            map3DView.getMap3DViewAsync(this);
         }
 
         RadioGroup rgMapMode = findViewById(R.id.rg_map_mode);

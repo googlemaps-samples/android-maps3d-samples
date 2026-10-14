@@ -18,13 +18,11 @@ package com.example.maps3dkotlin.cloudstyling
 
 import android.os.Bundle
 import android.widget.RadioGroup
-import androidx.activity.enableEdgeToEdge
 import com.example.maps3d.common.toValidCamera
 import com.example.maps3dcommon.R
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
@@ -38,6 +36,8 @@ import com.google.android.material.appbar.MaterialToolbar
 class CloudStylingActivity : SampleBaseActivity() {
 
     override val TAG: String = this::class.java.simpleName
+
+    override val layoutResId: Int = R.layout.activity_cloud_styling
 
     override val initialCamera: Camera = camera {
         center = latLngAltitude {
@@ -54,18 +54,11 @@ class CloudStylingActivity : SampleBaseActivity() {
     private var currentMapMode: Int = Map3DMode.ROADMAP
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_cloud_styling)
 
         findViewById<MaterialToolbar>(R.id.top_bar)?.apply {
             title = getString(R.string.feature_title_cloud_styling)
             setNavigationOnClickListener { finish() }
-        }
-
-        map3DView = findViewById<Map3DView>(R.id.map3dView).apply {
-            onCreate(savedInstanceState)
-            getMap3DViewAsync(this@CloudStylingActivity)
         }
 
         findViewById<RadioGroup>(R.id.rg_map_mode)?.setOnCheckedChangeListener { _, checkedId ->

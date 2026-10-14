@@ -52,7 +52,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         map3d:mapId="9a35234a36da44d2c47bf626"
-        map3d:mode="roadmap"
+        map3d:mapMode="roadmap"
         map3d:centerLat="37.7915"
         map3d:centerLng="-122.4010"
         map3d:centerAlt="250"
