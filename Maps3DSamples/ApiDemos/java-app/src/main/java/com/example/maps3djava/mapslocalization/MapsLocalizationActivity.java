@@ -148,7 +148,11 @@ public class MapsLocalizationActivity extends SampleBaseActivity {
         String[] labels = new String[presets.size()];
         for (int i = 0; i < presets.size(); i++) {
             MapLocalePreset preset = presets.get(i);
-            labels[i] = preset.getDisplayName() + " — " + preset.getNativeLabel();
+            labels[i] =
+                    getString(
+                            R.string.language_option_format,
+                            preset.getDisplayName(),
+                            preset.getNativeLabel());
         }
 
         MapLocalePreset currentPreset = viewModel.getCurrentState().getSelectedPreset();

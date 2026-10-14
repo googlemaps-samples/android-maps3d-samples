@@ -37,13 +37,13 @@ class MapLocalizationSnippets(private val map: TrackedMap3D) {
         description = "Applies language='zh' and region='CN' via LocaleOptions and setLocale.",
     )
     fun setChineseLocalization() {
-        // [START maps_android_3d_localization_init_kt]
+        // [START maps_android_3d_localization_chinese_kt]
         val localeOptions = LocaleOptions().apply {
             language = "zh"
             region = "CN"
         }
         map.setLocale(localeOptions)
-        // [END maps_android_3d_localization_init_kt]
+        // [END maps_android_3d_localization_chinese_kt]
     }
 
     /**
@@ -55,13 +55,13 @@ class MapLocalizationSnippets(private val map: TrackedMap3D) {
         description = "Applies language='fr' and region='FR' via LocaleOptions and setLocale.",
     )
     fun setFrenchLocalization() {
-        // [START maps_android_3d_localization_runtime_kt]
+        // [START maps_android_3d_localization_french_kt]
         val localeOptions = LocaleOptions().apply {
             language = "fr"
             region = "FR"
         }
         map.setLocale(localeOptions)
-        // [END maps_android_3d_localization_runtime_kt]
+        // [END maps_android_3d_localization_french_kt]
     }
 
     /**

@@ -270,6 +270,8 @@
     <string name="localization_controls_title">3D Map Localization Controls</string>
     <string name="change_language_button">Change Language &amp; Region</string>
     <string name="language_button_format">%1$s [%2$s]</string>
+    <string name="language_option_format">%1$s — %2$s</string>
     <string name="localization_applied_format">Applied %1$s [%2$s]</string>
     <string name="localization_location">Location: San Francisco Bay, USA</string>
+    <string name="navigate_up">Navigate up</string>
 </resources>

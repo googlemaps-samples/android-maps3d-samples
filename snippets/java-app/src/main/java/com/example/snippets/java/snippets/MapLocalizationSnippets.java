@@ -40,12 +40,12 @@ public class MapLocalizationSnippets {
             title = "1. Chinese (zh-CN)",
             description = "Applies language='zh' and region='CN' via LocaleOptions and setLocale.")
     public void setChineseLocalization() {
-        // [START maps_android_3d_localization_init_java]
+        // [START maps_android_3d_localization_chinese_java]
         LocaleOptions localeOptions = new LocaleOptions();
         localeOptions.setLanguage("zh");
         localeOptions.setRegion("CN");
         map.setLocale(localeOptions);
-        // [END maps_android_3d_localization_init_java]
+        // [END maps_android_3d_localization_chinese_java]
     }
 
     /** Localizes 3D map labels to French (`fr`) and France (`FR`) region. */
@@ -54,12 +54,12 @@ public class MapLocalizationSnippets {
             title = "2. French (fr-FR)",
             description = "Applies language='fr' and region='FR' via LocaleOptions and setLocale.")
     public void setFrenchLocalization() {
-        // [START maps_android_3d_localization_runtime_java]
+        // [START maps_android_3d_localization_french_java]
         LocaleOptions localeOptions = new LocaleOptions();
         localeOptions.setLanguage("fr");
         localeOptions.setRegion("FR");
         map.setLocale(localeOptions);
-        // [END maps_android_3d_localization_runtime_java]
+        // [END maps_android_3d_localization_french_java]
     }
 
     /** Localizes 3D map labels to Japanese (`ja`) and Japan (`JP`) region. */

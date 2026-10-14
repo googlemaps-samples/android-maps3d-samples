@@ -133,7 +133,9 @@ class MapsLocalizationActivity : SampleBaseActivity() {
 
     private fun showLanguageSelectionDialog() {
         val presets = MapLocalePreset.entries
-        val labels = presets.map { "${it.displayName} — ${it.nativeLabel}" }.toTypedArray()
+        val labels = presets.map {
+            getString(R.string.language_option_format, it.displayName, it.nativeLabel)
+        }.toTypedArray()
         val currentState = viewModel.uiState.value
         val currentIndex = presets.indexOf(currentState.selectedPreset).coerceAtLeast(0)
 

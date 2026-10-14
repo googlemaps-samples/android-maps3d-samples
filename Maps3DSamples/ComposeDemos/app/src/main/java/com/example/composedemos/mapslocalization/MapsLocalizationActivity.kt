@@ -141,7 +141,7 @@ fun MapsLocalizationScreen(
                     IconButton(onClick = onNavigateUp) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.navigate_up),
                         )
                     }
                 },
@@ -162,7 +162,6 @@ fun MapsLocalizationScreen(
                 modifier = Modifier.fillMaxSize(),
                 onMapReady = { map ->
                     googleMap3DInstance = map
-                    map.setLocale(state.toLocaleOptions())
                 },
             )
 
@@ -218,7 +217,11 @@ private fun LocalizationControlCard(
                                 },
                             )
                             Text(
-                                text = "${preset.displayName} — ${preset.nativeLabel}",
+                                text = stringResource(
+                                    R.string.language_option_format,
+                                    preset.displayName,
+                                    preset.nativeLabel,
+                                ),
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.padding(start = 8.dp),
                             )
