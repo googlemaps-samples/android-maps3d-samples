@@ -36,6 +36,7 @@ import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
+import com.google.android.gms.maps3d.model.Map3DMode;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 
@@ -67,6 +68,12 @@ public class Projection3DActivity extends SampleBaseActivity {
     @Override
     public String getTAG() {
         return "Projection3DActivity";
+    }
+
+    @Override
+    @Map3DMode
+    protected int getDefaultMapMode() {
+        return Map3DMode.SATELLITE;
     }
 
     @NonNull

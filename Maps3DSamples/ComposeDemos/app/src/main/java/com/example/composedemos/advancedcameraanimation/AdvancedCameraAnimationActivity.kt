@@ -41,6 +41,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -91,17 +92,21 @@ import com.example.maps3d.common.AdvancedCameraAnimationViewModel
 import com.example.maps3d.common.AnimationApproach
 import com.example.maps3d.common.CameraKeyframe
 import com.example.maps3d.common.EntityPose
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.Map3DSessionTheme
 import com.example.maps3d.common.SimpleFlyToMode
 import com.example.maps3d.common.StationaryCameraTracker
 import com.example.maps3d.common.TourData
 import com.example.maps3d.common.TrajectoryFlightAnimator
 import com.example.maps3d.common.WorldState
 import com.example.maps3d.common.awaitCameraUpdate
+import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.example.maps3d.common.toCameraUpdate
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.LatLngAltitude
+import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyAroundOptions
 import com.google.android.gms.maps3d.model.flyToOptions
@@ -123,7 +128,7 @@ class AdvancedCameraAnimationActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaterialTheme {
+            Map3DSessionTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                         AdvancedCameraAnimationScreen()
@@ -140,6 +145,7 @@ fun AdvancedCameraAnimationScreen(
 ) {
     val state by viewModel.worldState.collectAsStateWithLifecycle()
     var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.SATELLITE)
 
     val initialCamera = remember {
         camera {
@@ -317,6 +323,7 @@ fun AdvancedCameraAnimationScreen(
         GoogleMap3D(
             modifier = Modifier.fillMaxSize(),
             camera = currentCamera,
+            mapMode = settings.mapMode,
             models = models,
             onMapReady = { map ->
                 googleMap3D = map
@@ -339,6 +346,15 @@ fun AdvancedCameraAnimationScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(12.dp),
+        )
+
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.SATELLITE,
+            googleMap3D = googleMap3D,
         )
     }
 }

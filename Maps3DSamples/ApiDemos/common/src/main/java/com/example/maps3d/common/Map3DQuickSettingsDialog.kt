@@ -18,6 +18,7 @@ package com.example.maps3d.common
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.widget.Button
 import android.widget.RadioGroup
 import androidx.appcompat.app.AlertDialog
 import com.example.maps3dcommon.R
@@ -32,7 +33,8 @@ import com.google.android.material.materialswitch.MaterialSwitch
  * Modal dialog for inspecting and adjusting 3D map settings.
  *
  * Provides single-choice radio controls for Map Mode (Satellite, Hybrid, Roadmap)
- * and Color Scheme (Follow System, Light, Dark).
+ * and Color Scheme (Follow System, Light, Dark), plus toggles for built-in camera UI controls
+ * and a Reset to Defaults action.
  * Directly applies changes to [GoogleMap3D] and app theme for instant live feedback.
  */
 object Map3DQuickSettingsDialog {
@@ -43,13 +45,15 @@ object Map3DQuickSettingsDialog {
      * @param context Host Android UI [Context].
      * @param controller The [Map3DSettingsController] managing settings state.
      * @param googleMap3D Optional [GoogleMap3D] instance to apply settings immediately.
+     * @param sampleDefaultMapMode The hosting sample's default [Map3DMode] used when resetting.
      * @param onDismiss Optional callback invoked when the dialog is closed.
      * @return The displayed [AlertDialog] instance.
      */
     fun show(
         context: Context,
-        controller: Map3DSettingsController,
+        controller: Map3DSettingsController = Map3DSettingsController.shared,
         googleMap3D: GoogleMap3D? = null,
+        @Map3DMode sampleDefaultMapMode: Int = Map3DMode.HYBRID,
         onDismiss: (() -> Unit)? = null,
     ): AlertDialog {
         val view = LayoutInflater.from(context).inflate(
@@ -60,47 +64,6 @@ object Map3DQuickSettingsDialog {
 
         val rgMapMode = view.findViewById<RadioGroup>(R.id.rg_map_mode)
         val rgColorScheme = view.findViewById<RadioGroup>(R.id.rg_color_scheme)
-        val currentSettings = controller.getSettings()
-
-        // Set initial Map Mode selection
-        val initialModeId = when (currentSettings.mapMode) {
-            Map3DMode.SATELLITE -> R.id.rb_mode_satellite
-            Map3DMode.ROADMAP -> R.id.rb_mode_roadmap
-            else -> R.id.rb_mode_hybrid
-        }
-        rgMapMode.check(initialModeId)
-
-        // Set initial Color Scheme selection
-        val initialSchemeId = when (currentSettings.colorScheme) {
-            Map3DColorScheme.LIGHT -> R.id.rb_scheme_light
-            Map3DColorScheme.DARK -> R.id.rb_scheme_dark
-            else -> R.id.rb_scheme_system
-        }
-        rgColorScheme.check(initialSchemeId)
-
-        // Listen for Map Mode changes
-        rgMapMode.setOnCheckedChangeListener { _, checkedId ->
-            val newMode = when (checkedId) {
-                R.id.rb_mode_satellite -> Map3DMode.SATELLITE
-                R.id.rb_mode_roadmap -> Map3DMode.ROADMAP
-                else -> Map3DMode.HYBRID
-            }
-            val updated = controller.setMapMode(newMode)
-            googleMap3D?.let { updated.applyTo(it) }
-        }
-
-        // Listen for Color Scheme changes
-        rgColorScheme.setOnCheckedChangeListener { _, checkedId ->
-            val newScheme = when (checkedId) {
-                R.id.rb_scheme_light -> Map3DColorScheme.LIGHT
-                R.id.rb_scheme_dark -> Map3DColorScheme.DARK
-                else -> Map3DColorScheme.FOLLOW_SYSTEM
-            }
-            val updated = controller.setColorScheme(newScheme)
-            googleMap3D?.let { updated.applyTo(it) }
-        }
-
-        // Camera UI Controls Checkboxes & Master Switch
         val switchAll = view.findViewById<MaterialSwitch>(R.id.switch_toggle_all_controls)
         val cbZoom = view.findViewById<MaterialCheckBox>(R.id.cb_control_zoom)
         val cbTilt = view.findViewById<MaterialCheckBox>(R.id.cb_control_tilt)
@@ -108,8 +71,10 @@ object Map3DQuickSettingsDialog {
         val cbCompass = view.findViewById<MaterialCheckBox>(R.id.cb_control_compass)
         val cbPanV = view.findViewById<MaterialCheckBox>(R.id.cb_control_pan_v)
         val cbPanH = view.findViewById<MaterialCheckBox>(R.id.cb_control_pan_h)
+        val btnReset = view.findViewById<Button>(R.id.btn_reset_settings)
 
         var isUpdatingUi = false
+
         fun syncCheckboxes(ui: Map3DUiControls) {
             isUpdatingUi = true
             switchAll.isChecked = ui.allEnabled
@@ -121,14 +86,56 @@ object Map3DQuickSettingsDialog {
             cbPanH.isChecked = ui.panHorizontal
             isUpdatingUi = false
         }
-        syncCheckboxes(currentSettings.uiControls)
+
+        fun syncAllControls(settings: Map3DSettings) {
+            isUpdatingUi = true
+            val modeId = when (settings.mapMode) {
+                Map3DMode.SATELLITE -> R.id.rb_mode_satellite
+                Map3DMode.ROADMAP -> R.id.rb_mode_roadmap
+                else -> R.id.rb_mode_hybrid
+            }
+            rgMapMode.check(modeId)
+
+            val schemeId = when (settings.colorScheme) {
+                Map3DColorScheme.LIGHT -> R.id.rb_scheme_light
+                Map3DColorScheme.DARK -> R.id.rb_scheme_dark
+                else -> R.id.rb_scheme_system
+            }
+            rgColorScheme.check(schemeId)
+            isUpdatingUi = false
+
+            syncCheckboxes(settings.uiControls)
+        }
+
+        syncAllControls(controller.getSettings())
+
+        // Listen for Map Mode changes
+        rgMapMode.setOnCheckedChangeListener { _, checkedId ->
+            if (isUpdatingUi) return@setOnCheckedChangeListener
+            val newMode = when (checkedId) {
+                R.id.rb_mode_satellite -> Map3DMode.SATELLITE
+                R.id.rb_mode_roadmap -> Map3DMode.ROADMAP
+                else -> Map3DMode.HYBRID
+            }
+            controller.setMapMode(newMode)
+        }
+
+        // Listen for Color Scheme changes
+        rgColorScheme.setOnCheckedChangeListener { _, checkedId ->
+            if (isUpdatingUi) return@setOnCheckedChangeListener
+            val newScheme = when (checkedId) {
+                R.id.rb_scheme_light -> Map3DColorScheme.LIGHT
+                R.id.rb_scheme_dark -> Map3DColorScheme.DARK
+                else -> Map3DColorScheme.FOLLOW_SYSTEM
+            }
+            controller.setColorScheme(newScheme)
+        }
 
         // Master switch toggle
         switchAll.setOnCheckedChangeListener { _, isChecked ->
             if (isUpdatingUi) return@setOnCheckedChangeListener
             val updated = controller.setAllUiControls(isChecked)
             syncCheckboxes(updated.uiControls)
-            googleMap3D?.let { updated.applyTo(it) }
         }
 
         // Helper for individual checkboxes
@@ -145,7 +152,6 @@ object Map3DQuickSettingsDialog {
             isUpdatingUi = true
             switchAll.isChecked = updated.uiControls.allEnabled
             isUpdatingUi = false
-            googleMap3D?.let { updated.applyTo(it) }
         }
 
         cbZoom.setOnCheckedChangeListener { _, _ -> onIndividualControlToggled() }
@@ -154,6 +160,11 @@ object Map3DQuickSettingsDialog {
         cbCompass.setOnCheckedChangeListener { _, _ -> onIndividualControlToggled() }
         cbPanV.setOnCheckedChangeListener { _, _ -> onIndividualControlToggled() }
         cbPanH.setOnCheckedChangeListener { _, _ -> onIndividualControlToggled() }
+
+        btnReset?.setOnClickListener {
+            val resetSettings = controller.reset(sampleDefaultMapMode)
+            syncAllControls(resetSettings)
+        }
 
         val dialog = MaterialAlertDialogBuilder(context)
             .setTitle(R.string.map3d_settings_title)

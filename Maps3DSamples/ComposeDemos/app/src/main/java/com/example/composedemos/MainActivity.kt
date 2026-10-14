@@ -59,13 +59,15 @@ import com.example.composedemos.polylines.PolylinesActivity
 import com.example.composedemos.popovers.PopoversActivity
 import com.example.composedemos.roadmapmode.RoadmapModeActivity
 import com.example.composedemos.routes.RoutesActivity
+import com.example.composedemos.uicontrols.UiControlsActivity
+import com.example.maps3d.common.Map3DSessionTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaterialTheme {
+            Map3DSessionTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -201,6 +203,11 @@ fun CatalogScreen() {
         item {
             SampleItem("Roadmap Mode") {
                 context.startActivity(Intent(context, RoadmapModeActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("UI Controls") {
+                context.startActivity(Intent(context, UiControlsActivity::class.java))
             }
         }
         item {

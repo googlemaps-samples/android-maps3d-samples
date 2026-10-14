@@ -22,6 +22,7 @@ import com.google.android.gms.maps3d.OnMap3DClickListener;
 import com.google.android.gms.maps3d.OnMapReadyListener;
 import com.google.android.gms.maps3d.OnMapSteadyListener;
 import com.google.android.gms.maps3d.Popover;
+import com.google.android.gms.maps3d.UiControlSettings;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.CameraRestriction;
 import com.google.android.gms.maps3d.model.FlyAroundOptions;
@@ -126,5 +127,13 @@ public class TrackedMap3D {
 
     public void setLocale(LocaleOptions options) {
         delegate.setLocale(options);
+    }
+
+    public UiControlSettings getUiControlSettings() {
+        UiControlSettings settings = delegate.getUiControlSettings();
+        if (settings != null && !items.contains(settings)) {
+            items.add(settings);
+        }
+        return settings;
     }
 }

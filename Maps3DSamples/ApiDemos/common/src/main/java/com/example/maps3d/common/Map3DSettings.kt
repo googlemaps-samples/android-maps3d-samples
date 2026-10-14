@@ -16,9 +16,17 @@
 
 package com.example.maps3d.common
 
+import android.annotation.SuppressLint
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
+import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
+import com.google.android.gms.maps3d.UiControlSettings.ControlOrientation
 import com.google.android.gms.maps3d.UiControlSettings.ControlPlacement
 import com.google.android.gms.maps3d.model.CompassControl
 import com.google.android.gms.maps3d.model.Map3DControl
@@ -26,7 +34,6 @@ import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.PanHorizontalControl
 import com.google.android.gms.maps3d.model.PanVerticalControl
 import com.google.android.gms.maps3d.model.RotateControl
-import com.google.android.gms.maps3d.model.Spacer
 import com.google.android.gms.maps3d.model.TiltControl
 import com.google.android.gms.maps3d.model.ZoomControl
 
@@ -48,22 +55,25 @@ enum class Map3DColorScheme(val value: Int) {
 
 // [START maps_3d_quick_settings_ui_controls_model]
 /**
- * Visibility state for built-in 3D camera UI controls.
+ * Visibility and placement state for built-in 3D camera UI controls.
  *
- * @property zoom Zoom in/out (+ / -) control on trailing edge.
- * @property tilt Pitch up/down control on trailing edge.
- * @property rotate Heading rotation (CW / CCW) control on trailing edge.
- * @property compass North orientation indicator & reset control on trailing edge.
- * @property panVertical North/South pan control on leading edge.
- * @property panHorizontal East/West pan control on leading edge.
+ * @property zoom Zoom in/out (+ / -) control.
+ * @property tilt Pitch up/down control.
+ * @property rotate Heading rotation (CW / CCW) control.
+ * @property compass North orientation indicator & reset control.
+ * @property panVertical North/South pan control.
+ * @property panHorizontal East/West pan control.
+ * @property controlsPosition Screen edge for main controls ([ControlPlacement.TRAILING] or [ControlPlacement.LEADING]); pan and compass controls are placed on the opposite edge.
  */
-data class Map3DUiControls(
+data class Map3DUiControls @JvmOverloads constructor(
     val zoom: Boolean = true,
     val tilt: Boolean = true,
     val rotate: Boolean = true,
     val compass: Boolean = true,
     val panVertical: Boolean = true,
     val panHorizontal: Boolean = true,
+    @param:ControlPlacement @get:ControlPlacement
+    val controlsPosition: Int = ControlPlacement.TRAILING,
 ) {
     val allEnabled: Boolean
         get() = zoom && tilt && rotate && compass && panVertical && panHorizontal
@@ -79,6 +89,29 @@ data class Map3DUiControls(
         panVertical = enabled,
         panHorizontal = enabled,
     )
+
+    /**
+     * Calculates the top margin (in dp) required to place a floating action button directly
+     * below the active top-anchored trailing camera controls.
+     *
+     * SDK control dimensions:
+     * - Dual-button controls (Zoom, Tilt, Rotate, Pan): 104dp (two 48dp touch targets + 8dp spacing).
+     * - Single-button control (Compass): 56dp (48dp touch target + padding).
+     * - Inter-control and screen edge spacing: 16dp initial offset + 8dp margin per visible control.
+     */
+    fun calculateFabMarginDp(): Int {
+        var totalHeightDp = 0
+        if (controlsPosition == ControlPlacement.LEADING) {
+            if (panVertical) totalHeightDp += 104
+            if (panHorizontal) totalHeightDp += 104
+            if (compass) totalHeightDp += 56
+        } else {
+            if (zoom) totalHeightDp += 104
+            if (tilt) totalHeightDp += 104
+            if (rotate) totalHeightDp += 104
+        }
+        return if (totalHeightDp > 0) 16 + totalHeightDp + 8 else 16
+    }
 }
 // [END maps_3d_quick_settings_ui_controls_model]
 
@@ -93,7 +126,7 @@ data class Map3DUiControls(
  * @property uiControls Visibility state for built-in 3D camera UI controls.
  */
 data class Map3DSettings(
-    @Map3DMode val mapMode: Int = Map3DMode.HYBRID,
+    @param:Map3DMode @get:Map3DMode val mapMode: Int = Map3DMode.HYBRID,
     val colorScheme: Map3DColorScheme = Map3DColorScheme.FOLLOW_SYSTEM,
     val uiControls: Map3DUiControls = Map3DUiControls(),
 ) {
@@ -129,25 +162,96 @@ data class Map3DSettings(
         // Apply built-in UI controls configuration
         try {
             googleMap3D.getUiControlSettings()?.let { settings ->
-                val trailingControls = mutableListOf<Map3DControl>()
-                if (uiControls.zoom) trailingControls.add(ZoomControl(null))
-                if (uiControls.tilt) trailingControls.add(TiltControl(null))
-                if (uiControls.rotate) trailingControls.add(RotateControl(null))
-                if (uiControls.compass) {
-                    if (trailingControls.isNotEmpty()) {
-                        trailingControls.add(Spacer())
-                    }
-                    trailingControls.add(CompassControl())
-                }
-                settings.setUiControlsPlacement(trailingControls, ControlPlacement.TRAILING)
+                val mainControls = mutableListOf<Map3DControl>()
+                if (uiControls.zoom) mainControls.add(ZoomControl(ControlOrientation.VERTICAL))
+                if (uiControls.tilt) mainControls.add(TiltControl(ControlOrientation.VERTICAL))
+                if (uiControls.rotate) mainControls.add(RotateControl(ControlOrientation.VERTICAL))
 
-                val leadingControls = mutableListOf<Map3DControl>()
-                if (uiControls.panVertical) leadingControls.add(PanVerticalControl(null))
-                if (uiControls.panHorizontal) leadingControls.add(PanHorizontalControl(null))
-                settings.setUiControlsPlacement(leadingControls, ControlPlacement.LEADING)
+                val panControls = mutableListOf<Map3DControl>()
+                if (uiControls.panVertical) panControls.add(PanVerticalControl(ControlOrientation.VERTICAL))
+                if (uiControls.panHorizontal) panControls.add(PanHorizontalControl(ControlOrientation.VERTICAL))
+                if (uiControls.compass) panControls.add(CompassControl())
+
+                val mainPosition = if (uiControls.controlsPosition == ControlPlacement.LEADING) {
+                    ControlPlacement.LEADING
+                } else {
+                    ControlPlacement.TRAILING
+                }
+                val panPosition = if (mainPosition == ControlPlacement.TRAILING) {
+                    ControlPlacement.LEADING
+                } else {
+                    ControlPlacement.TRAILING
+                }
+
+                settings.setUiControlsPlacement(mainControls, mainPosition)
+                settings.setUiControlsPlacement(panControls, panPosition)
             }
         } catch (e: Throwable) {
             Log.e("Map3DSettings", "Could not apply UI controls placement to GoogleMap3D", e)
+        }
+    }
+
+    companion object {
+        /**
+         * Resolves the status bar height (in pixels) for the given [view].
+         */
+        @SuppressLint("InternalInsetResource", "DiscouragedApi")
+        @JvmStatic
+        @JvmOverloads
+        fun resolveStatusBarHeightPx(view: View, explicitStatusBarTop: Int? = null): Int {
+            if (explicitStatusBarTop != null && explicitStatusBarTop > 0) {
+                return explicitStatusBarTop
+            }
+            val rootInsets = ViewCompat.getRootWindowInsets(view)
+            if (rootInsets != null) {
+                val barType = WindowInsetsCompat.Type.statusBars() or
+                    WindowInsetsCompat.Type.displayCutout()
+                val visibleTop = rootInsets.getInsets(barType).top
+                if (visibleTop > 0) {
+                    return visibleTop
+                }
+                if (!rootInsets.isVisible(WindowInsetsCompat.Type.statusBars())) {
+                    return rootInsets.getInsets(WindowInsetsCompat.Type.displayCutout()).top
+                }
+            }
+            val resId = view.resources.getIdentifier("status_bar_height", "dimen", "android")
+            return if (resId > 0) view.resources.getDimensionPixelSize(resId) else 0
+        }
+
+        /**
+         * Computes how many vertical pixels of the status bar overlap the top of [view].
+         *
+         * Returns `> 0` for full-screen maps that extend behind the status bar, and `0` when
+         * the map is positioned below a non-overlay toolbar (`top_bar`).
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun resolveStatusBarOverlapPx(view: View, explicitStatusBarTop: Int? = null): Int {
+            val parentView = view.parent as? ViewGroup
+            val topBar = parentView?.findViewById<View?>(R.id.top_bar)
+            val appBarLayout = parentView?.findViewById<View?>(R.id.app_bar_layout)
+            if (topBar != null && appBarLayout == null) {
+                if (view.isLaidOut && topBar.isLaidOut && topBar.isVisible) {
+                    val viewLoc = IntArray(2)
+                    val barLoc = IntArray(2)
+                    view.getLocationInWindow(viewLoc)
+                    topBar.getLocationInWindow(barLoc)
+                    val barBottom = barLoc[1] + topBar.height
+                    return (barBottom - viewLoc[1]).coerceAtLeast(0)
+                }
+                return 0
+            }
+            val statusBarTop = resolveStatusBarHeightPx(view, explicitStatusBarTop)
+            if (statusBarTop <= 0) return 0
+
+            return if (view.isLaidOut) {
+                val location = IntArray(2)
+                view.getLocationInWindow(location)
+                val viewTopInWindow = location[1]
+                (statusBarTop - viewTopInWindow).coerceAtLeast(0)
+            } else {
+                statusBarTop
+            }
         }
     }
 }

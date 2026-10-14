@@ -16,6 +16,7 @@
 
 package com.example.maps3d.common
 
+import com.google.android.gms.maps3d.UiControlSettings.ControlPlacement
 import com.google.android.gms.maps3d.model.Map3DMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -204,5 +205,93 @@ class Map3DSettingsControllerTest {
         controller.setUiControls(Map3DUiControls()) // Already default
 
         assertEquals(0, callCount)
+    }
+
+    @Test
+    fun onSampleEntered_whenNotOverridden_adoptsSampleDefaultMapMode() {
+        assertFalse(controller.hasUserOverriddenMapMode)
+
+        controller.onSampleEntered(Map3DMode.SATELLITE)
+        assertEquals(Map3DMode.SATELLITE, controller.settings.value.mapMode)
+        assertFalse(controller.hasUserOverriddenMapMode)
+
+        controller.onSampleEntered(Map3DMode.ROADMAP)
+        assertEquals(Map3DMode.ROADMAP, controller.settings.value.mapMode)
+        assertFalse(controller.hasUserOverriddenMapMode)
+    }
+
+    @Test
+    fun onSampleEntered_afterUserOverridesMapMode_preservesUserChoice() {
+        controller.setMapMode(Map3DMode.ROADMAP)
+        assertTrue(controller.hasUserOverriddenMapMode)
+        assertEquals(Map3DMode.ROADMAP, controller.settings.value.mapMode)
+
+        // Entering a sample that defaults to SATELLITE or HYBRID should NOT clobber user's choice
+        controller.onSampleEntered(Map3DMode.SATELLITE)
+        assertEquals(Map3DMode.ROADMAP, controller.settings.value.mapMode)
+
+        controller.onSampleEntered(Map3DMode.HYBRID)
+        assertEquals(Map3DMode.ROADMAP, controller.settings.value.mapMode)
+    }
+
+    @Test
+    fun setMapMode_sameAsCurrentDefault_stillMarksUserOverride() {
+        // Default is HYBRID; user explicitly selects HYBRID
+        controller.setMapMode(Map3DMode.HYBRID)
+        assertTrue(controller.hasUserOverriddenMapMode)
+
+        // Entering a SATELLITE sample should now keep HYBRID
+        controller.onSampleEntered(Map3DMode.SATELLITE)
+        assertEquals(Map3DMode.HYBRID, controller.settings.value.mapMode)
+    }
+
+    @Test
+    fun reset_restoresDefaultsAndClearsUserOverrideFlag() {
+        controller.setMapMode(Map3DMode.ROADMAP)
+        controller.setColorScheme(Map3DColorScheme.DARK)
+        controller.setAllUiControls(false)
+        assertTrue(controller.hasUserOverriddenMapMode)
+
+        val resetState = controller.reset(sampleDefaultMapMode = Map3DMode.SATELLITE)
+
+        assertFalse(controller.hasUserOverriddenMapMode)
+        assertEquals(Map3DMode.SATELLITE, resetState.mapMode)
+        assertEquals(Map3DColorScheme.FOLLOW_SYSTEM, resetState.colorScheme)
+        assertTrue(resetState.uiControls.allEnabled)
+        assertEquals(resetState, controller.settings.value)
+
+        // Subsequent sample navigation should again adopt sample defaults
+        controller.onSampleEntered(Map3DMode.HYBRID)
+        assertEquals(Map3DMode.HYBRID, controller.settings.value.mapMode)
+    }
+
+    @Test
+    fun calculateFabMarginDp_adjustsWithActiveTrailingControls() {
+        assertEquals(336, Map3DUiControls(zoom = true, tilt = true, rotate = true).calculateFabMarginDp())
+        assertEquals(232, Map3DUiControls(zoom = true, tilt = true, rotate = false).calculateFabMarginDp())
+        assertEquals(128, Map3DUiControls(zoom = true, tilt = false, rotate = false).calculateFabMarginDp())
+        assertEquals(16, Map3DUiControls(zoom = false, tilt = false, rotate = false).calculateFabMarginDp())
+    }
+
+    @Test
+    fun setControlsPosition_leading_updatesPlacementAndAdjustsFabMargin() {
+        assertEquals(ControlPlacement.TRAILING, controller.getSettings().uiControls.controlsPosition)
+
+        val updated = controller.setControlsPosition(ControlPlacement.LEADING)
+
+        assertEquals(ControlPlacement.LEADING, updated.uiControls.controlsPosition)
+        assertEquals(288, updated.uiControls.calculateFabMarginDp())
+        assertEquals(
+            232,
+            updated.uiControls.copy(compass = false).calculateFabMarginDp(),
+        )
+        assertEquals(
+            184,
+            updated.uiControls.copy(panHorizontal = false).calculateFabMarginDp(),
+        )
+        assertEquals(
+            16,
+            updated.uiControls.copy(panVertical = false, panHorizontal = false, compass = false).calculateFabMarginDp(),
+        )
     }
 }

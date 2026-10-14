@@ -95,7 +95,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.composedemos.BuildConfig
 import com.example.composedemos.R
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.Map3DSessionTheme
+import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.ImageView
@@ -163,7 +167,7 @@ class RoutesActivity : ComponentActivity() {
         windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
-            MaterialTheme {
+            Map3DSessionTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -180,6 +184,8 @@ class RoutesActivity : ComponentActivity() {
 @Composable
 fun RouteSampleScreen(viewModel: RouteViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.SATELLITE)
 
     val context = LocalContext.current
     val sharedPrefs = remember { context.getSharedPreferences("route_prefs", Context.MODE_PRIVATE) }
@@ -406,8 +412,11 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
             markers = currentMarkers,
             models = currentModels,
             polylines = polylines,
-            mapMode = Map3DMode.SATELLITE,
+            mapMode = settings.mapMode,
             modifier = Modifier.fillMaxSize(),
+            onMapReady = { map ->
+                googleMap3D = map
+            },
             onCameraChanged = { camera ->
                 cameraFlow.tryEmit(camera)
             },
@@ -419,7 +428,7 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
                 .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(start = 16.dp, end = 64.dp, top = 8.dp, bottom = 8.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -498,6 +507,16 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                 sharedPrefs.edit { putInt("warning_count", warningCount + 1) }
             })
         }
+
+        // Quick Settings Overlay
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.SATELLITE,
+            googleMap3D = googleMap3D,
+        )
     }
 }
 

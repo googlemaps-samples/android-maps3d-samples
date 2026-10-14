@@ -171,13 +171,6 @@
                 android:text="@string/map3d_control_rotate" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/cb_control_compass"
-                style="@style/TextAppearance.Material3.BodyMedium"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/map3d_control_compass" />
-
-            <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/cb_control_pan_v"
                 style="@style/TextAppearance.Material3.BodyMedium"
                 android:layout_width="match_parent"
@@ -190,7 +183,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/map3d_control_pan_h" />
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/cb_control_compass"
+                style="@style/TextAppearance.Material3.BodyMedium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/map3d_control_compass" />
         </LinearLayout>
+
+        <!-- Reset to Defaults Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_reset_settings"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="@string/map3d_settings_reset" />
 
     </LinearLayout>
 </ScrollView>

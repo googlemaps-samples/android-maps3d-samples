@@ -34,6 +34,8 @@ import androidx.core.graphics.toColorInt
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.maps3d.common.Map3DQuickSettingsButton
+import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3d.common.PathData
 import com.example.maps3d.common.PathEngine
 import com.example.maps3d.common.PathFollowingViewModel
@@ -47,6 +49,7 @@ import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.LatLngAltitude
+import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.Polyline
 import com.google.android.gms.maps3d.model.PolylineOptions
 import com.google.android.material.button.MaterialButton
@@ -143,9 +146,20 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             runOnUiThread {
                 if (isMapInitialized) return@runOnUiThread
                 isMapInitialized = true
+                Map3DSettingsController.shared.onSampleEntered(Map3DMode.HYBRID)
+                Map3DSettingsController.shared.settings.value.applyTo(googleMap3D)
+                findViewById<Map3DQuickSettingsButton?>(R.id.quick_settings_button)?.apply {
+                    settingsController = Map3DSettingsController.shared
+                    sampleDefaultMapMode = Map3DMode.HYBRID
+                    attachMap(googleMap3D)
+                }
                 resetPolylines()
             }
         }
+    }
+
+    override fun onError(error: Exception) {
+        Log.e(TAG, "Error loading map", error)
     }
 
     private fun setupCustomGestureHandling() {
@@ -695,6 +709,9 @@ class PathFollowingActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     override fun onResume() {
         super.onResume()
         map3DView.onResume()
+        googleMap3D?.let { map ->
+            Map3DSettingsController.shared.settings.value.applyTo(map)
+        }
     }
 
     override fun onPause() {

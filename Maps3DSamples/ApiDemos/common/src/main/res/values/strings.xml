@@ -43,6 +43,7 @@
     <string name="feature_title_data_visualization">Data Visualization</string>
     <string name="feature_title_cloud_styling">Cloud Map Styling</string>
     <string name="feature_title_roadmap_mode">Roadmap Mode</string>
+    <string name="feature_title_ui_controls">UI Controls</string>
     <string name="feature_title_field_of_view">Field Of View</string>
     <string name="feature_title_projection_3d">3D Screen Projection</string>
     <string name="feature_title_maps_localization">Maps Localization</string>
@@ -294,5 +295,21 @@
     <string name="map3d_control_pan_v">Pan Vertical (Up / Down)</string>
     <string name="map3d_control_pan_h">Pan Horizontal (Left / Right)</string>
     <string name="map3d_settings_done">Done</string>
+    <string name="map3d_settings_reset">Reset to Defaults</string>
     <string name="map3d_settings_button_description">Open 3D map quick settings</string>
+
+    <!-- Dedicated UI Controls Sample strings -->
+    <string name="ui_controls_panel_title">3D Map UI Controls</string>
+    <string name="ui_controls_visibility_label">Visible Controls</string>
+    <string name="ui_controls_placement_label">Main Controls Placement</string>
+    <string name="ui_controls_placement_trailing">Trailing (Right)</string>
+    <string name="ui_controls_placement_leading">Leading (Left)</string>
+    <string name="ui_controls_show_all">Show All</string>
+    <string name="ui_controls_hide_all">Hide All</string>
+    <string name="ui_control_chip_zoom">Zoom</string>
+    <string name="ui_control_chip_tilt">Tilt</string>
+    <string name="ui_control_chip_rotate">Rotate</string>
+    <string name="ui_control_chip_compass">Compass</string>
+    <string name="ui_control_chip_pan_vertical">Pan Vertical</string>
+    <string name="ui_control_chip_pan_horizontal">Pan Horizontal</string>
 </resources>

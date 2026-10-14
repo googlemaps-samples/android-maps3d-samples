@@ -53,6 +53,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.example.maps3d.common.toValidCamera
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps.model.LatLng
@@ -86,6 +88,7 @@ class CloudStylingActivity : ComponentActivity() {
 
 @Composable
 fun CloudStylingScreen() {
+    val sessionSettings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.ROADMAP)
     val currentLocale = Locale.current
     var selectedMapMode by remember { mutableIntStateOf(Map3DMode.ROADMAP) }
 

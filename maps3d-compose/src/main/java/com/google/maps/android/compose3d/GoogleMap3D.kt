@@ -119,7 +119,7 @@ fun GoogleMap3D(
     val currentOnMapClick by rememberUpdatedState(onMapClick)
     val currentOnPlaceClick by rememberUpdatedState(onPlaceClick)
 
-    DisposableEffect(lifecycleOwner, map3DViewState.value) {
+    DisposableEffect(lifecycleOwner, map3DViewState.value as Any?) {
         val map3dView = map3DViewState.value ?: return@DisposableEffect onDispose {}
         var isViewResumed = false
         val observer = LifecycleEventObserver { _, event ->
@@ -203,11 +203,10 @@ fun GoogleMap3D(
                             return@setMap3DClickListener false
                         }
                     }
-                }
 
-                override fun onError(error: Exception): Unit = throw error
-            },
-        )
+                    override fun onError(error: Exception): Unit = throw error
+                },
+            )
 
             map3DViewState.value = map3dView
             map3dView
