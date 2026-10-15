@@ -42,6 +42,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -94,10 +95,14 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.Map3DSessionTheme
 import com.example.maps3d.common.PathData
 import com.example.maps3d.common.PathEngine
 import com.example.maps3d.common.PathFollowingViewModel
 import com.example.maps3d.common.PathPlaybackState
+import com.example.maps3d.common.rememberMap3DSessionSettings
+import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.Map3DMode
@@ -117,7 +122,7 @@ class PathFollowingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaterialTheme {
+            Map3DSessionTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Surface(
                         modifier = Modifier
@@ -147,6 +152,8 @@ enum class AltitudeModeOption(val label: String, val mode: Int) {
 @Composable
 fun PathFollowingScreen(viewModel: PathFollowingViewModel = viewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.HYBRID)
     var showHelpDialog by remember { mutableStateOf(false) }
     var showAltitudeInfoDialog by remember { mutableStateOf(false) }
     var lastInteractionTime by remember { mutableStateOf(System.currentTimeMillis()) }
@@ -261,8 +268,11 @@ fun PathFollowingScreen(viewModel: PathFollowingViewModel = viewModel()) {
         GoogleMap3D(
             modifier = Modifier.fillMaxSize(),
             camera = dynamicCamera,
-            mapMode = Map3DMode.HYBRID,
+            mapMode = settings.mapMode,
             polylines = listOfNotNull(staticPolylineConfig, progressPolylineConfig),
+            onMapReady = { map ->
+                googleMap3D = map
+            },
         )
 
         // Custom Gesture Overlay replacing built-in map gestures
@@ -398,6 +408,15 @@ fun PathFollowingScreen(viewModel: PathFollowingViewModel = viewModel()) {
             onEnvironmentChange = { route ->
                 viewModel.setRoute(route, applyDefaults = true)
             },
+        )
+
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.HYBRID,
+            googleMap3D = googleMap3D,
         )
 
         if (showHelpDialog) {

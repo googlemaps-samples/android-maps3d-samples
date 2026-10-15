@@ -13,6 +13,72 @@ This guide assists developers in migrating their codebases to newer versions of 
 
 ---
 
+## Migrating from 0.2.2 to 16.0.0
+
+This release graduates the SDK version to `16.0.0` and updates the click listener API and XML attribute naming.
+
+### 1. Dependency Update
+Update the SDK dependency version in your `build.gradle` or `gradle/libs.versions.toml`:
+
+*   **Action**: Update `playServicesMaps3d` version from `0.2.2` to `16.0.0`.
+
+### 2. Update `OnMap3DClickListener` Signature (`Map3DClickEvent` & `Boolean` Return)
+
+`OnMap3DClickListener.onMap3DClick` now receives a single `Map3DClickEvent` object (providing `location` and `placeId`) and returns a `Boolean` indicating whether the click event was consumed (`true`) or should propagate (`false`).
+
+#### Code Transformation:
+
+**Kotlin**:
+```diff
+-googleMap3D.setMap3DClickListener { location, placeId ->
+-    if (placeId != null) {
+-        handlePlaceClick(placeId)
+-    }
+-}
++googleMap3D.setMap3DClickListener { event ->
++    val placeId = event.placeId
++    if (placeId != null) {
++        handlePlaceClick(placeId)
++        return@setMap3DClickListener true
++    }
++    return@setMap3DClickListener false
++}
+```
+
+**Java**:
+```diff
+-googleMap3D.setMap3DClickListener((location, placeId) -> {
+-    if (placeId != null) {
+-        handlePlaceClick(placeId);
+-    }
+-});
++googleMap3D.setMap3DClickListener(event -> {
++    if (event.getPlaceId() != null) {
++        handlePlaceClick(event.getPlaceId());
++        return true;
++    }
++    return false;
++});
+```
+
+### 3. Update XML Attribute `map3d:mode` to `map3d:mapMode`
+
+In XML layout files declaring `com.google.android.gms.maps3d.Map3DView`, replace `map3d:mode` with `map3d:mapMode`:
+
+```diff
+ <com.google.android.gms.maps3d.Map3DView
+     android:id="@+id/map3dView"
+-    map3d:mode="hybrid"
++    map3d:mapMode="hybrid"
+     ... />
+```
+
+### 4. `maps3d-compose` `GoogleMap3D` Click Handling Behavior Change
+
+In the `GoogleMap3D` composable (`maps3d-compose`), tapping a place on the map now invokes `onPlaceClick` if provided, and **falls back to `onMapClick(event.location)` when `onPlaceClick` is `null`** (returning `true` when either callback handles the tap, and `false` when neither callback is set). Previously, place clicks were ignored when `onPlaceClick` was not set even if `onMapClick` was provided.
+
+---
+
 ## Migrating from 0.2.0 to 0.2.2
 
 This release introduces breaking changes to the initialization configuration and view construction.

@@ -25,7 +25,13 @@ plugins {
 configure<com.diffplug.gradle.spotless.SpotlessExtension> {
     kotlin {
         target("**/*.kt")
-        ktlint().editorConfigOverride(mapOf("indent_size" to "4", "ktlint_function_naming_ignore_when_annotated_with" to "Composable"))
+        ktlint().editorConfigOverride(
+            mapOf(
+                "indent_size" to "4",
+                "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
+                "ktlint_standard_max-line-length" to "disabled",
+            ),
+        )
         trimTrailingWhitespace()
         endWithNewline()
     }
@@ -79,6 +85,10 @@ android {
     }
 }
 
+composeCompiler {
+    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose_stability.conf"))
+}
+
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
@@ -101,7 +111,7 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
 
     // Maps Utils
-    implementation(libs.maps.utils.ktx)
+    implementation(libs.android.maps.utils)
 
     // Material Icons Extended
     implementation(libs.androidx.material.icons.extended)

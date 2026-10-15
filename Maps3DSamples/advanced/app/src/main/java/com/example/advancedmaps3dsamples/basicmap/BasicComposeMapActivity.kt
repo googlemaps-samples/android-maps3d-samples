@@ -106,7 +106,7 @@ class BasicComposeMapActivity : ComponentActivity() {
                             }
                         }
                         lifecycleOwner.lifecycle.addObserver(observer)
-                        
+
                         // Clean up the observer when this Composable leaves the composition.
                         onDispose {
                             lifecycleOwner.lifecycle.removeObserver(observer)
@@ -117,7 +117,10 @@ class BasicComposeMapActivity : ComponentActivity() {
                     // Since Map3DView is a traditional Android View, we use AndroidView to
                     // inflate and display it within our Jetpack Compose layout.
                     AndroidView(
-                        modifier = Modifier.fillMaxSize().padding(innerPadding).testTag("map3d_view"),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .testTag("map3d_view"),
                         factory = { map3DView }
                     )
                 }

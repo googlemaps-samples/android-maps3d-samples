@@ -8,7 +8,4 @@ package com.example.snippets.kotlin.annotations
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class SnippetItem(
-    val title: String,
-    val description: String = "",
-)
+annotation class SnippetItem(val title: String, val description: String = "")

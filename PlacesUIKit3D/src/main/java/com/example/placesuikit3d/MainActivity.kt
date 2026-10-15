@@ -626,12 +626,16 @@ class MainActivity :
             googleMap3D.setCamera(Camera3DTarget.DEFAULT.toCamera())
         }
 
-        googleMap3D.setMap3DClickListener { _, placeId ->
+        googleMap3D.setMap3DClickListener { event ->
+            val placeId = event.placeId
+            Log.d(tag, "Map clicked: placeId=$placeId")
             if (!placeId.isNullOrEmpty()) {
                 runOnUiThread {
                     viewModel.onPlaceSelected(placeId)
                 }
+                return@setMap3DClickListener true
             }
+            return@setMap3DClickListener false
         }
     }
 

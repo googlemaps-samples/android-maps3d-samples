@@ -6,10 +6,12 @@ import com.google.android.gms.maps3d.OnMap3DClickListener
 import com.google.android.gms.maps3d.OnMapReadyListener
 import com.google.android.gms.maps3d.OnMapSteadyListener
 import com.google.android.gms.maps3d.Popover
+import com.google.android.gms.maps3d.UiControlSettings
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.CameraRestriction
 import com.google.android.gms.maps3d.model.FlyAroundOptions
 import com.google.android.gms.maps3d.model.FlyToOptions
+import com.google.android.gms.maps3d.model.LocaleOptions
 import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.MarkerOptions
 import com.google.android.gms.maps3d.model.Model
@@ -23,10 +25,7 @@ import com.google.android.gms.maps3d.model.PopoverOptions
 /**
  * Decorator wrapper around GoogleMap3D to track elements added during a snippet session.
  */
-class TrackedMap3D(
-    val delegate: GoogleMap3D,
-    private val items: MutableList<Any>,
-) {
+class TrackedMap3D(val delegate: GoogleMap3D, private val items: MutableList<Any>) {
 
     fun addMarker(options: MarkerOptions): Marker? {
         val marker = delegate.addMarker(options)
@@ -71,4 +70,11 @@ class TrackedMap3D(
     fun setOnMapSteadyListener(listener: OnMapSteadyListener?) = delegate.setOnMapSteadyListener(listener)
     fun setCameraRestriction(restriction: CameraRestriction?) = delegate.setCameraRestriction(restriction)
     fun getCameraRestriction() = delegate.getCameraRestriction()
+    fun setLocale(options: LocaleOptions) = delegate.setLocale(options)
+
+    fun getUiControlSettings(): UiControlSettings? {
+        val settings = delegate.getUiControlSettings()
+        if (settings != null && settings !in items) items.add(settings)
+        return settings
+    }
 }

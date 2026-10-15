@@ -341,9 +341,11 @@ class RoutesActivity : SampleBaseActivity() {
 
   // --- Map Readiness & Route Rendering ---
 
+  @Map3DMode
+  override val defaultMapMode: Int = Map3DMode.SATELLITE
+
   override fun onMapReady(googleMap3D: GoogleMap3D) {
     super.onMapReady(googleMap3D)
-    googleMap3D.setMapMode(Map3DMode.SATELLITE)
 
     lifecycleScope.launch(Dispatchers.Default) { loadAndRenderRoute(googleMap3D) }
   }

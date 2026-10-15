@@ -24,11 +24,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,22 +44,41 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.Map3DSessionTheme
+import com.example.maps3d.common.miles
+import com.example.maps3d.common.rememberMap3DSessionSettings
+import com.example.maps3d.common.toCameraString
+import com.example.maps3d.common.toMeters
+import com.example.maps3d.common.toValidCamera
+import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.maps.android.compose3d.GoogleMap3D
 import com.google.maps.android.compose3d.PolygonConfig
 import kotlinx.coroutines.launch
+import androidx.compose.ui.graphics.Color as ComposeColor
+import com.example.maps3dcommon.R as CommonR
+
+private const val TAG = "PolygonsActivity"
+private const val DENVER_LATITUDE = 39.748477
+private const val DENVER_LONGITUDE = -104.947575
 
 class PolygonsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,11 +87,12 @@ class PolygonsActivity : ComponentActivity() {
 
         // Hide system tray (immersive mode)
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-        windowInsetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
-        windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
-            MaterialTheme {
+            Map3DSessionTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -83,20 +109,24 @@ fun PolygonsScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var isMapSteady by remember { mutableStateOf(false) }
+    var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.HYBRID)
 
-    // Define the camera position centered around Denver Zoo
+    val museumAltitude = remember { 1.miles.toMeters }
+
+    // Define the camera position centered around Denver Zoo & Museum
     val denverCamera = remember {
         camera {
             center = latLngAltitude {
-                latitude = 39.748477
-                longitude = -104.947575
-                altitude = 1609.34 // Denver is a mile high!
+                latitude = DENVER_LATITUDE
+                longitude = DENVER_LONGITUDE
+                altitude = museumAltitude
             }
             heading = -68.0
             tilt = 47.0
             roll = 0.0
             range = 2251.0
-        }
+        }.toValidCamera()
     }
 
     // Define the outline for the zoo
@@ -167,21 +197,24 @@ fun PolygonsScreen() {
             }
     }
 
-    // Create a polygon config
-    val polygonConfig = remember {
+    // Create the zoo polygon config (with hole, clamped to ground)
+    val zooPolygonConfig = remember(context) {
         PolygonConfig(
             key = "denver_zoo",
             path = zooOutline,
             innerPaths = listOf(zooHole),
-            // Translucent yellow
             fillColor = Color.argb(70, 255, 255, 0),
             strokeColor = Color.GREEN,
             strokeWidth = 3f,
             altitudeMode = AltitudeMode.CLAMP_TO_GROUND,
-            onClick = { polygon ->
-                Log.d("PolygonsActivity", "Polygon clicked: $polygon")
+            onClick = {
+                Log.d(TAG, "Clicked on zoo polygon")
                 scope.launch {
-                    Toast.makeText(context, "Zoo time!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(CommonR.string.polygon_zoo_clicked),
+                        Toast.LENGTH_SHORT,
+                    ).show()
                 }
             },
         )
@@ -202,26 +235,31 @@ fun PolygonsScreen() {
                 latLngAltitude {
                     latitude = lat
                     longitude = lng
-                    altitude = 1609.34 // Denver is a mile high!
+                    altitude = museumAltitude
                 }
             }
     }
 
-    // Create extruded polygons for the museum
-    val museumPolygons = remember {
+    // Create extruded polygons for the museum (AltitudeMode.ABSOLUTE, drawsOccludedSegments = true)
+    val museumPolygons = remember(context) {
         extrudePolygon(museumBaseFace, 50.0).mapIndexed { index, outline ->
             PolygonConfig(
                 key = "museum_face_$index",
                 path = outline,
-                // Semi-transparent magenta
                 fillColor = Color.argb(70, 255, 0, 255),
                 strokeColor = Color.MAGENTA,
                 strokeWidth = 3f,
                 altitudeMode = AltitudeMode.ABSOLUTE,
-                onClick = { polygon ->
-                    Log.d("PolygonsActivity", "Museum face clicked: $polygon")
+                geodesic = false,
+                drawsOccludedSegments = true,
+                onClick = {
+                    Log.d(TAG, "Clicked on museum polygon")
                     scope.launch {
-                        Toast.makeText(context, "Museum time!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(CommonR.string.polygon_museum_clicked),
+                            Toast.LENGTH_SHORT,
+                        ).show()
                     }
                 },
             )
@@ -236,9 +274,18 @@ fun PolygonsScreen() {
         // 1. Map fills the entire screen
         GoogleMap3D(
             camera = denverCamera,
-            mapMode = Map3DMode.HYBRID,
-            polygons = listOf(polygonConfig) + museumPolygons,
+            mapMode = settings.mapMode,
+            polygons = listOf(zooPolygonConfig) + museumPolygons,
             modifier = Modifier.fillMaxSize(),
+            onMapReady = { map ->
+                googleMap3D = map
+                map.flyCameraTo(
+                    flyToOptions {
+                        endCamera = denverCamera
+                        durationInMillis = 1_000
+                    },
+                )
+            },
             onMapSteady = {
                 isMapSteady = true
             },
@@ -253,11 +300,73 @@ fun PolygonsScreen() {
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
-                text = "Polygons",
+                text = stringResource(CommonR.string.feature_title_polygons),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
+
+        // 3. Floating Pill Control Bar (Reset View + Snapshot, matching SampleBaseActivity)
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 16.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Row(
+                modifier = Modifier
+                    .background(
+                        color = ComposeColor(0x80FFFFFF),
+                        shape = RoundedCornerShape(32.dp),
+                    )
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                FilledTonalIconButton(
+                    onClick = {
+                        googleMap3D?.flyCameraTo(
+                            flyToOptions {
+                                endCamera = denverCamera
+                                durationInMillis = 2_000
+                            },
+                        )
+                    },
+                    modifier = Modifier.alpha(0.85f),
+                ) {
+                    Icon(
+                        painter = painterResource(id = CommonR.drawable.restart_alt_24px),
+                        contentDescription = stringResource(CommonR.string.reset_view),
+                    )
+                }
+
+                FilledTonalIconButton(
+                    onClick = {
+                        googleMap3D?.getCamera()?.let { cam ->
+                            Log.d(TAG, cam.toValidCamera().toCameraString())
+                        }
+                    },
+                    modifier = Modifier.alpha(0.85f),
+                ) {
+                    Icon(
+                        painter = painterResource(id = CommonR.drawable.photo_camera_24px),
+                        contentDescription = stringResource(CommonR.string.snapshot_camera),
+                    )
+                }
+            }
+        }
+
+        // 4. Quick Settings Overlay
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.HYBRID,
+            googleMap3D = googleMap3D,
+        )
     }
 }
 

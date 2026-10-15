@@ -95,11 +95,15 @@ When generating, refactoring, or editing code, strictly adhere to these rules:
    - Prefer Android KTX extensions (e.g., `hexColorString.toColorInt()`) over legacy utility methods.
    - Keep KDoc references clean by importing or fully qualifying symbols in brackets (e.g., `[PlaceSearch3DScreenState]`).
    - For unavoidable warnings (e.g., experimental Compose APIs or external SDK deprecations), use targeted `@OptIn(...)` or `@Suppress(...)` with an explanatory comment rather than forcing brittle workarounds.
-4. **Resource & Design Token Discipline:**
-   - Externalize user-facing strings to `res/values/strings.xml`.
+4. **Resource & Design Token Discipline (Zero Hardcoded Strings):**
+   - ❌ **No Hardcoded Strings:** Hardcoding user-facing strings, titles, button labels, telemetry text, or format templates in Activity, Fragment, Composable, or Helper classes is **strictly forbidden**.
+   - ✅ **Externalize to `strings.xml`:** Always externalize human-readable strings and format templates (e.g. `"%1$d px"`) to `res/values/strings.xml`. Reference them via `stringResource(R.string...)` in Jetpack Compose or `getString(R.string...)` in Android Views.
    - Prefer theme tokens (`MaterialTheme.colorScheme.*`) over hardcoded hex values. Document any canonical brand colors (e.g. `#F4B400` Google yellow) with an explanatory comment.
    - Compose state collections must use `collectAsStateWithLifecycle()` from `androidx.lifecycle.compose`.
-5. **Snippet Region Tag Discipline (`snippets/`):**
+5. **KDoc / Javadoc Notation Discipline (No Raw LaTeX):**
+   - ❌ **No Raw LaTeX Markup:** Do NOT write LaTeX markup (e.g. `$math$`, `$\mathbf{...}$`, `\Delta`, `\cdot`) in KDoc or Javadoc comments. Standard Android Studio hover documentation tooltips, Dokka documentation pipelines, and GitHub code views do not parse LaTeX, leaving raw, unrendered markup.
+   - ✅ **Readable Unicode & Plain Text Math:** Use standard Unicode characters (e.g., `θ`, `φ`, `Δ`, `×`, `·`, `→`, subscripts like `P₀`, superscripts like `R²`) and clean ASCII math expressions for universal readability across IDEs and documentation.
+6. **Snippet Region Tag Discipline (`snippets/`):**
    - When creating, modifying, or refactoring code in `snippets/`, always preserve and properly place region tags (`// [START ...]` and `// [END ...]`, along with `// [START_EXCLUDE]` / `// [END_EXCLUDE]`).
    - Ensures snippet boundaries remain discoverable and fully compatible with automated catalog scripts (`SAMPLE_CATALOG.md`) and documentation extractors.
 

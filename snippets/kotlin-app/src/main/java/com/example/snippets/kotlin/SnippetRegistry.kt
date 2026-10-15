@@ -21,14 +21,18 @@ import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
 import com.example.snippets.kotlin.snippets.CameraControlSnippets
 import com.example.snippets.kotlin.snippets.MapInitSnippets
+import com.example.snippets.kotlin.snippets.MapLocalizationSnippets
 import com.example.snippets.kotlin.snippets.MarkerSnippets
 import com.example.snippets.kotlin.snippets.ModelSnippets
 import com.example.snippets.kotlin.snippets.PlaceSnippets
 import com.example.snippets.kotlin.snippets.PolygonSnippets
 import com.example.snippets.kotlin.snippets.PolylineSnippets
 import com.example.snippets.kotlin.snippets.PopoverSnippets
+import com.example.snippets.kotlin.snippets.UiControlSnippets
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Popover
+import com.google.android.gms.maps3d.UiControlSettings
+import com.google.android.gms.maps3d.UiControlSettings.ControlPlacement
 import com.google.android.gms.maps3d.model.Marker
 import com.google.android.gms.maps3d.model.Model
 import com.google.android.gms.maps3d.model.Polygon
@@ -56,10 +60,21 @@ object SnippetRegistry {
             try {
                 when (item) {
                     is Marker -> item.remove()
+
                     is Polyline -> item.remove()
+
                     is Polygon -> item.remove()
+
                     is Model -> item.remove()
+
                     is Popover -> item.remove()
+
+                    is UiControlSettings -> {
+                        item.setUiControlsPlacement(emptyList(), ControlPlacement.TRAILING)
+                        item.setUiControlsPlacement(emptyList(), ControlPlacement.LEADING)
+                        item.setUiControlsPlacement(emptyList(), ControlPlacement.TOP)
+                        item.setUiControlsPlacement(emptyList(), ControlPlacement.BOTTOM)
+                    }
                 }
             } catch (e: Exception) {
                 // Ignore failures to avoid crashing if already cleanup or invalid
@@ -70,7 +85,9 @@ object SnippetRegistry {
 
     private val snippetClasses = listOf(
         MapInitSnippets::class.java,
+        MapLocalizationSnippets::class.java,
         CameraControlSnippets::class.java,
+        UiControlSnippets::class.java,
         MarkerSnippets::class.java,
         PolygonSnippets::class.java,
         PolylineSnippets::class.java,
@@ -105,7 +122,9 @@ object SnippetRegistry {
                                 // Most snippet methods take no args because they use initialized class fields
                                 if (method.parameterCount == 0) {
                                     method.invoke(instance)
-                                } else if (method.parameterCount == 1 && method.parameterTypes[0] == Context::class.java) {
+                                } else if (method.parameterCount == 1 &&
+                                    method.parameterTypes[0] == Context::class.java
+                                ) {
                                     method.invoke(instance, context)
                                 } else {
                                     // Fallback or log error
@@ -132,14 +151,29 @@ object SnippetRegistry {
         return groups
     }
 
-    private fun createInstance(clazz: Class<*>, context: Context, map: TrackedMap3D, scope: CoroutineScope): Any = try {
-        clazz.getConstructor(Context::class.java, TrackedMap3D::class.java, CoroutineScope::class.java).newInstance(context, map, scope)
+    private fun createInstance(
+        clazz: Class<*>,
+        context: Context,
+        map: TrackedMap3D,
+        scope: CoroutineScope,
+    ): Any = try {
+        clazz.getConstructor(
+            Context::class.java,
+            TrackedMap3D::class.java,
+            CoroutineScope::class.java,
+        ).newInstance(context, map, scope)
     } catch (e: Exception) {
         try {
-            clazz.getConstructor(TrackedMap3D::class.java, CoroutineScope::class.java).newInstance(map, scope)
+            clazz.getConstructor(
+                TrackedMap3D::class.java,
+                CoroutineScope::class.java,
+            ).newInstance(map, scope)
         } catch (e: Exception) {
             try {
-                clazz.getConstructor(Context::class.java, TrackedMap3D::class.java).newInstance(context, map)
+                clazz.getConstructor(
+                    Context::class.java,
+                    TrackedMap3D::class.java,
+                ).newInstance(context, map)
             } catch (e: Exception) {
                 try {
                     clazz.getConstructor(TrackedMap3D::class.java).newInstance(map)

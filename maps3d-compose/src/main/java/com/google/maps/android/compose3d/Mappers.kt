@@ -1,9 +1,12 @@
 package com.google.maps.android.compose3d
 
+import com.google.android.gms.maps3d.model.Glyph
 import com.google.android.gms.maps3d.model.Hole
+import com.google.android.gms.maps3d.model.ImageView
 import com.google.android.gms.maps3d.model.markerOptions
 import com.google.android.gms.maps3d.model.modelOptions
 import com.google.android.gms.maps3d.model.orientation
+import com.google.android.gms.maps3d.model.pinConfiguration
 import com.google.android.gms.maps3d.model.polygonOptions
 import com.google.android.gms.maps3d.model.polylineOptions
 import com.google.android.gms.maps3d.model.vector3D
@@ -32,10 +35,52 @@ fun MarkerConfig.toMarkerOptions(overrideId: String? = null) = markerOptions {
     position = this@toMarkerOptions.position.toValidLocation()
     altitudeMode = this@toMarkerOptions.altitudeMode
     label = this@toMarkerOptions.label
+    zIndex = this@toMarkerOptions.zIndex
     isExtruded = this@toMarkerOptions.isExtruded
     isDrawnWhenOccluded = this@toMarkerOptions.isDrawnWhenOccluded
     collisionBehavior = this@toMarkerOptions.collisionBehavior
     styleView?.let { setStyle(it) }
+    pinConfig?.let { pin ->
+        setStyle(
+            pinConfiguration {
+                pin.scale?.let { scale = it }
+                pin.backgroundColor?.let { backgroundColor = it }
+                pin.borderColor?.let { borderColor = it }
+                pin.glyph?.let { glyphConfig ->
+                    val sdkGlyph = when (glyphConfig) {
+                        is GlyphConfig.Color -> Glyph.fromColor(glyphConfig.color)
+
+                        is GlyphConfig.Text -> {
+                            if (glyphConfig.color != null) {
+                                Glyph.fromColor(glyphConfig.color).apply {
+                                    setText(glyphConfig.text)
+                                }
+                            } else {
+                                Glyph.fromText(glyphConfig.text)
+                            }
+                        }
+
+                        is GlyphConfig.Circle -> {
+                            Glyph.fromCircle().apply {
+                                glyphConfig.color?.let { color = it }
+                            }
+                        }
+
+                        is GlyphConfig.Image -> {
+                            val glyph = if (glyphConfig.color != null) {
+                                Glyph.fromColor(glyphConfig.color)
+                            } else {
+                                Glyph.fromCircle()
+                            }
+                            glyph.setImage(ImageView(glyphConfig.imageResId))
+                            glyph
+                        }
+                    }
+                    setGlyph(sdkGlyph)
+                }
+            },
+        )
+    }
 }
 
 /**
@@ -49,6 +94,8 @@ fun PolygonConfig.toPolygonOptions(overrideId: String? = null) = polygonOptions 
     strokeColor = this@toPolygonOptions.strokeColor
     strokeWidth = this@toPolygonOptions.strokeWidth.toDouble()
     altitudeMode = this@toPolygonOptions.altitudeMode
+    geodesic = this@toPolygonOptions.geodesic
+    drawsOccludedSegments = this@toPolygonOptions.drawsOccludedSegments
 }
 
 /**

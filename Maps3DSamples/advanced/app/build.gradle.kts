@@ -39,7 +39,7 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "1.12.0"
+        versionName = "1.17.0" // x-release-please-version
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -104,7 +104,7 @@ dependencies {
     testImplementation(libs.google.truth)
 
     // Google Maps Utils for the polyline decoder
-    implementation(libs.maps.utils.ktx)
+    implementation(libs.android.maps.utils)
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)

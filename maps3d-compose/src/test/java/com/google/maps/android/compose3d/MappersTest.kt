@@ -128,6 +128,8 @@ class MappersTest {
             strokeColor = Color.GREEN,
             strokeWidth = 3f,
             altitudeMode = AltitudeMode.CLAMP_TO_GROUND,
+            geodesic = true,
+            drawsOccludedSegments = true,
         )
 
         val options = config.toPolygonOptions()
@@ -144,6 +146,8 @@ class MappersTest {
         assertEquals(Color.GREEN, options.strokeColor)
         assertEquals(3.0, options.strokeWidth, 0.0)
         assertEquals(AltitudeMode.CLAMP_TO_GROUND, options.altitudeMode)
+        assertEquals(true, options.geodesic)
+        assertEquals(true, options.drawsOccludedSegments)
     }
 
     @Test

@@ -46,6 +46,7 @@ import com.example.composedemos.fieldofview.FieldOfViewActivity
 import com.example.composedemos.flightsimulator.FlightSimulatorActivity
 import com.example.composedemos.hellomap.HelloMapActivity
 import com.example.composedemos.mapinteractions.MapInteractionsActivity
+import com.example.composedemos.mapslocalization.MapsLocalizationActivity
 import com.example.composedemos.markers.MarkersActivity
 import com.example.composedemos.models.ModelsActivity
 import com.example.composedemos.pathfollowing.PathFollowingActivity
@@ -58,13 +59,15 @@ import com.example.composedemos.polylines.PolylinesActivity
 import com.example.composedemos.popovers.PopoversActivity
 import com.example.composedemos.roadmapmode.RoadmapModeActivity
 import com.example.composedemos.routes.RoutesActivity
+import com.example.composedemos.uicontrols.UiControlsActivity
+import com.example.maps3d.common.Map3DSessionTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaterialTheme {
+            Map3DSessionTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -203,8 +206,18 @@ fun CatalogScreen() {
             }
         }
         item {
+            SampleItem("UI Controls") {
+                context.startActivity(Intent(context, UiControlsActivity::class.java))
+            }
+        }
+        item {
             SampleItem("Field Of View") {
                 context.startActivity(Intent(context, FieldOfViewActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Maps Localization") {
+                context.startActivity(Intent(context, MapsLocalizationActivity::class.java))
             }
         }
     }

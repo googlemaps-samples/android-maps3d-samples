@@ -104,7 +104,8 @@ class PolylineSnippets(private val context: Context, private val map: TrackedMap
     @Suppress("unused")
     @SnippetItem(
         title = "2. Styled",
-        description = "Draws a magenta polyline with a green outline, extruded and following the ground curvature (geodesic), connecting two points.",
+        description = "Draws a magenta polyline with a green outline, extruded and following the " +
+            "ground curvature (geodesic), connecting two points.",
     )
     fun addStyledPolyline() {
         // [START maps_android_3d_polyline_options_kt]

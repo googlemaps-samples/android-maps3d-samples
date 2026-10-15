@@ -21,7 +21,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
-import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.Polyline
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
@@ -87,7 +86,6 @@ class PolylinesActivity : SampleBaseActivity() {
 
     override fun onMapReady(googleMap3D: GoogleMap3D) {
         super.onMapReady(googleMap3D)
-        googleMap3D.setMapMode(Map3DMode.HYBRID)
         // Adding polylines can be a heavy operation (parsers), so we do it on a background thread.
         lifecycleScope.launch(Dispatchers.Default) {
             addPolylines(googleMap3D)

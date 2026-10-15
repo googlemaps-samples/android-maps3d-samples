@@ -35,7 +35,13 @@ subprojects {
         }
         kotlin {
             target("**/*.kt")
-            ktlint().editorConfigOverride(mapOf("indent_size" to "4", "ktlint_function_naming_ignore_when_annotated_with" to "Composable"))
+            ktlint().editorConfigOverride(
+                mapOf(
+                    "indent_size" to "4",
+                    "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
+                    "ktlint_standard_max-line-length" to "disabled",
+                ),
+            )
             trimTrailingWhitespace()
             endWithNewline()
         }

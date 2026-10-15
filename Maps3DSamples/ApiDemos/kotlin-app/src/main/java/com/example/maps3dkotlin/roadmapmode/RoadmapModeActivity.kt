@@ -25,6 +25,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioGroup
 import androidx.cardview.widget.CardView
+import com.example.maps3d.common.Map3DSettings
+import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3d.common.toValidCamera
 import com.example.maps3dcommon.R
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
@@ -67,6 +69,9 @@ class RoadmapModeActivity : SampleBaseActivity() {
 
   override val TAG = "RoadmapModeActivity"
 
+  @Map3DMode
+  override val defaultMapMode: Int = Map3DMode.ROADMAP
+
   override val initialCamera: Camera
     get() = camera {
       center = latLngAltitude {
@@ -91,6 +96,7 @@ class RoadmapModeActivity : SampleBaseActivity() {
   // --- State Variables ---
 
   private var isCollapsed = false
+  private var isSyncingRadioGroup = false
 
   // --- Handlers & Runnables ---
 
@@ -144,17 +150,36 @@ class RoadmapModeActivity : SampleBaseActivity() {
     }
 
     rgMapMode?.setOnCheckedChangeListener { _, checkedId ->
+      if (isSyncingRadioGroup) return@setOnCheckedChangeListener
+      val mode = when (checkedId) {
+        R.id.rb_roadmap -> Map3DMode.ROADMAP
+        R.id.rb_hybrid -> Map3DMode.HYBRID
+        R.id.rb_satellite -> Map3DMode.SATELLITE
+        else -> return@setOnCheckedChangeListener
+      }
+      Map3DSettingsController.shared.setMapMode(mode)
       googleMap3D?.let { map ->
-        when (checkedId) {
-          R.id.rb_roadmap -> map.setMapMode(Map3DMode.ROADMAP)
-          R.id.rb_hybrid -> map.setMapMode(Map3DMode.HYBRID)
-          R.id.rb_satellite -> map.setMapMode(Map3DMode.SATELLITE)
-        }
+        Map3DSettingsController.shared.settings.value.applyTo(map)
       }
     }
 
     // Schedule subtle initial auto-fade for unobstructed viewing
     fadeHandler.postDelayed(fadeOutRunnable, 3000L)
+  }
+
+  override fun onQuickSettingsChanged(settings: Map3DSettings) {
+    val targetId = when (settings.mapMode) {
+      Map3DMode.ROADMAP -> R.id.rb_roadmap
+      Map3DMode.HYBRID -> R.id.rb_hybrid
+      Map3DMode.SATELLITE -> R.id.rb_satellite
+      else -> return
+    }
+    val group = rgMapMode ?: return
+    if (group.checkedRadioButtonId != targetId) {
+      isSyncingRadioGroup = true
+      group.check(targetId)
+      isSyncingRadioGroup = false
+    }
   }
 
   // --- UI Collapse / Expand Mechanics ---
@@ -209,7 +234,6 @@ class RoadmapModeActivity : SampleBaseActivity() {
 
   override fun onMapReady(googleMap3D: GoogleMap3D) {
     super.onMapReady(googleMap3D)
-    googleMap3D.setMapMode(Map3DMode.ROADMAP)
     googleMap3D.setCamera(initialCamera)
   }
 

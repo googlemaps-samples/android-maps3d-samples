@@ -28,7 +28,6 @@ import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.Hole;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
-import com.google.android.gms.maps3d.model.Map3DMode;
 import com.google.android.gms.maps3d.model.PolygonOptions;
 
 import java.util.Arrays;
@@ -124,7 +123,7 @@ public class PolygonsActivity extends SampleBaseActivity {
         options.setFillColor(faceFillColor);
         options.setStrokeColor(faceStrokeColor);
         options.setStrokeWidth(faceStrokeWidth);
-        options.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
+        options.setAltitudeMode(AltitudeMode.ABSOLUTE);
         options.setGeodesic(false);
         options.setDrawsOccludedSegments(true);
         return options;
@@ -153,9 +152,9 @@ public class PolygonsActivity extends SampleBaseActivity {
     private void initializeMap(GoogleMap3D googleMap3D) {
         if (isInitialized) return;
         isInitialized = true;
+        super.onMapReady(googleMap3D);
 
         googleMap3D.setCamera(getInitialCamera());
-        googleMap3D.setMapMode(Map3DMode.HYBRID);
 
         initializePolygons(googleMap3D);
     }

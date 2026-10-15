@@ -28,7 +28,6 @@ import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
-import com.google.android.gms.maps3d.model.Map3DMode;
 
 public class MapInteractionsActivity extends SampleBaseActivity {
 
@@ -72,7 +71,7 @@ public class MapInteractionsActivity extends SampleBaseActivity {
   @Override
   public void onMap3DViewReady(GoogleMap3D googleMap3D) {
     super.onMap3DViewReady(googleMap3D);
-    
+
     googleMap3D.setOnMapReadyListener((map) -> {
       googleMap3D.setOnMapReadyListener(null);
       initializeMap(googleMap3D);
@@ -90,22 +89,23 @@ public class MapInteractionsActivity extends SampleBaseActivity {
   private void initializeMap(@NonNull GoogleMap3D googleMap3D) {
     if (isInitialized) return;
     isInitialized = true;
-
-    googleMap3D.setMapMode(Map3DMode.HYBRID);
+    super.onMapReady(googleMap3D);
 
     // Listeners for map clicks.
-    googleMap3D.setMap3DClickListener((location, placeId) -> {
+    googleMap3D.setMap3DClickListener((event) -> {
       runOnUiThread(() -> {
         String message;
-        if (placeId != null) {
-          message = "Clicked Place ID: " + placeId;
+        if (event.getPlaceId() != null) {
+          message = "Clicked Place ID: " + event.getPlaceId();
         } else {
-          message = "Clicked Location: " + location.getLatitude() + ", " + location.getLongitude();
+          message = "Clicked Location: " + event.getLocation().getLatitude() + ", "
+              + event.getLocation().getLongitude();
         }
         clickedInfoText.setText(message);
         clickedInfoText.setContentDescription(message);
         showToast(message);
       });
+      return true;
     });
   }
 

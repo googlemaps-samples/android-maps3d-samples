@@ -28,9 +28,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.example.snippets.kotlin.annotations.SnippetGroup
 import com.example.snippets.kotlin.annotations.SnippetItem
 import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
+import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 
@@ -50,13 +50,14 @@ class MapInitSnippets {
     @Suppress("unused")
     @SnippetItem(
         title = "2. Add Map to AndroidView",
-        description = "Shows how to add a Map3DView to an AndroidView which bridges to Jetpack Compose.",
+        description = "Shows how to add a Map3DView to an AndroidView which bridges to " +
+            "Jetpack Compose.",
     )
     fun BasicMap3D() {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
-                Map3DView(context, Map3DInitConfig.create()).apply {
+                Map3DView(context, Map3DMode.HYBRID).apply {
                     getMap3DViewAsync(object : OnMap3DViewReadyCallback {
                         override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
                             val camera = camera {

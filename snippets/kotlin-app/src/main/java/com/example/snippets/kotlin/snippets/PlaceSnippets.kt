@@ -38,17 +38,21 @@ class PlaceSnippets(private val context: Context, private val map: TrackedMap3D)
     @Suppress("unused")
     @SnippetItem(
         title = "1. Listen Clicks",
-        description = "Sets up a listener that logs the Place ID when a user clicks on a 3D building or POI.",
+        description = "Sets up a listener that logs the Place ID when a user clicks on a " +
+            "3D building or POI.",
     )
     fun listenToPlaceClicks() {
         // [START maps_android_3d_place_click_kt]
-        map.setMap3DClickListener { location, placeId ->
+        map.setMap3DClickListener { event ->
+            val placeId = event.placeId
             if (placeId != null) {
                 // Handle place click - Show a Toast on the UI thread
                 Handler(Looper.getMainLooper()).post {
                     Toast.makeText(context, "Clicked Place ID: $placeId", Toast.LENGTH_SHORT).show()
                 }
+                return@setMap3DClickListener true
             }
+            return@setMap3DClickListener false
         }
         // [END maps_android_3d_place_click_kt]
 

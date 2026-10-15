@@ -65,6 +65,10 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.composedemos.R
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.Map3DSessionTheme
+import com.example.maps3d.common.rememberMap3DSessionSettings
+import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
@@ -180,7 +184,7 @@ class PlaceDetailsActivity : FragmentActivity() {
         windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
-            MaterialTheme {
+            Map3DSessionTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -217,6 +221,8 @@ class PlaceDetailsActivity : FragmentActivity() {
         )
         val sheetPeekHeight = 120.dp
         val cameraState by viewModel.cameraState.collectAsState()
+        var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
+        val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.HYBRID)
 
         // Dismiss the place details overlay if the user fully expands the bottom sheet
         LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
@@ -249,8 +255,11 @@ class PlaceDetailsActivity : FragmentActivity() {
                 Box(modifier = Modifier.fillMaxSize()) {
                     GoogleMap3D(
                         camera = cameraState,
-                        mapMode = Map3DMode.HYBRID,
+                        mapMode = settings.mapMode,
                         modifier = Modifier.fillMaxSize(),
+                        onMapReady = { map ->
+                            googleMap3D = map
+                        },
                         onPlaceClick = { placeId ->
                             Log.d(TAG, "Place clicked: placeId=$placeId")
                             viewModel.setSelectedPlaceId(placeId)
@@ -269,6 +278,15 @@ class PlaceDetailsActivity : FragmentActivity() {
                         .padding(bottom = sheetPeekHeight + 16.dp, start = 16.dp, end = 16.dp),
                 )
             }
+
+            Map3DQuickSettingsWidget(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .statusBarsPadding()
+                    .padding(top = 8.dp, end = 8.dp),
+                sampleDefaultMapMode = Map3DMode.HYBRID,
+                googleMap3D = googleMap3D,
+            )
         }
     }
 

@@ -20,16 +20,25 @@ import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.CallSuper
+import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.example.maps3d.common.DEFAULT_CAMERA
+import com.example.maps3d.common.Map3DQuickSettingsButton
+import com.example.maps3d.common.Map3DSettings
+import com.example.maps3d.common.Map3DSettingsController
+import com.example.maps3d.common.Map3DUiControls
+import com.google.android.gms.maps3d.model.Map3DMode
 import com.example.maps3d.common.toCameraString
 import com.example.maps3d.common.toValidCamera
 import com.example.maps3d.common.toHeading
@@ -83,6 +92,9 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
     abstract val initialCamera: Camera
     abstract val TAG: String
 
+    @get:LayoutRes
+    protected open val layoutResId: Int = R.layout.activity_common_map
+
     // Private mutable state to hold the current camera position
     // This is updated by the listener when it's active.
     private val _currentCamera = MutableStateFlow(DEFAULT_CAMERA)
@@ -129,61 +141,148 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         }
     }
 
+    private var lastStatusBarTop: Int = 0
+
+    private fun applyStatusBarInsetsToMapControls(
+        statusBarTop: Int = lastStatusBarTop,
+        uiControls: Map3DUiControls? = null,
+    ) {
+        if (statusBarTop > 0) {
+            lastStatusBarTop = statusBarTop
+        }
+        // Keep the Quick Settings FAB directly below the active trailing controls
+        findViewById<Map3DQuickSettingsButton>(R.id.quick_settings_button)?.let { button ->
+            val currentUi = uiControls ?: button.getSettings().uiControls
+            button.statusBarTopOffsetPx = lastStatusBarTop
+            button.updateTopMarginForUiControls(currentUi)
+        }
+    }
+
+    override fun setContentView(layoutResID: Int) {
+        super.setContentView(layoutResID)
+        bindWindowInsetsAndMapHierarchy()
+    }
+
+    private fun bindWindowInsetsAndMapHierarchy() {
+        val rootView = findViewById<View?>(R.id.map_container)
+        val hasOverlayAppBar = findViewById<View?>(R.id.app_bar_layout) != null
+        if (!hasOverlayAppBar) {
+            lastStatusBarTop = 0
+            findViewById<Map3DQuickSettingsButton?>(R.id.quick_settings_button)?.let { button ->
+                button.statusBarTopOffsetPx = 0
+                button.updateTopMarginForUiControls()
+            }
+            return
+        }
+
+        if (rootView != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, insets ->
+                val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+                val navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+
+                findViewById<View>(R.id.app_bar_layout)?.updatePadding(top = statusBarInsets.top)
+                applyStatusBarInsetsToMapControls(statusBarInsets.top)
+
+                findViewById<View>(R.id.control_scroll_view)?.let { scrollView ->
+                    val layoutParams = scrollView.layoutParams as ViewGroup.MarginLayoutParams
+                    val margin16dp = (16 * scrollView.resources.displayMetrics.density).toInt()
+                    layoutParams.bottomMargin = navInsets.bottom + margin16dp
+                    scrollView.layoutParams = layoutParams
+                }
+
+                WindowInsetsCompat.CONSUMED
+            }
+        }
+    }
+
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        enableImmersiveMode()
 
-        setContentView(R.layout.activity_common_map)
+        setContentView(layoutResId)
         val rootView = findViewById<View>(R.id.map_container)
         val topBar = findViewById<MaterialToolbar>(R.id.top_bar)
-        
-        topBar.title = title
 
-        ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, insets ->
-            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+        topBar?.title = title
 
-            findViewById<View>(R.id.app_bar_layout)?.updatePadding(top = statusBarInsets.top)
+        if (rootView != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, insets ->
+                val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+                val navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
 
-            findViewById<View>(R.id.control_scroll_view)?.let { scrollView ->
-                val layoutParams = scrollView.layoutParams as android.view.ViewGroup.MarginLayoutParams
-                val margin16dp = (16 * scrollView.resources.displayMetrics.density).toInt()
-                layoutParams.bottomMargin = navInsets.bottom + margin16dp
-                scrollView.layoutParams = layoutParams
+                findViewById<View>(R.id.app_bar_layout)?.updatePadding(top = statusBarInsets.top)
+                applyStatusBarInsetsToMapControls(statusBarInsets.top)
+
+                findViewById<View>(R.id.control_scroll_view)?.let { scrollView ->
+                    val layoutParams = scrollView.layoutParams as android.view.ViewGroup.MarginLayoutParams
+                    val margin16dp = (16 * scrollView.resources.displayMetrics.density).toInt()
+                    layoutParams.bottomMargin = navInsets.bottom + margin16dp
+                    scrollView.layoutParams = layoutParams
+                }
+
+                WindowInsetsCompat.CONSUMED
             }
-
-            WindowInsetsCompat.CONSUMED
         }
 
         map3DView = findViewById(R.id.map3dView)
         map3DView.onCreate(savedInstanceState)
         map3DView.getMap3DViewAsync(this)
 
-        snapshotButton = findViewById<MaterialButton>(R.id.snapshot_button).apply {
-            setOnClickListener {
-                snapshot()
+        findViewById<MaterialButton>(R.id.snapshot_button)?.let { button ->
+            snapshotButton = button.apply {
+                setOnClickListener {
+                    snapshot()
+                }
+                visibility = View.VISIBLE
             }
-            visibility = View.VISIBLE
         }
 
-        recenterButton = findViewById<MaterialButton>(R.id.reset_view_button).apply {
-            setOnClickListener {
-                googleMap3D?.flyCameraTo(
-                    flyToOptions {
-                        endCamera = initialCamera
-                        durationInMillis = 2_000
-                    }
-                )
+        findViewById<MaterialButton>(R.id.reset_view_button)?.let { button ->
+            recenterButton = button.apply {
+                setOnClickListener {
+                    googleMap3D?.flyCameraTo(
+                        flyToOptions {
+                            endCamera = initialCamera
+                            durationInMillis = 2_000
+                        },
+                    )
+                }
+                visibility = View.VISIBLE
             }
-            visibility = View.VISIBLE
+        }
+    }
+
+    /**
+     * Enables sticky immersive mode so the 3D map canvas occupies the entire display,
+     * hiding status and navigation bars while allowing transient reveal on edge swipes.
+     */
+    protected fun enableImmersiveMode() {
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        insetsController.hide(WindowInsetsCompat.Type.systemBars())
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            enableImmersiveMode()
         }
     }
 
     @CallSuper
     override fun onResume() {
         super.onResume()
+        enableImmersiveMode()
         map3DView.onResume()
+        googleMap3D?.let { map ->
+            val currentSettings = Map3DSettingsController.shared.settings.value
+            currentSettings.applyTo(map)
+            onQuickSettingsChanged(currentSettings)
+            applyStatusBarInsetsToMapControls(lastStatusBarTop, currentSettings.uiControls)
+        }
     }
 
     @CallSuper
@@ -212,6 +311,19 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
     }
 
     /**
+     * Default Map Mode for this sample when the user has not explicitly overridden the mode in the
+     * current app session.
+     */
+    @Map3DMode
+    protected open val defaultMapMode: Int = Map3DMode.HYBRID
+
+    /**
+     * Hook invoked whenever Quick Settings change so subclasses with inline controls can stay in
+     * sync.
+     */
+    protected open fun onQuickSettingsChanged(settings: Map3DSettings) {}
+
+    /**
      * Called when the [Map3DView] is initialized and the map scene is ready.
      *
      * This method is called from within [GoogleMap3D.setOnMapReadyListener] to ensure that
@@ -228,13 +340,36 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         if (isMapInitialized) return
         isMapInitialized = true
         Log.d(TAG, "onMapReady called (guaranteed once)")
+
+        googleMap3D.setCamera(initialCamera)
+        Map3DSettingsController.shared.onSampleEntered(defaultMapMode)
+        val initialSettings = Map3DSettingsController.shared.settings.value
+        initialSettings.applyTo(googleMap3D)
+        onQuickSettingsChanged(initialSettings)
+
+        findViewById<Map3DQuickSettingsButton?>(R.id.quick_settings_button)?.apply {
+            settingsController = Map3DSettingsController.shared
+            sampleDefaultMapMode = defaultMapMode
+            attachMap(googleMap3D)
+            setOnSettingsChangedListener { updatedSettings ->
+                onQuickSettingsChanged(updatedSettings)
+                applyStatusBarInsetsToMapControls(lastStatusBarTop, updatedSettings.uiControls)
+            }
+        }
+        applyStatusBarInsetsToMapControls()
+
         // Workaround: The Maps 3D SDK onMapReady callback fires when the map object
         // is instantiated, but the internal native rendering pipeline and layout pass may briefly
-        // override initial programmatic camera positions. A short delay ensures the native map viewport
-        // has fully stabilized before applying the initial camera position.
+        // override control hierarchies. A short delay ensures
+        // the native map viewport has fully stabilized before ensuring UI controls are present.
         Handler(Looper.getMainLooper()).postDelayed({
             if (!isDestroyed && !isFinishing) {
-                this.googleMap3D?.setCamera(initialCamera)
+                this.googleMap3D?.let { map ->
+                    val currentSettings = Map3DSettingsController.shared.settings.value
+                    currentSettings.applyTo(map)
+                    onQuickSettingsChanged(currentSettings)
+                    applyStatusBarInsetsToMapControls(lastStatusBarTop, currentSettings.uiControls)
+                }
             }
         }, 350L)
     }
@@ -268,7 +403,6 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
     @CallSuper
     override fun onError(error: Exception) {
         Log.e(TAG, "Error loading map", error)
-        super.onError(error)
     }
 
     /**

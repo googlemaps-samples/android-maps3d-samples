@@ -381,9 +381,14 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
   // --- Map Readiness & Route Rendering ---
 
   @Override
+  @Map3DMode
+  protected int getDefaultMapMode() {
+    return Map3DMode.SATELLITE;
+  }
+
+  @Override
   public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
     super.onMap3DViewReady(googleMap3D);
-    googleMap3D.setMapMode(Map3DMode.SATELLITE);
 
     // Trigger async route fetch on executor thread
     loadAndRenderRouteAsync(googleMap3D);

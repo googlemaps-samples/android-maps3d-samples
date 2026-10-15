@@ -19,8 +19,19 @@ package com.example.snippets.java;
 import android.content.Context;
 import com.example.snippets.java.annotations.SnippetGroup;
 import com.example.snippets.java.annotations.SnippetItem;
-import com.example.snippets.java.snippets.*;
+import com.example.snippets.java.snippets.CameraControlSnippets;
+import com.example.snippets.java.snippets.MapInitSnippets;
+import com.example.snippets.java.snippets.MapLocalizationSnippets;
+import com.example.snippets.java.snippets.MarkerSnippets;
+import com.example.snippets.java.snippets.ModelSnippets;
+import com.example.snippets.java.snippets.PlaceSnippets;
+import com.example.snippets.java.snippets.PolygonSnippets;
+import com.example.snippets.java.snippets.PolylineSnippets;
+import com.example.snippets.java.snippets.PopoverSnippets;
+import com.example.snippets.java.snippets.UiControlSnippets;
 import com.google.android.gms.maps3d.Popover;
+import com.google.android.gms.maps3d.UiControlSettings;
+import com.google.android.gms.maps3d.UiControlSettings.ControlPlacement;
 import com.google.android.gms.maps3d.model.Marker;
 import com.google.android.gms.maps3d.model.Model;
 import com.google.android.gms.maps3d.model.Polygon;
@@ -28,6 +39,7 @@ import com.google.android.gms.maps3d.model.Polyline;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,6 +57,17 @@ public class SnippetRegistry {
                 else if (item instanceof Polygon) ((Polygon) item).remove();
                 else if (item instanceof Model) ((Model) item).remove();
                 else if (item instanceof Popover) ((Popover) item).remove();
+                else if (item instanceof UiControlSettings) {
+                    UiControlSettings uiSettings = (UiControlSettings) item;
+                    uiSettings.setUiControlsPlacement(
+                            Collections.emptyList(), ControlPlacement.TRAILING);
+                    uiSettings.setUiControlsPlacement(
+                            Collections.emptyList(), ControlPlacement.LEADING);
+                    uiSettings.setUiControlsPlacement(
+                            Collections.emptyList(), ControlPlacement.TOP);
+                    uiSettings.setUiControlsPlacement(
+                            Collections.emptyList(), ControlPlacement.BOTTOM);
+                }
             } catch (Exception e) {
                 /* ignore */
             }
@@ -55,7 +78,9 @@ public class SnippetRegistry {
     private static final List<Class<?>> snippetClasses =
             Arrays.asList(
                     MapInitSnippets.class,
+                    MapLocalizationSnippets.class,
                     CameraControlSnippets.class,
+                    UiControlSnippets.class,
                     MarkerSnippets.class,
                     PolygonSnippets.class,
                     PolylineSnippets.class,

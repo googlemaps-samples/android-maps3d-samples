@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+import org.gradle.api.tasks.testing.Test
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.spotless) apply false
+}
+
+subprojects {
+    tasks.withType<Test>().configureEach {
+        jvmArgs("--add-opens=java.base/jdk.internal.access=ALL-UNNAMED")
+    }
 }
 
 // Evaluate if we are in a CI environment

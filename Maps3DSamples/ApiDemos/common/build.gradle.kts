@@ -60,6 +60,10 @@ android {
     }
 }
 
+composeCompiler {
+    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose_stability.conf"))
+}
+
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
@@ -80,7 +84,7 @@ dependencies {
 
     api(libs.play.services.base) // "com.google.android.gms:play-services-base:18.10.0"
     api(libs.play.services.maps3d) // "com.google.android.gms:play-services-maps3d:0.2.2"
-    api(libs.maps.utils.ktx)
+    api(libs.android.maps.utils)
 }
 
 jacoco {

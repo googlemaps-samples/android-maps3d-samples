@@ -32,6 +32,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.lifecycle.ViewModelProvider;
+import com.example.maps3d.common.Map3DQuickSettingsButton;
+import com.example.maps3d.common.Map3DSettingsController;
 import com.example.maps3d.common.PathData;
 import com.example.maps3d.common.PathEngine;
 import com.example.maps3d.common.PathFollowingViewModel;
@@ -45,6 +47,7 @@ import com.google.android.gms.maps3d.OnMap3DViewReadyCallback;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
+import com.google.android.gms.maps3d.model.Map3DMode;
 import com.google.android.gms.maps3d.model.Polyline;
 import com.google.android.gms.maps3d.model.PolylineOptions;
 import com.google.android.material.button.MaterialButton;
@@ -144,9 +147,24 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
                 });
     }
 
+    @Override
+    public void onError(@NonNull Exception error) {
+        Log.e(TAG, "Error loading map", error);
+    }
+
     private void initializeMap() {
         if (isMapInitialized) return;
         isMapInitialized = true;
+        if (googleMap3D != null) {
+            Map3DSettingsController.getShared().onSampleEntered(Map3DMode.HYBRID);
+            Map3DSettingsController.getShared().getSettings().applyTo(googleMap3D);
+            Map3DQuickSettingsButton quickSettings = findViewById(R.id.quick_settings_button);
+            if (quickSettings != null) {
+                quickSettings.setSettingsController(Map3DSettingsController.getShared());
+                quickSettings.setSampleDefaultMapMode(Map3DMode.HYBRID);
+                quickSettings.attachMap(googleMap3D);
+            }
+        }
         resetPolylines();
     }
 
@@ -722,6 +740,9 @@ public class PathFollowingActivity extends AppCompatActivity implements OnMap3DV
     protected void onResume() {
         super.onResume();
         map3DView.onResume();
+        if (googleMap3D != null) {
+            Map3DSettingsController.getShared().getSettings().applyTo(googleMap3D);
+        }
     }
 
     @Override

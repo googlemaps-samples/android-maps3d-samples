@@ -41,8 +41,11 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.Map3DSessionTheme
+import com.example.maps3d.common.rememberMap3DSessionSettings
+import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
@@ -59,7 +62,7 @@ class MapInteractionsActivity : ComponentActivity() {
         windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
-            MaterialTheme {
+            Map3DSessionTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -74,6 +77,8 @@ class MapInteractionsActivity : ComponentActivity() {
 @Composable
 fun MapInteractionsScreen() {
     var isMapSteady by remember { mutableStateOf(false) }
+    var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.HYBRID)
     var clickedInfo by remember { mutableStateOf("Click on the map to see details") }
 
     // Calibrated camera centered around Colorado State Capitol
@@ -99,14 +104,17 @@ fun MapInteractionsScreen() {
         // 1. Map fills the entire screen
         GoogleMap3D(
             camera = calibratedCamera,
+            mapMode = settings.mapMode,
             modifier = Modifier.fillMaxSize(),
             onMapReady = { instance ->
-                instance.setMap3DClickListener { location, placeId ->
-                    clickedInfo = if (placeId != null) {
-                        "Clicked Place ID: $placeId"
+                googleMap3D = instance
+                instance.setMap3DClickListener { event ->
+                    clickedInfo = if (event.placeId != null) {
+                        "Clicked Place ID: ${event.placeId}"
                     } else {
-                        "Clicked Location: ${location.latitude}, ${location.longitude}"
+                        "Clicked Location: ${event.location.latitude}, ${event.location.longitude}"
                     }
+                    return@setMap3DClickListener true
                 }
             },
             onMapSteady = {
@@ -144,5 +152,15 @@ fun MapInteractionsScreen() {
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
+
+        // 4. Quick Settings Overlay
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.HYBRID,
+            googleMap3D = googleMap3D,
+        )
     }
 }

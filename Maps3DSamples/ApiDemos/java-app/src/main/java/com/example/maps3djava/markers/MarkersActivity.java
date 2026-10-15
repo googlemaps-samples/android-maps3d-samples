@@ -14,32 +14,24 @@
 
 package com.example.maps3djava.markers;
 
-import com.google.android.gms.maps3d.model.FlyAroundOptions;
-import com.google.android.gms.maps3d.model.PopoverOptions;
-import com.google.android.gms.maps3d.Popover;
-import org.json.JSONObject;
-import org.json.JSONArray;
-import android.graphics.Color;
-import android.util.Log;
-import android.widget.TextView;
-import android.widget.PopupMenu;
-import java.util.concurrent.CompletableFuture;
-import android.os.Looper;
-import android.os.Handler;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Random;
 import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
 
+import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-
+import android.widget.PopupMenu;
+import android.widget.TextView;
 import com.example.maps3dcommon.R;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
+import com.google.android.gms.maps3d.Popover;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.CollisionBehavior;
+import com.google.android.gms.maps3d.model.FlyAroundOptions;
 import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.Glyph;
 import com.google.android.gms.maps3d.model.ImageView;
@@ -48,9 +40,13 @@ import com.google.android.gms.maps3d.model.Map3DMode;
 import com.google.android.gms.maps3d.model.Marker;
 import com.google.android.gms.maps3d.model.MarkerOptions;
 import com.google.android.gms.maps3d.model.PinConfiguration;
-
-import java.util.List;
+import com.google.android.gms.maps3d.model.PopoverOptions;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Demonstrates the use of different altitude modes for markers in a 3D map.
@@ -96,6 +92,12 @@ public class MarkersActivity extends SampleBaseActivity {
     private boolean isInitialized = false;
 
     @Override
+    @Map3DMode
+    protected int getDefaultMapMode() {
+        return Map3DMode.SATELLITE;
+    }
+
+    @Override
     public final Camera getInitialCamera() {
         return toValidCamera(new Camera(
                 new LatLngAltitude(
@@ -111,9 +113,9 @@ public class MarkersActivity extends SampleBaseActivity {
     @Override
     public void onMap3DViewReady(GoogleMap3D googleMap3D) {
         super.onMap3DViewReady(googleMap3D);
-        
+
         Log.d(getTAG(), "onMap3DViewReady called");
-        
+
         googleMap3D.setOnMapReadyListener((map) -> {
             Log.w(getTAG(), "on map ready listener fired");
             googleMap3D.setOnMapReadyListener(null);
@@ -132,9 +134,9 @@ public class MarkersActivity extends SampleBaseActivity {
     private void initializeMap(GoogleMap3D googleMap3D) {
         if (isInitialized) return;
         isInitialized = true;
+        super.onMapReady(googleMap3D);
 
         googleMap3D.setCamera(getInitialCamera());
-        googleMap3D.setMapMode(Map3DMode.SATELLITE);
 
         Button flyBerlinButton = findViewById(R.id.fly_berlin_button);
         if (flyBerlinButton != null) {
@@ -201,13 +203,17 @@ public class MarkersActivity extends SampleBaseActivity {
             stopButton.setOnClickListener(v -> stopMonsterTour(googleMap3D));
         }
 
-        googleMap3D.setMap3DClickListener((location, placeId) -> {
-            runOnUiThread(() -> {
-                if (activePopover != null) {
-                    activePopover.remove();
-                    activePopover = null;
-                }
-            });
+        googleMap3D.setMap3DClickListener((event) -> {
+            boolean hadActivePopover = activePopover != null;
+            if (hadActivePopover) {
+                runOnUiThread(() -> {
+                    if (activePopover != null) {
+                        activePopover.remove();
+                        activePopover = null;
+                    }
+                });
+            }
+            return hadActivePopover;
         });
 
         // Marker 1: Absolute Altitude

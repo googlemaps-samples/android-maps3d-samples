@@ -43,6 +43,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.maps3d.common.Map3DQuickSettingsWidget
+import com.example.maps3d.common.Map3DSessionTheme
+import com.example.maps3d.common.rememberMap3DSessionSettings
+import com.google.android.gms.maps3d.GoogleMap3D
+import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.cameraRestriction
 import com.google.android.gms.maps3d.model.latLngAltitude
@@ -56,11 +61,11 @@ class CameraRestrictionsActivity : ComponentActivity() {
 
         // Hide system tray (immersive mode)
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-        windowInsetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
         windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
-            MaterialTheme {
+            Map3DSessionTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -75,6 +80,8 @@ class CameraRestrictionsActivity : ComponentActivity() {
 @Composable
 fun CameraRestrictionsScreen() {
     var isMapSteady by remember { mutableStateOf(false) }
+    var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.HYBRID)
 
     // Camera centered on Space Needle
     val spaceNeedleCamera = remember {
@@ -122,8 +129,12 @@ fun CameraRestrictionsScreen() {
         // 1. Map fills the entire screen with camera restriction
         GoogleMap3D(
             camera = spaceNeedleCamera,
+            mapMode = settings.mapMode,
             cameraRestriction = seattleRestriction,
             modifier = Modifier.fillMaxSize(),
+            onMapReady = { map ->
+                googleMap3D = map
+            },
             onMapSteady = {
                 isMapSteady = true
             },
@@ -157,5 +168,15 @@ fun CameraRestrictionsScreen() {
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
+
+        // 4. Quick Settings Overlay
+        Map3DQuickSettingsWidget(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 8.dp),
+            sampleDefaultMapMode = Map3DMode.HYBRID,
+            googleMap3D = googleMap3D,
+        )
     }
 }

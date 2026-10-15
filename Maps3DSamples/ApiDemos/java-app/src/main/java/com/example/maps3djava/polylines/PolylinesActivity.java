@@ -28,7 +28,6 @@ import com.google.android.gms.maps3d.OnMap3DViewReadyCallback;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
-import com.google.android.gms.maps3d.model.Map3DMode;
 import com.google.android.gms.maps3d.model.PolylineOptions;
 
 import java.util.ArrayList;
@@ -132,8 +131,8 @@ public class PolylinesActivity extends SampleBaseActivity implements OnMap3DView
     private void initializeMap(@NonNull GoogleMap3D googleMap3D) {
         if (isInitialized) return;
         isInitialized = true;
+        super.onMapReady(googleMap3D);
 
-        googleMap3D.setMapMode(Map3DMode.HYBRID);
         googleMap3D.addPolyline(trailBackgroundPolylineOptions);
         com.google.android.gms.maps3d.model.Polyline foregroundPolyline = googleMap3D.addPolyline(trailForegroundPolylineOptions);
         foregroundPolyline.setClickListener(() -> showToast(getString(R.string.polyline_trail_clicked)));
