@@ -144,11 +144,14 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
     private var lastStatusBarTop: Int = 0
 
     private fun applyStatusBarInsetsToMapControls(
-        statusBarTop: Int = lastStatusBarTop,
+        statusBarTop: Int,
         uiControls: Map3DUiControls? = null,
     ) {
         if (statusBarTop > 0) {
             lastStatusBarTop = statusBarTop
+        }
+        if (::map3DView.isInitialized) {
+            Map3DSettings.applyStatusBarInsetsToMapView(map3DView, lastStatusBarTop)
         }
         // Keep the Quick Settings FAB directly below the active trailing controls
         findViewById<Map3DQuickSettingsButton>(R.id.quick_settings_button)?.let { button ->
@@ -168,6 +171,9 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         val hasOverlayAppBar = findViewById<View?>(R.id.app_bar_layout) != null
         if (!hasOverlayAppBar) {
             lastStatusBarTop = 0
+            findViewById<Map3DView?>(R.id.map3dView)?.let { currentMapView ->
+                Map3DSettings.applyStatusBarInsetsToMapView(currentMapView, 0)
+            }
             findViewById<Map3DQuickSettingsButton?>(R.id.quick_settings_button)?.let { button ->
                 button.statusBarTopOffsetPx = 0
                 button.updateTopMarginForUiControls()
@@ -177,8 +183,12 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
 
         if (rootView != null) {
             ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, insets ->
-                val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-                val navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+                val statusBarInsets = insets.getInsetsIgnoringVisibility(
+                    WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.displayCutout(),
+                )
+                val navInsets = insets.getInsetsIgnoringVisibility(
+                    WindowInsetsCompat.Type.navigationBars(),
+                )
 
                 findViewById<View>(R.id.app_bar_layout)?.updatePadding(top = statusBarInsets.top)
                 applyStatusBarInsetsToMapControls(statusBarInsets.top)
@@ -193,6 +203,10 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
                 WindowInsetsCompat.CONSUMED
             }
         }
+
+        findViewById<Map3DView?>(R.id.map3dView)?.let { currentMapView ->
+            Map3DSettings.applyStatusBarInsetsToMapView(currentMapView, lastStatusBarTop)
+        }
     }
 
     @CallSuper
@@ -202,29 +216,9 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         enableImmersiveMode()
 
         setContentView(layoutResId)
-        val rootView = findViewById<View>(R.id.map_container)
         val topBar = findViewById<MaterialToolbar>(R.id.top_bar)
 
         topBar?.title = title
-
-        if (rootView != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, insets ->
-                val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-                val navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-
-                findViewById<View>(R.id.app_bar_layout)?.updatePadding(top = statusBarInsets.top)
-                applyStatusBarInsetsToMapControls(statusBarInsets.top)
-
-                findViewById<View>(R.id.control_scroll_view)?.let { scrollView ->
-                    val layoutParams = scrollView.layoutParams as android.view.ViewGroup.MarginLayoutParams
-                    val margin16dp = (16 * scrollView.resources.displayMetrics.density).toInt()
-                    layoutParams.bottomMargin = navInsets.bottom + margin16dp
-                    scrollView.layoutParams = layoutParams
-                }
-
-                WindowInsetsCompat.CONSUMED
-            }
-        }
 
         map3DView = findViewById(R.id.map3dView)
         map3DView.onCreate(savedInstanceState)
@@ -280,8 +274,8 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         googleMap3D?.let { map ->
             val currentSettings = Map3DSettingsController.shared.settings.value
             currentSettings.applyTo(map)
-            onQuickSettingsChanged(currentSettings)
             applyStatusBarInsetsToMapControls(lastStatusBarTop, currentSettings.uiControls)
+            onQuickSettingsChanged(currentSettings)
         }
     }
 
@@ -345,18 +339,18 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         Map3DSettingsController.shared.onSampleEntered(defaultMapMode)
         val initialSettings = Map3DSettingsController.shared.settings.value
         initialSettings.applyTo(googleMap3D)
-        onQuickSettingsChanged(initialSettings)
 
         findViewById<Map3DQuickSettingsButton?>(R.id.quick_settings_button)?.apply {
             settingsController = Map3DSettingsController.shared
             sampleDefaultMapMode = defaultMapMode
             attachMap(googleMap3D)
             setOnSettingsChangedListener { updatedSettings ->
-                onQuickSettingsChanged(updatedSettings)
                 applyStatusBarInsetsToMapControls(lastStatusBarTop, updatedSettings.uiControls)
+                onQuickSettingsChanged(updatedSettings)
             }
         }
-        applyStatusBarInsetsToMapControls()
+        applyStatusBarInsetsToMapControls(lastStatusBarTop, initialSettings.uiControls)
+        onQuickSettingsChanged(initialSettings)
 
         // Workaround: The Maps 3D SDK onMapReady callback fires when the map object
         // is instantiated, but the internal native rendering pipeline and layout pass may briefly
@@ -367,8 +361,8 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
                 this.googleMap3D?.let { map ->
                     val currentSettings = Map3DSettingsController.shared.settings.value
                     currentSettings.applyTo(map)
-                    onQuickSettingsChanged(currentSettings)
                     applyStatusBarInsetsToMapControls(lastStatusBarTop, currentSettings.uiControls)
+                    onQuickSettingsChanged(currentSettings)
                 }
             }
         }, 350L)
