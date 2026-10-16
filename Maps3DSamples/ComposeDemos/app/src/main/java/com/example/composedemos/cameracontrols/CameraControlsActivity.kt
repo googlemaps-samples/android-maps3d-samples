@@ -21,10 +21,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +41,8 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -46,9 +51,9 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -65,10 +70,15 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.example.composedemos.cameracontrols.DataModel.EMPIRE_STATE_BUILDING_LATITUDE
-import com.example.composedemos.cameracontrols.DataModel.EMPIRE_STATE_BUILDING_LONGITUDE
+import com.example.composedemos.cameracontrols.DataModel.ESB_FLY_TO_DURATION_MS
+import com.example.composedemos.cameracontrols.DataModel.MT_RAINIER_FLY_TO_DURATION_MS
+import com.example.composedemos.cameracontrols.DataModel.MT_RAINIER_ORBIT_DURATION_MS
+import com.example.composedemos.cameracontrols.DataModel.MT_RAINIER_ORBIT_ROUNDS
+import com.example.composedemos.cameracontrols.DataModel.esbCamera
 import com.example.composedemos.cameracontrols.DataModel.nycCameraRestriction
 import com.example.composedemos.cameracontrols.DataModel.nycPolygonConfigs
+import com.example.composedemos.cameracontrols.DataModel.targetBeaconConfig
+import com.example.composedemos.cameracontrols.DataModel.targetCamera
 import com.example.maps3d.common.Map3DQuickSettingsWidget
 import com.example.maps3d.common.Map3DSessionTheme
 import com.example.maps3d.common.Map3DSettingsController
@@ -78,16 +88,13 @@ import com.example.maps3d.common.toCompassDirection
 import com.example.maps3d.common.toValidCamera
 import com.example.maps3d.common.wrapIn
 import com.google.android.gms.maps3d.GoogleMap3D
+import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Map3DMode
-import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyAroundOptions
 import com.google.android.gms.maps3d.model.flyToOptions
-import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.maps.android.compose3d.GoogleMap3D
-import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.milliseconds
 import com.example.maps3dcommon.R as CommonR
 
 class CameraControlsActivity : ComponentActivity() {
@@ -114,25 +121,16 @@ class CameraControlsActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CameraControlsScreen() {
     val context = LocalContext.current
     var isMapSteady by remember { mutableStateOf(false) }
-    var hasTriggeredInitialFlyTo by remember { mutableStateOf(false) }
     var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
     val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.SATELLITE)
 
     val initialCamera = remember {
-        camera {
-            center = latLngAltitude {
-                latitude = 40.7128
-                longitude = -74.0060
-                altitude = 150.0
-            }
-            heading = 252.7
-            tilt = 79.0
-            range = 1500.0
-        }
+        esbCamera(AltitudeMode.RELATIVE_TO_GROUND)
     }
 
     var showRestriction by remember { mutableStateOf(false) }
@@ -140,9 +138,50 @@ fun CameraControlsScreen() {
     val selectedMapMode = settings.mapMode
     var rollValue by remember { mutableFloatStateOf(0.0f) }
     var telemetryCamera by remember { mutableStateOf(initialCamera) }
+    var selectedAltitudeMode by remember { mutableIntStateOf(AltitudeMode.RELATIVE_TO_GROUND) }
+    var activeTargetResId by remember { mutableIntStateOf(CommonR.string.camera_target_esb) }
+    var beaconRefreshToken by remember { mutableIntStateOf(0) }
+    var needsMeshBeaconRefresh by remember { mutableStateOf(false) }
 
-    val cameraStateText = remember(context, telemetryCamera) {
-        formatCameraState(context, telemetryCamera)
+    val cameraStateText = remember(
+        context,
+        telemetryCamera,
+        activeTargetResId,
+        selectedAltitudeMode,
+    ) {
+        formatCameraState(
+            context = context,
+            camera = telemetryCamera,
+            activeTargetResId = activeTargetResId,
+            altitudeMode = selectedAltitudeMode,
+        )
+    }
+
+    val isMountainTarget = (activeTargetResId == CommonR.string.camera_target_mt_rainier)
+    val beaconLabel = stringResource(
+        when (selectedAltitudeMode) {
+            AltitudeMode.RELATIVE_TO_MESH ->
+                if (isMountainTarget) CommonR.string.mt_rainier_beacon_mesh_label else CommonR.string.esb_beacon_mesh_label
+
+            AltitudeMode.CLAMP_TO_GROUND ->
+                if (isMountainTarget) CommonR.string.mt_rainier_beacon_clamp_label else CommonR.string.esb_beacon_clamp_label
+
+            AltitudeMode.ABSOLUTE ->
+                if (isMountainTarget) CommonR.string.mt_rainier_beacon_absolute_label else CommonR.string.esb_beacon_absolute_label
+
+            else ->
+                if (isMountainTarget) CommonR.string.mt_rainier_beacon_label else CommonR.string.esb_beacon_ground_label
+        },
+    )
+    val markers = remember(isMountainTarget, beaconLabel, selectedAltitudeMode, beaconRefreshToken) {
+        listOf(
+            targetBeaconConfig(
+                isMountain = isMountainTarget,
+                label = beaconLabel,
+                mode = selectedAltitudeMode,
+                refreshToken = beaconRefreshToken,
+            ),
+        )
     }
 
     val polygons = remember(showRestriction) {
@@ -153,16 +192,6 @@ fun CameraControlsScreen() {
         if (isCameraRestricted) nycCameraRestriction else null
     }
 
-    // Automatically fly to the Empire State Building 2 seconds after the map first becomes steady
-    LaunchedEffect(isMapSteady, googleMap3D) {
-        val map = googleMap3D
-        if (isMapSteady && map != null && !hasTriggeredInitialFlyTo) {
-            delay(2000.milliseconds)
-            hasTriggeredInitialFlyTo = true
-            flyToEmpireStateBuilding(map)
-        }
-    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -171,6 +200,7 @@ fun CameraControlsScreen() {
         // 1. Map fills the screen above/behind the controls
         GoogleMap3D(
             camera = initialCamera,
+            markers = markers,
             polygons = polygons,
             cameraRestriction = cameraRestriction,
             mapMode = selectedMapMode,
@@ -184,6 +214,10 @@ fun CameraControlsScreen() {
             },
             onMapSteady = {
                 isMapSteady = true
+                if (needsMeshBeaconRefresh) {
+                    needsMeshBeaconRefresh = false
+                    beaconRefreshToken++
+                }
             },
             onCameraChanged = { cameraPosition ->
                 telemetryCamera = cameraPosition
@@ -211,17 +245,27 @@ fun CameraControlsScreen() {
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
-                .padding(16.dp)
+                .padding(12.dp)
                 .fillMaxWidth(),
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(12.dp)) {
                 // Row 1: Fly to ESB & Fly around center
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     OutlinedButton(
-                        onClick = { flyToEmpireStateBuilding(googleMap3D) },
+                        onClick = {
+                            activeTargetResId = CommonR.string.camera_target_esb
+                            needsMeshBeaconRefresh = (selectedAltitudeMode == AltitudeMode.RELATIVE_TO_MESH)
+                            beaconRefreshToken++
+                            flyToTarget(
+                                googleMap3D = googleMap3D,
+                                isMountain = false,
+                                altitudeMode = selectedAltitudeMode,
+                                onFlightFinished = { beaconRefreshToken++ },
+                            )
+                        },
                         modifier = Modifier.weight(1f),
                     ) {
                         Text(
@@ -241,7 +285,74 @@ fun CameraControlsScreen() {
                     }
                 }
 
-                // Row 2: Show/Hide restriction cube & Restrict/Remove camera restriction
+                // Row 2: Fly to Mt. Rainier (Relative Alt)
+                FilledTonalButton(
+                    onClick = {
+                        isCameraRestricted = false
+                        activeTargetResId = CommonR.string.camera_target_mt_rainier
+                        needsMeshBeaconRefresh = (selectedAltitudeMode == AltitudeMode.RELATIVE_TO_MESH)
+                        beaconRefreshToken++
+                        flyToTarget(
+                            googleMap3D = googleMap3D,
+                            isMountain = true,
+                            altitudeMode = selectedAltitudeMode,
+                            onFlightFinished = { beaconRefreshToken++ },
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = stringResource(CommonR.string.fly_to_mountain),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+
+                // Row 3: AltitudeMode Selector Chips (RELATIVE_TO_GROUND, RELATIVE_TO_MESH, CLAMP_TO_GROUND, ABSOLUTE)
+                Text(
+                    text = stringResource(CommonR.string.altitude_mode),
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+
+                val altitudeModes = listOf(
+                    AltitudeMode.RELATIVE_TO_GROUND to stringResource(CommonR.string.relative_to_ground),
+                    AltitudeMode.RELATIVE_TO_MESH to stringResource(CommonR.string.relative_to_mesh),
+                    AltitudeMode.CLAMP_TO_GROUND to stringResource(CommonR.string.clamp_to_ground),
+                    AltitudeMode.ABSOLUTE to stringResource(CommonR.string.absolute),
+                )
+
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    altitudeModes.forEach { (modeValue, modeLabel) ->
+                        FilterChip(
+                            selected = (selectedAltitudeMode == modeValue),
+                            onClick = {
+                                if (selectedAltitudeMode != modeValue) {
+                                    selectedAltitudeMode = modeValue
+                                    needsMeshBeaconRefresh = (modeValue == AltitudeMode.RELATIVE_TO_MESH)
+                                    beaconRefreshToken++
+                                    flyToTarget(
+                                        googleMap3D = googleMap3D,
+                                        isMountain = isMountainTarget,
+                                        altitudeMode = modeValue,
+                                        onFlightFinished = { beaconRefreshToken++ },
+                                    )
+                                }
+                            },
+                            label = {
+                                Text(
+                                    text = modeLabel,
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            },
+                        )
+                    }
+                }
+
+                // Row 4: Show/Hide restriction cube & Restrict/Remove camera restriction
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -303,7 +414,7 @@ fun CameraControlsScreen() {
                     }
                 }
 
-                // Row 3: Map Mode RadioGroup (Roadmap 2D / Hybrid / Satellite)
+                // Row 5: Map Mode RadioGroup (Roadmap 2D / Hybrid / Satellite)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -331,7 +442,7 @@ fun CameraControlsScreen() {
                                     },
                                     role = Role.RadioButton,
                                 )
-                                .padding(vertical = 4.dp),
+                                .padding(vertical = 2.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             RadioButton(
@@ -347,11 +458,11 @@ fun CameraControlsScreen() {
                     }
                 }
 
-                // Row 4: Roll Slider + Reset Roll Button
+                // Row 6: Roll Slider + Reset Roll Button
                 Text(
                     text = stringResource(CommonR.string.camera_roll_label_dynamic, rollValue),
                     style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.padding(top = 8.dp),
+                    modifier = Modifier.padding(top = 4.dp),
                 )
 
                 Row(
@@ -389,7 +500,7 @@ fun CameraControlsScreen() {
                     }
                 }
 
-                // Row 5: Camera State Telemetry
+                // Row 7: Camera State Telemetry
                 Text(
                     text = stringResource(CommonR.string.camera_state_label),
                     style = MaterialTheme.typography.titleSmall,
@@ -415,23 +526,39 @@ fun CameraControlsScreen() {
 }
 
 /**
- * Initiates a camera flight animation to the Empire State Building.
+ * Initiates a camera flight animation to the specified landmark target (`isMountain = false` for
+ * the Empire State Building, `isMountain = true` for Mount Rainier) using the single unified
+ * [AltitudeMode] camera and marker pipeline.
  */
-private fun flyToEmpireStateBuilding(googleMap3D: GoogleMap3D?) {
-    googleMap3D?.flyCameraTo(
+private fun flyToTarget(
+    googleMap3D: GoogleMap3D?,
+    isMountain: Boolean,
+    @AltitudeMode altitudeMode: Int,
+    onFlightFinished: () -> Unit = {},
+) {
+    val map = googleMap3D ?: return
+    if (isMountain) {
+        map.setCameraRestriction(null)
+    }
+    val targetCam = targetCamera(isMountain = isMountain, mode = altitudeMode)
+    map.setCameraAnimationEndListener {
+        map.setCameraAnimationEndListener(null)
+        onFlightFinished()
+        if (isMountain) {
+            map.flyCameraAround(
+                flyAroundOptions {
+                    center = targetCam
+                    durationInMillis = MT_RAINIER_ORBIT_DURATION_MS
+                    rounds = MT_RAINIER_ORBIT_ROUNDS
+                },
+            )
+        }
+    }
+    map.flyCameraTo(
         flyToOptions {
-            endCamera = camera {
-                center = latLngAltitude {
-                    latitude = EMPIRE_STATE_BUILDING_LATITUDE
-                    longitude = EMPIRE_STATE_BUILDING_LONGITUDE
-                    altitude = 212.0
-                }
-                heading = 34.0
-                tilt = 67.0
-                range = 750.0
-                roll = 0.0
-            }
-            durationInMillis = 2_000
+            endCamera = targetCam
+            durationInMillis =
+                if (isMountain) MT_RAINIER_FLY_TO_DURATION_MS else ESB_FLY_TO_DURATION_MS
         },
     )
 }
@@ -441,6 +568,7 @@ private fun flyToEmpireStateBuilding(googleMap3D: GoogleMap3D?) {
  */
 private fun flyAroundCurrentCenter(googleMap3D: GoogleMap3D?) {
     val camera = googleMap3D?.getCamera()?.toValidCamera() ?: return
+    googleMap3D.setCameraAnimationEndListener(null)
 
     googleMap3D.flyCameraAround(
         flyAroundOptions {
@@ -484,10 +612,30 @@ private fun updateMapRoll(googleMap3D: GoogleMap3D?, newRoll: Double) {
     }
 }
 
+private fun getAltitudeModeLabel(context: Context, @AltitudeMode mode: Int): String = when (mode) {
+    AltitudeMode.RELATIVE_TO_GROUND ->
+        context.getString(CommonR.string.altitude_mode_relative_to_ground_code)
+
+    AltitudeMode.RELATIVE_TO_MESH ->
+        context.getString(CommonR.string.altitude_mode_relative_to_mesh_code)
+
+    AltitudeMode.CLAMP_TO_GROUND ->
+        context.getString(CommonR.string.altitude_mode_clamp_to_ground_code)
+
+    else ->
+        context.getString(CommonR.string.altitude_mode_absolute_code)
+}
+
 /**
- * Formats the [Camera] state string matching the Kotlin View implementation.
+ * Formats the [Camera] state string matching the Kotlin View implementation, including
+ * the active target and [AltitudeMode] label.
  */
-private fun formatCameraState(context: Context, camera: Camera): String {
+private fun formatCameraState(
+    context: Context,
+    camera: Camera,
+    @StringRes activeTargetResId: Int,
+    @AltitudeMode altitudeMode: Int,
+): String {
     val nbsp = "\u00A0"
     val heading = camera.heading ?: 0.0
     val compassString = heading.toCompassDirection()
@@ -505,5 +653,13 @@ private fun formatCameraState(context: Context, camera: Camera): String {
         append(context.getString(CommonR.string.cam_tlt_label, camera.tilt ?: 0.0))
         append(", ")
         append(context.getString(CommonR.string.cam_rng_label, camera.range ?: 0.0))
+        append("\n")
+        append(
+            context.getString(
+                CommonR.string.camera_target_and_altitude_mode_format,
+                context.getString(activeTargetResId),
+                getAltitudeModeLabel(context, altitudeMode),
+            ),
+        )
     }
 }
