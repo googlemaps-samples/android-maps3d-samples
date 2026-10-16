@@ -17,6 +17,7 @@
 package com.google.maps.android.compose3d.utils
 
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.CameraRestriction
 import com.google.android.gms.maps3d.model.FlyAroundOptions
@@ -72,6 +73,12 @@ fun Camera?.toValidCamera(): Camera {
         tilt = source.tilt.toTilt()
         roll = source.roll.toRoll()
         range = source.range.toRange()
+        if (source.altitudeMode == AltitudeMode.ABSOLUTE ||
+            source.altitudeMode == AltitudeMode.RELATIVE_TO_GROUND ||
+            source.altitudeMode == AltitudeMode.RELATIVE_TO_MESH
+        ) {
+            altitudeMode = source.altitudeMode
+        }
     }
 }
 
@@ -288,12 +295,14 @@ fun Number.toCompassDirection(): String {
  * @param roll The new roll to use, or null to keep the current roll.
  * @return A new [Camera] object with the specified properties updated.
  */
+@JvmOverloads
 fun Camera.copy(
     center: LatLngAltitude? = null,
     heading: Double? = null,
     tilt: Double? = null,
     range: Double? = null,
     roll: Double? = null,
+    @AltitudeMode altitudeMode: Int? = null,
 ): Camera {
     val objectToCopy = this
     return camera {
@@ -302,6 +311,13 @@ fun Camera.copy(
         this.tilt = tilt ?: objectToCopy.tilt
         this.range = range ?: objectToCopy.range
         this.roll = roll ?: objectToCopy.roll
+        val resolvedAltitudeMode = altitudeMode ?: objectToCopy.altitudeMode
+        if (resolvedAltitudeMode == AltitudeMode.ABSOLUTE ||
+            resolvedAltitudeMode == AltitudeMode.RELATIVE_TO_GROUND ||
+            resolvedAltitudeMode == AltitudeMode.RELATIVE_TO_MESH
+        ) {
+            this.altitudeMode = resolvedAltitudeMode
+        }
     }
 }
 
