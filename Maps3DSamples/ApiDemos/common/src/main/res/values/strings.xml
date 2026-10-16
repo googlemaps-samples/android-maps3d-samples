@@ -62,6 +62,23 @@
     <string name="fly_around">Fly around center</string>
     <!-- Fly to the Empire State Building -->
     <string name="fly_to">Fly to ESB 🏢</string>
+    <string name="fly_to_mountain">Fly to Mt. Rainier (Relative Alt)</string>
+    <string name="camera_target_nyc">New York City</string>
+    <string name="camera_target_esb">Empire State Building</string>
+    <string name="camera_target_mt_rainier">Mt. Rainier (4,392m)</string>
+    <string name="camera_target_and_altitude_mode_format">Target: %1$s | Mode: %2$s</string>
+    <string name="mt_rainier_beacon_label">Mt. Rainier (+100m DTM Ground)</string>
+    <string name="mt_rainier_beacon_mesh_label">Mt. Rainier (+360m DSM Mesh)</string>
+    <string name="mt_rainier_beacon_clamp_label">Mt. Rainier Clamped (0m DTM)</string>
+    <string name="mt_rainier_beacon_absolute_label">Mt. Rainier (4,392m MSL Abs)</string>
+    <string name="esb_beacon_ground_label">ESB (+100m DTM Ground)</string>
+    <string name="esb_beacon_mesh_label">ESB Spire (+360m DSM Mesh)</string>
+    <string name="esb_beacon_clamp_label">ESB Clamped (0m DTM)</string>
+    <string name="esb_beacon_absolute_label">ESB (212m MSL Abs)</string>
+    <string name="altitude_mode_relative_to_ground_code" translatable="false">RELATIVE_TO_GROUND</string>
+    <string name="altitude_mode_relative_to_mesh_code" translatable="false">RELATIVE_TO_MESH</string>
+    <string name="altitude_mode_clamp_to_ground_code" translatable="false">CLAMP_TO_GROUND</string>
+    <string name="altitude_mode_absolute_code" translatable="false">ABSOLUTE</string>
 
     <string name="camera_activate_restriction">Restrict camera</string>
     <string name="camera_remove_restriction">Remove restriction</string>

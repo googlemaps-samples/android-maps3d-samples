@@ -18,36 +18,41 @@ import android.os.Bundle
 import android.view.View
 import android.widget.RadioGroup
 import android.widget.TextView
+import androidx.annotation.StringRes
 import androidx.core.view.WindowCompat
-import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.Map3DView
-import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
-import com.example.maps3dcommon.R
-import com.google.android.gms.maps3d.model.Camera
-import com.google.android.gms.maps3d.model.camera
-import com.google.android.gms.maps3d.model.flyAroundOptions
-import com.google.android.gms.maps3d.model.flyToOptions
-import com.google.android.gms.maps3d.model.latLngAltitude
-import com.google.android.material.button.MaterialButton
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
-import com.google.android.gms.maps3d.model.Polygon
-import com.example.maps3dkotlin.cameracontrols.DataModel.nycCameraRestriction
-import com.example.maps3dkotlin.cameracontrols.DataModel.nycPolygonOptions
-import com.example.maps3dkotlin.cameracontrols.DataModel.EMPIRE_STATE_BUILDING_LATITUDE
-import com.example.maps3dkotlin.cameracontrols.DataModel.EMPIRE_STATE_BUILDING_LONGITUDE
 import com.example.maps3d.common.Map3DSettings
 import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3d.common.copy
 import com.example.maps3d.common.toCompassDirection
 import com.example.maps3d.common.toValidCamera
 import com.example.maps3d.common.wrapIn
+import com.example.maps3dcommon.R
+import com.example.maps3dkotlin.cameracontrols.DataModel.ESB_FLY_TO_DURATION_MS
+import com.example.maps3dkotlin.cameracontrols.DataModel.MT_RAINIER_FLY_TO_DURATION_MS
+import com.example.maps3dkotlin.cameracontrols.DataModel.MT_RAINIER_ORBIT_DURATION_MS
+import com.example.maps3dkotlin.cameracontrols.DataModel.MT_RAINIER_ORBIT_ROUNDS
+import com.example.maps3dkotlin.cameracontrols.DataModel.esbCamera
+import com.example.maps3dkotlin.cameracontrols.DataModel.nycCameraRestriction
+import com.example.maps3dkotlin.cameracontrols.DataModel.nycPolygonOptions
+import com.example.maps3dkotlin.cameracontrols.DataModel.targetBeaconOptions
+import com.example.maps3dkotlin.cameracontrols.DataModel.targetCamera
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
+import com.google.android.gms.maps3d.GoogleMap3D
+import com.google.android.gms.maps3d.Map3DView
+import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
+import com.google.android.gms.maps3d.model.AltitudeMode
+import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Map3DMode
+import com.google.android.gms.maps3d.model.Marker
+import com.google.android.gms.maps3d.model.Polygon
+import com.google.android.gms.maps3d.model.flyAroundOptions
+import com.google.android.gms.maps3d.model.flyToOptions
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.slider.Slider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
     override val TAG = this::class.java.simpleName
@@ -61,17 +66,17 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
     private var isSyncingRadioGroup = false
 
     private var restrictionCubeFaces: MutableList<Polygon> = mutableListOf()
+    private var activeBeaconMarker: Marker? = null
+    private var beaconRefreshToken = 0
+    private var needsMeshBeaconRefresh = false
 
-    override val initialCamera = camera {
-        center = latLngAltitude {
-            latitude = 40.7128
-            longitude = -74.0060
-            altitude = 150.0
-        }
-        heading = 252.7
-        tilt = 79.0
-        range = 1500.0
-    }
+    @AltitudeMode
+    private var selectedAltitudeMode: Int = AltitudeMode.RELATIVE_TO_GROUND
+
+    @StringRes
+    private var activeTargetResId: Int = R.string.camera_target_esb
+
+    override val initialCamera: Camera = esbCamera(AltitudeMode.RELATIVE_TO_GROUND)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,7 +99,26 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         }
 
         findViewById<MaterialButton>(R.id.fly_to).setOnClickListener {
-            flyToEmpireStateBuilding()
+            flyToTarget(R.string.camera_target_esb)
+        }
+
+        findViewById<MaterialButton>(R.id.fly_to_mountain_button).setOnClickListener {
+            flyToTarget(R.string.camera_target_mt_rainier)
+        }
+
+        findViewById<ChipGroup>(R.id.altitude_mode_chip_group).setOnCheckedStateChangeListener { _, checkedIds ->
+            val checkedId = checkedIds.firstOrNull() ?: return@setOnCheckedStateChangeListener
+            val newMode = when (checkedId) {
+                R.id.chip_altitude_relative_to_ground -> AltitudeMode.RELATIVE_TO_GROUND
+                R.id.chip_altitude_relative_to_mesh -> AltitudeMode.RELATIVE_TO_MESH
+                R.id.chip_altitude_clamp_to_ground -> AltitudeMode.CLAMP_TO_GROUND
+                R.id.chip_altitude_absolute -> AltitudeMode.ABSOLUTE
+                else -> return@setOnCheckedStateChangeListener
+            }
+            if (selectedAltitudeMode != newMode) {
+                selectedAltitudeMode = newMode
+                flyToTarget(activeTargetResId)
+            }
         }
 
         findViewById<MaterialButton>(R.id.toggle_restriction).setOnClickListener { view ->
@@ -205,6 +229,18 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         super.onMapReady(googleMap3D)
         this.googleMap3D = googleMap3D
 
+        upsertActiveBeacon()
+
+        googleMap3D.setOnMapSteadyListener { isSteady ->
+            if (isSteady) {
+                map3DView.contentDescription = "MapSteady"
+                if (needsMeshBeaconRefresh) {
+                    needsMeshBeaconRefresh = false
+                    runOnUiThread { upsertActiveBeacon() }
+                }
+            }
+        }
+
         // Set the initial camera position
         googleMap3D.getCamera()?.let { camera ->
             updateCameraPosition(camera)
@@ -214,66 +250,91 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         googleMap3D.setCameraChangedListener { cameraPosition ->
             updateCameraPosition(cameraPosition)
         }
+    }
 
-        googleMap3D.setOnMapSteadyListener { isSteady ->
-            if (isSteady) {
-                googleMap3D.setOnMapSteadyListener(null)
-                 CoroutineScope(Dispatchers.Main).launch {
-                    delay(2000.milliseconds)
-                    flyToEmpireStateBuilding()
-                }
-            }
+    private fun getBeaconLabel(isMountain: Boolean, @AltitudeMode mode: Int): String {
+        val resId = when (mode) {
+            AltitudeMode.RELATIVE_TO_MESH ->
+                if (isMountain) R.string.mt_rainier_beacon_mesh_label else R.string.esb_beacon_mesh_label
+            AltitudeMode.CLAMP_TO_GROUND ->
+                if (isMountain) R.string.mt_rainier_beacon_clamp_label else R.string.esb_beacon_clamp_label
+            AltitudeMode.ABSOLUTE ->
+                if (isMountain) R.string.mt_rainier_beacon_absolute_label else R.string.esb_beacon_absolute_label
+            else ->
+                if (isMountain) R.string.mt_rainier_beacon_label else R.string.esb_beacon_ground_label
         }
+        return getString(resId)
     }
 
     /**
-     * Initiates a camera flight animation to the Empire State Building.
-     *
-     * This function uses the [GoogleMap3D.flyCameraTo] method to move the camera's viewpoint
-     * smoothly to the Empire State Building's location. The camera is configured
-     * with specific latitude, longitude, altitude, heading, tilt, and range values
-     * to provide an engaging view of the landmark.
-     *
-     * The flight duration is set to 2 seconds.
-     *
-     * This function assumes that the [googleMap3D] object is initialized and ready for use.
+     * Places or updates the altitude reference beacon for the active target using the unified
+     * [AltitudeMode] builder.
      */
-    private fun flyToEmpireStateBuilding() {
-        googleMap3D?.flyCameraTo(
-            flyToOptions {
-                endCamera = camera {
-                    center = latLngAltitude {
-                        latitude = EMPIRE_STATE_BUILDING_LATITUDE
-                        longitude = EMPIRE_STATE_BUILDING_LONGITUDE
-                        altitude = 212.0
+    private fun upsertActiveBeacon() {
+        val map = googleMap3D ?: return
+        val isMountain = (activeTargetResId == R.string.camera_target_mt_rainier)
+        val beaconOptions = targetBeaconOptions(
+            isMountain = isMountain,
+            label = getBeaconLabel(isMountain, selectedAltitudeMode),
+            mode = selectedAltitudeMode,
+            refreshToken = ++beaconRefreshToken,
+        )
+        activeBeaconMarker?.remove()
+        activeBeaconMarker = map.addMarker(beaconOptions)
+    }
+
+    /**
+     * Initiates a camera flight animation to the specified landmark target ([R.string.camera_target_esb]
+     * or [R.string.camera_target_mt_rainier]) using the single unified [AltitudeMode] camera and
+     * marker pipeline.
+     */
+    private fun flyToTarget(@StringRes targetResId: Int) {
+        val map = googleMap3D ?: return
+        activeTargetResId = targetResId
+        val isMountain = (targetResId == R.string.camera_target_mt_rainier)
+
+        // Clear NYC bounds restriction if active so the camera can travel to Washington State
+        if (isMountain) {
+            val restrictionButton = findViewById<MaterialButton?>(R.id.toggle_restriction)
+            if (restrictionButton?.isChecked == true) {
+                restrictionButton.isChecked = false
+                restrictionButton.text = getText(R.string.camera_activate_restriction)
+                map.setCameraRestriction(null)
+            }
+        }
+
+        needsMeshBeaconRefresh = (selectedAltitudeMode == AltitudeMode.RELATIVE_TO_MESH)
+        upsertActiveBeacon()
+
+        val targetCam = targetCamera(isMountain = isMountain, mode = selectedAltitudeMode)
+        map.setCameraAnimationEndListener {
+            map.setCameraAnimationEndListener(null)
+            runOnUiThread { upsertActiveBeacon() }
+            if (isMountain) {
+                map.flyCameraAround(
+                    flyAroundOptions {
+                        center = targetCam
+                        durationInMillis = MT_RAINIER_ORBIT_DURATION_MS
+                        rounds = MT_RAINIER_ORBIT_ROUNDS
                     }
-                    heading = 34.0
-                    tilt = 67.0
-                    range = 750.0
-                    roll = 0.0
-                }
-                durationInMillis = 2_000
+                )
+            }
+        }
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = targetCam
+                durationInMillis =
+                    if (isMountain) MT_RAINIER_FLY_TO_DURATION_MS else ESB_FLY_TO_DURATION_MS
             }
         )
     }
 
     /**
      * Initiates a camera fly-around animation around the current camera's center.
-     *
-     * This function retrieves the current camera position from the map and then
-     * starts a fly-around animation using the [GoogleMap3D.flyCameraAround] method. The animation
-     * will orbit around the current center point, with the specified duration and number of rounds.
-     *
-     * If the map or the current camera position is not available, this function
-     * will do nothing.
-     *
-     * The fly-around animation parameters are:
-     * - `center`: The current camera position (latitude, longitude, altitude).
-     * - `durationInMillis`: The duration of the fly-around animation in milliseconds (5000 ms).
-     * - `rounds`: The number of times the camera will orbit around the center (1.0 round).
      */
     private fun flyAroundCurrentCenter() {
         val camera = googleMap3D?.getCamera()?.toValidCamera() ?: return
+        googleMap3D?.setCameraAnimationEndListener(null)
 
         googleMap3D?.flyCameraAround(
             flyAroundOptions {
@@ -284,18 +345,17 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         )
     }
 
+    private fun getAltitudeModeLabel(@AltitudeMode mode: Int): String =
+        when (mode) {
+            AltitudeMode.RELATIVE_TO_GROUND -> getString(R.string.altitude_mode_relative_to_ground_code)
+            AltitudeMode.RELATIVE_TO_MESH -> getString(R.string.altitude_mode_relative_to_mesh_code)
+            AltitudeMode.CLAMP_TO_GROUND -> getString(R.string.altitude_mode_clamp_to_ground_code)
+            else -> getString(R.string.altitude_mode_absolute_code)
+        }
+
     /**
-     * Updates the camera state text view with the current camera's position information.
-     *
-     * This function takes a [Camera] object and extracts its center coordinates (latitude,
-     * longitude, altitude), heading, tilt, and range. It then formats these values into a
-     * string that is displayed in the `cameraStateText` TextView.
-     *
-     * It also appends the compass direction based on the camera's heading.
-     *
-     * The update to the TextView is performed on the main thread using a coroutine.
-     *
-     * @param camera The [Camera] object representing the current camera position.
+     * Updates the camera state text view with the current camera's position, active target,
+     * and [AltitudeMode] telemetry.
      */
     private fun updateCameraPosition(camera: Camera) {
         val nbsp = "\u00A0"
@@ -315,7 +375,7 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
 
             // Heading
             append(getString(R.string.cam_hdg_label, camera.heading ?: 0.0))
-            val compassString = (camera.heading ?: 0.0).toCompassDirection() // Assuming this utility exists
+            val compassString = (camera.heading ?: 0.0).toCompassDirection()
             append("$nbsp($compassString)")
             append(", ")
 
@@ -325,9 +385,19 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
 
             // Range
             append(getString(R.string.cam_rng_label, camera.range ?: 0.0))
+            append("\n")
+
+            // Active Target & AltitudeMode
+            append(
+                getString(
+                    R.string.camera_target_and_altitude_mode_format,
+                    getString(activeTargetResId),
+                    getAltitudeModeLabel(selectedAltitudeMode),
+                )
+            )
         }
 
-        val resetValue = (camera.roll ?: 0.0).toFloat().wrapIn(-180f .. 180f)
+        val resetValue = (camera.roll ?: 0.0).toFloat().wrapIn(-180f..180f)
 
         CoroutineScope(Dispatchers.Main).launch {
             cameraStateText.text = cameraStateString
