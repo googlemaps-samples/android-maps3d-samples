@@ -25,15 +25,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioGroup
 import androidx.cardview.widget.CardView
+import com.example.maps3d.common.Map3DQuickSettingsButton
+import com.example.maps3d.common.Map3DSettings
+import com.example.maps3d.common.Map3DUiControls
 import com.example.maps3d.common.toValidCamera
 import com.example.maps3dcommon.R
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.GoogleMap3D
+import com.google.android.gms.maps3d.UiControlSettings.ControlOrientation
 import com.google.android.gms.maps3d.UiControlSettings.ControlPlacement
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.CompassControl
-import com.google.android.gms.maps3d.UiControlSettings.ControlOrientation
 import com.google.android.gms.maps3d.model.Map3DControl
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.PanHorizontalControl
@@ -219,6 +222,21 @@ class UiControlsActivity : SampleBaseActivity() {
 
         uiSettings.setUiControlsPlacement(primaryControls, primaryPlacement)
         uiSettings.setUiControlsPlacement(secondaryControls, secondaryPlacement)
+        val localUiControls = Map3DUiControls(
+            zoom = chipZoom?.isChecked == true,
+            tilt = chipTilt?.isChecked == true,
+            rotate = chipRotate?.isChecked == true,
+            compass = chipCompass?.isChecked == true,
+            panVertical = chipPanVertical?.isChecked == true,
+            panHorizontal = chipPanHorizontal?.isChecked == true,
+            controlsPosition = primaryPlacement,
+        )
+        findViewById<Map3DQuickSettingsButton?>(R.id.quick_settings_button)
+            ?.updateTopMarginForUiControls(localUiControls)
+        Map3DSettings.applyStatusBarInsetsToMapView(map3DView)
+        map3DView.post {
+            Map3DSettings.applyStatusBarInsetsToMapView(map3DView)
+        }
     }
 
     // --- UI Collapse / Expand Mechanics ---
@@ -265,7 +283,7 @@ class UiControlsActivity : SampleBaseActivity() {
 
     // --- 3D Map Setup ---
 
-    override fun onQuickSettingsChanged(settings: com.example.maps3d.common.Map3DSettings) {
+    override fun onQuickSettingsChanged(settings: Map3DSettings) {
         super.onQuickSettingsChanged(settings)
         applyControlsToMap()
     }

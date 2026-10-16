@@ -23,10 +23,12 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -54,6 +56,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -100,6 +103,11 @@ fun rememberMap3DSessionSettings(
                 ctx = ctx.baseContext
             }
         }
+        LaunchedEffect(Unit) {
+            Map3DSettings.findMap3DView(view.rootView)?.let { mapView ->
+                Map3DSettings.applyStatusBarInsetsToMapView(mapView)
+            }
+        }
     }
     remember(defaultMapMode, controller) {
         controller.onSampleEntered(defaultMapMode)
@@ -140,6 +148,7 @@ fun Map3DSessionTheme(
  * @param settingsController The [Map3DSettingsController] backing the widget (defaults to [Map3DSettingsController.shared]).
  * @param sampleDefaultMapMode The hosting sample's default [Map3DMode] restored on Reset.
  * @param googleMap3D Optional live [GoogleMap3D] instance to automatically apply settings changes.
+ * @param uiControlsOverride Optional local [Map3DUiControls] override for screens that manage SDK controls directly.
  * @param onSettingsChanged Optional callback invoked when map settings are modified.
  */
 @Composable
@@ -148,25 +157,58 @@ fun Map3DQuickSettingsWidget(
     settingsController: Map3DSettingsController = Map3DSettingsController.shared,
     @Map3DMode sampleDefaultMapMode: Int = Map3DMode.HYBRID,
     googleMap3D: GoogleMap3D? = null,
+    uiControlsOverride: Map3DUiControls? = null,
     onSettingsChanged: (Map3DSettings) -> Unit = {},
 ) {
     val settings by settingsController.settings.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
+    val view = LocalView.current
+    val density = LocalDensity.current
+    val effectiveUiControls = uiControlsOverride ?: settings.uiControls
 
-    LaunchedEffect(googleMap3D, settings) {
+    LaunchedEffect(googleMap3D, settings, uiControlsOverride) {
         if (googleMap3D != null) {
-            settings.applyTo(googleMap3D)
+            val effectiveSettings = if (uiControlsOverride != null) {
+                settings.copy(uiControls = uiControlsOverride)
+            } else {
+                settings
+            }
+            effectiveSettings.applyTo(googleMap3D)
+            Map3DSettings.findMap3DView(view.rootView)?.let { mapView ->
+                Map3DSettings.applyStatusBarInsetsToMapView(mapView)
+                mapView.post { Map3DSettings.applyStatusBarInsetsToMapView(mapView) }
+            }
         }
     }
 
-    LaunchedEffect(googleMap3D) {
+    LaunchedEffect(googleMap3D, uiControlsOverride) {
         if (googleMap3D != null) {
             delay(350.milliseconds)
-            settingsController.settings.value.applyTo(googleMap3D)
+            val currentSettings = settingsController.settings.value
+            val effectiveSettings = if (uiControlsOverride != null) {
+                currentSettings.copy(uiControls = uiControlsOverride)
+            } else {
+                currentSettings
+            }
+            effectiveSettings.applyTo(googleMap3D)
+            Map3DSettings.findMap3DView(view.rootView)?.let { mapView ->
+                Map3DSettings.applyStatusBarInsetsToMapView(mapView)
+            }
         }
     }
 
-    val extraTopPadding = (settings.uiControls.calculateFabMarginDp() - 8).coerceAtLeast(0).dp
+    val visibleStatusBarsTopPx = WindowInsets.statusBars.getTop(density)
+    val overlapPx = if (view.isInEditMode) {
+        0
+    } else {
+        val mapView = Map3DSettings.findMap3DView(view.rootView)
+        Map3DSettings.resolveStatusBarOverlapPx(mapView ?: view)
+    }
+    val missingStatusBarDp = with(density) {
+        (overlapPx - visibleStatusBarsTopPx).coerceAtLeast(0).toDp()
+    }
+    val extraTopPadding =
+        (effectiveUiControls.calculateFabMarginDp() - 8).coerceAtLeast(0).dp + missingStatusBarDp
 
     Map3DSessionTheme(controller = settingsController) {
         FloatingActionButton(

@@ -30,6 +30,9 @@ import android.widget.RadioGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
+import com.example.maps3d.common.Map3DQuickSettingsButton;
+import com.example.maps3d.common.Map3DSettings;
+import com.example.maps3d.common.Map3DUiControls;
 import com.example.maps3dcommon.R;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps.model.LatLng;
@@ -272,6 +275,23 @@ public class UiControlsActivity extends SampleBaseActivity {
 
     uiSettings.setUiControlsPlacement(primaryControls, primaryPlacement);
     uiSettings.setUiControlsPlacement(secondaryControls, secondaryPlacement);
+    Map3DUiControls localUiControls = new Map3DUiControls(
+        chipZoom != null && chipZoom.isChecked(),
+        chipTilt != null && chipTilt.isChecked(),
+        chipRotate != null && chipRotate.isChecked(),
+        chipCompass != null && chipCompass.isChecked(),
+        chipPanVertical != null && chipPanVertical.isChecked(),
+        chipPanHorizontal != null && chipPanHorizontal.isChecked(),
+        primaryPlacement
+    );
+    Map3DQuickSettingsButton quickSettingsButton = findViewById(R.id.quick_settings_button);
+    if (quickSettingsButton != null) {
+      quickSettingsButton.updateTopMarginForUiControls(localUiControls);
+    }
+    if (map3DView != null) {
+      Map3DSettings.applyStatusBarInsetsToMapView(map3DView);
+      map3DView.post(() -> Map3DSettings.applyStatusBarInsetsToMapView(map3DView));
+    }
   }
 
   // --- UI Collapse / Expand Mechanics ---
@@ -321,7 +341,7 @@ public class UiControlsActivity extends SampleBaseActivity {
   }
 
   @Override
-  protected void onQuickSettingsChanged(@NonNull com.example.maps3d.common.Map3DSettings settings) {
+  protected void onQuickSettingsChanged(@NonNull Map3DSettings settings) {
     super.onQuickSettingsChanged(settings);
     applyControlsToMap();
   }
