@@ -91,10 +91,10 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
 
     private OnCameraChangedListener cameraChangedListener;
 
-    private int lastStatusBarTop = 0;
+    private Integer lastStatusBarTop = null;
 
-    private void applyStatusBarInsetsToMapControls(int statusBarTop, Map3DUiControls uiControls) {
-        if (statusBarTop > 0) {
+    private void applyStatusBarInsetsToMapControls(Integer statusBarTop, Map3DUiControls uiControls) {
+        if (statusBarTop != null) {
             lastStatusBarTop = statusBarTop;
         }
         if (map3DView != null) {
@@ -104,7 +104,7 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
         Map3DQuickSettingsButton quickSettingsButton = findViewById(R.id.quick_settings_button);
         if (quickSettingsButton != null) {
             Map3DUiControls currentUi = uiControls != null ? uiControls : quickSettingsButton.getSettings().getUiControls();
-            quickSettingsButton.setStatusBarTopOffsetPx(lastStatusBarTop);
+            quickSettingsButton.setStatusBarTopOffsetPx(lastStatusBarTop != null ? lastStatusBarTop : 0);
             quickSettingsButton.updateTopMarginForUiControls(currentUi);
         }
     }

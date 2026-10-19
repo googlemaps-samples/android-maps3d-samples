@@ -19,6 +19,7 @@ package com.example.maps3d.common
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.view.View
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,11 +47,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -198,11 +201,19 @@ fun Map3DQuickSettingsWidget(
     }
 
     val visibleStatusBarsTopPx = WindowInsets.statusBars.getTop(density)
-    val overlapPx = if (view.isInEditMode) {
-        0
-    } else {
-        val mapView = Map3DSettings.findMap3DView(view.rootView)
-        Map3DSettings.resolveStatusBarOverlapPx(mapView ?: view)
+    var overlapPx by remember { mutableIntStateOf(0) }
+    if (!view.isInEditMode) {
+        DisposableEffect(view, googleMap3D, visibleStatusBarsTopPx) {
+            val targetView = Map3DSettings.findMap3DView(view.rootView) ?: view
+            overlapPx = Map3DSettings.resolveStatusBarOverlapPx(targetView)
+            val layoutListener = View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+                overlapPx = Map3DSettings.resolveStatusBarOverlapPx(targetView)
+            }
+            targetView.addOnLayoutChangeListener(layoutListener)
+            onDispose {
+                targetView.removeOnLayoutChangeListener(layoutListener)
+            }
+        }
     }
     val missingStatusBarDp = with(density) {
         (overlapPx - visibleStatusBarsTopPx).coerceAtLeast(0).toDp()

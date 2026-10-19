@@ -57,7 +57,7 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
         val map = attachedMap ?: mapProvider?.invoke()
         map?.let { updatedSettings.applyTo(it) }
         updateTopMarginForUiControls(updatedSettings.uiControls)
-        post { applyStatusBarInsetsToSiblingMapView() }
+        applyStatusBarInsetsToSiblingMapView()
         onSettingsChangedListener?.onSettingsChanged(updatedSettings)
     }
 
@@ -107,6 +107,7 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
 
         ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
             updateTopMarginForUiControls()
+            applyStatusBarInsetsToSiblingMapView()
             insets
         }
 
@@ -120,6 +121,7 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
         hideHostSystemBars()
         settingsController.addListener(controllerListener)
         updateTopMarginForUiControls()
+        applyStatusBarInsetsToSiblingMapView()
         ViewCompat.requestApplyInsets(this)
         post {
             hideHostSystemBars()
@@ -182,7 +184,6 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
      */
     @JvmOverloads
     fun updateTopMarginForUiControls(uiControls: Map3DUiControls = getSettings().uiControls) {
-        applyStatusBarInsetsToSiblingMapView()
         val lp = layoutParams as? ViewGroup.MarginLayoutParams ?: return
         val density = resources.displayMetrics.density
         val baseMarginDp = uiControls.calculateFabMarginDp()
@@ -206,13 +207,13 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
         if (googleMap3D != null) {
             currentSettings.applyTo(googleMap3D)
             applyStatusBarInsetsToSiblingMapView()
-            post { applyStatusBarInsetsToSiblingMapView() }
             // Re-apply after a short delay to ensure native engine layout pass preserves controls
             postDelayed({
                 if (attachedMap == googleMap3D) {
                     val latest = settingsController.getSettings()
                     latest.applyTo(googleMap3D)
                     updateTopMarginForUiControls(latest.uiControls)
+                    applyStatusBarInsetsToSiblingMapView()
                 }
             }, 350L)
         }

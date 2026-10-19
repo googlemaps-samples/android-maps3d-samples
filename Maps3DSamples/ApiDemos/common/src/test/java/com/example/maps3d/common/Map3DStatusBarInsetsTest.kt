@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.maps3dkotlin.sampleactivity
+package com.example.maps3d.common
 
 import android.content.Context
 import android.os.Looper
@@ -22,7 +22,6 @@ import android.view.Gravity
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.test.core.app.ApplicationProvider
-import com.example.maps3d.common.Map3DSettings
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -96,8 +95,8 @@ class Map3DStatusBarInsetsTest {
         ).apply { topMargin = baseMarginPx }
         mapView.addView(delayedTrailingControls, trailingLp)
 
-        // Simulate explicit re-application (as triggered by onChildViewAdded / onMapReady)
-        Map3DSettings.applyStatusBarInsetsToMapView(mapView, explicitStatusBarTop = statusBarPx)
+        // Adding a child triggers a layout pass on the root map view
+        mapView.layout(0, 0, 1000, 1000)
         shadowOf(Looper.getMainLooper()).idle()
 
         assertThat((delayedTrailingControls.layoutParams as FrameLayout.LayoutParams).topMargin)
@@ -142,5 +141,30 @@ class Map3DStatusBarInsetsTest {
 
         assertThat((nestedTrailingControls.layoutParams as FrameLayout.LayoutParams).topMargin)
             .isEqualTo(statusBarPx + baseMarginPx)
+    }
+
+    @Test
+    fun applyStatusBarInsetsToMapView_clearsCachedTopAndRestoresSdkBaseMarginWhenZeroPassed() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val mapView = FrameLayout(context)
+        val customSdkBaseMarginPx = 24
+        val statusBarPx = 80
+
+        val trailingControls = LinearLayout(context)
+        val trailingLp = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            Gravity.TOP or Gravity.END,
+        ).apply { topMargin = customSdkBaseMarginPx }
+        mapView.addView(trailingControls, trailingLp)
+
+        Map3DSettings.applyStatusBarInsetsToMapView(mapView, explicitStatusBarTop = statusBarPx)
+        assertThat((trailingControls.layoutParams as FrameLayout.LayoutParams).topMargin)
+            .isEqualTo(customSdkBaseMarginPx + statusBarPx)
+
+        // Passing explicit 0 should clear the cached positive inset and restore the SDK's exact base margin
+        Map3DSettings.applyStatusBarInsetsToMapView(mapView, explicitStatusBarTop = 0)
+        assertThat((trailingControls.layoutParams as FrameLayout.LayoutParams).topMargin)
+            .isEqualTo(customSdkBaseMarginPx)
     }
 }
