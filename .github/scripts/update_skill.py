@@ -18,7 +18,7 @@ import urllib.request
 import sys
 
 def get_gemini_response(api_key, prompt):
-    model = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+    model = (os.getenv("GEMINI_MODEL") or "").strip() or "gemini-3.8-flash"
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
     headers = {'Content-Type': 'application/json'}
     data = {

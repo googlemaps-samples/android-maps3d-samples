@@ -45,13 +45,19 @@ public abstract class BaseVisualTest {
     protected Context context;
     protected GeminiVisualTestHelper helper;
     protected String geminiApiKey;
+    protected String geminiModel;
 
     @Before
     public void setUp() {
         instrumentation = InstrumentationRegistry.getInstrumentation();
         uiDevice = UiDevice.getInstance(instrumentation);
         context = instrumentation.getTargetContext();
-        helper = new GeminiVisualTestHelper();
+        geminiModel =
+            GeminiVisualTestHelper.resolveModel(
+                InstrumentationRegistry.getArguments().getString("GEMINI_MODEL"),
+                BuildConfig.GEMINI_MODEL
+            );
+        helper = new GeminiVisualTestHelper(geminiModel);
         
         geminiApiKey = BuildConfig.GEMINI_API_KEY;
         assertTrue(
