@@ -17,7 +17,7 @@ val IOLANI_PALACE = latLngAltitude {
     altitude = 0.0
 }
 
-// Step 6: Waikiki Beach
+// Step 8: Waikiki Beach
 val WAIKIKI = latLngAltitude {
     latitude = 21.2766
     longitude = -157.8286
@@ -27,6 +27,12 @@ val WAIKIKI = latLngAltitude {
 val DIAMOND_HEAD = latLngAltitude {
     latitude = 21.26194
     longitude = -157.80556
+    altitude = 0.0
+}
+
+val HANAUMA_BAY = latLngAltitude {
+    latitude = 21.2690
+    longitude = -157.6938
     altitude = 0.0
 }
 
@@ -58,7 +64,7 @@ val LANIKAI_BEACH = latLngAltitude {
 const val BALLOON_MODEL_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/balloon-pin-BlXF32yD.glb"
 const val BALLOON_SCALE = 5.0
 
-// Step 5: Iolani Palace Geometry (Lat, Lng pairs)
+// Step 6: Iolani Palace Geometry (Lat, Lng pairs)
 val IOLANI_PALACE_GEO = listOf(
     21.307180365, -157.858769898,
     21.306765552, -157.858390366,

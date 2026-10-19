@@ -3,11 +3,15 @@ package com.example.alohaexplorer
 /* TODO: Prerequisites - Uncomment the rest of this file after synchronizing the Maps 3D SDK dependency!
 
 import com.google.android.gms.maps3d.GoogleMap3D
+import com.google.android.gms.maps3d.model.FlyAroundOptions
+import com.google.android.gms.maps3d.model.FlyToOptions
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.latLngAltitude
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
-import kotlin.math.floor
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 
 
 /**
@@ -68,40 +72,66 @@ fun extrudePolygon(
  * **Coroutine Helper**: Awaiting Map Stability.
  * Often you want to wait until the map has fully loaded (is "steady") before starting
  * the next animation or interaction. This implementation wraps the callback-based
- * `setOnMapSteadyListener` into a standard Kotlin `suspend` function.
+ * `setOnMapSteadyListener` into a standard Kotlin `suspend` function with a timeout so
+ * execution never hangs indefinitely if 3D tiles are slow to load.
  */
-suspend fun awaitMapSteady(map: GoogleMap3D) = suspendCancellableCoroutine { continuation ->
-    map.setOnMapSteadyListener { isSteady ->
-        if (isSteady) {
-            map.setOnMapSteadyListener(null) // Cleanup the listener
-            if (continuation.isActive) {
-                continuation.resume(Unit) // Resume the suspended coroutine
+suspend fun GoogleMap3D.awaitMapSteady(timeout: Duration = 5.seconds): Boolean {
+    return withTimeoutOrNull(timeout) {
+        suspendCancellableCoroutine { continuation ->
+            setOnMapSteadyListener { isSteady ->
+                if (isSteady) {
+                    setOnMapSteadyListener(null) // Cleanup the listener
+                    if (continuation.isActive) {
+                        continuation.resume(true) // Resume the suspended coroutine
+                    }
+                }
+            }
+
+            // Safety: If the coroutine is cancelled (e.g., user exits app or timeout expires), remove the listener.
+            continuation.invokeOnCancellation {
+                setOnMapSteadyListener(null)
             }
         }
-    }
-
-    // Safety: If the coroutine is cancelled (e.g., user exits app), remove the listener.
-    continuation.invokeOnCancellation {
-        map.setOnMapSteadyListener(null)
-    }
+    } ?: false
 }
 
-
 /**
- * **Coroutine Helper**: Awaiting Camera Animation.
- * Similar to `awaitMapSteady`, this pauses our code execution until the camera finishes its flight.
- * This allows us to write strict sequences like: "Fly to A, THEN wait, THEN fly to B".
+ * **Coroutine Helper**: Awaiting a Fly-To Camera Animation.
+ * Registers the animation-end listener before triggering [GoogleMap3D.flyCameraTo] to prevent
+ * race conditions, and stops the camera animation if the coroutine is cancelled.
  */
-suspend fun awaitCameraAnimation(map: GoogleMap3D) = suspendCancellableCoroutine { continuation ->
-    map.setCameraAnimationEndListener {
-        map.setCameraAnimationEndListener(null) // Cleanup
+suspend fun GoogleMap3D.awaitCameraAnimation(options: FlyToOptions) = suspendCancellableCoroutine { continuation ->
+    setCameraAnimationEndListener {
+        setCameraAnimationEndListener(null) // Cleanup
         if (continuation.isActive) {
             continuation.resume(Unit)
         }
     }
+    flyCameraTo(options)
 
     continuation.invokeOnCancellation {
-        map.setCameraAnimationEndListener(null)
+        stopCameraAnimation()
+        setCameraAnimationEndListener(null)
+    }
+}
+
+/**
+ * **Coroutine Helper**: Awaiting a Fly-Around Camera Animation.
+ * Registers the animation-end listener before triggering [GoogleMap3D.flyCameraAround] to prevent
+ * race conditions, and stops the camera animation if the coroutine is cancelled.
+ */
+suspend fun GoogleMap3D.awaitCameraAnimation(options: FlyAroundOptions) = suspendCancellableCoroutine { continuation ->
+    setCameraAnimationEndListener {
+        setCameraAnimationEndListener(null) // Cleanup
+        if (continuation.isActive) {
+            continuation.resume(Unit)
+        }
+    }
+    flyCameraAround(options)
+
+    continuation.invokeOnCancellation {
+        stopCameraAnimation()
+        setCameraAnimationEndListener(null)
     }
 }
 

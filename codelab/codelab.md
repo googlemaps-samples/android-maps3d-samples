@@ -39,7 +39,7 @@ Before we start coding, ensure your environment is ready.
     
     The `starter` project comes with the Secrets plugin pre-configured for you! All you need to do is create a new file called `secrets.properties` in the root of your project and add:
     ```properties
-    MAPS_API_KEY=YOUR_API_KEY_HERE
+    MAPS3D_API_KEY=YOUR_API_KEY_HERE
     ```
 
 3.  **Dependencies**:
@@ -52,12 +52,6 @@ Before we start coding, ensure your environment is ready.
         implementation(libs.play.services.maps3d)
     }
     ```
-    *   Ensure the Maps 3D SDK dependency is also present in `dependencies { ... }`:
-        ```kotlin
-        dependencies {
-            implementation(libs.play.services.maps3d)
-        }
-        ```
 
     *  **Be sure to sync the project if you haven't already!**
 
@@ -89,7 +83,7 @@ To insert the 3D Map, find the `TextView` with the `id` of `@+id/map3dView` and 
         android:id="@+id/map3dView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:mode="hybrid"
+        app:mapMode="hybrid"
         app:centerLat="21.3069"
         app:centerLng="-157.8583"
         app:centerAlt="0"
@@ -217,7 +211,7 @@ Add this logic to `MainActivity.kt`:
         )
     }
 ```
-> **Note**: You will see red errors for `startFromGlobalView` and other helper functions. Don't worry! We will implement these in the next sections. The `setupButtons` wiring has been pre-provided at the bottom of your file.
+> **Note**: When you uncomment `setupButtons(googleMap3D)` at the bottom of your file, you will see red errors for `flyToHonolulu`, `addMarkers`, and the other feature helper functions called inside `setupButtons`. Don't worry! We will implement each of these in the next sections.
 
 ### Step 1.4: Map Lifecycle (The Modern Way)
 
@@ -275,48 +269,68 @@ Here is where many developers trip up. Animations take time. Network loading tak
 >
 > **The Result:** We can write flat, sequential, and highly readable synchronous-looking code!
 
-Open `Utilities.kt` to see how we wrap the SDK's callback-based listeners into Kotlin Coroutine `suspend` functions. This lets us write linear, readable code like "Fly THERE, then wait, then Fly HERE".
+Open `Utilities.kt` to see how we wrap the SDK's callback-based listeners into Kotlin Coroutine `suspend` extension functions on `GoogleMap3D`. This lets us write linear, readable code like "Fly THERE, then wait, then Fly HERE".
 
 ```kotlin
-// Pauses execution until the camera stops moving
-private suspend fun awaitCameraAnimation(map: GoogleMap3D) = suspendCancellableCoroutine { continuation ->
-    map.setCameraAnimationEndListener {
-        map.setCameraAnimationEndListener(null) // Cleanup
+// Registers the animation-end listener before starting the flight, and stops the camera if cancelled
+suspend fun GoogleMap3D.awaitCameraAnimation(options: FlyToOptions) = suspendCancellableCoroutine { continuation ->
+    setCameraAnimationEndListener {
+        setCameraAnimationEndListener(null) // Cleanup
         if (continuation.isActive) {
             continuation.resume(Unit)
         }
     }
+    flyCameraTo(options)
 
     continuation.invokeOnCancellation {
-        map.setCameraAnimationEndListener(null)
+        stopCameraAnimation()
+        setCameraAnimationEndListener(null)
     }
 }
 
-// Pauses execution until the map tiles are fully loaded and steady
-private suspend fun awaitMapSteady(map: GoogleMap3D) = suspendCancellableCoroutine { continuation ->
-    map.setOnMapSteadyListener { isSteady ->
-        if (isSteady) {
-            map.setOnMapSteadyListener(null) // Cleanup the listener
-            if (continuation.isActive) {
-                continuation.resume(Unit) // Resume the suspended coroutine
-            }
+suspend fun GoogleMap3D.awaitCameraAnimation(options: FlyAroundOptions) = suspendCancellableCoroutine { continuation ->
+    setCameraAnimationEndListener {
+        setCameraAnimationEndListener(null) // Cleanup
+        if (continuation.isActive) {
+            continuation.resume(Unit)
         }
     }
-    
-    // Safety: If the coroutine is cancelled (e.g., user exits app), remove the listener.
+    flyCameraAround(options)
+
     continuation.invokeOnCancellation {
-        map.setOnMapSteadyListener(null)
+        stopCameraAnimation()
+        setCameraAnimationEndListener(null)
     }
+}
+
+// Pauses execution until the map tiles are fully loaded and steady (with a safety timeout)
+suspend fun GoogleMap3D.awaitMapSteady(timeout: Duration = 5.seconds): Boolean {
+    return withTimeoutOrNull(timeout) {
+        suspendCancellableCoroutine { continuation ->
+            setOnMapSteadyListener { isSteady ->
+                if (isSteady) {
+                    setOnMapSteadyListener(null) // Cleanup the listener
+                    if (continuation.isActive) {
+                        continuation.resume(true) // Resume the suspended coroutine
+                    }
+                }
+            }
+
+            // Safety: If the coroutine is cancelled or times out, remove the listener.
+            continuation.invokeOnCancellation {
+                setOnMapSteadyListener(null)
+            }
+        }
+    } ?: false
 }
 ```
 
-Now our flight plan looks like this:
+Now our flight plan in `flyToHonolulu` looks like this:
 
 ```kotlin
-    map.flyCameraTo(...)
-    awaitCameraAnimation(map) // Wait for flight
-    awaitMapSteady(map)       // Wait for tiles to load
-    map.flyCameraAround(...)  // Start orbit
+    map.awaitCameraAnimation(flyToOptions { ... })     // Fly and wait for flight to finish
+    map.awaitMapSteady(5.seconds)                      // Wait for 3D tiles to load (up to 5s)
+    map.awaitCameraAnimation(flyAroundOptions { ... }) // Orbit and wait for orbit to finish
 ```
 
 ---
@@ -325,23 +339,27 @@ Now our flight plan looks like this:
 
 Objects in a 3D world need to know where they sit on the vertical "Z-axis".
 
-### The 3 Modes of Altitude
+### The 4 Modes of Altitude
 1.  **ABSOLUTE**: Relative to sea level (WGS84). Good for airplanes.
 2.  **RELATIVE_TO_GROUND**: Relative to the terrain height. Good for things floating *above* the ground.
 3.  **CLAMP_TO_GROUND**: Snaps to the terrain. Good for POIs.
 4.  **RELATIVE_TO_MESH**: Relative to the actual 3D objects (buildings/trees). Good for placing things on rooftops.
 
-### Helper: `resetMap()` and `addMarker()`
+### Helper: `resetMap()` and `addClickableMarker()`
 
 You noticed we call `resetMap()` at the start. This prevents "ghost objects"—markers from previous clicks staying on the map. We iterate through our tracking lists (`activeMarkers`, etc.), call `.remove()` on each object to clear it from the 3D engine, and then clear the list.
 
-We also use a custom `addMarker(options: MarkerOptions)` helper method. Instead of duplicating the `Toast` listener and the list-tracking logic for every single marker, this helper centralizes it:
+We also use a custom `addClickableMarker(map: GoogleMap3D, markerOptions: MarkerOptions)` helper method. Instead of duplicating the `Toast` listener and the list-tracking logic for every single marker, this helper centralizes it:
 ```kotlin
-private fun addMarker(markerOptions: MarkerOptions) {
-    googleMap3D?.addMarker(markerOptions)?.also { marker ->
+private fun addClickableMarker(map: GoogleMap3D, markerOptions: MarkerOptions) {
+    map.addMarker(markerOptions)?.also { marker ->
         marker.setClickListener {
             lifecycleScope.launch(Dispatchers.Main) {
-                Toast.makeText(this@MainActivity, getString(R.string.toast_clicked, marker.label), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@MainActivity,
+                    getString(R.string.toast_clicked, marker.label),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
         activeMarkers.add(marker)
@@ -355,60 +373,68 @@ private fun addMarkers(map: GoogleMap3D) {
     resetMap()
 
     // 4.1. ABSOLUTE: Altitude is relative to the WGS84 ellipsoid (rough sea level).
-    addMarker(
-        markerOptions {
-            position = latLngAltitude {
-                latitude = IOLANI_PALACE.latitude + 0.001
-                longitude = IOLANI_PALACE.longitude
-                altitude = 100.0 // 100 meters above sea level
-            }
-            altitudeMode = AltitudeMode.ABSOLUTE
-            label = getString(R.string.label_absolute)
-            isDrawnWhenOccluded = true
-            isExtruded = true // Draws a line to the ground
+    addClickableMarker(map, markerOptions {
+        position = latLngAltitude {
+            latitude = IOLANI_PALACE.latitude
+            longitude = IOLANI_PALACE.longitude
+            altitude = 100.0 // 100 meters above sea level
         }
-    )
+        altitudeMode = AltitudeMode.ABSOLUTE
+        label = getString(R.string.label_absolute)
+        isDrawnWhenOccluded = true
+        isExtruded = true // Draws a line to the ground
+    })
 
     // 4.2. RELATIVE_TO_GROUND: Altitude is added to the terrain height at that point.
-    addMarker(
-        markerOptions {
-            position = latLngAltitude {
-                latitude = IOLANI_PALACE.latitude
-                longitude = IOLANI_PALACE.longitude
-                altitude = 50.0 // 50m above ground
-            }
-            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-            label = getString(R.string.label_relative)
-            isDrawnWhenOccluded = true
-            isExtruded = true
+    addClickableMarker(map, markerOptions {
+        position = latLngAltitude {
+            latitude = IOLANI_PALACE.latitude + 0.001
+            longitude = IOLANI_PALACE.longitude
+            altitude = 50.0 // 50m above ground
         }
-    )
+        altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+        label = getString(R.string.label_relative)
+        isDrawnWhenOccluded = true
+        isExtruded = true
+    })
 
     // 4.3. CLAMP_TO_GROUND: Snaps to the terrain.
-    addMarker(
-        markerOptions {
-            position = latLngAltitude {
-                latitude = IOLANI_PALACE.latitude - 0.001
-                longitude = IOLANI_PALACE.longitude
-                altitude = 0.0 // Ignored
-            }
-            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-            label = getString(R.string.label_clamped)
-            isDrawnWhenOccluded = true
-            isExtruded = true
+    addClickableMarker(map, markerOptions {
+        position = latLngAltitude {
+            latitude = IOLANI_PALACE.latitude - 0.001
+            longitude = IOLANI_PALACE.longitude
+            altitude = 0.0 // Ignored
         }
-    )
+        altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+        label = getString(R.string.label_clamped)
+        isDrawnWhenOccluded = true
+        isExtruded = true
+    })
+
+    // 4.4. RELATIVE_TO_MESH: Relative to 3D buildings/trees.
+    addClickableMarker(map, markerOptions {
+        position = latLngAltitude {
+            latitude = IOLANI_PALACE.latitude
+            longitude = IOLANI_PALACE.longitude - 0.001
+            altitude = 10.0 // 10m above the 3D mesh surface
+        }
+        altitudeMode = AltitudeMode.RELATIVE_TO_MESH
+        label = getString(R.string.label_relative_mesh)
+        isDrawnWhenOccluded = true
+        isExtruded = true
+    })
 }
+```
 
 <!-- TODO: Add screenshot here.
-     Subject: "Three Markers"
-     Description: Show the three markers side-by-side.
+     Subject: "Four Markers"
+     Description: Show the four markers around Iolani Palace.
      - "Absolute" marker should be floating high up.
-     - "Relative" marker should be floating slightly above ground.
+     - "Relative" marker should be floating 50m above ground.
      - "Clamped" marker should be on the ground.
+     - "Relative to Mesh" marker should sit 10m above the 3D building/tree mesh.
      Highlight the visual vertical line (extrusion) connecting the floating markers to the ground. 
 -->
-```
 
 ---
 
@@ -428,65 +454,57 @@ Add the following function below `addMarkers`:
         resetMap()
 
         // 5.1. Styled Pin
-        addMarker(
-            markerOptions {
-                position = latLngAltitude {
-                    latitude = IOLANI_PALACE.latitude
-                    longitude = IOLANI_PALACE.longitude + 0.002
-                    altitude = 0.0
-                }
-                label = getString(R.string.label_styled_pin)
-                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                setStyle(pinConfiguration {
-                    backgroundColor = Color.BLUE
-                    borderColor = Color.WHITE
-                    scale = 1.5f
-                })
+        addClickableMarker(map, markerOptions {
+            position = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude
+                longitude = IOLANI_PALACE.longitude + 0.002
+                altitude = 0.0
             }
-        )
+            label = getString(R.string.label_styled_pin)
+            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+            setStyle(pinConfiguration {
+                backgroundColor = Color.BLUE
+                borderColor = Color.WHITE
+                scale = 1.5f
+            })
+        })
 
         // 5.2. Image Glyph (Hibiscus)
-        addMarker(
-            markerOptions {
-                position = latLngAltitude {
-                    latitude = IOLANI_PALACE.latitude
-                    longitude = IOLANI_PALACE.longitude + 0.004
-                    altitude = 0.0
-                }
-                label = getString(R.string.label_hibiscus)
-                isExtruded = true
-                isDrawnWhenOccluded = true
-                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                setStyle(ImageView(this@MainActivity).apply { 
-                    setImageResource(R.drawable.hibiscus) 
-                })
+        addClickableMarker(map, markerOptions {
+            position = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude
+                longitude = IOLANI_PALACE.longitude + 0.004
+                altitude = 0.0
             }
-        )
+            label = getString(R.string.label_hibiscus)
+            isExtruded = true
+            isDrawnWhenOccluded = true
+            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+            setStyle(ImageView(R.drawable.hibiscus))
+        })
 
         // 5.3. Text Glyph
         val glyphText = Glyph.fromColor(Color.YELLOW).apply {
             setText("🌸")
         }
 
-        addMarker(
-            markerOptions {
-                position = latLngAltitude {
-                    latitude = IOLANI_PALACE.latitude
-                    longitude = IOLANI_PALACE.longitude + 0.006
-                    altitude = 0.0
-                }
-                label = getString(R.string.label_text_glyph)
-                isExtruded = true
-                isDrawnWhenOccluded = true
-                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                setStyle(pinConfiguration {
-                    setGlyph(glyphText)
-                    scale = 1.2f
-                    backgroundColor = Color.BLUE
-                    borderColor = Color.GREEN
-                })
+        addClickableMarker(map, markerOptions {
+            position = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude
+                longitude = IOLANI_PALACE.longitude + 0.006
+                altitude = 0.0
             }
-        )
+            label = getString(R.string.label_text_glyph)
+            isExtruded = true
+            isDrawnWhenOccluded = true
+            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+            setStyle(pinConfiguration {
+                setGlyph(glyphText)
+                scale = 1.2f
+                backgroundColor = Color.BLUE
+                borderColor = Color.GREEN
+            })
+        })
     }
 ```
 
@@ -496,6 +514,9 @@ Add the following function below `addMarkers`:
 
 Let's highlight the Palace grounds. A flat polygon is okay, but a 3D volume is better.
 
+> **[!NOTE] Native Extrusion vs. Custom 3D Prisms**
+> `PolygonOptions` supports native extrusion out of the box via `extruded = true` (paired with `AltitudeMode.RELATIVE_TO_GROUND` and a non-zero vertex `altitude`, plus optional `innerPaths` for interior holes). In this step, we also demonstrate how to construct an explicit 6-face prism (`extrudePolygon` in `Utilities.kt`) when you want individual control over top, bottom, and wall faces.
+
 ### Extrusion Algorithm
 Open `Utilities.kt` to review the `extrudePolygon` helper function. We can "extrude" a flat shape by:
 1.  Taking the base coordinates.
@@ -504,7 +525,7 @@ Open `Utilities.kt` to review the `extrudePolygon` helper function. We can "extr
 
 ```kotlin
 // Define the base (ground) shape of Iolani Palace.
-// Uses the constant defined in companion object
+// Uses the constant defined in HonoluluData.kt
 val palaceBaseFace = IOLANI_PALACE_GEO.windowed(2, 2).map { 
      latLngAltitude { latitude = it[0]; longitude = it[1]; altitude = 0.0 }
 }.let { points -> points + points.first() }
@@ -605,20 +626,11 @@ activePolylines.add(map.addPolyline(
         path = listOf(IOLANI_PALACE, WAIKIKI)
         strokeWidth = 10.0
         strokeColor = Color.BLUE
+        altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+        geodesic = true
+        drawsOccludedSegments = true
     }
 ))
-
-// Jump the camera to see the full path
-map.setCamera(camera {
-    center = latLngAltitude {
-        latitude = 21.2893
-        longitude = -157.8441
-        altitude = 0.0
-    }
-    heading = 0.0
-    tilt = 0.0
-    range = 8000.0
-})
 ```
 
 ---
@@ -638,8 +650,14 @@ val balloon = map.addModel(
             longitude = WAIKIKI.longitude
             altitude = 20.0 // Floating above the beach
         }
-        url = "https://.../balloon.glb"
-        scale = vector3D { x = 5.0; y = 5.0; z = 5.0 } // Make it big!
+        altitudeMode = AltitudeMode.ABSOLUTE
+        orientation = orientation {
+            heading = 0.0
+            tilt = 0.0
+            roll = 0.0
+        }
+        url = BALLOON_MODEL_URL
+        scale = vector3D { x = BALLOON_SCALE; y = BALLOON_SCALE; z = BALLOON_SCALE } // Make it big!
     }
 )
 ```
@@ -649,9 +667,10 @@ And ensuring it's clickable:
 ```kotlin
 balloon.setClickListener {
     lifecycleScope.launch(Dispatchers.Main) {
-        Toast.makeText(this@MainActivity, "Clicked the Balloon!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this@MainActivity, getString(R.string.clicked_the_balloon), Toast.LENGTH_SHORT).show()
     }
 }
+```
 
 <!-- TODO: Add screenshot here.
      Subject: "The Balloon"
@@ -662,35 +681,43 @@ balloon.setClickListener {
 
 ## 10. Popovers (Info Windows)
 
-Markers are great, but sometimes you need to show more information. **Popovers** are 2D views that "stick" to a 3D location. Unlike Markers, they always face the camera and can contain any Android View (button, text, image, etc.).
+Markers are great, but sometimes you need to show more information. **Popovers** are 2D views that "stick" to a 3D location or marker. Unlike Markers, they always face the camera and can contain any Android View (button, text, image, etc.).
 
 ### Creating a Popover
 
-In this example, we will attach a "Hello World" message to the Iolani Palace marker.
+In this example, we will attach a popover message directly to the Iolani Palace marker (`positionAnchor = palaceMarker`).
 
-1.  **Create the View**: First, we create a standard Android `TextView` programmatically.
-2.  **Configure the Popover**: We use `popoverOptions` to define its anchor point and style.
+1.  **Add the Anchor Marker**: Place a marker at `IOLANI_PALACE`.
+2.  **Create the View**: Create a standard Android `TextView` programmatically.
+3.  **Configure the Popover**: Use `popoverOptions` to anchor the popover to `palaceMarker` and style it.
 
 ```kotlin
     private fun setupPopover(map: GoogleMap3D) {
         resetMap()
 
-        // 9.1. Create a simple text view for the popover content
+        // 10.1. Add a marker to serve as a visual anchor reference
+        val palaceMarker = map.addMarker(
+            markerOptions {
+                position = IOLANI_PALACE
+                label = getString(R.string.label_polygon)
+                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                isExtruded = true
+            }
+        ) ?: return
+        activeMarkers.add(palaceMarker)
+
+        // 10.2. Create a simple text view for the popover content
         // In a real app, you could inflate this from XML using layoutInflater
-        val textView = TextView(this).apply {
-            text = "Welcome to Iolani Palace!\nA symbol of Hawaiian sovereignty."
+        val textView = TextView(this@MainActivity).apply {
+            text = getString(R.string.toast_palace)
             setPadding(32, 16, 32, 16)
             setTextColor(Color.BLACK)
             setBackgroundColor(Color.WHITE)
         }
 
-        // 9.2. Add a Popover attached to the same location
+        // 10.3. Add a Popover attached to the marker
         val popover = map.addPopover(popoverOptions {
-            positionAnchor = latLngAltitude {
-                latitude = IOLANI_PALACE.latitude
-                longitude = IOLANI_PALACE.longitude
-                altitude = 10.0
-            }
+            positionAnchor = palaceMarker
             altitudeMode = AltitudeMode.RELATIVE_TO_MESH
             content = textView
             autoCloseEnabled = true // Close when user clicks elsewhere
@@ -710,7 +737,10 @@ In this example, we will attach a "Hello World" message to the Iolani Palace mar
         // Track it
         activePopovers.add(popover)
         
-        // Show immediately for demo purposes
+        // 10.4. Show popover on marker click (and show immediately for demo purposes)
+        palaceMarker.setClickListener {
+            popover.show()
+        }
         popover.show()
     }
 ```
@@ -729,8 +759,8 @@ Popovers bridge the gap between the 3D world and 2D information. They are perfec
 
 Let's spread our wings and explore the whole island! In this step, we'll scatter markers across Oahu's most famous landmarks and animate the camera flying point-to-point. 
 
-1. Add the `btn_tour` and `btn_clear` buttons to your `activity_main.xml` layout, next to the other buttons.
-2. In `MainActivity.kt`, add the geographic constants for the landmarks to the `companion object`.
+1. Verify that the `btn_tour` and `btn_clear` buttons are present in your `activity_main.xml` layout, next to the other buttons.
+2. Verify that the geographic constants for the landmarks are defined in `HonoluluData.kt`.
 3. Add a helper function `flyTour` to orchestrate the flight:
 
 ```kotlin
@@ -798,11 +828,11 @@ Prefer **Jetpack Compose** over XML? The Maps 3D SDK is View-based, but is a per
 
 We have included a full reference implementation in `Map3DComposeActivity.kt` (in the solution code). Here is a complete guide to recreating it.
 
-### 1. Configure Options
-First, define how the map should initialize.
+### 1. Configure `Map3DInitConfig`
+First, define how the map should initialize using `Map3DInitConfig.create().copy(...)`.
 
 ```kotlin
-val map3DOptions = Map3DOptions(
+val map3DConfig: Map3DInitConfig = Map3DInitConfig.create().copy(
     centerLat = HONOLULU.latitude,
     centerLng = HONOLULU.longitude,
     centerAlt = 1000.0,
@@ -824,7 +854,7 @@ First, we need to bridge the gap between Compose and the View system using `Andr
 @Composable
 fun Map3DContainer(
     modifier: Modifier = Modifier,
-    options: Map3DOptions
+    config: Map3DInitConfig
 ) {
     // State to hold the map controller
     var googleMap by remember { mutableStateOf<GoogleMap3D?>(null) }
@@ -834,7 +864,7 @@ fun Map3DContainer(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
                 // TODO: Initialize View
-                Map3DView(context, options) 
+                Map3DView(context, config) 
             }
         )
     }
@@ -847,9 +877,10 @@ The `factory` lambda is called *once* to create the View. We must manually initi
 
 ```kotlin
 factory = { context ->
-    Map3DView(context, options).apply {
-        // Manually call onCreate. In a real app, wire this to LifecycleOwner.
+    Map3DView(context, config).apply {
+        // Manually call onCreate and onResume. In a real app, wire this to LifecycleOwner.
         onCreate(null)
+        onResume()
     }
 },
 ```
@@ -876,11 +907,12 @@ update = { view ->
 
 #### 2.4 Cleanup (`onRelease`)
 
-To prevent memory leaks, we must destroy the view when the Composable is removed from the screen.
+To prevent memory leaks, we must pause and destroy the view when the Composable is removed from the screen.
 
 ```kotlin
 onRelease = { view -> 
     googleMap = null
+    view.onPause()
     view.onDestroy() 
 }
 ```
@@ -901,38 +933,42 @@ Button(
     enabled = googleMap != null && animationJob == null,
     onClick = {
         animationJob?.cancel()
-        animationJob = coroutineScope.launch {
-            // 1. Fly to Honolulu
-            googleMap?.flyCameraTo(flyToOptions {
-                endCamera = camera {
-                    center = HONOLULU
-                    tilt = 45.0
-                    range = 20000.0
-                }
-                durationInMillis = 2000L
-            })
-            googleMap?.let { awaitCameraAnimation(it) }
+        googleMap?.let { map ->
+            animationJob = coroutineScope.launch {
+                // 1. Fly to Honolulu
+                map.awaitCameraAnimation(
+                    flyToOptions {
+                        endCamera = camera {
+                            center = HONOLULU
+                            tilt = 45.0
+                            range = 20_000.0
+                        }
+                        durationInMillis = 2000L
+                    }
+                )
 
-            // 2. Orbit
-            googleMap?.flyCameraAround(flyAroundOptions {
-                center = camera {
-                    center = HONOLULU
-                    tilt = 45.0
-                    range = 20000.0
-                }
-                rounds = 1.0
-                durationInMillis = 5000L
-            })
-            googleMap?.let { awaitCameraAnimation(it) }
-            
-            animationJob = null
+                // 2. Orbit
+                map.awaitCameraAnimation(
+                    flyAroundOptions {
+                        center = camera {
+                            center = HONOLULU
+                            tilt = 45.0
+                            range = 20_000.0
+                        }
+                        rounds = 1.0
+                        durationInMillis = 5000L
+                    }
+                )
+                
+                animationJob = null
+            }
         }
     },
     modifier = Modifier
         .align(Alignment.BottomCenter)
         .padding(bottom = 32.dp)
 ) {
-    Text("Fly to Honolulu")
+    Text(stringResource(R.string.fly_to_honolulu))
 }
 ```
 
@@ -948,7 +984,7 @@ class Map3DComposeActivity : ComponentActivity() {
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 Map3DContainer(
                     modifier = Modifier.padding(innerPadding),
-                    options = map3DOptions
+                    config = map3DConfig
                 )
             }
         }
@@ -972,8 +1008,15 @@ Mahalo for completing the **Aloha Explorer** codelab! You’ve gone from a empty
 
 **You learned how to:**
 *   Manage the `Map3DView` lifecycle.
-*   Control the camera with Coroutines.
-*   Master `AltitudeMode` for perfect placement.
-*   Import and click 3D Models.
+*   Control the camera with Coroutines (`awaitCameraAnimation` and `awaitMapSteady`).
+*   Master all four `AltitudeMode` values (`ABSOLUTE`, `RELATIVE_TO_GROUND`, `CLAMP_TO_GROUND`, and `RELATIVE_TO_MESH`) for accurate 3D placement.
+*   Customize markers, extrude 3D polygons, draw geodesic polylines, load 3D glTF models, and anchor popovers.
+
+**More Maps 3D SDK Features to Explore Next:**
+*   **Map Modes & Color Schemes**: Switch dynamically between `Map3DMode.HYBRID`, `Map3DMode.SATELLITE`, and `Map3DMode.ROADMAP` via `googleMap3D.setMapMode(...)`, and apply light/dark themes via `googleMap3D.setColorScheme(Map3DColorScheme.DARK)`.
+*   **Built-in 3D Camera UI Controls**: Configure on-screen zoom, tilt, rotate, pan, and compass controls via `googleMap3D.getUiControlSettings()?.setUiControlsPlacement(...)`.
+*   **Place & Map Click Handling**: Handle taps on 3D map places and terrain using `googleMap3D.setMap3DClickListener { event: Map3DClickEvent -> ... }` (inspecting `event.placeId` and `event.location`).
+*   **Camera Restrictions & Field of View**: Constrain user navigation with `googleMap3D.setCameraRestriction(cameraRestriction { minAltitude = ...; maxAltitude = ...; bounds = ... })` and tune perspective with `camera { fov = ... }`.
+*   **Cloud Map Styling & Localization**: Apply custom Cloud Map IDs (`mapId` in `Map3DInitConfig` or `app:mapId` in XML) and runtime language/region localization via `googleMap3D.setLocale(localeOptions { ... })`.
 
 **The world is no longer flat—go build something amazing!**

@@ -2,7 +2,6 @@ package com.example.alohaexplorer
 
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -69,7 +68,6 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     // clicks buttons multiple times.  We do this in the activity for simplicity, but recommend
     // tracking state in a view model.
 
-    // TODO: handle rotation bug... :/
     private val activeMarkers = mutableListOf<Marker>()
     private val activePolygons = mutableListOf<Polygon>()
     private val activePolylines = mutableListOf<Polyline>()
@@ -121,9 +119,20 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     }
 
     private fun setupPopover(map: GoogleMap3D) {
-        clearMap()
+        resetMap()
 
-        // 9.1. Create a simple text view for the popover content
+        // 10.1. Add a marker to serve as a visual anchor reference
+        val palaceMarker = map.addMarker(
+            markerOptions {
+                position = IOLANI_PALACE
+                label = getString(R.string.label_polygon)
+                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                isExtruded = true
+            }
+        ) ?: return
+        activeMarkers.add(palaceMarker)
+
+        // 10.2. Create a simple text view for the popover content
         val textView = TextView(this@MainActivity).apply {
             text = getString(R.string.toast_palace)
             setPadding(32, 16, 32, 16)
@@ -131,13 +140,9 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             setBackgroundColor(Color.WHITE)
         }
 
-        // 9.2. Add a Popover attached to the same location
+        // 10.3. Add a Popover attached to the marker
         val popover = map.addPopover(popoverOptions {
-            positionAnchor = latLngAltitude {
-                latitude = IOLANI_PALACE.latitude
-                longitude = IOLANI_PALACE.longitude
-                altitude = 10.0
-            }
+            positionAnchor = palaceMarker
             altitudeMode = AltitudeMode.RELATIVE_TO_MESH
             content = textView
             autoCloseEnabled = true // Close when user clicks elsewhere
@@ -157,7 +162,10 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         // Track it
         activePopovers.add(popover)
 
-        // Show immediately for demo purposes
+        // 10.4. Show popover on marker click (and show immediately for demo purposes)
+        palaceMarker.setClickListener {
+            popover.show()
+        }
         popover.show()
     }
 
@@ -165,6 +173,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val locations = listOf(
             HONOLULU to "Honolulu",
             DIAMOND_HEAD to "Diamond Head",
+            HANAUMA_BAY to "Hanauma Bay",
             KOKO_HEAD to "Koko Head",
             LANIKAI_BEACH to "Lanikai Beach",
             MOUNT_KAALA to "Mount Ka'ala",
@@ -172,7 +181,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         )
         
         // Add all markers for the tour
-        clearMap()
+        resetMap()
         locations.forEach { (location, name) ->
             activeMarkers.add(map.addMarker(
                 markerOptions {
@@ -196,12 +205,13 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             flyCameraToAndWait(
                 map,
                 camera,
-                duration = 3.seconds)
+                duration = 3.seconds
+            )
 
-            // Wait for the scene to load
-            awaitMapSteady(map)
+            // Wait for the scene to load (with a 5-second timeout so it never hangs)
+            map.awaitMapSteady(5.seconds)
 
-            map.flyCameraAround(
+            map.awaitCameraAnimation(
                 flyAroundOptions {
                     center = camera
                     rounds = 1.0
@@ -234,8 +244,9 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val flyDuration = 5.seconds
         val orbitDuration = 10.seconds
         
-        map.flyCameraTo(
-             // **FlyToOptions**: Configures how the camera moves.
+        // Fly to Honolulu and wait for the animation to finish
+        map.awaitCameraAnimation(
+            // **FlyToOptions**: Configures how the camera moves.
             flyToOptions {
                 endCamera = camera {
                     center = HONOLULU
@@ -246,25 +257,23 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 durationInMillis = flyDuration.inWholeMilliseconds
             }
         )
-        // Wait for the animation to finish
-        awaitCameraAnimation(map)
-        awaitMapSteady(map) // Wait for tiles to load and settle
+        map.awaitMapSteady(5.seconds) // Wait for tiles to load and settle
         
-        map.flyCameraAround(
+        // Orbit around Honolulu and wait for the animation to finish
+        map.awaitCameraAnimation(
             flyAroundOptions {
                 // **FlyAroundOptions**: Orbits around a specific point.
                 // We reuse the target parameters to be precise, or could read map.camera
                 center = camera {
                     center = HONOLULU
                     tilt = 45.0
-                    range = 20000.0
+                    range = 20_000.0
                     heading = 0.0
                 }
                 rounds = 1.0 // One full circle
                 durationInMillis = orbitDuration.inWholeMilliseconds
             }
         )
-        awaitCameraAnimation(map)
     }
 
     /**
@@ -272,7 +281,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
      * We iterate through our tracking lists and call .remove() on each object.
      * This is crucial to avoid "leaking" objects on the map if the user clicks buttons repeatedly.
      */
-    private fun clearMap() {
+    private fun resetMap() {
         activeMarkers.forEach { it.remove() }
         activeMarkers.clear()
 
@@ -290,10 +299,10 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     }
 
     private fun addPolygon(map: GoogleMap3D) {
-        clearMap()
+        resetMap()
 
         // Define the base (ground) shape of Iolani Palace.
-        // Take the four corners around the place and build a rectangle around the base
+        // Uses the constant defined in HonoluluData.kt
         val palaceBaseFace = IOLANI_PALACE_GEO.windowed(2, 2).map {
             latLngAltitude { latitude = it[0]; longitude = it[1]; altitude = 0.0 }
         }.let { points -> points + points.first() }
@@ -316,7 +325,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
                 // Remember the polygon for clean up
                 activePolygons.add(face)
 
-                // 6.1. Tapping the Turf
+                // 7.1. Tapping the Turf
                 // Add click listener to each face
                 face.setClickListener {
                     lifecycleScope.launch(Dispatchers.Main) {
@@ -332,21 +341,24 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     }
 
     private fun setupPolylines(map: GoogleMap3D) {
-        clearMap()
+        resetMap()
 
-        // 7. Polylines
+        // 8. Polylines
         // Draw path to Waikiki
         activePolylines.add(map.addPolyline(
             polylineOptions {
                 path = listOf(IOLANI_PALACE, WAIKIKI)
                 strokeWidth = 10.0
                 strokeColor = Color.BLUE
+                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                geodesic = true
+                drawsOccludedSegments = true
             }
         ))
     }
 
     private fun setupBalloon(map: GoogleMap3D) {
-        clearMap()
+        resetMap()
 
         // Add "Balloon" Model (glTF)
         // Models are external 3D assets.
@@ -406,7 +418,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
      * Junior Dev Tip: Understanding `AltitudeMode` is key to placing objects correctly.
      */
     private fun addMarkers(map: GoogleMap3D) {
-        clearMap()
+        resetMap()
 
         // 4.1. ABSOLUTE: Altitude is relative to the WGS84 ellipsoid (rough sea level).
         //    Good for aircraft, satellites, or data visualizations that ignore terrain.
@@ -449,12 +461,26 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             isDrawnWhenOccluded = true
             isExtruded = true
         })
+
+        // 4.4. RELATIVE_TO_MESH: Altitude is relative to the 3D mesh (buildings/trees).
+        //    Ideal for placing markers on or above rooftops.
+        addClickableMarker(map, markerOptions {
+            position = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude
+                longitude = IOLANI_PALACE.longitude - 0.001
+                altitude = 10.0 // 10m above the 3D mesh surface
+            }
+            altitudeMode = AltitudeMode.RELATIVE_TO_MESH
+            label = getString(R.string.label_relative_mesh)
+            isDrawnWhenOccluded = true
+            isExtruded = true
+        })
     }
 
     private fun addCustomMarkers(map: GoogleMap3D) {
-        clearMap()
+        resetMap()
 
-        // 4.4. Styled Pin
+        // 5.1. Styled Pin
         addClickableMarker(map, markerOptions {
             position = latLngAltitude {
                 latitude = IOLANI_PALACE.latitude
@@ -470,7 +496,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             })
         })
 
-        // 4.5. Image Glyph (Hibiscus)
+        // 5.2. Image Glyph (Hibiscus)
         addClickableMarker(map, markerOptions {
             position = latLngAltitude {
                 latitude = IOLANI_PALACE.latitude
@@ -484,7 +510,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             setStyle(ImageView(R.drawable.hibiscus))
         })
 
-        // 4.6. Text Glyph
+        // 5.3. Text Glyph
         val glyphText = Glyph.fromColor(Color.YELLOW).apply {
             setText("🌸")
         }
@@ -553,7 +579,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             currentAnimationJob?.cancel()
             // "Launch" starts a new coroutine.
             currentAnimationJob = lifecycleScope.launch {
-                clearMap()
+                resetMap()
                 flyToHonolulu(map)
             }
         }
@@ -615,17 +641,17 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
         findViewById<Button>(R.id.btn_clear).setOnClickListener {
             currentAnimationJob?.cancel()
-            clearMap()
+            resetMap()
         }
     }
 
     private suspend fun flyCameraToAndWait(map: GoogleMap3D, camera: Camera, duration: Duration = 2.seconds) {
-        map.flyCameraTo(options = flyToOptions {
-            endCamera = camera
-            durationInMillis = duration.inWholeMilliseconds
-        })
-
-        awaitCameraAnimation(map)
+        map.awaitCameraAnimation(
+            flyToOptions {
+                endCamera = camera
+                durationInMillis = duration.inWholeMilliseconds
+            }
+        )
     }
 
 }

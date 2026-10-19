@@ -22,7 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.maps3d.GoogleMap3D
-import com.google.android.gms.maps3d.Map3DOptions
+import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.Map3DView
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.Map3DMode
@@ -36,8 +36,7 @@ import kotlinx.coroutines.launch
  * Configure the initial state of the 3D Map.
  * This global configuration ensures the map starts where we want it (High above Honolulu).
  */
-val map3DOptions = Map3DOptions(
-    defaultUiDisabled = true,
+val map3DConfig: Map3DInitConfig = Map3DInitConfig.create().copy(
     centerLat = HONOLULU.latitude,
     centerLng = HONOLULU.longitude,
     centerAlt = 1000.0,
@@ -65,7 +64,7 @@ class Map3DComposeActivity : ComponentActivity() {
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 Map3DContainer(
                     modifier = Modifier.padding(innerPadding),
-                    options = map3DOptions
+                    config = map3DConfig
                 )
             }
         }
@@ -81,7 +80,7 @@ class Map3DComposeActivity : ComponentActivity() {
 @Composable
 fun Map3DContainer(
     modifier: Modifier = Modifier,
-    options: Map3DOptions,
+    config: Map3DInitConfig,
 ) {
     // We use a state holder to remember the GoogleMap3D object once it's initialized.
     // This allows us to interact with the GoogleMap3D object later in response to UI events.
@@ -105,11 +104,12 @@ fun Map3DContainer(
             // factory: Called ONCE to create the View.
             // We initialize the specific Map3DView here.
             factory = { context ->
-                Map3DView(context, options).apply {
+                Map3DView(context, config).apply {
                     // We must manually call the lifecycle methods on the View.
                     // Ideally, you would wire this up to the LifecycleOwner, but for
-                    // simplicity in this codelab, we just call onCreate here.
+                    // simplicity in this codelab, we call onCreate and onResume here.
                     onCreate(null)
+                    onResume()
                 }
             },
             
@@ -135,6 +135,7 @@ fun Map3DContainer(
             // We clean up the View here to prevent memory leaks and stop the renderer.
             onRelease = { view ->
                 googleMap = null
+                view.onPause()
                 view.onDestroy()
             }
         )
@@ -149,30 +150,30 @@ fun Map3DContainer(
                 googleMap?.let { googleMap ->
                     // Launch a coroutine to run our cinematic sequence
                     animationJob = coroutineScope.launch {
-                        googleMap.flyCameraTo(flyToOptions {
-                            endCamera = camera {
-                                center = HONOLULU
-                                tilt = 45.0
-                                range = 20000.0
+                        // 1. Fly to Honolulu and wait for the fly-to to finish
+                        googleMap.awaitCameraAnimation(
+                            flyToOptions {
+                                endCamera = camera {
+                                    center = HONOLULU
+                                    tilt = 45.0
+                                    range = 20_000.0
+                                }
+                                durationInMillis = 2000L
                             }
-                            durationInMillis = 2000L
-                        })
+                        )
 
-                        // Wait for the fly-to to finish
-                        awaitCameraAnimation(googleMap)
-
-                        googleMap.flyCameraAround(flyAroundOptions {
-                            center = camera {
-                                center = HONOLULU
-                                tilt = 45.0
-                                range = 20000.0
+                        // 2. Orbit and wait for the fly-around to finish
+                        googleMap.awaitCameraAnimation(
+                            flyAroundOptions {
+                                center = camera {
+                                    center = HONOLULU
+                                    tilt = 45.0
+                                    range = 20_000.0
+                                }
+                                rounds = 1.0
+                                durationInMillis = 5000L
                             }
-                            rounds = 1.0
-                            durationInMillis = 5000L
-                        })
-
-                        // Wait for the fly-around to finish
-                        awaitCameraAnimation(googleMap)
+                        )
                         animationJob = null
                     }
                 }

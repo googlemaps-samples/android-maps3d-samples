@@ -5,6 +5,7 @@
     <string name="label_absolute">Absolute (100m)</string>
     <string name="label_relative">Relative (50m)</string>
     <string name="label_clamped">Clamped</string>
+    <string name="label_relative_mesh">Relative to Mesh (10m)</string>
     <string name="label_styled_pin">Styled Pin</string>
     <string name="label_text_glyph">Text Glyph</string>
     <string name="label_hibiscus">Hibiscus Marker</string>

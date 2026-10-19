@@ -9,12 +9,6 @@ android {
     namespace = "com.example.alohaexplorer"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
-    buildFeatures {
-        viewBinding = true
-        compose = true
-        buildConfig = true
-    }
-
     defaultConfig {
         applicationId = "com.example.alohaexplorer"
         minSdk = libs.versions.minSdk.get().toInt()

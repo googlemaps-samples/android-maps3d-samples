@@ -10,10 +10,9 @@ import kotlinx.coroutines.Job
 /**
  * This is the main entry point for the "Aloha Explorer" 3D Maps Codelab.
  */
-class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DViewReadyCallback */ {
+class MainActivity : AppCompatActivity() /*, TODO: Step 1.2 - Implement OnMap3DViewReadyCallback */ {
 
-    private var fortuneIndex = 0
-    // TODO: Step 1.3 - Define Map3DView and GoogleMap3D
+    // TODO: Step 1.2 - Define Map3DView and GoogleMap3D
     // private lateinit var map3DView: Map3DView
     // private var googleMap3D: GoogleMap3D? = null
 
@@ -26,9 +25,7 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
 
     private var currentAnimationJob: Job? = null
 
-    companion object {
-        // Constants are now located in HonoluluData.kt
-    }
+    // Constants are located in HonoluluData.kt
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Fix: Ensure the bundle can deserialize the Maps 3D SDK's Camera Parcelable on rotation
@@ -56,17 +53,18 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
             insets
         }
 
-        // TODO: Step 1.3 - Initialize Map3DView
-        
-        // TODO: Step 1.4 - Map Lifecycle
-
-        // TODO: Step 1.5 - Configure the UI buttons
-        // setupButtons()
+        // TODO: Step 1.3 - Initialize Map3DView and Map Lifecycle
     }
 
     // TODO: Step 1.3 - Implement onMap3DViewReady
     /*
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
+        this@MainActivity.googleMap3D = googleMap3D
+
+        lifecycleScope.launch {
+            startFromGlobalView(googleMap3D)
+            setupButtons(googleMap3D)
+        }
     }
     */
 
@@ -136,6 +134,8 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
         // 2. Add RELATIVE_TO_GROUND Marker
         
         // 3. Add CLAMP_TO_GROUND Marker
+
+        // 4. Add RELATIVE_TO_MESH Marker
     }
     */
 
@@ -293,12 +293,13 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.3 - Implement OnMap3DV
     }
 
     private suspend fun flyCameraToAndWait(map: GoogleMap3D, camera: Camera, duration: Duration = 2.seconds) {
-        map.flyCameraTo(options = flyToOptions {
-            endCamera = camera
-            durationInMillis = duration.inWholeMilliseconds
-        })
         // See Utilities.kt
-        awaitCameraAnimation(map)
+        map.awaitCameraAnimation(
+            flyToOptions {
+                endCamera = camera
+                durationInMillis = duration.inWholeMilliseconds
+            }
+        )
     }
     */
 

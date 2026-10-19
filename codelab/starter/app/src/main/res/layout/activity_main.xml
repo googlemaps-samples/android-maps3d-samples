@@ -85,14 +85,32 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/btn_models" />
-            
+                android:text="@string/btn_models"
+                android:layout_marginEnd="8dp" />
+
             <Button
                 android:id="@+id/btn_show_popovers"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/btn_popovers" />
+                android:text="@string/btn_popovers"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btn_tour"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_tour"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btn_clear"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_clear"
+                android:textColor="@android:color/holo_red_dark" />
 
         </LinearLayout>
     </HorizontalScrollView>

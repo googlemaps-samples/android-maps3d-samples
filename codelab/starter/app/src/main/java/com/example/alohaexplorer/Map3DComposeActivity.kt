@@ -18,34 +18,32 @@ import androidx.activity.enableEdgeToEdge
 // import androidx.compose.runtime.setValue
 // import androidx.compose.ui.Alignment
 // import androidx.compose.ui.Modifier
+// import androidx.compose.ui.res.stringResource
 // import androidx.compose.ui.unit.dp
 // import androidx.compose.ui.viewinterop.AndroidView
 // import com.google.android.gms.maps3d.GoogleMap3D
-// import com.google.android.gms.maps3d.Map3DMode
-// import com.google.android.gms.maps3d.Map3DOptions
+// import com.google.android.gms.maps3d.Map3DInitConfig
 // import com.google.android.gms.maps3d.Map3DView
 // import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
+// import com.google.android.gms.maps3d.model.Map3DMode
 // import com.google.android.gms.maps3d.model.camera
 // import com.google.android.gms.maps3d.model.flyAroundOptions
 // import com.google.android.gms.maps3d.model.flyToOptions
-// import com.google.android.gms.maps3d.model.latLngAltitude
 // import kotlinx.coroutines.Job
 // import kotlinx.coroutines.launch
-// import kotlinx.coroutines.suspendCancellableCoroutine
-// import kotlin.coroutines.resume
 
 // TODO: Step 12 - Jetpack Compose
 /*
-class Map3DComposeActivity : ComponentActivity() {
+val map3DConfig: Map3DInitConfig = Map3DInitConfig.create().copy(
+    centerLat = HONOLULU.latitude,
+    centerLng = HONOLULU.longitude,
+    centerAlt = 1000.0,
+    heading = 0.0,
+    range = 10_000_000.0, // Start from space
+    mapMode = Map3DMode.HYBRID
+)
 
-    private val map3DOptions = Map3DOptions(
-        centerLat = MainActivity.HONOLULU.latitude,
-        centerLng = MainActivity.HONOLULU.longitude,
-        centerAlt = 1000.0,
-        heading = 0.0,
-        range = 10_000_000.0, // Start from space
-        mapMode = Map3DMode.HYBRID
-    )
+class Map3DComposeActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +52,7 @@ class Map3DComposeActivity : ComponentActivity() {
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 Map3DContainer(
                     modifier = Modifier.padding(innerPadding),
-                    options = map3DOptions
+                    config = map3DConfig
                 )
             }
         }
@@ -64,7 +62,7 @@ class Map3DComposeActivity : ComponentActivity() {
 @Composable
 fun Map3DContainer(
     modifier: Modifier = Modifier,
-    options: Map3DOptions
+    config: Map3DInitConfig
 ) {
     // State to hold the map controller
     var googleMap by remember { mutableStateOf<GoogleMap3D?>(null) }
@@ -77,9 +75,10 @@ fun Map3DContainer(
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
-                 Map3DView(context, options).apply {
-                    // Manually call onCreate. In a real app, wire this to LifecycleOwner.
+                 Map3DView(context, config).apply {
+                    // Manually call onCreate and onResume. In a real app, wire this to LifecycleOwner.
                     onCreate(null)
+                    onResume()
                  }
             },
             update = { view ->
@@ -87,7 +86,6 @@ fun Map3DContainer(
                     object : OnMap3DViewReadyCallback {
                         override fun onMap3DViewReady(map3D: GoogleMap3D) {
                             googleMap = map3D
-                            // No automatic startFromGlobalView here, we wait for button click
                         }
                         override fun onError(e: Exception) {
                             googleMap = null
@@ -95,11 +93,10 @@ fun Map3DContainer(
                         }
                     }
                 )
-                // Forward Log lifecycle events if possible, or use a LifecycleEventObserver container
-                view.onResume()
             },
             onRelease = { view -> 
                 googleMap = null
+                view.onPause()
                 view.onDestroy() 
             }
         )
@@ -113,27 +110,29 @@ fun Map3DContainer(
                     val map = googleMap ?: return@launch
                     
                     // 1. Fly to Honolulu
-                    map.flyCameraTo(flyToOptions {
-                        endCamera = camera {
-                            center = MainActivity.HONOLULU
-                            tilt = 45.0
-                            range = 20000.0
+                    map.awaitCameraAnimation(
+                        flyToOptions {
+                            endCamera = camera {
+                                center = HONOLULU
+                                tilt = 45.0
+                                range = 20_000.0
+                            }
+                            durationInMillis = 2000L
                         }
-                        durationInMillis = 2000L
-                    })
-                    awaitCameraAnimation(map)
+                    )
 
                     // 2. Orbit
-                    map.flyCameraAround(flyAroundOptions {
-                        center = camera {
-                            center = MainActivity.HONOLULU
-                            tilt = 45.0
-                            range = 20000.0
+                    map.awaitCameraAnimation(
+                        flyAroundOptions {
+                            center = camera {
+                                center = HONOLULU
+                                tilt = 45.0
+                                range = 20_000.0
+                            }
+                            rounds = 1.0
+                            durationInMillis = 5000L
                         }
-                        rounds = 1.0
-                        durationInMillis = 5000L
-                    })
-                    awaitCameraAnimation(map)
+                    )
                     
                     animationJob = null
                 }
@@ -142,21 +141,8 @@ fun Map3DContainer(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 32.dp)
         ) {
-            Text("Fly to Honolulu")
+            Text(stringResource(R.string.fly_to_honolulu))
         }
-    }
-}
-
-// Re-use our robust await function, or copy it here if utils are separate
-private suspend fun awaitCameraAnimation(map: GoogleMap3D) = suspendCancellableCoroutine { continuation ->
-    map.setCameraAnimationEndListener {
-        map.setCameraAnimationEndListener(null) // Cleanup
-        if (continuation.isActive) {
-            continuation.resume(Unit)
-        }
-    }
-    continuation.invokeOnCancellation {
-        map.setCameraAnimationEndListener(null)
     }
 }
 */
