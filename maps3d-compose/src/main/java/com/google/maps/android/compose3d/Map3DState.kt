@@ -105,8 +105,7 @@ class Map3DState {
             if (existing != null) {
                 val (oldConfig, marker) = existing
                 if (oldConfig != config) {
-                    // Config changed, remove previous marker and recreate with updated options
-                    marker.remove()
+                    // Config changed, update by adding again with same ID!
                     val newMarker = createMarker(map, config, marker.id)
                     if (newMarker != null) {
                         markers[config.key] = Pair(config, newMarker)

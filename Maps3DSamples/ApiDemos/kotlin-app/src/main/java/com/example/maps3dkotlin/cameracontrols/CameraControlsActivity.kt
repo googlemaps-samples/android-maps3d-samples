@@ -55,7 +55,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
-    override val TAG = this::class.java.simpleName
+    override val TAG: String = this::class.java.simpleName
 
     @Map3DMode
     override val defaultMapMode: Int = Map3DMode.SATELLITE
@@ -123,14 +123,7 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
 
         findViewById<MaterialButton>(R.id.toggle_restriction).setOnClickListener { view ->
             val button = view as MaterialButton
-
-            if (button.isChecked) {
-                button.text = getText(R.string.camera_remove_restriction)
-                googleMap3D?.setCameraRestriction(nycCameraRestriction)
-            } else {
-                button.text = getText(R.string.camera_activate_restriction)
-                googleMap3D?.setCameraRestriction(null)
-            }
+            setCameraRestricted(button.isChecked)
         }
 
         findViewById<MaterialButton>(R.id.show_restriction).setOnClickListener { view ->
@@ -255,8 +248,11 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         googleMap3D.setOnMapSteadyListener { isSteady ->
             if (isSteady) {
                 map3DView.contentDescription = "MapSteady"
+                // Workaround: RELATIVE_TO_MESH samples 3D tile height at marker creation time and
+                // does not re-sample as new tiles stream in. Re-add once onMapSteady confirms loaded tiles.
                 if (needsMeshBeaconRefresh) {
                     needsMeshBeaconRefresh = false
+                    beaconRefreshToken++
                     runOnUiThread { upsertActiveBeacon() }
                 }
             }
@@ -271,6 +267,15 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         googleMap3D.setCameraChangedListener { cameraPosition ->
             updateCameraPosition(cameraPosition)
         }
+    }
+
+    private fun setCameraRestricted(enabled: Boolean) {
+        val button = findViewById<MaterialButton?>(R.id.toggle_restriction)
+        button?.isChecked = enabled
+        button?.text = getText(
+            if (enabled) R.string.camera_remove_restriction else R.string.camera_activate_restriction,
+        )
+        googleMap3D?.setCameraRestriction(if (enabled) nycCameraRestriction else null)
     }
 
     private fun getBeaconLabel(isMountain: Boolean, @AltitudeMode mode: Int): String {
@@ -298,7 +303,7 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
             isMountain = isMountain,
             label = getBeaconLabel(isMountain, selectedAltitudeMode),
             mode = selectedAltitudeMode,
-            refreshToken = ++beaconRefreshToken,
+            refreshToken = beaconRefreshToken,
         )
         activeBeaconMarker?.remove()
         activeBeaconMarker = map.addMarker(beaconOptions)
@@ -316,22 +321,16 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
 
         // Clear NYC bounds restriction if active so the camera can travel to Washington State
         if (isMountain) {
-            val restrictionButton = findViewById<MaterialButton?>(R.id.toggle_restriction)
-            if (restrictionButton?.isChecked == true) {
-                restrictionButton.isChecked = false
-                restrictionButton.text = getText(R.string.camera_activate_restriction)
-                map.setCameraRestriction(null)
-            }
+            setCameraRestricted(false)
         }
 
         needsMeshBeaconRefresh = (selectedAltitudeMode == AltitudeMode.RELATIVE_TO_MESH)
         upsertActiveBeacon()
 
         val targetCam = targetCamera(isMountain = isMountain, mode = selectedAltitudeMode)
-        map.setCameraAnimationEndListener {
-            map.setCameraAnimationEndListener(null)
-            runOnUiThread { upsertActiveBeacon() }
-            if (isMountain) {
+        if (isMountain) {
+            map.setCameraAnimationEndListener {
+                map.setCameraAnimationEndListener(null)
                 map.flyCameraAround(
                     flyAroundOptions {
                         center = targetCam
@@ -340,6 +339,8 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
                     }
                 )
             }
+        } else {
+            map.setCameraAnimationEndListener(null)
         }
         map.flyCameraTo(
             flyToOptions {
@@ -366,12 +367,15 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         )
     }
 
-    private fun getAltitudeModeLabel(@AltitudeMode mode: Int): String =
+    // Camera does not support CLAMP_TO_GROUND; it uses RELATIVE_TO_GROUND at 0m clearance.
+    private fun getCameraAltitudeModeLabel(@AltitudeMode mode: Int): String =
         when (mode) {
-            AltitudeMode.RELATIVE_TO_GROUND -> getString(R.string.altitude_mode_relative_to_ground_code)
-            AltitudeMode.RELATIVE_TO_MESH -> getString(R.string.altitude_mode_relative_to_mesh_code)
-            AltitudeMode.CLAMP_TO_GROUND -> getString(R.string.altitude_mode_clamp_to_ground_code)
-            else -> getString(R.string.altitude_mode_absolute_code)
+            AltitudeMode.RELATIVE_TO_GROUND, AltitudeMode.CLAMP_TO_GROUND ->
+                getString(R.string.altitude_mode_relative_to_ground_code)
+            AltitudeMode.RELATIVE_TO_MESH ->
+                getString(R.string.altitude_mode_relative_to_mesh_code)
+            else ->
+                getString(R.string.altitude_mode_absolute_code)
         }
 
     /**
@@ -413,7 +417,7 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
                 getString(
                     R.string.camera_target_and_altitude_mode_format,
                     getString(activeTargetResId),
-                    getAltitudeModeLabel(selectedAltitudeMode),
+                    getCameraAltitudeModeLabel(selectedAltitudeMode),
                 )
             )
         }

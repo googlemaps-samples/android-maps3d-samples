@@ -190,6 +190,11 @@ public final class DataModel {
      *   <li>{@link AltitudeMode#CLAMP_TO_GROUND}: {@link #CLAMP_ALTITUDE_METERS} (0m) clamped flat onto the ground surface.</li>
      *   <li>{@link AltitudeMode#ABSOLUTE}: {@code absoluteAltitudeMeters} anchored at fixed EGM96 sea-level elevation.</li>
      * </ul>
+     *
+     * @param refreshToken Incremented only when {@link AltitudeMode#RELATIVE_TO_MESH} is active and
+     *   {@code onMapSteady} fires after a flight. The Maps 3D SDK evaluates {@code RELATIVE_TO_MESH}
+     *   height against loaded 3D tiles at marker creation time and does not re-sample once high-LOD
+     *   destination tiles stream in, so a new ID forces re-creation against the loaded mesh.
      */
     @NonNull
     public static MarkerOptions buildTargetBeaconOptions(
@@ -218,6 +223,7 @@ public final class DataModel {
             beaconAltitudeMode = AltitudeMode.RELATIVE_TO_GROUND;
         }
         MarkerOptions options = new MarkerOptions();
+        // Include refreshToken so RELATIVE_TO_MESH markers re-sample after 3D tiles load.
         options.setId(markerIdPrefix + "_" + mode + "_" + refreshToken);
         options.setPosition(new LatLngAltitude(
                 latitude,
@@ -266,11 +272,6 @@ public final class DataModel {
     }
 
     @NonNull
-    public static MarkerOptions getEsbBeaconOptions(@NonNull String label, @AltitudeMode int mode) {
-        return getEsbBeaconOptions(label, mode, 0);
-    }
-
-    @NonNull
     public static MarkerOptions getEsbBeaconOptions(
             @NonNull String label,
             @AltitudeMode int mode,
@@ -297,11 +298,6 @@ public final class DataModel {
                 MT_RAINIER_BASE_RANGE_METERS,
                 mode
         );
-    }
-
-    @NonNull
-    public static MarkerOptions getMtRainierBeaconOptions(@NonNull String label, @AltitudeMode int mode) {
-        return getMtRainierBeaconOptions(label, mode, 0);
     }
 
     @NonNull

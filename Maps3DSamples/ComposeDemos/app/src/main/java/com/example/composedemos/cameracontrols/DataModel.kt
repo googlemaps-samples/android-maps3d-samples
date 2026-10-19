@@ -182,6 +182,11 @@ object DataModel {
      * - [AltitudeMode.RELATIVE_TO_MESH]: [RELATIVE_MESH_CLEARANCE_METERS] (+360m) extruded above the 3D mesh (DSM).
      * - [AltitudeMode.CLAMP_TO_GROUND]: [CLAMP_ALTITUDE_METERS] (0m) clamped flat onto the ground surface.
      * - [AltitudeMode.ABSOLUTE]: [absoluteAltitudeMeters] anchored at fixed EGM96 sea-level elevation.
+     *
+     * @param refreshToken Incremented only when [AltitudeMode.RELATIVE_TO_MESH] is active and
+     *   `onMapSteady` fires after a flight. The Maps 3D SDK evaluates `RELATIVE_TO_MESH` height
+     *   against loaded 3D tiles at marker creation time and does not re-sample once high-LOD
+     *   destination tiles stream in, so a new key forces re-creation against the loaded mesh.
      */
     fun buildTargetBeaconConfig(
         markerIdPrefix: String,
@@ -207,6 +212,7 @@ object DataModel {
                 RELATIVE_CLEARANCE_METERS to AltitudeMode.RELATIVE_TO_GROUND
         }
         return MarkerConfig(
+            // Include refreshToken so RELATIVE_TO_MESH markers re-sample after 3D tiles load.
             key = "${markerIdPrefix}_${mode}_$refreshToken",
             position = latLngAltitude {
                 this.latitude = latitude

@@ -132,18 +132,7 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
 
         findViewById(R.id.toggle_restriction).setOnClickListener(view -> {
             MaterialButton button = (MaterialButton) view;
-
-            if (button.isChecked()) {
-                button.setText(getText(R.string.camera_remove_restriction));
-                if (googleMap3D != null) {
-                    googleMap3D.setCameraRestriction(DataModel.nycCameraRestriction);
-                }
-            } else {
-                button.setText(getText(R.string.camera_activate_restriction));
-                if (googleMap3D != null) {
-                    googleMap3D.setCameraRestriction(null);
-                }
-            }
+            setCameraRestricted(button.isChecked());
         });
 
         findViewById(R.id.show_restriction).setOnClickListener(view -> {
@@ -281,8 +270,11 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
                 if (map3DView != null) {
                     map3DView.setContentDescription("MapSteady");
                 }
+                // Workaround: RELATIVE_TO_MESH samples 3D tile height at marker creation time and
+                // does not re-sample as new tiles stream in. Re-add once onMapSteady confirms loaded tiles.
                 if (needsMeshBeaconRefresh) {
                     needsMeshBeaconRefresh = false;
+                    beaconRefreshToken++;
                     runOnUiThread(this::upsertActiveBeacon);
                 }
             }
@@ -293,6 +285,19 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
         }
 
         googleMap3D.setCameraChangedListener(this::updateCameraPosition);
+    }
+
+    private void setCameraRestricted(boolean enabled) {
+        MaterialButton button = findViewById(R.id.toggle_restriction);
+        if (button != null) {
+            button.setChecked(enabled);
+            button.setText(getText(
+                    enabled ? R.string.camera_remove_restriction : R.string.camera_activate_restriction
+            ));
+        }
+        if (googleMap3D != null) {
+            googleMap3D.setCameraRestriction(enabled ? DataModel.nycCameraRestriction : null);
+        }
     }
 
     @NonNull
@@ -323,7 +328,7 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
                 isMountain,
                 getBeaconLabel(isMountain, selectedAltitudeMode),
                 selectedAltitudeMode,
-                ++beaconRefreshToken
+                beaconRefreshToken
         );
         if (activeBeaconMarker != null) {
             activeBeaconMarker.remove();
@@ -345,23 +350,17 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
 
         // Clear NYC bounds restriction if active so the camera can travel to Washington State
         if (isMountain) {
-            MaterialButton restrictionButton = findViewById(R.id.toggle_restriction);
-            if (restrictionButton != null && restrictionButton.isChecked()) {
-                restrictionButton.setChecked(false);
-                restrictionButton.setText(getText(R.string.camera_activate_restriction));
-                googleMap3D.setCameraRestriction(null);
-            }
+            setCameraRestricted(false);
         }
 
         needsMeshBeaconRefresh = (selectedAltitudeMode == AltitudeMode.RELATIVE_TO_MESH);
         upsertActiveBeacon();
 
         Camera targetCamera = DataModel.getTargetCamera(isMountain, selectedAltitudeMode);
-        googleMap3D.setCameraAnimationEndListener(() -> {
-            if (googleMap3D != null) {
-                googleMap3D.setCameraAnimationEndListener(null);
-                runOnUiThread(this::upsertActiveBeacon);
-                if (isMountain) {
+        if (isMountain) {
+            googleMap3D.setCameraAnimationEndListener(() -> {
+                if (googleMap3D != null) {
+                    googleMap3D.setCameraAnimationEndListener(null);
                     FlyAroundOptions orbitOptions = new FlyAroundOptions(
                             targetCamera,
                             DataModel.MT_RAINIER_ORBIT_DURATION_MS,
@@ -369,8 +368,10 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
                     );
                     googleMap3D.flyCameraAround(orbitOptions);
                 }
-            }
-        });
+            });
+        } else {
+            googleMap3D.setCameraAnimationEndListener(null);
+        }
 
         long durationMs = isMountain
                 ? DataModel.MT_RAINIER_FLY_TO_DURATION_MS
@@ -394,14 +395,13 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
         googleMap3D.flyCameraAround(flyAroundOptions);
     }
 
+    // Camera does not support CLAMP_TO_GROUND; it uses RELATIVE_TO_GROUND at 0m clearance.
     @NonNull
-    private String getAltitudeModeLabel(@AltitudeMode int mode) {
-        if (mode == AltitudeMode.RELATIVE_TO_GROUND) {
+    private String getCameraAltitudeModeLabel(@AltitudeMode int mode) {
+        if (mode == AltitudeMode.RELATIVE_TO_GROUND || mode == AltitudeMode.CLAMP_TO_GROUND) {
             return getString(R.string.altitude_mode_relative_to_ground_code);
         } else if (mode == AltitudeMode.RELATIVE_TO_MESH) {
             return getString(R.string.altitude_mode_relative_to_mesh_code);
-        } else if (mode == AltitudeMode.CLAMP_TO_GROUND) {
-            return getString(R.string.altitude_mode_clamp_to_ground_code);
         } else {
             return getString(R.string.altitude_mode_absolute_code);
         }
@@ -429,7 +429,7 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
         String targetAndMode = getString(
                 R.string.camera_target_and_altitude_mode_format,
                 getString(activeTargetResId),
-                getAltitudeModeLabel(selectedAltitudeMode)
+                getCameraAltitudeModeLabel(selectedAltitudeMode)
         );
         String cameraStateString = baseCameraState + "\n" + targetAndMode;
 
