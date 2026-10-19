@@ -21,18 +21,27 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.maps3djava.R;
-
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.ViewHolder> {
+
+    private static final Set<Integer> TWO_D_SAMPLE_TITLES =
+            new HashSet<>(
+                    Arrays.asList(
+                            com.example.maps3dcommon.R.string.feature_title_store_locator,
+                            com.example.maps3dcommon.R.string.feature_title_routes_api,
+                            com.example.maps3dcommon.R.string.feature_title_roadmap_mode,
+                            com.example.maps3dcommon.R.string.feature_title_cloud_styling,
+                            com.example.maps3dcommon.R.string.feature_title_data_visualization));
 
     public interface OnItemClickListener {
         void onClick(Class<?> activityClass, @StringRes int titleResId);
@@ -54,8 +63,17 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
             title = view.findViewById(R.id.sample_item_title);
         }
 
-        void bind(Map.Entry<Integer, Class<?>> entry, Context context, OnItemClickListener listener) {
-            title.setText(context.getString(entry.getKey()));
+        @android.annotation.SuppressLint("SetTextI18n")
+        void bind(
+                Map.Entry<Integer, Class<?>> entry,
+                Context context,
+                OnItemClickListener listener) {
+            String baseTitle = context.getString(entry.getKey());
+            if (TWO_D_SAMPLE_TITLES.contains(entry.getKey())) {
+                title.setText(baseTitle + "  [2D / ROADMAP]");
+            } else {
+                title.setText(baseTitle);
+            }
             boolean enabled = entry.getValue() != null;
             title.setEnabled(enabled);
             title.setAlpha(enabled ? 1f : 0.5f);
@@ -65,9 +83,11 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
 
     @NonNull
     @Override
-    public SampleListAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.sample_list_item, parent, false);
+    public SampleListAdapter.ViewHolder onCreateViewHolder(
+            @NonNull ViewGroup parent, int viewType) {
+        View view =
+                LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.sample_list_item, parent, false);
         return new ViewHolder(view);
     }
 

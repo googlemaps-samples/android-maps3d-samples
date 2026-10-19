@@ -57,6 +57,20 @@
                 />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_toggle_2d_3d"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minHeight="36dp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp"
+                android:text="@string/store_locator_switch_to_3d"
+                android:textSize="12sp"
+                app:cornerRadius="18dp"
+                />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_collapse"
                 style="?attr/materialIconButtonStyle"
                 android:layout_width="36dp"

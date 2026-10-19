@@ -27,6 +27,7 @@ import android.widget.RadioGroup
 import androidx.cardview.widget.CardView
 import com.example.maps3d.common.Map3DSettings
 import com.example.maps3d.common.Map3DSettingsController
+import com.example.maps3d.common.copy
 import com.example.maps3d.common.toValidCamera
 import com.example.maps3dcommon.R
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
@@ -35,6 +36,7 @@ import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
@@ -77,12 +79,12 @@ class RoadmapModeActivity : SampleBaseActivity() {
       center = latLngAltitude {
         latitude = SF_LOCATION.latitude
         longitude = SF_LOCATION.longitude
-        altitude = 250.0
+        altitude = 0.0
       }
       heading = 45.0
-      tilt = 65.0
+      tilt = if (Map3DSettingsController.shared.getSettings().mapMode != Map3DMode.ROADMAP) 65.0 else 0.0
       roll = 0.0
-      range = 800.0
+      range = 2500.0
     }.toValidCamera()
 
   // --- UI Elements ---
@@ -91,12 +93,15 @@ class RoadmapModeActivity : SampleBaseActivity() {
   private var cardHeader: View? = null
   private var cardContent: View? = null
   private var btnCollapse: MaterialButton? = null
+  private var btnToggle2D3D: MaterialButton? = null
   private var rgMapMode: RadioGroup? = null
 
   // --- State Variables ---
 
   private var isCollapsed = false
   private var isSyncingRadioGroup = false
+  private var is3DMode = false
+  private var hasSyncedInitialMode = false
 
   // --- Handlers & Runnables ---
 
@@ -113,6 +118,8 @@ class RoadmapModeActivity : SampleBaseActivity() {
   // --- Lifecycle & Initialization ---
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    Map3DSettingsController.shared.onSampleEntered(defaultMapMode)
+    is3DMode = Map3DSettingsController.shared.getSettings().mapMode != Map3DMode.ROADMAP
     super.onCreate(savedInstanceState)
 
     // Hide base pill scroll view as this activity manages its own overlay card
@@ -140,6 +147,20 @@ class RoadmapModeActivity : SampleBaseActivity() {
     rgMapMode = findViewById(R.id.rg_map_mode)
     cardContent = rgMapMode
     btnCollapse = findViewById(R.id.btn_collapse)
+    btnToggle2D3D = findViewById(R.id.btn_toggle_2d_3d)
+    updateToggle2D3DButtonText()
+
+    btnToggle2D3D?.setOnClickListener {
+      val nextMode = if (is3DMode) Map3DMode.ROADMAP else Map3DMode.HYBRID
+      is3DMode = nextMode != Map3DMode.ROADMAP
+      updateToggle2D3DButtonText()
+      Map3DSettingsController.shared.setMapMode(nextMode)
+      onQuickSettingsChanged(Map3DSettingsController.shared.settings.value)
+      googleMap3D?.let { map ->
+        Map3DSettingsController.shared.settings.value.applyTo(map)
+        applyCameraPerspective(map, is3DMode)
+      }
+    }
 
     btnCollapse?.setOnClickListener {
       if (isCollapsed) expandControls() else collapseControls()
@@ -157,9 +178,12 @@ class RoadmapModeActivity : SampleBaseActivity() {
         R.id.rb_satellite -> Map3DMode.SATELLITE
         else -> return@setOnCheckedChangeListener
       }
+      is3DMode = mode != Map3DMode.ROADMAP
+      updateToggle2D3DButtonText()
       Map3DSettingsController.shared.setMapMode(mode)
       googleMap3D?.let { map ->
         Map3DSettingsController.shared.settings.value.applyTo(map)
+        applyCameraPerspective(map, is3DMode)
       }
     }
 
@@ -167,7 +191,31 @@ class RoadmapModeActivity : SampleBaseActivity() {
     fadeHandler.postDelayed(fadeOutRunnable, 3000L)
   }
 
+  private fun updateToggle2D3DButtonText() {
+    btnToggle2D3D?.setText(
+      if (is3DMode) R.string.store_locator_switch_to_2d else R.string.store_locator_switch_to_3d
+    )
+  }
+
+  private fun applyCameraPerspective(map: GoogleMap3D, target3D: Boolean) {
+    val targetTilt = if (target3D) 65.0 else 0.0
+    map.flyCameraTo(
+      flyToOptions {
+        endCamera = initialCamera.copy(tilt = targetTilt)
+        durationInMillis = 900
+      }
+    )
+  }
+
   override fun onQuickSettingsChanged(settings: Map3DSettings) {
+    val nextIs3D = settings.mapMode != Map3DMode.ROADMAP
+    val modeChangedAfterInit = hasSyncedInitialMode && is3DMode != nextIs3D
+    hasSyncedInitialMode = true
+    is3DMode = nextIs3D
+    updateToggle2D3DButtonText()
+    if (modeChangedAfterInit) {
+      googleMap3D?.let { applyCameraPerspective(it, is3DMode) }
+    }
     val targetId = when (settings.mapMode) {
       Map3DMode.ROADMAP -> R.id.rb_roadmap
       Map3DMode.HYBRID -> R.id.rb_hybrid

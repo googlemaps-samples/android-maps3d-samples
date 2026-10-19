@@ -136,6 +136,7 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         findViewById<RadioGroup>(R.id.map_mode_radio_group).setOnCheckedChangeListener { _, checkedId ->
             if (isSyncingRadioGroup) return@setOnCheckedChangeListener
             val mode = when (checkedId) {
+                R.id.map_mode_roadmap -> Map3DMode.ROADMAP
                 R.id.map_mode_hybrid -> Map3DMode.HYBRID
                 R.id.map_mode_satellite -> Map3DMode.SATELLITE
                 else -> return@setOnCheckedChangeListener
@@ -143,6 +144,7 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
             Map3DSettingsController.shared.setMapMode(mode)
             googleMap3D?.let { map ->
                 Map3DSettingsController.shared.settings.value.applyTo(map)
+                applyMapModeCameraPerspective(map, mode)
             }
         }
 
@@ -165,6 +167,7 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
     override fun onQuickSettingsChanged(settings: Map3DSettings) {
         val group = findViewById<RadioGroup?>(R.id.map_mode_radio_group) ?: return
         val targetId = when (settings.mapMode) {
+            Map3DMode.ROADMAP -> R.id.map_mode_roadmap
             Map3DMode.HYBRID -> R.id.map_mode_hybrid
             Map3DMode.SATELLITE -> R.id.map_mode_satellite
             else -> View.NO_ID
@@ -178,6 +181,24 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
             }
             isSyncingRadioGroup = false
         }
+    }
+
+    private fun applyMapModeCameraPerspective(map: GoogleMap3D, @Map3DMode mode: Int) {
+        val currentCamera = map.getCamera()?.toValidCamera() ?: return
+        val currentTilt = currentCamera.tilt ?: 67.0
+        val targetTilt = if (mode == Map3DMode.ROADMAP) {
+            0.0
+        } else if (currentTilt <= 30.0) {
+            67.0
+        } else {
+            return
+        }
+        map.flyCameraTo(
+            flyToOptions {
+                endCamera = currentCamera.copy(tilt = targetTilt)
+                durationInMillis = 900
+            }
+        )
     }
 
     private fun updateRollSliderLabel(value: Float) {

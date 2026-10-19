@@ -19,7 +19,6 @@ package com.example.maps3djava.mainactivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -29,65 +28,70 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.maps3dcommon.R;
+import com.example.maps3djava.advancedcameraanimation.AdvancedCameraAnimationActivity;
+import com.example.maps3djava.animatingmodels.AnimatingModelsActivity;
 import com.example.maps3djava.cameracontrols.CameraControlsActivity;
+import com.example.maps3djava.camerarestrictions.CameraRestrictionsActivity;
+import com.example.maps3djava.cloudstyling.CloudStylingActivity;
+import com.example.maps3djava.datavisualization.DataVisualizationActivity;
+import com.example.maps3djava.fieldofview.FieldOfViewActivity;
+import com.example.maps3djava.flightsimulator.FlightSimulatorActivity;
 import com.example.maps3djava.hellomap.HelloMapActivity;
+import com.example.maps3djava.mapinteractions.MapInteractionsActivity;
+import com.example.maps3djava.mapslocalization.MapsLocalizationActivity;
 import com.example.maps3djava.markers.MarkersActivity;
 import com.example.maps3djava.models.ModelsActivity;
-import com.example.maps3djava.polygons.PolygonsActivity;
-import com.example.maps3djava.polylines.PolylinesActivity;
-import com.example.maps3djava.camerarestrictions.CameraRestrictionsActivity;
-import com.example.maps3djava.flightsimulator.FlightSimulatorActivity;
-import com.example.maps3djava.routes.RoutesActivity;
 import com.example.maps3djava.pathfollowing.PathFollowingActivity;
 import com.example.maps3djava.pathstyling.PathStylingActivity;
-import com.example.maps3djava.animatingmodels.AnimatingModelsActivity;
-import com.example.maps3djava.placesearch.PlaceSearchActivity;
-import com.example.maps3djava.placeautocomplete.PlaceAutocompleteActivity;
 import com.example.maps3djava.placedetails.PlaceDetailsActivity;
-import com.example.maps3djava.advancedcameraanimation.AdvancedCameraAnimationActivity;
-import com.example.maps3djava.datavisualization.DataVisualizationActivity;
-import com.example.maps3djava.cloudstyling.CloudStylingActivity;
-import com.example.maps3djava.roadmapmode.RoadmapModeActivity;
-import com.example.maps3djava.fieldofview.FieldOfViewActivity;
+import com.example.maps3djava.polygons.PolygonsActivity;
+import com.example.maps3djava.polylines.PolylinesActivity;
+import com.example.maps3djava.popovers.PopoversActivity;
 import com.example.maps3djava.projection3d.Projection3DActivity;
-import com.example.maps3djava.mapslocalization.MapsLocalizationActivity;
+import com.example.maps3djava.roadmapmode.RoadmapModeActivity;
+import com.example.maps3djava.routes.RoutesActivity;
+import com.example.maps3djava.storelocator.StoreLocatorActivity;
 import com.example.maps3djava.uicontrols.UiControlsActivity;
 import com.google.android.material.appbar.MaterialToolbar;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final Map<Integer, Class<?>> sampleActivities = new LinkedHashMap<>() {{
-        put(R.string.feature_title_overview_hello_3d_map, HelloMapActivity.class);
-        put(R.string.feature_title_camera_controls, CameraControlsActivity.class);
-        put(R.string.feature_title_markers, MarkersActivity.class);
-        put(R.string.feature_title_polygons, PolygonsActivity.class);
-        put(R.string.feature_title_polylines, PolylinesActivity.class);
-        put(R.string.feature_title_3d_models, ModelsActivity.class);
-        put(R.string.feature_title_popovers, com.example.maps3djava.popovers.PopoversActivity.class);
-        put(R.string.feature_title_map_interactions, com.example.maps3djava.mapinteractions.MapInteractionsActivity.class);
-        put(R.string.feature_title_camera_restrictions, CameraRestrictionsActivity.class);
-        put(R.string.feature_title_flight_simulator, FlightSimulatorActivity.class);
-        put(R.string.feature_title_routes_api, RoutesActivity.class);
-        put(R.string.feature_title_path_following, PathFollowingActivity.class);
-        put(R.string.feature_title_path_styling, PathStylingActivity.class);
-        put(R.string.feature_title_animating_models, AnimatingModelsActivity.class);
-        put(R.string.feature_title_place_search, PlaceSearchActivity.class);
-        put(R.string.feature_title_place_autocomplete, PlaceAutocompleteActivity.class);
-        put(R.string.feature_title_place_details, PlaceDetailsActivity.class);
-        put(R.string.feature_title_advanced_camera_animation, AdvancedCameraAnimationActivity.class);
-        put(R.string.feature_title_data_visualization, DataVisualizationActivity.class);
-        put(R.string.feature_title_cloud_styling, CloudStylingActivity.class);
-        put(R.string.feature_title_roadmap_mode, RoadmapModeActivity.class);
-        put(R.string.feature_title_ui_controls, UiControlsActivity.class);
-        put(R.string.feature_title_field_of_view, FieldOfViewActivity.class);
-        put(R.string.feature_title_projection_3d, Projection3DActivity.class);
-        put(R.string.feature_title_maps_localization, MapsLocalizationActivity.class);
-    }};
+    private final Map<Integer, Class<?>> sampleActivities =
+            new LinkedHashMap<>() {
+                {
+                    // Canonical 2D / Abstract Map Samples (Map3DMode.ROADMAP & Hybrid Overlays)
+                    put(R.string.feature_title_store_locator, StoreLocatorActivity.class);
+                    put(R.string.feature_title_routes_api, RoutesActivity.class);
+                    put(R.string.feature_title_roadmap_mode, RoadmapModeActivity.class);
+                    put(R.string.feature_title_cloud_styling, CloudStylingActivity.class);
+                    put(R.string.feature_title_data_visualization, DataVisualizationActivity.class);
+                    put(R.string.feature_title_ui_controls, UiControlsActivity.class);
+                    // Core 3D Maps SDK Samples
+                    put(R.string.feature_title_overview_hello_3d_map, HelloMapActivity.class);
+                    put(R.string.feature_title_camera_controls, CameraControlsActivity.class);
+                    put(R.string.feature_title_markers, MarkersActivity.class);
+                    put(R.string.feature_title_polygons, PolygonsActivity.class);
+                    put(R.string.feature_title_polylines, PolylinesActivity.class);
+                    put(R.string.feature_title_3d_models, ModelsActivity.class);
+                    put(R.string.feature_title_popovers, PopoversActivity.class);
+                    put(R.string.feature_title_map_interactions, MapInteractionsActivity.class);
+                    put(R.string.feature_title_camera_restrictions, CameraRestrictionsActivity.class);
+                    put(R.string.feature_title_flight_simulator, FlightSimulatorActivity.class);
+                    put(R.string.feature_title_path_following, PathFollowingActivity.class);
+                    put(R.string.feature_title_path_styling, PathStylingActivity.class);
+                    put(R.string.feature_title_animating_models, AnimatingModelsActivity.class);
+                    put(R.string.feature_title_place_details, PlaceDetailsActivity.class);
+                    put(
+                            R.string.feature_title_advanced_camera_animation,
+                            AdvancedCameraAnimationActivity.class);
+                    put(R.string.feature_title_field_of_view, FieldOfViewActivity.class);
+                    put(R.string.feature_title_projection_3d, Projection3DActivity.class);
+                    put(R.string.feature_title_maps_localization, MapsLocalizationActivity.class);
+                }
+            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,20 +102,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(com.example.maps3djava.R.layout.main_activity);
 
         View contentContainer = findViewById(com.example.maps3djava.R.id.root_layout);
-        ViewCompat.setOnApplyWindowInsetsListener(contentContainer, (v, windowInsets) -> {
-            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            // Apply the insets as padding to the view.
-            // This will push the content down from behind the status bar and up from
-            // behind the navigation bar.
-            v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
-            // Return CONSUMED to signal that we've handled the insets.
-            return WindowInsetsCompat.CONSUMED;
-        });
+        ViewCompat.setOnApplyWindowInsetsListener(
+                contentContainer,
+                (v, windowInsets) -> {
+                    Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                    v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                    return WindowInsetsCompat.CONSUMED;
+                });
 
         RecyclerView recyclerView = findViewById(com.example.maps3djava.R.id.sample_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new SampleListAdapter(sampleActivities, this::onSampleClicked));
-        recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        recyclerView.addItemDecoration(
+                new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
         MaterialToolbar toolbar = findViewById(com.example.maps3djava.R.id.topAppBar);
         setSupportActionBar(toolbar);

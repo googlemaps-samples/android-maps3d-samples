@@ -25,6 +25,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,6 +35,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -44,11 +46,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -57,7 +61,10 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.maps3d.common.Map3DQuickSettingsWidget
 import com.example.maps3d.common.Map3DSessionTheme
+import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3d.common.rememberMap3DSessionSettings
+import com.example.maps3d.common.toValidCamera
+import com.example.maps3dcommon.R
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
@@ -101,35 +108,58 @@ fun DataVisualizationScreen() {
     val context = LocalContext.current
     var isMapSteady by remember { mutableStateOf(false) }
     var googleMap3DInstance by remember { mutableStateOf<GoogleMap3D?>(null) }
-    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.HYBRID)
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.ROADMAP)
+    val effectiveMapMode = settings.mapMode
     var currentFloodElevation by remember { mutableDoubleStateOf(10.0) }
     var isSimulating by remember { mutableStateOf(false) }
     var activePolygon by remember { mutableStateOf<Polygon?>(null) }
 
     val initialCamera: Camera = remember {
+        val initialMode = Map3DSettingsController.shared.getSettings().mapMode
         camera {
             center = latLngAltitude {
                 latitude = SF_FLOOD_CENTER.latitude
                 longitude = SF_FLOOD_CENTER.longitude
-                altitude = 120.0
+                altitude = 0.0
             }
             heading = 35.0
-            tilt = 64.0
-            range = 1200.0
-        }
+            tilt = if (initialMode == Map3DMode.ROADMAP) TILT_2D_ROADMAP else TILT_3D_HYBRID
+            range = 2200.0
+        }.toValidCamera()
+    }
+
+    val flyToModePerspective: (Int) -> Unit = { targetMode ->
+        val targetTilt = if (targetMode == Map3DMode.ROADMAP) TILT_2D_ROADMAP else TILT_3D_HYBRID
+        val updatedCamera = camera {
+            center = latLngAltitude {
+                latitude = SF_FLOOD_CENTER.latitude
+                longitude = SF_FLOOD_CENTER.longitude
+                altitude = 0.0
+            }
+            heading = 35.0
+            tilt = targetTilt
+            roll = 0.0
+            range = 2200.0
+        }.toValidCamera()
+        googleMap3DInstance?.flyCameraTo(
+            flyToOptions {
+                endCamera = updatedCamera
+                durationInMillis = 1_000L
+            },
+        )
     }
 
     // Coroutine loop for auto flood simulation animation
     LaunchedEffect(isSimulating) {
         if (isSimulating) {
-            if (currentFloodElevation >= 50.0) {
+            if (currentFloodElevation >= 100.0) {
                 currentFloodElevation = 0.0
             }
             while (isActive && isSimulating) {
                 var newElevation = currentFloodElevation + 0.2
                 newElevation = Math.round(newElevation * 10.0) / 10.0
-                if (newElevation >= 50.0) {
-                    currentFloodElevation = 50.0
+                if (newElevation >= 100.0) {
+                    currentFloodElevation = 100.0
                     isSimulating = false
                     break
                 }
@@ -138,6 +168,10 @@ fun DataVisualizationScreen() {
             }
         }
     }
+
+    val latestFloodToastMessage by rememberUpdatedState(
+        stringResource(R.string.flood_toast_format, currentFloodElevation),
+    )
 
     // Synchronize 3D extruded flood polygon whenever flood elevation or map instance updates
     LaunchedEffect(currentFloodElevation, googleMap3DInstance) {
@@ -166,7 +200,7 @@ fun DataVisualizationScreen() {
             setClickListener {
                 Toast.makeText(
                     context,
-                    String.format("San Francisco Waterfront - Water Level: +%.1f m", currentFloodElevation),
+                    latestFloodToastMessage,
                     Toast.LENGTH_SHORT,
                 ).show()
             }
@@ -180,16 +214,10 @@ fun DataVisualizationScreen() {
     ) {
         GoogleMap3D(
             camera = initialCamera,
-            mapMode = settings.mapMode,
+            mapMode = effectiveMapMode,
             modifier = Modifier.fillMaxSize(),
             onMapReady = { map ->
                 googleMap3DInstance = map
-                map.flyCameraTo(
-                    flyToOptions {
-                        endCamera = initialCamera
-                        durationInMillis = 1200
-                    },
-                )
             },
             onMapSteady = {
                 isMapSteady = true
@@ -205,7 +233,7 @@ fun DataVisualizationScreen() {
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
-                text = "Data Visualization (Flood Fill)",
+                text = stringResource(R.string.feature_title_data_visualization),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -226,11 +254,43 @@ fun DataVisualizationScreen() {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 val feet = currentFloodElevation * 3.28084
-                Text(
-                    text = String.format("Flood Elevation: +%.1f m (%.1f ft)", currentFloodElevation, feet),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(R.string.flood_elevation_format, currentFloodElevation, feet),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f),
+                    )
+
+                    FilledTonalButton(
+                        onClick = {
+                            val nextMode = if (effectiveMapMode == Map3DMode.ROADMAP) {
+                                Map3DMode.HYBRID
+                            } else {
+                                Map3DMode.ROADMAP
+                            }
+                            Map3DSettingsController.shared.setMapMode(nextMode)
+                            googleMap3DInstance?.setMapMode(nextMode)
+                            flyToModePerspective(nextMode)
+                        },
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                    ) {
+                        Text(
+                            text = stringResource(
+                                if (effectiveMapMode == Map3DMode.ROADMAP) {
+                                    R.string.store_locator_switch_to_3d
+                                } else {
+                                    R.string.store_locator_switch_to_2d
+                                },
+                            ),
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
+                }
 
                 val (badgeText, badgeColor, badgeBg) = when {
                     currentFloodElevation <= 2.0 -> Triple("🌊 Baseline Tide", Color(0xFF008800), Color(0x2000AA00))
@@ -262,9 +322,9 @@ fun DataVisualizationScreen() {
                         value = currentFloodElevation.toFloat(),
                         onValueChange = {
                             isSimulating = false
-                            currentFloodElevation = it.toDouble()
+                            currentFloodElevation = Math.round(it.toDouble() * 10.0) / 10.0
                         },
-                        valueRange = 0f..50f,
+                        valueRange = 0f..100f,
                         modifier = Modifier.weight(1f),
                     )
 
@@ -285,13 +345,18 @@ fun DataVisualizationScreen() {
                 .align(Alignment.TopEnd)
                 .statusBarsPadding()
                 .padding(top = 8.dp, end = 8.dp),
-            sampleDefaultMapMode = Map3DMode.HYBRID,
+            sampleDefaultMapMode = Map3DMode.ROADMAP,
             googleMap3D = googleMap3DInstance,
+            onSettingsChanged = { updatedSettings ->
+                flyToModePerspective(updatedSettings.mapMode)
+            },
         )
     }
 }
 
 private const val POLYGON_ID = "flood_zone_polygon"
+private const val TILT_2D_ROADMAP = 0.0
+private const val TILT_3D_HYBRID = 64.0
 
 private val SF_FLOOD_CENTER = LatLng(37.8025, -122.4030)
 

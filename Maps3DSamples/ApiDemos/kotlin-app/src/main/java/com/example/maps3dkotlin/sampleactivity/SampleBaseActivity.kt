@@ -135,9 +135,11 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
 
         // The awaitClose block runs when the collector is cancelled
         awaitClose {
-            // Remove the listener when the flow collection stops
-            Log.d(TAG, "Detaching CameraChangeListener")
-            googleMap3D?.setCameraChangedListener(null)
+            // Restore the base listener when the flow collection stops so getCamera() stays fresh
+            Log.d(TAG, "Restoring base CameraChangeListener")
+            googleMap3D?.setCameraChangedListener { cameraPosition ->
+                _currentCamera.value = cameraPosition
+            }
         }
     }
 
@@ -335,7 +337,6 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         isMapInitialized = true
         Log.d(TAG, "onMapReady called (guaranteed once)")
 
-        googleMap3D.setCamera(initialCamera)
         Map3DSettingsController.shared.onSampleEntered(defaultMapMode)
         val initialSettings = Map3DSettingsController.shared.settings.value
         initialSettings.applyTo(googleMap3D)
@@ -372,9 +373,22 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
         this.googleMap3D = googleMap3D
         Log.d(TAG, "onMap3DViewReady called")
-        Log.d(TAG, "Setting initial camera: " + initialCamera.toCameraString())
+
+        // Synchronize session mode first so initialCamera reads the active 2D/3D mode immediately
+        Map3DSettingsController.shared.onSampleEntered(defaultMapMode)
+        Map3DSettingsController.shared.settings.value.applyTo(googleMap3D)
+        val startCamera = initialCamera
+        Log.d(TAG, "Setting initial camera: " + startCamera.toCameraString())
+        googleMap3D.setCamera(startCamera)
+        _currentCamera.value = startCamera
+
+        // Always attach a base camera changed listener so googleMap3D.getCamera() never returns stale XML coordinates
+        googleMap3D.setCameraChangedListener { cameraPosition ->
+            _currentCamera.value = cameraPosition
+        }
+
         // Wire up the standardized listener
-        googleMap3D.setOnMapReadyListener { sceneReadiness->
+        googleMap3D.setOnMapReadyListener { sceneReadiness ->
             Log.w(TAG, "on map ready listener $sceneReadiness")
             googleMap3D.setOnMapReadyListener(null)
             onMapReady(googleMap3D)
@@ -387,9 +401,9 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
             }
         }
 
-        // Ensure onMapReady triggers even on delayed or reused fragments.
+        // Ensure onMapReady triggers promptly even when the SDK's process-wide onMapReadyListener has already fired
         lifecycleScope.launch {
-            delay(2000)
+            delay(300)
             onMapReady(googleMap3D)
         }
     }

@@ -224,6 +224,13 @@
             android:exported="true"
             />
 
+        <activity
+            android:name=".storelocator.StoreLocatorActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_store_locator"
+            android:exported="true"
+            />
+
     </application>
 
 </manifest>

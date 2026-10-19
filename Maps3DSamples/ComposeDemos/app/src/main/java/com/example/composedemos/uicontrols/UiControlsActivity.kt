@@ -135,7 +135,7 @@ class UiControlsActivity : ComponentActivity() {
 fun UiControlsScreen() {
     var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
     var isCollapsed by remember { mutableStateOf(false) }
-    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.ROADMAP)
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.HYBRID)
     val view = LocalView.current
 
     // Local state for UI controls showcase (directly controls SDK without polluting session settings)
@@ -414,7 +414,7 @@ fun UiControlsScreen() {
                 .align(Alignment.TopEnd)
                 .statusBarsPadding()
                 .padding(top = 8.dp, end = 8.dp),
-            sampleDefaultMapMode = Map3DMode.ROADMAP,
+            sampleDefaultMapMode = Map3DMode.HYBRID,
             googleMap3D = googleMap3D,
             uiControlsOverride = localUiControls,
         )

@@ -30,6 +30,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.lifecycle.lifecycleScope
+import com.example.maps3d.common.Map3DSettings
+import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3d.common.OahuRouteData
 import com.example.maps3d.common.RouteEngine
 import com.example.maps3d.common.toHeading
@@ -98,7 +100,7 @@ class RoutesActivity : SampleBaseActivity() {
           altitude = 0.0
         }
         heading = 38.6
-        tilt = 45.0
+        tilt = if (Map3DSettingsController.shared.getSettings().mapMode != Map3DMode.ROADMAP) 45.0 else 0.0
         range = 20000.0
       }.toValidCamera()
 
@@ -108,6 +110,7 @@ class RoutesActivity : SampleBaseActivity() {
   private var cardHeader: View? = null
   private var cardContent: View? = null
   private var btnCollapse: MaterialButton? = null
+  private var btnToggle2D3D: MaterialButton? = null
 
   private var btnPlayPause: MaterialButton? = null
   private var progressSlider: Slider? = null
@@ -129,6 +132,7 @@ class RoutesActivity : SampleBaseActivity() {
   private var isPlaying = false
   private var isUserScrubbing = false
   private var isCollapsed = false
+  private var is3DMode = false
 
   // --- Slider Parameters ---
 
@@ -154,6 +158,8 @@ class RoutesActivity : SampleBaseActivity() {
   // --- Lifecycle & Layout Setup ---
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    Map3DSettingsController.shared.onSampleEntered(defaultMapMode)
+    is3DMode = Map3DSettingsController.shared.getSettings().mapMode != Map3DMode.ROADMAP
     super.onCreate(savedInstanceState)
 
     // Hide base pill scroll view as this activity manages its own overlay card
@@ -169,6 +175,7 @@ class RoutesActivity : SampleBaseActivity() {
     }
 
     initViews()
+    updateToggle2D3DButtonText()
   }
 
   @SuppressLint("ClickableViewAccessibility")
@@ -177,6 +184,7 @@ class RoutesActivity : SampleBaseActivity() {
     cardHeader = findViewById(R.id.card_header)
     cardContent = findViewById(R.id.card_content)
     btnCollapse = findViewById(R.id.btn_collapse)
+    btnToggle2D3D = findViewById(R.id.btn_toggle_2d_3d)
 
     btnPlayPause = findViewById(R.id.btn_play_pause)
     progressSlider = findViewById(R.id.progress_slider)
@@ -186,6 +194,11 @@ class RoutesActivity : SampleBaseActivity() {
     speedSliderLabel = findViewById(R.id.speed_slider_label)
     headingSlider = findViewById(R.id.heading_slider)
     headingSliderLabel = findViewById(R.id.heading_slider_label)
+
+    btnToggle2D3D?.setOnClickListener {
+      resetFadeTimer()
+      toggle2D3DMapMode()
+    }
 
     btnCollapse?.setOnClickListener {
       if (isCollapsed) {
@@ -339,10 +352,35 @@ class RoutesActivity : SampleBaseActivity() {
     }
   }
 
+  private fun toggle2D3DMapMode() {
+    is3DMode = !is3DMode
+    val nextMode = if (is3DMode) Map3DMode.HYBRID else Map3DMode.ROADMAP
+    Map3DSettingsController.shared.setMapMode(nextMode)
+    googleMap3D?.setMapMode(nextMode)
+    updateToggle2D3DButtonText()
+    updateVehiclePositionAndCamera()
+  }
+
+  private fun updateToggle2D3DButtonText() {
+    btnToggle2D3D?.setText(
+        if (is3DMode) {
+          R.string.store_locator_switch_to_2d
+        } else {
+          R.string.store_locator_switch_to_3d
+        })
+  }
+
   // --- Map Readiness & Route Rendering ---
 
   @Map3DMode
-  override val defaultMapMode: Int = Map3DMode.SATELLITE
+  override val defaultMapMode: Int = Map3DMode.ROADMAP
+
+  override fun onQuickSettingsChanged(settings: Map3DSettings) {
+    super.onQuickSettingsChanged(settings)
+    is3DMode = settings.mapMode != Map3DMode.ROADMAP
+    updateToggle2D3DButtonText()
+    updateVehiclePositionAndCamera()
+  }
 
   override fun onMapReady(googleMap3D: GoogleMap3D) {
     super.onMapReady(googleMap3D)
@@ -496,6 +534,7 @@ class RoutesActivity : SampleBaseActivity() {
               })
     }
 
+    val targetTilt = if (is3DMode) 65.0 else 0.0
     googleMap3D?.setCamera(
         camera {
           center = latLngAltitude {
@@ -504,7 +543,7 @@ class RoutesActivity : SampleBaseActivity() {
             altitude = 0.0
           }
           heading = (posAndHeading.heading.toDouble() + yawOffset.toDouble()).toHeading()
-          tilt = 65.0
+          tilt = targetTilt
           range = cameraRange.toDouble()
         }.toValidCamera())
   }

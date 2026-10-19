@@ -303,21 +303,22 @@ fun CameraControlsScreen() {
                     }
                 }
 
-                // Row 3: Map Mode RadioGroup (Hybrid / Satellite)
+                // Row 3: Map Mode RadioGroup (Roadmap 2D / Hybrid / Satellite)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
                         .selectableGroup(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val modes = listOf(
+                        Map3DMode.ROADMAP to stringResource(CommonR.string.map_mode_roadmap),
                         Map3DMode.HYBRID to stringResource(CommonR.string.map_mode_hybrid),
                         Map3DMode.SATELLITE to stringResource(CommonR.string.map_mode_satellite),
                     )
                     modes.forEachIndexed { index, (modeValue, modeLabel) ->
                         if (index > 0) {
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                         }
                         Row(
                             modifier = Modifier
@@ -326,6 +327,7 @@ fun CameraControlsScreen() {
                                     selected = (selectedMapMode == modeValue),
                                     onClick = {
                                         Map3DSettingsController.shared.setMapMode(modeValue)
+                                        applyMapModeCameraPerspective(googleMap3D, modeValue)
                                     },
                                     role = Role.RadioButton,
                                 )
@@ -339,7 +341,7 @@ fun CameraControlsScreen() {
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = modeLabel,
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.bodySmall,
                             )
                         }
                     }
@@ -445,6 +447,28 @@ private fun flyAroundCurrentCenter(googleMap3D: GoogleMap3D?) {
             center = camera
             durationInMillis = 5_000
             rounds = 1.0
+        },
+    )
+}
+
+/**
+ * Smoothly transitions camera tilt between 2D perspective (0°) for [Map3DMode.ROADMAP]
+ * and 3D perspective (67°) for [Map3DMode.HYBRID] / [Map3DMode.SATELLITE].
+ */
+private fun applyMapModeCameraPerspective(googleMap3D: GoogleMap3D?, @Map3DMode mode: Int) {
+    val currentCamera = googleMap3D?.getCamera()?.toValidCamera() ?: return
+    val currentTilt = currentCamera.tilt ?: 67.0
+    val targetTilt = if (mode == Map3DMode.ROADMAP) {
+        0.0
+    } else if (currentTilt <= 30.0) {
+        67.0
+    } else {
+        return
+    }
+    googleMap3D.flyCameraTo(
+        flyToOptions {
+            endCamera = currentCamera.copy(tilt = targetTilt)
+            durationInMillis = 900
         },
     )
 }

@@ -112,7 +112,7 @@ public class UiControlsActivity extends SampleBaseActivity {
   @Override
   @Map3DMode
   protected int getDefaultMapMode() {
-    return Map3DMode.ROADMAP;
+    return Map3DMode.HYBRID;
   }
 
   @NonNull

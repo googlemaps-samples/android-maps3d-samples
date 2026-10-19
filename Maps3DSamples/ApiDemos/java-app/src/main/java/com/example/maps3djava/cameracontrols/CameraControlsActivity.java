@@ -152,7 +152,9 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
                 return;
             }
             int mode;
-            if (checkedId == R.id.map_mode_hybrid) {
+            if (checkedId == R.id.map_mode_roadmap) {
+                mode = Map3DMode.ROADMAP;
+            } else if (checkedId == R.id.map_mode_hybrid) {
                 mode = Map3DMode.HYBRID;
             } else if (checkedId == R.id.map_mode_satellite) {
                 mode = Map3DMode.SATELLITE;
@@ -162,6 +164,7 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
             Map3DSettingsController.getShared().setMapMode(mode);
             if (googleMap3D != null) {
                 Map3DSettingsController.getShared().getSettings().applyTo(googleMap3D);
+                applyMapModeCameraPerspective(googleMap3D, mode);
             }
         });
 
@@ -189,7 +192,9 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
         }
         int targetId = View.NO_ID;
         int mapMode = settings.getMapMode();
-        if (mapMode == Map3DMode.HYBRID) {
+        if (mapMode == Map3DMode.ROADMAP) {
+            targetId = R.id.map_mode_roadmap;
+        } else if (mapMode == Map3DMode.HYBRID) {
             targetId = R.id.map_mode_hybrid;
         } else if (mapMode == Map3DMode.SATELLITE) {
             targetId = R.id.map_mode_satellite;
@@ -203,6 +208,24 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
             }
             isSyncingRadioGroup = false;
         }
+    }
+
+    private void applyMapModeCameraPerspective(@NonNull GoogleMap3D map, @Map3DMode int mode) {
+        if (map.getCamera() == null) {
+            return;
+        }
+        Camera currentCamera = toValidCamera(map.getCamera());
+        double currentTilt = currentCamera.getTilt() != null ? currentCamera.getTilt() : 67.0;
+        double targetTilt;
+        if (mode == Map3DMode.ROADMAP) {
+            targetTilt = 0.0;
+        } else if (currentTilt <= 30.0) {
+            targetTilt = 67.0;
+        } else {
+            return;
+        }
+        currentCamera.setTilt(targetTilt);
+        map.flyCameraTo(new FlyToOptions(currentCamera, 900));
     }
 
     private void updateRollSliderLabel(float value) {

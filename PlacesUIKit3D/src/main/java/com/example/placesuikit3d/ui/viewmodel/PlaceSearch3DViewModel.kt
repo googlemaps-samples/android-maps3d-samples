@@ -25,6 +25,7 @@ import com.example.placesuikit3d.data.repository.PlacesRepository
 import com.example.placesuikit3d.data.repository.PlacesRepositoryImpl
 import com.example.placesuikit3d.utils.StringProvider
 import com.google.android.gms.maps3d.model.LatLngAltitude
+import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.libraries.places.compose.autocomplete.models.AutocompletePlace
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -52,6 +54,8 @@ class PlaceSearch3DViewModel @Inject constructor(
     private val _screenState = MutableStateFlow(
         PlaceSearch3DScreenState(
             selectedCategory = "🏛️ Landmarks",
+            is3DView = false,
+            mapMode = Map3DMode.ROADMAP,
             allMarkers = PlacesRepositoryImpl.getCuratedPlacesByCategory("🏛️ Landmarks"),
         ),
     )
@@ -71,11 +75,15 @@ class PlaceSearch3DViewModel @Inject constructor(
 
         if (defaultHotspot != null) {
             val markedPlaces = initialPlaces.map { it.copy(isSelected = it.id == defaultHotspot.id) }
-            val initialTarget = defaultHotspot.toCameraTarget()
+            val initialTarget = defaultHotspot.toCameraTarget(tilt = 0.0, range = 2000.0)
 
             _screenState.update { current ->
                 current.copy(
                     selectedCategory = "🏛️ Landmarks",
+                    is3DView = false,
+                    mapMode = Map3DMode.ROADMAP,
+                    hasCameraMovedSinceSearch = false,
+                    lastSearchedCenter = defaultHotspot.location,
                     allMarkers = markedPlaces,
                     selectedPlace = defaultHotspot.copy(isSelected = true),
                     selectedPlaceId = null, // Window stays closed until user taps marker
@@ -97,6 +105,8 @@ class PlaceSearch3DViewModel @Inject constructor(
                 selectedCategory = category,
                 searchUiState = PlaceSearchUiState.Loading,
                 isOrbiting = false,
+                hasCameraMovedSinceSearch = false,
+                lastSearchedCenter = center ?: it.lastSearchedCenter,
                 autocompleteSuggestions = emptyList(),
             )
         }
@@ -105,16 +115,20 @@ class PlaceSearch3DViewModel @Inject constructor(
             val result = repository.searchPlacesByCategory(category, center)
             result.onSuccess { places ->
                 val markedPlaces = places.map { it.copy(isSelected = false) }
+                val targetTilt = if (_screenState.value.is3DView) 42.0 else 0.0
                 val encompassingTarget = if (markedPlaces.isNotEmpty()) {
-                    Camera3DTarget.fromPlaces(markedPlaces)
+                    Camera3DTarget.fromPlaces(markedPlaces, tilt = targetTilt)
                 } else {
                     Camera3DTarget.DEFAULT
                 }
+                val resolvedCenter = center ?: encompassingTarget.toLatLngAltitude()
                 _screenState.update { current ->
                     current.copy(
                         allMarkers = markedPlaces,
                         selectedPlace = null,
                         selectedPlaceId = null,
+                        hasCameraMovedSinceSearch = false,
+                        lastSearchedCenter = resolvedCenter,
                         searchUiState = PlaceSearchUiState.SearchResultsLoaded(markedPlaces, null),
                         cameraMode = Camera3DMode.FlyingTo(encompassingTarget),
                         infoMessage = getString(R.string.found_places_query, markedPlaces.size, category),
@@ -129,6 +143,60 @@ class PlaceSearch3DViewModel @Inject constructor(
     }
 
     /**
+     * Re-runs the active category search around the current map viewport center ("Search this area").
+     */
+    fun searchThisArea(center: LatLngAltitude? = null) {
+        val activeCategory = _screenState.value.selectedCategory.ifBlank { "🏛️ Landmarks" }
+        selectCategory(activeCategory, center ?: _screenState.value.lastSearchedCenter)
+    }
+
+    /**
+     * Tracks camera movement relative to [PlaceSearch3DScreenState.lastSearchedCenter].
+     * When the user pans or zooms away while a category chip is active, surfaces the
+     * "Search this area" button.
+     */
+    fun onCameraMoved(currentCenter: LatLngAltitude) {
+        val current = _screenState.value
+        if (current.selectedCategory.isBlank() || current.searchUiState is PlaceSearchUiState.Loading) {
+            return
+        }
+        val reference = current.lastSearchedCenter ?: Camera3DTarget.DEFAULT.toLatLngAltitude()
+        val latDelta = abs(currentCenter.latitude - reference.latitude)
+        val lngDelta = abs(currentCenter.longitude - reference.longitude)
+        if (latDelta > CAMERA_MOVED_THRESHOLD_DEGREES || lngDelta > CAMERA_MOVED_THRESHOLD_DEGREES) {
+            if (!current.hasCameraMovedSinceSearch) {
+                _screenState.update { it.copy(hasCameraMovedSinceSearch = true) }
+            }
+        }
+    }
+
+    /**
+     * Updates the active 3D map mode ([Map3DMode.ROADMAP], [Map3DMode.HYBRID], [Map3DMode.SATELLITE])
+     * and adjusts camera tilt when transitioning between 2D and 3D modes.
+     */
+    fun setMapMode(@Map3DMode mapMode: Int, currentLocation: LatLngAltitude? = null) {
+        _screenState.update { current ->
+            val nextIs3D = mapMode != Map3DMode.ROADMAP
+            val nextCameraMode = if (current.is3DView != nextIs3D) {
+                val center = current.selectedPlace?.location ?: currentLocation ?: Camera3DTarget.DEFAULT.toLatLngAltitude()
+                val newTarget = if (nextIs3D) {
+                    Camera3DTarget.fromLocation(center, heading = 25.0, tilt = 50.0, range = 1400.0)
+                } else {
+                    Camera3DTarget.fromLocation(center, heading = 0.0, tilt = 0.0, range = 3500.0)
+                }
+                Camera3DMode.FlyingTo(newTarget)
+            } else {
+                current.cameraMode
+            }
+            current.copy(
+                mapMode = mapMode,
+                is3DView = nextIs3D,
+                cameraMode = nextCameraMode,
+            )
+        }
+    }
+
+    /**
      * Executes free-text search for places.
      */
     fun searchByQuery(query: String, center: LatLngAltitude? = null) {
@@ -139,6 +207,7 @@ class PlaceSearch3DViewModel @Inject constructor(
                 searchQuery = query,
                 searchUiState = PlaceSearchUiState.Loading,
                 isOrbiting = false,
+                hasCameraMovedSinceSearch = false,
                 autocompleteSuggestions = emptyList(),
             )
         }
@@ -156,6 +225,8 @@ class PlaceSearch3DViewModel @Inject constructor(
                             allMarkers = markedPlaces,
                             selectedPlace = firstPlace.copy(isSelected = true),
                             selectedPlaceId = null, // Highlighted on map first; window opens on marker tap
+                            hasCameraMovedSinceSearch = false,
+                            lastSearchedCenter = center ?: firstPlace.location,
                             searchUiState = PlaceSearchUiState.SearchResultsLoaded(markedPlaces, firstPlace),
                             cameraMode = Camera3DMode.FlyingTo(target),
                             infoMessage = getString(R.string.found_places_query, places.size, query),
@@ -213,6 +284,7 @@ class PlaceSearch3DViewModel @Inject constructor(
                 searchQuery = queryText,
                 autocompleteSuggestions = emptyList(),
                 isOrbiting = false,
+                hasCameraMovedSinceSearch = false,
             )
         }
 
@@ -227,6 +299,7 @@ class PlaceSearch3DViewModel @Inject constructor(
                         searchQuery = queryText,
                         selectedPlace = placeSearchResult,
                         selectedPlaceId = null, // Highlighted first; window shows on marker click
+                        lastSearchedCenter = placeSearchResult.location,
                         allMarkers = listOf(placeSearchResult),
                         searchUiState = PlaceSearchUiState.SearchResultsLoaded(listOf(placeSearchResult), placeSearchResult),
                         cameraMode = Camera3DMode.FlyingTo(target),
@@ -330,9 +403,12 @@ class PlaceSearch3DViewModel @Inject constructor(
         } else {
             val centerTarget = current.selectedPlace?.location ?: currentCenter
             if (centerTarget != null) {
+                val orbitMapMode = if (current.mapMode == Map3DMode.ROADMAP) Map3DMode.HYBRID else current.mapMode
                 _screenState.update {
                     it.copy(
                         isOrbiting = true,
+                        is3DView = true,
+                        mapMode = orbitMapMode,
                         cameraMode = Camera3DMode.Orbiting(centerTarget, 1400.0),
                         infoMessage = getString(R.string.orbiting_place, current.selectedPlace?.name ?: getString(R.string.default_location_city)),
                     )
@@ -355,7 +431,7 @@ class PlaceSearch3DViewModel @Inject constructor(
     }
 
     /**
-     * Toggles between 3D perspective view (tilt 50°) and 2D top-down view (tilt 0°).
+     * Toggles between 3D perspective view ([Map3DMode.HYBRID], tilt 50°) and 2D top-down view ([Map3DMode.ROADMAP], tilt 0°).
      */
     fun toggle2D3DView(currentLocation: LatLngAltitude? = null) {
         val current = _screenState.value
@@ -367,10 +443,16 @@ class PlaceSearch3DViewModel @Inject constructor(
         } else {
             Camera3DTarget.fromLocation(center, heading = 0.0, tilt = 0.0, range = 3500.0)
         }
+        val newMapMode = if (newIs3D) {
+            if (current.mapMode == Map3DMode.ROADMAP) Map3DMode.HYBRID else current.mapMode
+        } else {
+            Map3DMode.ROADMAP
+        }
 
         _screenState.update {
             it.copy(
                 is3DView = newIs3D,
+                mapMode = newMapMode,
                 isOrbiting = false,
                 cameraMode = Camera3DMode.FlyingTo(newTarget),
                 infoMessage = if (newIs3D) getString(R.string.switched_to_3d) else getString(R.string.switched_to_2d),
@@ -414,5 +496,10 @@ class PlaceSearch3DViewModel @Inject constructor(
      */
     fun clearInfoMessage() {
         _screenState.update { it.copy(infoMessage = null) }
+    }
+
+    companion object {
+        /** ~165 meters threshold before showing the "Search this area" pill. */
+        private const val CAMERA_MOVED_THRESHOLD_DEGREES = 0.0015
     }
 }

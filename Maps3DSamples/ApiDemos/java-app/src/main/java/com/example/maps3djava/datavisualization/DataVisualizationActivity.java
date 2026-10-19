@@ -33,6 +33,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
+import com.example.maps3d.common.Map3DSettings;
+import com.example.maps3d.common.Map3DSettingsController;
 import com.example.maps3dcommon.R;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps.model.LatLng;
@@ -41,6 +43,7 @@ import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
+import com.google.android.gms.maps3d.model.Map3DMode;
 import com.google.android.gms.maps3d.model.Polygon;
 import com.google.android.gms.maps3d.model.PolygonOptions;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -86,6 +89,8 @@ public class DataVisualizationActivity extends SampleBaseActivity {
 
   /** Stable identifier for upserting the flood polygon in the 3D map engine. */
   private static final String POLYGON_ID = "flood_zone_polygon";
+  private static final double TILT_2D_ROADMAP = 0.0;
+  private static final double TILT_3D_HYBRID = 64.0;
 
   /** Boundary coordinates outlining the San Francisco waterfront flood study area. */
   public static final List<double[]> floodZoneCoords = Arrays.asList(
@@ -111,6 +116,7 @@ public class DataVisualizationActivity extends SampleBaseActivity {
   private CardView controlsCard;
   private View cardHeader;
   private View cardContent;
+  private MaterialButton btnToggle2D3D;
   private MaterialButton btnCollapse;
   private TextView floodDepthLabel;
   private TextView floodRiskBadge;
@@ -123,6 +129,8 @@ public class DataVisualizationActivity extends SampleBaseActivity {
   private double currentFloodElevation = 10.0;
   private boolean isSimulating = false;
   private boolean isCollapsed = false;
+  private boolean is3DMode = false;
+  private boolean hasSyncedInitialMode = false;
 
   // --- Handlers & Runnables ---
 
@@ -147,15 +155,24 @@ public class DataVisualizationActivity extends SampleBaseActivity {
     return "DataVisualizationActivity";
   }
 
+  @Override
+  protected int getDefaultMapMode() {
+    return Map3DMode.ROADMAP;
+  }
+
   @NonNull
   @Override
   public Camera getInitialCamera() {
+    double initialTilt =
+        Map3DSettingsController.getShared().getSettings().getMapMode() == Map3DMode.ROADMAP
+            ? TILT_2D_ROADMAP
+            : TILT_3D_HYBRID;
     return toValidCamera(new Camera(
-        new LatLngAltitude(SF_FLOOD_CENTER.latitude, SF_FLOOD_CENTER.longitude, 120.0),
+        new LatLngAltitude(SF_FLOOD_CENTER.latitude, SF_FLOOD_CENTER.longitude, 0.0),
         35.0,
-        64.0,
+        initialTilt,
         0.0,
-        1200.0
+        2200.0
     ));
   }
 
@@ -163,6 +180,8 @@ public class DataVisualizationActivity extends SampleBaseActivity {
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
+    Map3DSettingsController.getShared().onSampleEntered(getDefaultMapMode());
+    is3DMode = Map3DSettingsController.getShared().getSettings().getMapMode() != Map3DMode.ROADMAP;
     super.onCreate(savedInstanceState);
 
     // Hide base pill scroll view as this activity manages its own overlay card
@@ -193,12 +212,18 @@ public class DataVisualizationActivity extends SampleBaseActivity {
     controlsCard = findViewById(R.id.control_panel);
     cardHeader = findViewById(R.id.card_header);
     cardContent = findViewById(R.id.card_content);
+    btnToggle2D3D = findViewById(R.id.btn_toggle_2d_3d);
     btnCollapse = findViewById(R.id.btn_collapse);
 
     floodDepthLabel = findViewById(R.id.tv_flood_depth_label);
     floodRiskBadge = findViewById(R.id.tv_flood_risk_badge);
     floodSlider = findViewById(R.id.flood_slider);
     btnAnimateFlood = findViewById(R.id.btn_animate_flood);
+
+    if (btnToggle2D3D != null) {
+      btnToggle2D3D.setOnClickListener(v -> toggle2D3DMapMode());
+    }
+    update2D3DToggleLabel(Map3DSettingsController.getShared().getSettings().getMapMode());
 
     if (btnCollapse != null) {
       btnCollapse.setOnClickListener(v -> {
@@ -241,6 +266,53 @@ public class DataVisualizationActivity extends SampleBaseActivity {
 
     // Schedule subtle initial auto-fade for unobstructed viewing
     fadeHandler.postDelayed(fadeOutRunnable, 3000L);
+  }
+
+  private void toggle2D3DMapMode() {
+    int currentMode = Map3DSettingsController.getShared().getSettings().getMapMode();
+    int nextMode = (currentMode == Map3DMode.ROADMAP)
+        ? Map3DMode.HYBRID
+        : Map3DMode.ROADMAP;
+    is3DMode = nextMode != Map3DMode.ROADMAP;
+    Map3DSettingsController.getShared().setMapMode(nextMode);
+    update2D3DToggleLabel(nextMode);
+    GoogleMap3D map = googleMap3D;
+    if (map != null) {
+      Map3DSettingsController.getShared().getSettings().applyTo(map);
+      applyCameraTilt(map, nextMode);
+    }
+  }
+
+  private void applyCameraTilt(@NonNull GoogleMap3D map, @Map3DMode int mode) {
+    double targetTilt = (mode == Map3DMode.ROADMAP) ? TILT_2D_ROADMAP : TILT_3D_HYBRID;
+    Camera updatedCamera = toValidCamera(new Camera(
+        new LatLngAltitude(SF_FLOOD_CENTER.latitude, SF_FLOOD_CENTER.longitude, 0.0),
+        35.0,
+        targetTilt,
+        0.0,
+        2200.0
+    ));
+    map.flyCameraTo(new FlyToOptions(updatedCamera, 1_000L));
+  }
+
+  private void update2D3DToggleLabel(@Map3DMode int mode) {
+    if (btnToggle2D3D != null) {
+      btnToggle2D3D.setText(mode == Map3DMode.ROADMAP
+          ? R.string.store_locator_switch_to_3d
+          : R.string.store_locator_switch_to_2d);
+    }
+  }
+
+  @Override
+  protected void onQuickSettingsChanged(@NonNull Map3DSettings settings) {
+    boolean nextIs3D = settings.getMapMode() != Map3DMode.ROADMAP;
+    boolean modeChangedAfterInit = hasSyncedInitialMode && (is3DMode != nextIs3D);
+    hasSyncedInitialMode = true;
+    is3DMode = nextIs3D;
+    update2D3DToggleLabel(settings.getMapMode());
+    if (modeChangedAfterInit && googleMap3D != null) {
+      applyCameraTilt(googleMap3D, settings.getMapMode());
+    }
   }
 
   // --- UI Collapse / Expand Mechanics ---
@@ -307,7 +379,6 @@ public class DataVisualizationActivity extends SampleBaseActivity {
   @Override
   protected void onMapReady(@NonNull GoogleMap3D googleMap3D) {
     super.onMapReady(googleMap3D);
-    googleMap3D.flyCameraTo(new FlyToOptions(getInitialCamera(), 1200));
     runOnUiThread(() -> updateFloodElevation(currentFloodElevation));
   }
 

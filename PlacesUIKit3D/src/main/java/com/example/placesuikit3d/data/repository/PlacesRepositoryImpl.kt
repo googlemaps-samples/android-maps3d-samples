@@ -438,7 +438,18 @@ class PlacesRepositoryImpl @Inject constructor(
 
         fun getCuratedPlacesByCategory(category: String): List<PlaceSearchResult> {
             val places = getCuratedPlaces()
-            val matches = places.filter { it.category.equals(category, ignoreCase = true) }
+            val cleaned = category.replace(Regex("[^a-zA-Z0-9 ]"), "").trim().lowercase()
+            val matches = places.filter { place ->
+                place.category.equals(category, ignoreCase = true) ||
+                    (cleaned.contains("coffee") && place.category?.contains("Cafes", ignoreCase = true) == true) ||
+                    (cleaned.contains("cafe") && place.category?.contains("Cafes", ignoreCase = true) == true) ||
+                    (cleaned.contains("park") && place.types.any { it.contains("park", ignoreCase = true) }) ||
+                    (cleaned.contains("shop") && place.types.any { it.contains("shop", ignoreCase = true) || it.contains("store", ignoreCase = true) }) ||
+                    (cleaned.contains("hotel") && place.category?.contains("Hotels", ignoreCase = true) == true) ||
+                    (cleaned.contains("restaurant") && place.category?.contains("Restaurants", ignoreCase = true) == true) ||
+                    (cleaned.contains("museum") && place.category?.contains("Museums", ignoreCase = true) == true) ||
+                    (cleaned.contains("landmark") && place.category?.contains("Landmarks", ignoreCase = true) == true)
+            }
             return if (matches.isNotEmpty()) matches else places.take(5)
         }
     }

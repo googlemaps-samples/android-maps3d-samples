@@ -66,6 +66,7 @@
         <activity android:name=".uicontrols.UiControlsActivity" android:exported="true" android:label="UI Controls" />
         <activity android:name=".fieldofview.FieldOfViewActivity" android:exported="true" android:label="Field Of View" />
         <activity android:name=".mapslocalization.MapsLocalizationActivity" android:exported="true" android:label="Maps Localization" />
+        <activity android:name=".storelocator.StoreLocatorActivity" android:exported="true" android:label="Store Locator" />
 
     </application>
 

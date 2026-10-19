@@ -154,6 +154,8 @@ fun GoogleMap3D(
     AndroidView(
         modifier = modifier,
         factory = { context ->
+            val initialValidCamera = camera.toValidCamera()
+            state.initFromOptions(initialValidCamera, mapMode)
             val map3dView = Map3DView(context, options)
             map3dView.onCreate(null)
 
@@ -161,6 +163,8 @@ fun GoogleMap3D(
                 object : OnMap3DViewReadyCallback {
                     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
                         googleMap3DState.value = googleMap3D
+                        googleMap3D.setMapMode(mapMode)
+                        googleMap3D.setCamera(initialValidCamera)
                         Map3DRegistry.setInstance(googleMap3D)
 
                         googleMap3D.setOnMapReadyListener {
@@ -169,13 +173,14 @@ fun GoogleMap3D(
                             isMapReady.value = true
                         }
 
-                        // Ensure readiness triggers even on delayed or reused map instances
+                        // Ensure readiness triggers promptly even on reused map instances where
+                        // the SDK's process-wide onMapReadyListener has already fired
                         map3dView.postDelayed({
                             if (!isMapReady.value) {
                                 Map3DRegistry.markReady()
                                 isMapReady.value = true
                             }
-                        }, 2000L)
+                        }, 300L)
 
                         googleMap3D.setOnMapSteadyListener { isSteady ->
                             currentOnMapSteadyChange(isSteady)

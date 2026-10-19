@@ -36,6 +36,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
+import com.example.maps3d.common.Map3DSettings;
+import com.example.maps3d.common.Map3DSettingsController;
 import com.example.maps3d.common.OahuRouteData;
 import com.example.maps3d.common.PositionAndHeading;
 import com.example.maps3d.common.RouteEngine;
@@ -97,6 +99,7 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
   private View cardHeader;
   private View cardContent;
   private MaterialButton btnCollapse;
+  private MaterialButton btnToggle2D3D;
   private MaterialButton btnPlayPause;
   private Slider progressSlider;
   private Slider rangeSlider;
@@ -117,6 +120,7 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
   private boolean isPlaying = false;
   private boolean isUserScrubbing = false;
   private boolean isCollapsed = false;
+  private boolean is3DMode = false;
 
   // --- Slider Parameters ---
 
@@ -153,11 +157,15 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
   @NonNull
   @Override
   public Camera getInitialCamera() {
+    double initialTilt =
+        Map3DSettingsController.getShared().getSettings().getMapMode() != Map3DMode.ROADMAP
+            ? 45.0
+            : 0.0;
     return toValidCamera(
         new Camera(
             new LatLngAltitude(21.348567, -157.803961, 0.0),
             38.6,
-            45.0,
+            initialTilt,
             0.0,
             20000.0));
   }
@@ -166,6 +174,8 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
+    Map3DSettingsController.getShared().onSampleEntered(getDefaultMapMode());
+    is3DMode = Map3DSettingsController.getShared().getSettings().getMapMode() != Map3DMode.ROADMAP;
     super.onCreate(savedInstanceState);
 
     // Hide base pill scroll view as this activity manages its own overlay card
@@ -186,6 +196,7 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
     }
 
     initViews();
+    updateToggle2D3DButtonText();
   }
 
   /** Initializes view references and wires up touch and click listeners. */
@@ -195,6 +206,7 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
     cardHeader = findViewById(R.id.card_header);
     cardContent = findViewById(R.id.card_content);
     btnCollapse = findViewById(R.id.btn_collapse);
+    btnToggle2D3D = findViewById(R.id.btn_toggle_2d_3d);
 
     btnPlayPause = findViewById(R.id.btn_play_pause);
     progressSlider = findViewById(R.id.progress_slider);
@@ -204,6 +216,14 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
     speedSliderLabel = findViewById(R.id.speed_slider_label);
     headingSlider = findViewById(R.id.heading_slider);
     headingSliderLabel = findViewById(R.id.heading_slider_label);
+
+    if (btnToggle2D3D != null) {
+      btnToggle2D3D.setOnClickListener(
+          v -> {
+            resetFadeTimer();
+            toggle2D3DMapMode();
+          });
+    }
 
     if (btnCollapse != null) {
       btnCollapse.setOnClickListener(
@@ -378,17 +398,45 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
     }
   }
 
+  private void toggle2D3DMapMode() {
+    is3DMode = !is3DMode;
+    int nextMode = is3DMode ? Map3DMode.HYBRID : Map3DMode.ROADMAP;
+    Map3DSettingsController.getShared().setMapMode(nextMode);
+    if (googleMap3D != null) {
+      googleMap3D.setMapMode(nextMode);
+    }
+    updateToggle2D3DButtonText();
+    updateVehiclePositionAndCamera();
+  }
+
+  private void updateToggle2D3DButtonText() {
+    if (btnToggle2D3D != null) {
+      btnToggle2D3D.setText(
+          is3DMode
+              ? R.string.store_locator_switch_to_2d
+              : R.string.store_locator_switch_to_3d);
+    }
+  }
+
   // --- Map Readiness & Route Rendering ---
 
   @Override
   @Map3DMode
   protected int getDefaultMapMode() {
-    return Map3DMode.SATELLITE;
+    return Map3DMode.ROADMAP;
   }
 
   @Override
-  public void onMap3DViewReady(@NonNull GoogleMap3D googleMap3D) {
-    super.onMap3DViewReady(googleMap3D);
+  protected void onQuickSettingsChanged(@NonNull Map3DSettings settings) {
+    super.onQuickSettingsChanged(settings);
+    is3DMode = settings.getMapMode() != Map3DMode.ROADMAP;
+    updateToggle2D3DButtonText();
+    updateVehiclePositionAndCamera();
+  }
+
+  @Override
+  protected void onMapReady(@NonNull GoogleMap3D googleMap3D) {
+    super.onMapReady(googleMap3D);
 
     // Trigger async route fetch on executor thread
     loadAndRenderRouteAsync(googleMap3D);
@@ -539,6 +587,7 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
 
     // 2. Update Camera center and bearing
     if (googleMap3D != null) {
+      double targetTilt = is3DMode ? 65.0 : 0.0;
       Camera trackingCamera =
           toValidCamera(
               new Camera(
@@ -547,7 +596,7 @@ public class RoutesActivity extends SampleBaseActivity implements OnMap3DViewRea
                       posAndHeading.getPosition().longitude,
                       0.0),
                   toHeading(posAndHeading.getHeading() + yawOffset),
-                  65.0,
+                  targetTilt,
                   0.0,
                   (double) cameraRange));
       googleMap3D.setCamera(trackingCamera);

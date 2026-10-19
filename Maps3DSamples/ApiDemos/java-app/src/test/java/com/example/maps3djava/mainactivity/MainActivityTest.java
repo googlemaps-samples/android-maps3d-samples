@@ -18,12 +18,11 @@ package com.example.maps3djava.mainactivity;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import java.lang.reflect.Field;
+import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-
-import java.lang.reflect.Field;
-import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 public class MainActivityTest {
@@ -35,11 +34,23 @@ public class MainActivityTest {
         field.setAccessible(true);
         Map<Integer, Class<?>> samples = (Map<Integer, Class<?>>) field.get(activity);
 
-        assertThat(samples).hasSize(25);
-        assertThat(samples.values()).contains(com.example.maps3djava.popovers.PopoversActivity.class);
-        assertThat(samples.values()).contains(com.example.maps3djava.mapinteractions.MapInteractionsActivity.class);
-        assertThat(samples.values()).contains(com.example.maps3djava.projection3d.Projection3DActivity.class);
-        assertThat(samples.values()).contains(com.example.maps3djava.mapslocalization.MapsLocalizationActivity.class);
-        assertThat(samples.values()).contains(com.example.maps3djava.uicontrols.UiControlsActivity.class);
+        assertThat(samples).hasSize(24);
+        assertThat(samples.values())
+                .contains(com.example.maps3djava.storelocator.StoreLocatorActivity.class);
+        assertThat(samples.values())
+                .contains(com.example.maps3djava.popovers.PopoversActivity.class);
+        assertThat(samples.values())
+                .contains(com.example.maps3djava.mapinteractions.MapInteractionsActivity.class);
+        assertThat(samples.values())
+                .contains(com.example.maps3djava.projection3d.Projection3DActivity.class);
+        assertThat(samples.values())
+                .contains(com.example.maps3djava.mapslocalization.MapsLocalizationActivity.class);
+        assertThat(samples.values())
+                .contains(com.example.maps3djava.uicontrols.UiControlsActivity.class);
+        assertThat(samples.values())
+                .doesNotContain(com.example.maps3djava.placesearch.PlaceSearchActivity.class);
+        assertThat(samples.values())
+                .doesNotContain(
+                        com.example.maps3djava.placeautocomplete.PlaceAutocompleteActivity.class);
     }
 }
