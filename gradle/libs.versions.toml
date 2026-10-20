@@ -8,7 +8,7 @@ json = "20260522"
 robolectric = "4.17"
 
 activityCompose = "1.13.0"
-agp = "9.2.1"
+agp = "9.4.1"
 appcompat = "1.8.0"
 composeBom = "2026.09.00"
 coreKtx = "1.19.1"
@@ -21,23 +21,24 @@ lifecycleRuntimeKtx = "2.11.0"
 material = "1.14.0"
 
 playServicesBase = "18.10.0"
+playServicesLocation = "21.4.0"
 playServicesMaps3d = "16.0.1"
-places = "5.3.0"
+places = "6.0.2"
 placesCompose = "0.3.0"
 secretsGradlePlugin = "2.0.1"
 truth = "1.4.5"
 uiautomator = "2.4.0"
-spotless = "8.9.0"
+spotless = "8.10.3"
 
 kotlinxDatetime = "0.8.0"
 kotlinxSerialization = "1.11.0"
 ktor = "3.6.0"
 hilt = "2.60.1"
-ksp = "2.3.6"
+ksp = "2.3.12"
 mapsUtils = "6.0.0"
 androidx-core-ktx = "1.8.9"
 androidxArchCoreTesting = "2.2.0"
-kotlinxCoroutines = "1.8.0"
+kotlinxCoroutines = "1.11.0"
 
 [libraries]
 androidx-arch-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "androidxArchCoreTesting" }
@@ -67,6 +68,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "androidx-core-ktx" }
 androidx-fragment-compose = { group = "androidx.fragment", name = "fragment-compose", version.ref = "androidx-core-ktx" }
 play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "playServicesBase" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 play-services-maps3d = { module = "com.google.android.gms:play-services-maps3d", version.ref = "playServicesMaps3d" }
 places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
 places-compose = { module = "com.google.maps.android:places-compose", version.ref = "placesCompose" }
