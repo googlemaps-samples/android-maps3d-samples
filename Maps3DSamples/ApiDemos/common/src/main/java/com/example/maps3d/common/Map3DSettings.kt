@@ -285,7 +285,8 @@ data class Map3DSettings(
          * when [mapView] is rendered full-screen.
          *
          * Workaround: [Map3DView] does not yet respect window insets or expose a padding API for
-         * its internal UI control overlays on edge-to-edge screens.
+         * its internal UI control overlays on edge-to-edge screens. Tracked in
+         * https://issuetracker.google.com/issues/575850758.
          */
         @JvmStatic
         @JvmOverloads
@@ -293,8 +294,9 @@ data class Map3DSettings(
             mapView: ViewGroup,
             explicitStatusBarTop: Int? = null,
         ) {
-            // Workaround: Until Map3DView natively handles window insets or exposes map padding,
-            // offset its top-aligned UI control containers when the map draws under the status bar.
+            // Workaround: Until Map3DView natively handles window insets or exposes map padding
+            // (https://issuetracker.google.com/issues/575850758), offset its top-aligned UI
+            // control containers when the map draws under the status bar.
             if (explicitStatusBarTop != null) {
                 mapView.setTag(
                     R.id.map3d_status_bar_top_tag,
