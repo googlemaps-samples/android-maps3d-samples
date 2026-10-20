@@ -70,12 +70,12 @@ enum class Map3DColorScheme(val value: Int) {
  * @property controlsPosition Screen edge for main controls ([ControlPlacement.TRAILING] or [ControlPlacement.LEADING]); pan and compass controls are placed on the opposite edge.
  */
 data class Map3DUiControls @JvmOverloads constructor(
-    val zoom: Boolean = true,
-    val tilt: Boolean = true,
-    val rotate: Boolean = true,
-    val compass: Boolean = true,
-    val panVertical: Boolean = true,
-    val panHorizontal: Boolean = true,
+    val zoom: Boolean = false,
+    val tilt: Boolean = false,
+    val rotate: Boolean = false,
+    val compass: Boolean = false,
+    val panVertical: Boolean = false,
+    val panHorizontal: Boolean = false,
     @param:ControlPlacement @get:ControlPlacement
     val controlsPosition: Int = ControlPlacement.TRAILING,
 ) {

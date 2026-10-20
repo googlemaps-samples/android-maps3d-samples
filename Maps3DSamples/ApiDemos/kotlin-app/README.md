@@ -4,30 +4,33 @@ This directory contains the Kotlin samples using traditional Android Views for t
 
 ## 📊 Sample Status
 
-| Feature | Status | Source Code | Screenshot |
-| :--- | :--- | :--- | :--- |
-| **Basic Map** | ✅ Done | [HelloMapActivity.kt](src/main/java/com/example/maps3dkotlin/hellomap/HelloMapActivity.kt) | <img src="screenshots/hello_map_screenshot.png" alt="Screenshot" width="121"/> |
-| **Polylines** | ✅ Done | [PolylinesActivity.kt](src/main/java/com/example/maps3dkotlin/polylines/PolylinesActivity.kt) | <img src="screenshots/polylines_screenshot.png" alt="Screenshot" width="121"/> |
-| **Map Interactions** | ✅ Done | [MapInteractionsActivity.kt](src/main/java/com/example/maps3dkotlin/mapinteractions/MapInteractionsActivity.kt) | <img src="screenshots/map_interactions_screenshot.png" alt="Screenshot" width="121"/> |
-| **Popovers** | ✅ Done | [PopoversActivity.kt](src/main/java/com/example/maps3dkotlin/popovers/PopoversActivity.kt) | <img src="screenshots/popovers_screenshot.png" alt="Screenshot" width="121"/> |
-| **Camera Controls** | ✅ Done | [CameraControlsActivity.kt](src/main/java/com/example/maps3dkotlin/cameracontrols/CameraControlsActivity.kt) | <img src="screenshots/camera_controls_screenshot.png" alt="Screenshot" width="121"/> |
-| **Polygons** | ✅ Done | [PolygonsActivity.kt](src/main/java/com/example/maps3dkotlin/polygons/PolygonsActivity.kt) | <img src="screenshots/polygons_screenshot.png" alt="Screenshot" width="121"/> |
-| **Models** | ✅ Done | [ModelsActivity.kt](src/main/java/com/example/maps3dkotlin/models/ModelsActivity.kt) | <img src="screenshots/models_screenshot.png" alt="Screenshot" width="121"/> |
-| **Markers** | ✅ Done | [MarkersActivity.kt](src/main/java/com/example/maps3dkotlin/markers/MarkersActivity.kt) | |
-| **Camera Restrictions** | 🚧 Skeleton | [CameraRestrictionsActivity.kt](src/main/java/com/example/maps3dkotlin/camerarestrictions/CameraRestrictionsActivity.kt) | |
-| **Flight Simulator** | 🚧 Skeleton | [FlightSimulatorActivity.kt](src/main/java/com/example/maps3dkotlin/flightsimulator/FlightSimulatorActivity.kt) | |
-| **Routes API** | ✅ Done | [RoutesActivity.kt](src/main/java/com/example/maps3dkotlin/routes/RoutesActivity.kt) | <img src="screenshots/routes_screenshot.png" alt="Screenshot" width="121"/> |
-| **Path Following** | ✅ Done | [PathFollowingActivity.kt](src/main/java/com/example/maps3dkotlin/pathfollowing/PathFollowingActivity.kt) | |
-| **Path Styling** | 🚧 Skeleton | [PathStylingActivity.kt](src/main/java/com/example/maps3dkotlin/pathstyling/PathStylingActivity.kt) | |
-| **Animating Models** | 🚧 Skeleton | [AnimatingModelsActivity.kt](src/main/java/com/example/maps3dkotlin/animatingmodels/AnimatingModelsActivity.kt) | |
-| **Place Search** | 🚧 Skeleton | [PlaceSearchActivity.kt](src/main/java/com/example/maps3dkotlin/placesearch/PlaceSearchActivity.kt) | |
-| **Place Autocomplete** | 🚧 Skeleton | [PlaceAutocompleteActivity.kt](src/main/java/com/example/maps3dkotlin/placeautocomplete/PlaceAutocompleteActivity.kt) | |
-| **Place Details** | 🚧 Skeleton | [PlaceDetailsActivity.kt](src/main/java/com/example/maps3dkotlin/placedetails/PlaceDetailsActivity.kt) | |
-| **Advanced Camera Animation** | ✅ Done | [AdvancedCameraAnimationActivity.kt](src/main/java/com/example/maps3dkotlin/advancedcameraanimation/AdvancedCameraAnimationActivity.kt) | |
-| **Data Visualization** | ✅ Done | [DataVisualizationActivity.kt](src/main/java/com/example/maps3dkotlin/datavisualization/DataVisualizationActivity.kt) | |
-| **Cloud Map Styling** | ✅ Done | [CloudStylingActivity.kt](src/main/java/com/example/maps3dkotlin/cloudstyling/CloudStylingActivity.kt) | |
-| **Roadmap Mode** | ✅ Done | [RoadmapModeActivity.kt](src/main/java/com/example/maps3dkotlin/roadmapmode/RoadmapModeActivity.kt) | |
-| **Field Of View** | ✅ Done | [FieldOfViewActivity.kt](src/main/java/com/example/maps3dkotlin/fieldofview/FieldOfViewActivity.kt) | |
+| Feature | Status | Source Code | Screenshot | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **Basic Map** | ✅ Done | [HelloMapActivity.kt](src/main/java/com/example/maps3dkotlin/hellomap/HelloMapActivity.kt) | <img src="screenshots/hello_map_screenshot.png" alt="Screenshot" width="121"/> | Displays a basic 3D map with standard satellite imagery and initial camera placement. |
+| **Polylines** | ✅ Done | [PolylinesActivity.kt](src/main/java/com/example/maps3dkotlin/polylines/PolylinesActivity.kt) | <img src="screenshots/polylines_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates drawing 3D polylines on the map, including custom colors and widths. |
+| **Map Interactions** | ✅ Done | [MapInteractionsActivity.kt](src/main/java/com/example/maps3dkotlin/mapinteractions/MapInteractionsActivity.kt) | <img src="screenshots/map_interactions_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates handling click events on map coordinates and POIs. |
+| **Popovers** | ✅ Done | [PopoversActivity.kt](src/main/java/com/example/maps3dkotlin/popovers/PopoversActivity.kt) | <img src="screenshots/popovers_screenshot.png" alt="Screenshot" width="121"/> | Shows how to display interactive popover overlays at specific coordinates on the map. |
+| **Camera Controls** | ✅ Done | [CameraControlsActivity.kt](src/main/java/com/example/maps3dkotlin/cameracontrols/CameraControlsActivity.kt) | <img src="screenshots/camera_controls_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates manual control of the camera center, heading, tilt, and range using UI controls. |
+| **Polygons** | ✅ Done | [PolygonsActivity.kt](src/main/java/com/example/maps3dkotlin/polygons/PolygonsActivity.kt) | <img src="screenshots/polygons_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates drawing 3D polygons with fill colors and outlines on the map. |
+| **Models** | ✅ Done | [ModelsActivity.kt](src/main/java/com/example/maps3dkotlin/models/ModelsActivity.kt) | <img src="screenshots/models_screenshot.png" alt="Screenshot" width="121"/> | Shows how to load and place custom 3D models (gLTF) on the map with position, scale, and orientation. |
+| **Markers** | ✅ Done | [MarkersActivity.kt](src/main/java/com/example/maps3dkotlin/markers/MarkersActivity.kt) | <img src="screenshots/markers_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates 2D markers with custom icons, styled pins (pin configurations), and collision behaviors. |
+| **Camera Restrictions** | 🚧 Skeleton | [CameraRestrictionsActivity.kt](src/main/java/com/example/maps3dkotlin/camerarestrictions/CameraRestrictionsActivity.kt) | | Will demonstrate restricting the camera range and center bounds to a specific area. |
+| **Flight Simulator** | 🚧 Skeleton | [FlightSimulatorActivity.kt](src/main/java/com/example/maps3dkotlin/flightsimulator/FlightSimulatorActivity.kt) | | Will demonstrate a first-person camera view simulating flight. |
+| **Routes API** | ✅ Done | [RoutesActivity.kt](src/main/java/com/example/maps3dkotlin/routes/RoutesActivity.kt) | <img src="screenshots/routes_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates loading a route from file, rendering the polyline, and animating a 3D car model along the route. |
+| **Path Following** | ✅ Done | [PathFollowingActivity.kt](src/main/java/com/example/maps3dkotlin/pathfollowing/PathFollowingActivity.kt) | <img src="screenshots/path_following_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates camera traveling along a 3D path with dual-polyline tracking and decoupled gestures. |
+| **Path Styling** | 🚧 Skeleton | [PathStylingActivity.kt](src/main/java/com/example/maps3dkotlin/pathstyling/PathStylingActivity.kt) | | Will demonstrate custom styling for paths. |
+| **Animating Models** | 🚧 Skeleton | [AnimatingModelsActivity.kt](src/main/java/com/example/maps3dkotlin/animatingmodels/AnimatingModelsActivity.kt) | | Will demonstrate animating 3D models. |
+| **Place Search** | 🚧 Skeleton | [PlaceSearchActivity.kt](src/main/java/com/example/maps3dkotlin/placesearch/PlaceSearchActivity.kt) | | Will demonstrate programmatic place search (see also [PlacesUIKit3D](../../../PlacesUIKit3D)). |
+| **Place Autocomplete** | 🚧 Skeleton | [PlaceAutocompleteActivity.kt](src/main/java/com/example/maps3dkotlin/placeautocomplete/PlaceAutocompleteActivity.kt) | | Will demonstrate place autocomplete widget (see also [PlacesUIKit3D](../../../PlacesUIKit3D)). |
+| **Place Details** | 🚧 Skeleton | [PlaceDetailsActivity.kt](src/main/java/com/example/maps3dkotlin/placedetails/PlaceDetailsActivity.kt) | | Will demonstrate loading place details (see also [PlacesUIKit3D](../../../PlacesUIKit3D)). |
+| **Advanced Camera Animation** | ✅ Done | [AdvancedCameraAnimationActivity.kt](src/main/java/com/example/maps3dkotlin/advancedcameraanimation/AdvancedCameraAnimationActivity.kt) | <img src="screenshots/advanced_camera_animation_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates reverse-trig stationary tracking, 5-step keyframe tour, and 360° orbit. |
+| **Data Visualization** | ✅ Done | [DataVisualizationActivity.kt](src/main/java/com/example/maps3dkotlin/datavisualization/DataVisualizationActivity.kt) | <img src="screenshots/data_visualization_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates 3D extruded flood simulation polygons with dynamic elevation slider. |
+| **Cloud Map Styling** | ✅ Done | [CloudStylingActivity.kt](src/main/java/com/example/maps3dkotlin/cloudstyling/CloudStylingActivity.kt) | <img src="screenshots/cloud_styling_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates dynamic Cloud Console Map ID runtime styling. |
+| **Roadmap Mode** | ✅ Done | [RoadmapModeActivity.kt](src/main/java/com/example/maps3dkotlin/roadmapmode/RoadmapModeActivity.kt) | <img src="screenshots/roadmap_mode_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates 2D vector roadmap tiles overlay on 3D photorealistic mesh. |
+| **UI Controls** | ✅ Done | [UiControlsActivity.kt](src/main/java/com/example/maps3dkotlin/uicontrols/UiControlsActivity.kt) | <img src="screenshots/ui_controls_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates toggling the built-in compass and map toolbar controls on the 3D map. |
+| **Field Of View** | ✅ Done | [FieldOfViewActivity.kt](src/main/java/com/example/maps3dkotlin/fieldofview/FieldOfViewActivity.kt) | <img src="screenshots/field_of_view_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates interactive camera lens focal length and FOV adjustments. |
+| **3D Projection** | ✅ Done | [Projection3DActivity.kt](src/main/java/com/example/maps3dkotlin/projection3d/Projection3DActivity.kt) | <img src="screenshots/projection_3d_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates projecting a 3D map coordinate onto 2D screen space to anchor custom HUD overlays. |
+| **Maps Localization** | ✅ Done | [MapsLocalizationActivity.kt](src/main/java/com/example/maps3dkotlin/mapslocalization/MapsLocalizationActivity.kt) | <img src="screenshots/maps_localization_screenshot.png" alt="Screenshot" width="121"/> | Demonstrates runtime language and locale switching for 3D map labels using AppCompat per-app language APIs. |
 
 ---
 > [!NOTE]
