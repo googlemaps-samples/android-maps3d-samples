@@ -28,6 +28,7 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
@@ -432,7 +433,7 @@ class StoreLocatorActivity : SampleBaseActivity() {
                         store.phone,
                     )
                     textSize = 12f
-                    setTextColor(if (store.isOpenNow) Color.parseColor("#1E8E3E") else Color.GRAY)
+                    setTextColor(if (store.isOpenNow) "#1E8E3E".toColorInt() else Color.GRAY)
                 },
             )
         }

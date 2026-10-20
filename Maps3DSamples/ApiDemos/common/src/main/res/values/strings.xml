@@ -322,7 +322,7 @@
     <string name="store_locator_switch_to_2d">Switch to 2D</string>
     <string name="store_locator_overview_2d">Overview</string>
     <string name="store_locator_filter_open_now">Open Now</string>
-    <string name="store_locator_filter_drive_thru" tools:ignore="Spelling">Drive-Thru</string>
+    <string name="store_locator_filter_drive_thru" tools:ignore="Typos,Spelling">Drive-Thru</string>
     <string name="store_locator_filter_open_24h">24 Hours</string>
     <string name="store_locator_filter_ev_charging">EV Charging</string>
     <string name="store_locator_open_status">Open</string>
