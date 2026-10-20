@@ -64,9 +64,11 @@ import com.google.android.material.chip.Chip;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Java Views implementation of the canonical 2D-to-3D Store Locator sample built in {@link
@@ -318,11 +320,16 @@ public class StoreLocatorActivity extends SampleBaseActivity {
         StoreLocation selectedStore = state.getSelectedStore();
         String selectedId = selectedStore != null ? selectedStore.getId() : null;
 
-        if (!currentIds.equals(lastRenderedStoreIds)
-                || !Objects.equals(selectedId, lastRenderedSelectedStoreId)) {
+        if (!currentIds.equals(lastRenderedStoreIds)) {
+            // Dataset / filters changed: reconcile active markers with filteredStores
             lastRenderedStoreIds = currentIds;
             lastRenderedSelectedStoreId = selectedId;
-            rebuildStoreMarkers(map, state.getFilteredStores(), selectedStore);
+            reconcileStoreMarkers(map, state.getFilteredStores(), selectedStore);
+        } else if (!Objects.equals(selectedId, lastRenderedSelectedStoreId)) {
+            // Only selection changed (filters unchanged): update only previously and newly selected markers
+            String previousId = lastRenderedSelectedStoreId;
+            lastRenderedSelectedStoreId = selectedId;
+            updateMarkerSelection(map, state.getAllStores(), previousId, selectedStore);
         }
 
         StoreFlyToCommand flyToCommand = state.getFlyToCommand();
@@ -335,59 +342,123 @@ public class StoreLocatorActivity extends SampleBaseActivity {
         }
     }
 
-    private void rebuildStoreMarkers(
+    private void reconcileStoreMarkers(
             GoogleMap3D map,
             List<StoreLocation> stores,
             @Nullable StoreLocation selectedStore) {
+        Set<String> currentIdSet = new HashSet<>();
+        for (StoreLocation store : stores) {
+            currentIdSet.add(store.getId());
+        }
+
+        // 1. Remove markers no longer in filtered set
+        List<String> removedIds = new ArrayList<>();
+        for (String id : activeMarkers.keySet()) {
+            if (!currentIdSet.contains(id)) {
+                removedIds.add(id);
+            }
+        }
+        for (String id : removedIds) {
+            Marker marker = activeMarkers.remove(id);
+            if (marker != null) {
+                marker.remove();
+            }
+        }
+
+        // 2. Add or update markers for currently filtered stores
+        String selectedId = selectedStore != null ? selectedStore.getId() : null;
+        for (StoreLocation store : stores) {
+            boolean isSelected = store.getId().equals(selectedId);
+            Marker existing = activeMarkers.get(store.getId());
+            if (existing == null || isSelected) {
+                createOrUpdateStoreMarker(map, store, isSelected);
+            }
+        }
+
+        // 3. Update popover for selected store
         if (activePopover != null) {
             activePopover.remove();
             activePopover = null;
         }
-        for (Marker marker : activeMarkers.values()) {
-            marker.remove();
-        }
-        activeMarkers.clear();
-
-        String selectedId = selectedStore != null ? selectedStore.getId() : null;
-        for (StoreLocation store : stores) {
-            boolean isSelected = store.getId().equals(selectedId);
-            int pinBgColor =
-                    isSelected
-                            ? COLOR_PIN_SELECTED
-                            : (store.isOpenNow() ? COLOR_PIN_OPEN : COLOR_PIN_CLOSED);
-            float pinScale =
-                    isSelected
-                            ? StoreLocation.SELECTED_PIN_SCALE
-                            : StoreLocation.DEFAULT_PIN_SCALE;
-
-            PinConfiguration pinConfig =
-                    PinConfiguration.builder()
-                            .setScale(pinScale)
-                            .setBackgroundColor(pinBgColor)
-                            .setBorderColor(Color.WHITE)
-                            .setGlyph(Glyph.fromColor(Color.WHITE))
-                            .build();
-
-            MarkerOptions options = new MarkerOptions();
-            options.setId(store.getId());
-            options.setPosition(store.toLatLngAltitude());
-            options.setLabel(store.getName());
-            options.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
-            options.setCollisionBehavior(CollisionBehavior.REQUIRED);
-            options.setExtruded(true);
-            options.setDrawnWhenOccluded(true);
-            options.setZIndex(isSelected ? 10 : 1);
-            options.setStyle(pinConfig);
-
-            Marker marker = map.addMarker(options);
+        if (selectedStore != null) {
+            Marker marker = activeMarkers.get(selectedStore.getId());
             if (marker != null) {
-                activeMarkers.put(store.getId(), marker);
-                marker.setClickListener(() -> runOnUiThread(() -> viewModel.selectStore(store)));
-                if (isSelected) {
-                    showStorePopover(map, marker, store);
-                }
+                showStorePopover(map, marker, selectedStore);
             }
         }
+    }
+
+    private void updateMarkerSelection(
+            GoogleMap3D map,
+            List<StoreLocation> allStores,
+            @Nullable String previousSelectedId,
+            @Nullable StoreLocation selectedStore) {
+        // 1. Revert previously selected marker to unselected styling
+        if (previousSelectedId != null && activeMarkers.containsKey(previousSelectedId)) {
+            StoreLocation previousStore = null;
+            for (StoreLocation s : allStores) {
+                if (s.getId().equals(previousSelectedId)) {
+                    previousStore = s;
+                    break;
+                }
+            }
+            if (previousStore != null) {
+                createOrUpdateStoreMarker(map, previousStore, false);
+            }
+        }
+
+        // 2. Elevate newly selected marker to selected styling and display popover
+        if (activePopover != null) {
+            activePopover.remove();
+            activePopover = null;
+        }
+        if (selectedStore != null) {
+            Marker marker = createOrUpdateStoreMarker(map, selectedStore, true);
+            if (marker != null) {
+                showStorePopover(map, marker, selectedStore);
+            }
+        }
+    }
+
+    @Nullable
+    private Marker createOrUpdateStoreMarker(
+            GoogleMap3D map,
+            StoreLocation store,
+            boolean isSelected) {
+        int pinBgColor =
+                isSelected
+                        ? COLOR_PIN_SELECTED
+                        : (store.isOpenNow() ? COLOR_PIN_OPEN : COLOR_PIN_CLOSED);
+        float pinScale =
+                isSelected
+                        ? StoreLocation.SELECTED_PIN_SCALE
+                        : StoreLocation.DEFAULT_PIN_SCALE;
+
+        PinConfiguration pinConfig =
+                PinConfiguration.builder()
+                        .setScale(pinScale)
+                        .setBackgroundColor(pinBgColor)
+                        .setBorderColor(Color.WHITE)
+                        .setGlyph(Glyph.fromColor(Color.WHITE))
+                        .build();
+
+        MarkerOptions options = new MarkerOptions();
+        options.setId(store.getId());
+        options.setPosition(store.toLatLngAltitude());
+        options.setLabel(store.getName());
+        options.setAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
+        options.setCollisionBehavior(CollisionBehavior.REQUIRED);
+        options.setExtruded(true);
+        options.setDrawnWhenOccluded(true);
+        options.setZIndex(isSelected ? 10 : 1);
+        options.setStyle(pinConfig);
+
+        Marker marker = map.addMarker(options);
+        if (marker != null) {
+            activeMarkers.put(store.getId(), marker);
+            marker.setClickListener(() -> runOnUiThread(() -> viewModel.selectStore(store)));
+        }
+        return marker;
     }
 
     private void showStorePopover(GoogleMap3D map, Marker anchorMarker, StoreLocation store) {
@@ -445,6 +516,19 @@ public class StoreLocatorActivity extends SampleBaseActivity {
         if (activePopover != null) {
             activePopover.show();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (activePopover != null) {
+            activePopover.remove();
+            activePopover = null;
+        }
+        for (Marker marker : activeMarkers.values()) {
+            marker.remove();
+        }
+        activeMarkers.clear();
+        super.onDestroy();
     }
 
     private void togglePanelCollapse() {

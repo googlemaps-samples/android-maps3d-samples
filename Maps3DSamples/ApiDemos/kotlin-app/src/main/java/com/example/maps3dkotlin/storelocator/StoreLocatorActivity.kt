@@ -273,10 +273,16 @@ class StoreLocatorActivity : SampleBaseActivity() {
         val selectedStore = state.selectedStore
         val selectedId = selectedStore?.id
 
-        if (currentIds != lastRenderedStoreIds || selectedId != lastRenderedSelectedStoreId) {
+        if (currentIds != lastRenderedStoreIds) {
+            // Dataset / filters changed: reconcile active markers with filteredStores
             lastRenderedStoreIds = currentIds
             lastRenderedSelectedStoreId = selectedId
-            rebuildStoreMarkers(map, state.filteredStores, selectedStore)
+            reconcileStoreMarkers(map, state.filteredStores, selectedStore)
+        } else if (selectedId != lastRenderedSelectedStoreId) {
+            // Only selection changed (filters unchanged): update only previously and newly selected markers
+            val previousId = lastRenderedSelectedStoreId
+            lastRenderedSelectedStoreId = selectedId
+            updateMarkerSelection(map, state.allStores, previousId, selectedStore)
         }
 
         val flyToCommand = state.flyToCommand
@@ -291,63 +297,110 @@ class StoreLocatorActivity : SampleBaseActivity() {
         }
     }
 
-    private fun rebuildStoreMarkers(
+    private fun reconcileStoreMarkers(
         map: GoogleMap3D,
         stores: List<StoreLocation>,
         selectedStore: StoreLocation?,
     ) {
+        val currentIdSet = stores.map { it.id }.toSet()
+
+        // 1. Remove markers no longer in filtered set
+        val removedIds = activeMarkers.keys - currentIdSet
+        for (id in removedIds) {
+            activeMarkers.remove(id)?.remove()
+        }
+
+        // 2. Add or update markers for currently filtered stores
+        val selectedId = selectedStore?.id
+        for (store in stores) {
+            val isSelected = store.id == selectedId
+            val existing = activeMarkers[store.id]
+            if (existing == null || isSelected) {
+                createOrUpdateStoreMarker(map, store, isSelected)
+            }
+        }
+
+        // 3. Update popover for selected store
         activePopover?.remove()
         activePopover = null
-        activeMarkers.values.forEach { it.remove() }
-        activeMarkers.clear()
-
-        for (store in stores) {
-            val isSelected = store.id == selectedStore?.id
-            // Canonical Google brand colors: #F4B400 (Google Yellow) for selected, #1A73E8 (Google Blue) for open
-            val pinBgColor = when {
-                isSelected -> "#F4B400".toColorInt()
-                store.isOpenNow -> "#1A73E8".toColorInt()
-                else -> "#757575".toColorInt()
+        if (selectedStore != null) {
+            activeMarkers[selectedStore.id]?.let { marker ->
+                showStorePopover(map, marker, selectedStore)
             }
-            val pinScale = if (isSelected) {
-                StoreLocation.SELECTED_PIN_SCALE
-            } else {
-                StoreLocation.DEFAULT_PIN_SCALE
+        }
+    }
+
+    private fun updateMarkerSelection(
+        map: GoogleMap3D,
+        allStores: List<StoreLocation>,
+        previousSelectedId: String?,
+        selectedStore: StoreLocation?,
+    ) {
+        // 1. Revert previously selected marker to unselected styling
+        if (previousSelectedId != null && activeMarkers.containsKey(previousSelectedId)) {
+            val previousStore = allStores.find { it.id == previousSelectedId }
+            if (previousStore != null) {
+                createOrUpdateStoreMarker(map, previousStore, isSelected = false)
             }
+        }
 
-            val marker = map.addMarker(
-                markerOptions {
-                    id = store.id
-                    position = store.toLatLngAltitude()
-                    label = store.name
-                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                    collisionBehavior = CollisionBehavior.REQUIRED
-                    isExtruded = true
-                    isDrawnWhenOccluded = true
-                    zIndex = if (isSelected) 10 else 1
-                    setStyle(
-                        pinConfiguration {
-                            scale = pinScale
-                            backgroundColor = pinBgColor
-                            borderColor = Color.WHITE
-                            setGlyph(Glyph.fromColor(Color.WHITE))
-                        },
-                    )
-                },
-            )
-
+        // 2. Elevate newly selected marker to selected styling and display popover
+        activePopover?.remove()
+        activePopover = null
+        if (selectedStore != null) {
+            val marker = createOrUpdateStoreMarker(map, selectedStore, isSelected = true)
             if (marker != null) {
-                activeMarkers[store.id] = marker
-                marker.setClickListener {
-                    runOnUiThread {
-                        viewModel.selectStore(store)
-                    }
-                }
-                if (isSelected) {
-                    showStorePopover(map, marker, store)
+                showStorePopover(map, marker, selectedStore)
+            }
+        }
+    }
+
+    private fun createOrUpdateStoreMarker(
+        map: GoogleMap3D,
+        store: StoreLocation,
+        isSelected: Boolean,
+    ): Marker? {
+        val pinBgColor = when {
+            isSelected -> "#F4B400".toColorInt()
+            store.isOpenNow -> "#1A73E8".toColorInt()
+            else -> "#757575".toColorInt()
+        }
+        val pinScale = if (isSelected) {
+            StoreLocation.SELECTED_PIN_SCALE
+        } else {
+            StoreLocation.DEFAULT_PIN_SCALE
+        }
+
+        val marker = map.addMarker(
+            markerOptions {
+                id = store.id
+                position = store.toLatLngAltitude()
+                label = store.name
+                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                collisionBehavior = CollisionBehavior.REQUIRED
+                isExtruded = true
+                isDrawnWhenOccluded = true
+                zIndex = if (isSelected) 10 else 1
+                setStyle(
+                    pinConfiguration {
+                        scale = pinScale
+                        backgroundColor = pinBgColor
+                        borderColor = Color.WHITE
+                        setGlyph(Glyph.fromColor(Color.WHITE))
+                    },
+                )
+            },
+        )
+
+        if (marker != null) {
+            activeMarkers[store.id] = marker
+            marker.setClickListener {
+                runOnUiThread {
+                    viewModel.selectStore(store)
                 }
             }
         }
+        return marker
     }
 
 
@@ -408,6 +461,14 @@ class StoreLocatorActivity : SampleBaseActivity() {
         )
         activePopover = popover
         popover.show()
+    }
+
+    override fun onDestroy() {
+        activePopover?.remove()
+        activePopover = null
+        activeMarkers.values.forEach { it.remove() }
+        activeMarkers.clear()
+        super.onDestroy()
     }
 
     private fun togglePanelCollapse() {

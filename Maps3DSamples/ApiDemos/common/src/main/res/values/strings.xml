@@ -322,7 +322,7 @@
     <string name="store_locator_switch_to_2d">Switch to 2D</string>
     <string name="store_locator_overview_2d">Overview</string>
     <string name="store_locator_filter_open_now">Open Now</string>
-    <string name="store_locator_filter_drive_thru">Drive-Thru</string>
+    <string name="store_locator_filter_drive_thru" tools:ignore="Spelling">Drive-Thru</string>
     <string name="store_locator_filter_open_24h">24 Hours</string>
     <string name="store_locator_filter_ev_charging">EV Charging</string>
     <string name="store_locator_open_status">Open</string>
@@ -330,7 +330,7 @@
     <string name="store_locator_distance_format" translatable="false">%1$.1f km</string>
     <string name="store_locator_address_distance_format">%1$s • %2$.1f km</string>
     <string name="store_locator_hours_phone_format">%1$s • %2$s</string>
-    <string name="store_locator_count_format">%1$d of %2$d stores</string>
+    <string name="store_locator_count_format" tools:ignore="PluralsCandidate">%1$d of %2$d stores</string>
     <string name="store_locator_clear_filters">Clear Filters</string>
     <string name="routes_switch_to_3d">3D View</string>
     <string name="routes_switch_to_2d">2D View</string>
