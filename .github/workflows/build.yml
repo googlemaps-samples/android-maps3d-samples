@@ -84,3 +84,23 @@ jobs:
       - name: Run PlacesUIKit3D Spotless Check
         run: ./gradlew :PlacesUIKit3D:spotlessCheck
 
+  build-codelab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Java 21
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Build Codelab Starter
+        working-directory: codelab/starter
+        run: ./gradlew assembleDebug testDebugUnitTest
+      - name: Build Codelab Solution
+        working-directory: codelab/solution
+        run: ./gradlew assembleDebug testDebugUnitTest
+
+
