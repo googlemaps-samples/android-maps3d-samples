@@ -56,6 +56,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -66,6 +67,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.maps3d.common.Map3DQuickSettingsWidget
 import com.example.maps3d.common.Map3DSessionTheme
+import com.example.maps3d.common.Map3DSettings
+import com.example.maps3d.common.Map3DUiControls
 import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps.model.LatLng
@@ -133,6 +136,7 @@ fun UiControlsScreen() {
     var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
     var isCollapsed by remember { mutableStateOf(false) }
     val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.ROADMAP)
+    val view = LocalView.current
 
     // Local state for UI controls showcase (directly controls SDK without polluting session settings)
     var zoomEnabled by remember { mutableStateOf(true) }
@@ -191,6 +195,12 @@ fun UiControlsScreen() {
 
         uiSettings.setUiControlsPlacement(primaryControls, primaryPlacement)
         uiSettings.setUiControlsPlacement(secondaryControls, secondaryPlacement)
+        Map3DSettings.findMap3DView(view.rootView)?.let { mapView ->
+            Map3DSettings.applyStatusBarInsetsToMapView(mapView)
+            mapView.post {
+                Map3DSettings.applyStatusBarInsetsToMapView(mapView)
+            }
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -380,6 +390,25 @@ fun UiControlsScreen() {
             }
         }
 
+        val localUiControls = remember(
+            zoomEnabled,
+            tiltEnabled,
+            rotateEnabled,
+            compassEnabled,
+            panVerticalEnabled,
+            panHorizontalEnabled,
+            controlsPosition,
+        ) {
+            Map3DUiControls(
+                zoom = zoomEnabled,
+                tilt = tiltEnabled,
+                rotate = rotateEnabled,
+                compass = compassEnabled,
+                panVertical = panVerticalEnabled,
+                panHorizontal = panHorizontalEnabled,
+                controlsPosition = controlsPosition,
+            )
+        }
         Map3DQuickSettingsWidget(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -387,6 +416,7 @@ fun UiControlsScreen() {
                 .padding(top = 8.dp, end = 8.dp),
             sampleDefaultMapMode = Map3DMode.ROADMAP,
             googleMap3D = googleMap3D,
+            uiControlsOverride = localUiControls,
         )
     }
 }
