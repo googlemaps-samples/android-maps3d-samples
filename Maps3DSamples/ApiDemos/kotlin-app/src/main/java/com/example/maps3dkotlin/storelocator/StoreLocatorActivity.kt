@@ -27,7 +27,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.graphics.toColorInt
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
@@ -157,6 +157,8 @@ class StoreLocatorActivity : SampleBaseActivity() {
     override fun onQuickSettingsChanged(settings: Map3DSettings) {
         super.onQuickSettingsChanged(settings)
         viewModel.setMapMode(settings.mapMode)
+        lastRenderedStoreIds = emptyList()
+        googleMap3D?.let { syncMapMarkersAndCamera(it, viewModel.currentState) }
     }
 
     private fun bindViews(panel: View) {
@@ -360,11 +362,7 @@ class StoreLocatorActivity : SampleBaseActivity() {
         store: StoreLocation,
         isSelected: Boolean,
     ): Marker? {
-        val pinBgColor = when {
-            isSelected -> "#F4B400".toColorInt()
-            store.isOpenNow -> "#1A73E8".toColorInt()
-            else -> "#757575".toColorInt()
-        }
+        val pinBgColor = store.getPinBackgroundColor(this, isSelected)
         val pinScale = if (isSelected) {
             StoreLocation.SELECTED_PIN_SCALE
         } else {
@@ -380,6 +378,7 @@ class StoreLocatorActivity : SampleBaseActivity() {
                 collisionBehavior = CollisionBehavior.REQUIRED
                 isExtruded = true
                 isDrawnWhenOccluded = true
+                isSizePreserved = true
                 zIndex = if (isSelected) 10 else 1
                 setStyle(
                     pinConfiguration {
@@ -433,7 +432,7 @@ class StoreLocatorActivity : SampleBaseActivity() {
                         store.phone,
                     )
                     textSize = 12f
-                    setTextColor(if (store.isOpenNow) "#1E8E3E".toColorInt() else Color.GRAY)
+                    setTextColor(if (store.isOpenNow) Color.parseColor("#1E8E3E") else Color.GRAY)
                 },
             )
         }
@@ -542,7 +541,7 @@ class StoreLocatorActivity : SampleBaseActivity() {
                 val density = context.resources.displayMetrics.density
                 cardRoot.strokeWidth = ((if (isSelected) 2.5f else 1f) * density).toInt()
                 cardRoot.strokeColor = if (isSelected) {
-                    "#F4B400".toColorInt()
+                    ContextCompat.getColor(context, R.color.store_pin_selected)
                 } else {
                     Color.LTGRAY
                 }

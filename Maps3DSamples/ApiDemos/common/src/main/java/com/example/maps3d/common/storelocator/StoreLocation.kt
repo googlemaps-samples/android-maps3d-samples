@@ -16,7 +16,12 @@
 
 package com.example.maps3d.common.storelocator
 
+import android.content.Context
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
+import androidx.core.content.ContextCompat
 import com.example.maps3d.common.toValidCamera
+import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.camera
@@ -100,7 +105,64 @@ data class StoreLocation(
     fun formattedAmenities(): String =
         amenities.joinToString(" • ") { "${it.iconEmoji} ${it.label}" }
 
+    /** Resolves the marker pin background color resource ID for this store instance. */
+    @ColorRes
+    fun getPinColorResId(isSelected: Boolean): Int =
+        StoreLocation.getPinColorResId(isSelected, isOpenNow)
+
+    /** Resolves the theme-aware marker pin background color for this store instance. */
+    @ColorInt
+    fun getPinBackgroundColor(context: Context, isSelected: Boolean): Int =
+        StoreLocation.getPinBackgroundColor(context, isSelected, isOpenNow)
+
+    /** Resolves the marker pin background color for this store instance under a specific theme mode. */
+    @ColorInt
+    fun getPinBackgroundColor(isDarkTheme: Boolean, isSelected: Boolean = false): Int =
+        StoreLocation.getPinBackgroundColor(isSelected, isOpenNow, isDarkTheme)
+
     companion object {
+        /** Marker pin color constants across light and dark themes. */
+        const val COLOR_PIN_SELECTED_LIGHT = 0xFFF4B400.toInt()
+        const val COLOR_PIN_SELECTED_DARK = 0xFFFDD663.toInt()
+        const val COLOR_PIN_OPEN_LIGHT = 0xFF1A73E8.toInt()
+        const val COLOR_PIN_OPEN_DARK = 0xFF8AB4F8.toInt()
+        const val COLOR_PIN_CLOSED_LIGHT = 0xFF757575.toInt()
+        const val COLOR_PIN_CLOSED_DARK = 0xFFBDC1C6.toInt()
+
+        /**
+         * Resolves the marker pin background color resource ID for a store based on its selection
+         * and open status.
+         */
+        @JvmStatic
+        @ColorRes
+        fun getPinColorResId(isSelected: Boolean, isOpenNow: Boolean): Int = when {
+            isSelected -> R.color.store_pin_selected
+            isOpenNow -> R.color.store_pin_open
+            else -> R.color.store_pin_closed
+        }
+
+        /**
+         * Resolves the marker pin background color using theme-aware resources from the given [Context].
+         */
+        @JvmStatic
+        @ColorInt
+        fun getPinBackgroundColor(context: Context, isSelected: Boolean, isOpenNow: Boolean): Int =
+            ContextCompat.getColor(context, getPinColorResId(isSelected, isOpenNow))
+
+        /**
+         * Resolves the marker pin background color for a given theme mode ([isDarkTheme]).
+         */
+        @JvmStatic
+        @ColorInt
+        fun getPinBackgroundColor(
+            isSelected: Boolean,
+            isOpenNow: Boolean,
+            isDarkTheme: Boolean,
+        ): Int = when {
+            isSelected -> if (isDarkTheme) COLOR_PIN_SELECTED_DARK else COLOR_PIN_SELECTED_LIGHT
+            isOpenNow -> if (isDarkTheme) COLOR_PIN_OPEN_DARK else COLOR_PIN_OPEN_LIGHT
+            else -> if (isDarkTheme) COLOR_PIN_CLOSED_DARK else COLOR_PIN_CLOSED_LIGHT
+        }
         /** Reference user origin at Union Square, San Francisco. */
         const val REFERENCE_ORIGIN_LAT = 37.7879
         const val REFERENCE_ORIGIN_LNG = -122.4075
@@ -124,9 +186,11 @@ data class StoreLocation(
         const val DETAIL_2D_CAMERA_TILT = 0.0
         const val DETAIL_2D_CAMERA_RANGE = 850.0
 
-        /** Marker pin scale constants. */
-        const val DEFAULT_PIN_SCALE = 1.0f
-        const val SELECTED_PIN_SCALE = 1.35f
+        /**
+         * Marker pin scale constants.
+         */
+        const val DEFAULT_PIN_SCALE = 0.8f
+        const val SELECTED_PIN_SCALE = 1.0f
 
         /** Default 2D-style overview camera covering all San Francisco stores. */
         @JvmStatic

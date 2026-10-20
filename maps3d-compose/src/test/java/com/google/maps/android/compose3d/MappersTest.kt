@@ -75,6 +75,7 @@ class MappersTest {
             zIndex = 2,
             isExtruded = true,
             isDrawnWhenOccluded = true,
+            isSizePreserved = true,
             collisionBehavior = CollisionBehavior.REQUIRED,
         )
 
@@ -86,6 +87,7 @@ class MappersTest {
         assertEquals("Test Label", options.label)
         assertEquals(true, options.isExtruded)
         assertEquals(true, options.isDrawnWhenOccluded)
+        assertEquals(true, options.isSizePreserved)
         assertEquals(CollisionBehavior.REQUIRED, options.collisionBehavior)
     }
 
@@ -257,6 +259,7 @@ class MappersTest {
         assertEquals(0, options.zIndex)
         assertEquals(false, options.isExtruded)
         assertEquals(false, options.isDrawnWhenOccluded)
+        assertEquals(false, options.isSizePreserved)
         assertEquals(CollisionBehavior.REQUIRED, options.collisionBehavior)
     }
 

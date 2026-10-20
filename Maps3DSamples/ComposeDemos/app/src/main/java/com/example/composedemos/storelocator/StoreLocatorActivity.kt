@@ -26,6 +26,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -72,12 +73,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.maps3d.common.Map3DColorScheme
 import com.example.maps3d.common.Map3DQuickSettingsWidget
 import com.example.maps3d.common.Map3DSessionTheme
 import com.example.maps3d.common.Map3DSettingsController
@@ -182,28 +183,33 @@ fun StoreLocatorScreen(
         }
     }
 
-    val markers = remember(uiState.filteredStores, selectedStore) {
+    val isDarkTheme = when (settings.colorScheme) {
+        Map3DColorScheme.LIGHT -> false
+        Map3DColorScheme.DARK -> true
+        Map3DColorScheme.FOLLOW_SYSTEM -> isSystemInDarkTheme()
+    }
+
+    val markers = remember(uiState.filteredStores, selectedStore, isDarkTheme) {
         uiState.filteredStores.map { store ->
             val isSelected = store.id == selectedStore?.id
-            // Canonical Google brand colors: #F4B400 (Google Yellow) for selected, #1A73E8 (Google Blue) for open
-            val bgColor = when {
-                isSelected -> "#F4B400".toColorInt()
-                store.isOpenNow -> "#1A73E8".toColorInt()
-                else -> "#757575".toColorInt()
-            }
+            val bgColor = store.getPinBackgroundColor(
+                isSelected = isSelected,
+                isDarkTheme = isDarkTheme,
+            )
             val scale = if (isSelected) {
                 StoreLocation.SELECTED_PIN_SCALE
             } else {
                 StoreLocation.DEFAULT_PIN_SCALE
             }
             MarkerConfig(
-                key = "${store.id}_$isSelected",
+                key = store.id,
                 position = store.toLatLngAltitude(),
                 label = store.name,
                 altitudeMode = AltitudeMode.CLAMP_TO_GROUND,
                 collisionBehavior = CollisionBehavior.REQUIRED,
                 isExtruded = true,
                 isDrawnWhenOccluded = true,
+                isSizePreserved = true,
                 zIndex = if (isSelected) 10 else 1,
                 pinConfig = PinConfig(
                     scale = scale,

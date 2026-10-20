@@ -255,4 +255,60 @@ class StoreLocatorViewModelTest {
         assertEquals(StoreLocation.OVERVIEW_3D_CAMERA_TILT, state.targetCamera.tilt ?: 0.0, 0.001)
         assertNull(state.flyToCommand)
     }
+
+    @Test
+    fun storeLocation_pinColors_supportLightAndDarkVariants() {
+        val openStore = StoreLocation.SAN_FRANCISCO_STORES.first { it.isOpenNow }
+        val closedStore = StoreLocation.SAN_FRANCISCO_STORES.first { !it.isOpenNow }
+
+        // Light mode colors
+        assertEquals(
+            StoreLocation.COLOR_PIN_SELECTED_LIGHT,
+            StoreLocation.getPinBackgroundColor(isSelected = true, isOpenNow = true, isDarkTheme = false),
+        )
+        assertEquals(
+            StoreLocation.COLOR_PIN_SELECTED_LIGHT,
+            openStore.getPinBackgroundColor(isDarkTheme = false, isSelected = true),
+        )
+        assertEquals(
+            StoreLocation.COLOR_PIN_OPEN_LIGHT,
+            openStore.getPinBackgroundColor(isDarkTheme = false, isSelected = false),
+        )
+        assertEquals(
+            StoreLocation.COLOR_PIN_CLOSED_LIGHT,
+            closedStore.getPinBackgroundColor(isDarkTheme = false, isSelected = false),
+        )
+
+        // Dark mode colors
+        assertEquals(
+            StoreLocation.COLOR_PIN_SELECTED_DARK,
+            StoreLocation.getPinBackgroundColor(isSelected = true, isOpenNow = true, isDarkTheme = true),
+        )
+        assertEquals(
+            StoreLocation.COLOR_PIN_SELECTED_DARK,
+            openStore.getPinBackgroundColor(isDarkTheme = true, isSelected = true),
+        )
+        assertEquals(
+            StoreLocation.COLOR_PIN_OPEN_DARK,
+            openStore.getPinBackgroundColor(isDarkTheme = true, isSelected = false),
+        )
+        assertEquals(
+            StoreLocation.COLOR_PIN_CLOSED_DARK,
+            closedStore.getPinBackgroundColor(isDarkTheme = true, isSelected = false),
+        )
+
+        // Resource IDs
+        assertEquals(
+            com.example.maps3dcommon.R.color.store_pin_selected,
+            openStore.getPinColorResId(isSelected = true),
+        )
+        assertEquals(
+            com.example.maps3dcommon.R.color.store_pin_open,
+            openStore.getPinColorResId(isSelected = false),
+        )
+        assertEquals(
+            com.example.maps3dcommon.R.color.store_pin_closed,
+            closedStore.getPinColorResId(isSelected = false),
+        )
+    }
 }

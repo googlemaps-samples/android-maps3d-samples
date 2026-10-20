@@ -28,6 +28,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -84,10 +85,6 @@ public class StoreLocatorActivity extends SampleBaseActivity {
 
     private static final String TAG = "StoreLocatorActivity";
 
-    // Canonical Google brand colors: #F4B400 (Google Yellow) for selected, #1A73E8 (Google Blue)
-    private static final int COLOR_PIN_SELECTED = Color.parseColor("#F4B400");
-    private static final int COLOR_PIN_OPEN = Color.parseColor("#1A73E8");
-    private static final int COLOR_PIN_CLOSED = Color.parseColor("#757575");
     private static final int COLOR_STATUS_OPEN = Color.parseColor("#1E8E3E");
 
     private StoreLocatorViewModel viewModel;
@@ -190,6 +187,10 @@ public class StoreLocatorActivity extends SampleBaseActivity {
         super.onQuickSettingsChanged(settings);
         if (viewModel != null) {
             viewModel.setMapMode(settings.getMapMode());
+            lastRenderedStoreIds.clear();
+            if (googleMap3D != null) {
+                syncMapMarkersAndCamera(googleMap3D, viewModel.getCurrentState());
+            }
         }
     }
 
@@ -425,10 +426,7 @@ public class StoreLocatorActivity extends SampleBaseActivity {
             GoogleMap3D map,
             StoreLocation store,
             boolean isSelected) {
-        int pinBgColor =
-                isSelected
-                        ? COLOR_PIN_SELECTED
-                        : (store.isOpenNow() ? COLOR_PIN_OPEN : COLOR_PIN_CLOSED);
+        int pinBgColor = store.getPinBackgroundColor(this, isSelected);
         float pinScale =
                 isSelected
                         ? StoreLocation.SELECTED_PIN_SCALE
@@ -450,6 +448,7 @@ public class StoreLocatorActivity extends SampleBaseActivity {
         options.setCollisionBehavior(CollisionBehavior.REQUIRED);
         options.setExtruded(true);
         options.setDrawnWhenOccluded(true);
+        options.setSizePreserved(true);
         options.setZIndex(isSelected ? 10 : 1);
         options.setStyle(pinConfig);
 
@@ -622,7 +621,11 @@ public class StoreLocatorActivity extends SampleBaseActivity {
 
                 float density = itemView.getContext().getResources().getDisplayMetrics().density;
                 cardRoot.setStrokeWidth((int) ((isSelected ? 2.5f : 1.0f) * density));
-                cardRoot.setStrokeColor(isSelected ? COLOR_PIN_SELECTED : Color.LTGRAY);
+                int selectedStrokeColor =
+                        ContextCompat.getColor(
+                                itemView.getContext(),
+                                com.example.maps3dcommon.R.color.store_pin_selected);
+                cardRoot.setStrokeColor(isSelected ? selectedStrokeColor : Color.LTGRAY);
                 cardRoot.setOnClickListener(v -> onClickListener.onStoreClick(store));
             }
         }
