@@ -43,7 +43,18 @@ import java.io.ByteArrayOutputStream
  *
  * This version uses org.json for parsing to avoid binary compatibility issues with kotlinx.serialization.
  */
-class GeminiVisualTestHelper {
+class GeminiVisualTestHelper @JvmOverloads constructor(
+    private val defaultModel: String = DEFAULT_MODEL,
+) {
+
+    companion object {
+        const val DEFAULT_MODEL = "gemini-3.8-flash"
+
+        @JvmStatic
+        fun resolveModel(vararg candidates: String?): String {
+            return candidates.firstOrNull { !it.isNullOrBlank() }?.trim() ?: DEFAULT_MODEL
+        }
+    }
 
     private val client = HttpClient(CIO) {
         install(HttpTimeout) {
@@ -57,7 +68,12 @@ class GeminiVisualTestHelper {
      * Executes a UI action based on a natural language prompt.
      * It analyzes the current UI hierarchy and asks Gemini to determine the best action.
      */
-    suspend fun performActionFromPrompt(prompt: String, uiDevice: UiDevice, apiKey: String) {
+    suspend fun performActionFromPrompt(
+        prompt: String,
+        uiDevice: UiDevice,
+        apiKey: String,
+        model: String = defaultModel,
+    ) {
         val hierarchyStream = ByteArrayOutputStream()
         uiDevice.dumpWindowHierarchy(hierarchyStream)
         val hierarchyXml = hierarchyStream.toString("UTF-8")
@@ -82,8 +98,8 @@ class GeminiVisualTestHelper {
 
         val fullPrompt = "$systemPrompt\n\nCommand: \"$prompt\"\n\nUI Hierarchy:\n$hierarchyXml"
 
-        val modelName = "gemini-3.5-flash"
-        
+        val modelName = model.trim().ifEmpty { defaultModel }
+
         val requestJson = JSONObject().apply {
             put("contents", JSONArray().apply {
                 put(JSONObject().apply {
@@ -184,11 +200,9 @@ class GeminiVisualTestHelper {
     suspend fun analyzeImage(
         bitmap: Bitmap,
         prompt: String,
-        apiKey: String
+        apiKey: String,
+        model: String = defaultModel,
     ): String? {
-        // Log available models first for easier debugging.
-        listAvailableModels(apiKey)
-
         val base64Image = bitmap.toBase64EncodedJpeg()
         
         val requestJson = JSONObject().apply {
@@ -207,7 +221,8 @@ class GeminiVisualTestHelper {
             })
         }
 
-        val response: HttpResponse = client.post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=$apiKey") {
+        val resolvedModel = model.trim().ifEmpty { defaultModel }
+        val response: HttpResponse = client.post("https://generativelanguage.googleapis.com/v1beta/models/$resolvedModel:generateContent?key=$apiKey") {
             contentType(ContentType.Application.Json)
             setBody(requestJson.toString())
         }
@@ -245,19 +260,27 @@ class GeminiVisualTestHelper {
     /**
      * Blocking version of analyzeImage for Java interop.
      */
+    @JvmOverloads
     fun analyzeImageBlocking(
         bitmap: Bitmap,
         prompt: String,
-        apiKey: String
+        apiKey: String,
+        model: String = defaultModel,
     ): String? = runBlocking {
-        analyzeImage(bitmap, prompt, apiKey)
+        analyzeImage(bitmap, prompt, apiKey, model)
     }
 
     /**
      * Blocking version of performActionFromPrompt for Java interop.
      */
-    fun performActionFromPromptBlocking(prompt: String, uiDevice: UiDevice, apiKey: String) = runBlocking {
-        performActionFromPrompt(prompt, uiDevice, apiKey)
+    @JvmOverloads
+    fun performActionFromPromptBlocking(
+        prompt: String,
+        uiDevice: UiDevice,
+        apiKey: String,
+        model: String = defaultModel,
+    ) = runBlocking {
+        performActionFromPrompt(prompt, uiDevice, apiKey, model)
     }
 
     private fun Bitmap.toBase64EncodedJpeg(): String {

@@ -37,7 +37,12 @@ abstract class BaseVisualTest {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     protected val uiDevice: UiDevice = UiDevice.getInstance(instrumentation)
     protected val context: Context = instrumentation.targetContext
-    protected val helper = GeminiVisualTestHelper()
+    protected val geminiModel: String =
+        GeminiVisualTestHelper.resolveModel(
+            InstrumentationRegistry.getArguments().getString("GEMINI_MODEL"),
+            BuildConfig.GEMINI_MODEL,
+        )
+    protected val helper = GeminiVisualTestHelper(geminiModel)
 
     protected val geminiApiKey: String by lazy {
         val key = BuildConfig.GEMINI_API_KEY
