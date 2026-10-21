@@ -47,6 +47,7 @@
     <string name="feature_title_field_of_view">Field Of View</string>
     <string name="feature_title_projection_3d">3D Screen Projection</string>
     <string name="feature_title_maps_localization">Maps Localization</string>
+    <string name="feature_title_store_locator">Store Locator</string>
 
     <string name="feature_not_implemented">Coming soon!</string>
 
@@ -68,6 +69,7 @@
 
     <string name="camera_show_restriction">Show restriction</string>
     <string name="camera_hide_restriction">Hide restriction</string>
+    <string name="map_mode_roadmap">Roadmap (2D)</string>
     <string name="map_mode_hybrid">Hybrid</string>
     <string name="map_mode_satellite">Satellite</string>
     <string name="camera_roll_label">Roll</string>
@@ -312,4 +314,24 @@
     <string name="ui_control_chip_compass">Compass</string>
     <string name="ui_control_chip_pan_vertical">Pan Vertical</string>
     <string name="ui_control_chip_pan_horizontal">Pan Horizontal</string>
+
+    <!-- Store Locator (2D Roadmap / 3D Hybrid) Sample strings -->
+    <string name="store_locator_panel_title">Store Locator (2D Roadmap)</string>
+    <string name="store_locator_panel_title_3d">Store Locator (3D Hybrid)</string>
+    <string name="store_locator_switch_to_3d">Switch to 3D</string>
+    <string name="store_locator_switch_to_2d">Switch to 2D</string>
+    <string name="store_locator_overview_2d">Overview</string>
+    <string name="store_locator_filter_open_now">Open Now</string>
+    <string name="store_locator_filter_drive_thru" tools:ignore="Typos,Spelling">Drive-Thru</string>
+    <string name="store_locator_filter_open_24h">24 Hours</string>
+    <string name="store_locator_filter_ev_charging">EV Charging</string>
+    <string name="store_locator_open_status">Open</string>
+    <string name="store_locator_closed_status">Closed</string>
+    <string name="store_locator_distance_format" translatable="false">%1$.1f km</string>
+    <string name="store_locator_address_distance_format">%1$s • %2$.1f km</string>
+    <string name="store_locator_hours_phone_format">%1$s • %2$s</string>
+    <string name="store_locator_count_format" tools:ignore="PluralsCandidate">%1$d of %2$d stores</string>
+    <string name="store_locator_clear_filters">Clear Filters</string>
+    <string name="routes_switch_to_3d">3D View</string>
+    <string name="routes_switch_to_2d">2D View</string>
 </resources>

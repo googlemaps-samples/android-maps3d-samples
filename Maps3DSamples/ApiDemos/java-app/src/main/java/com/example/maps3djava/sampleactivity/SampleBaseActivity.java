@@ -296,7 +296,6 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
         isMapInitialized = true;
         Log.d(getTAG(), "onMapReady called (guaranteed once)");
 
-        googleMap3D.setCamera(getInitialCamera());
         Map3DSettingsController.getShared().onSampleEntered(getDefaultMapMode());
         Map3DSettings initialSettings = Map3DSettingsController.getShared().getSettings();
         initialSettings.applyTo(googleMap3D);
@@ -336,6 +335,16 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
         this.googleMap3D = googleMap3D;
         Log.d(getTAG(), "onMap3DViewReady called");
 
+        // Synchronize session mode first so getInitialCamera() reads the active 2D/3D mode immediately
+        Map3DSettingsController.getShared().onSampleEntered(getDefaultMapMode());
+        Map3DSettingsController.getShared().getSettings().applyTo(googleMap3D);
+        googleMap3D.setCamera(getInitialCamera());
+
+        // Initialize and set the camera changed listener so getCamera() never returns stale XML coordinates
+        cameraChangedListener = cameraPosition -> {
+        };
+        googleMap3D.setCameraChangedListener(cameraChangedListener);
+
         // Wire up the standardized listener
         googleMap3D.setOnMapReadyListener(map -> {
             googleMap3D.setOnMapReadyListener(null);
@@ -349,15 +358,12 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
             }
         });
 
-        // Ensure onMapReady triggers even on delayed or reused fragments.
+        // Ensure onMapReady triggers promptly even when the SDK's process-wide onMapReadyListener has already fired
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            onMapReady(googleMap3D);
-        }, 2000L);
-
-        // Initialize and set the camera changed listener
-        cameraChangedListener = cameraPosition -> {
-        };
-        googleMap3D.setCameraChangedListener(cameraChangedListener);
+            if (!isDestroyed() && !isFinishing()) {
+                onMapReady(googleMap3D);
+            }
+        }, 300L);
     }
 
     @CallSuper

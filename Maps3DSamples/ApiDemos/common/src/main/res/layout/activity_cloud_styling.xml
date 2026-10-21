@@ -55,10 +55,10 @@
         map3d:mapMode="roadmap"
         map3d:centerLat="37.7915"
         map3d:centerLng="-122.4010"
-        map3d:centerAlt="250"
+        map3d:centerAlt="0"
         map3d:heading="45"
-        map3d:tilt="65"
-        map3d:range="800"
+        map3d:tilt="0"
+        map3d:range="2500"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -85,13 +85,35 @@
             android:orientation="vertical"
             >
 
-            <TextView
-                style="@style/TextAppearance.Material3.LabelLarge"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/map_mode"
-                android:textStyle="bold"
-                />
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                >
+
+                <TextView
+                    style="@style/TextAppearance.Material3.LabelLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/map_mode"
+                    android:textStyle="bold"
+                    />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_toggle_2d_3d"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="36dp"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:text="@string/store_locator_switch_to_3d"
+                    android:textSize="12sp"
+                    app:cornerRadius="18dp"
+                    />
+            </LinearLayout>
 
             <RadioGroup
                 android:id="@+id/rg_map_mode"

@@ -19,6 +19,8 @@ package com.example.placesuikit3d.ui.viewmodel
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.placesuikit3d.data.model.Camera3DTarget
 import com.example.placesuikit3d.data.repository.PlacesRepositoryImpl
+import com.google.android.gms.maps3d.model.Map3DMode
+import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,11 +60,18 @@ class PlaceSearch3DViewModelTest {
     }
 
     @Test
-    fun initialState_loadsDefaultLandmarks() = runTest {
+    fun initialState_loadsDefaultLandmarksInRoadmap2DMode() = runTest {
         advanceUntilIdle()
         val state = viewModel.screenState.value
         assertThat(state.selectedCategory).isEqualTo("🏛️ Landmarks")
+        assertThat(state.mapMode).isEqualTo(Map3DMode.ROADMAP)
+        assertThat(state.is3DView).isFalse()
+        assertThat(state.hasCameraMovedSinceSearch).isFalse()
         assertThat(state.allMarkers).isNotEmpty()
+        assertThat(state.cameraMode).isInstanceOf(Camera3DMode.FlyingTo::class.java)
+        val initialTarget = (state.cameraMode as Camera3DMode.FlyingTo).target
+        assertThat(initialTarget.tilt).isEqualTo(0.0)
+        assertThat(initialTarget.range).isEqualTo(2000.0)
     }
 
     @Test
@@ -75,6 +84,48 @@ class PlaceSearch3DViewModelTest {
         assertThat(state.allMarkers).isNotEmpty()
         assertThat(state.allMarkers.any { it.name.contains("Coffee") || it.category == "☕ Cafes" }).isTrue()
         assertThat(state.cameraMode).isInstanceOf(Camera3DMode.FlyingTo::class.java)
+        assertThat(state.hasCameraMovedSinceSearch).isFalse()
+    }
+
+    @Test
+    fun onCameraMoved_setsHasCameraMovedSinceSearch_andSearchThisAreaResetsIt() = runTest {
+        advanceUntilIdle()
+        assertThat(viewModel.screenState.value.hasCameraMovedSinceSearch).isFalse()
+
+        // Pan camera significantly away from initial center
+        val pannedCenter = latLngAltitude {
+            latitude = 40.0500
+            longitude = -105.2500
+            altitude = 1600.0
+        }
+        viewModel.onCameraMoved(pannedCenter)
+        assertThat(viewModel.screenState.value.hasCameraMovedSinceSearch).isTrue()
+
+        // Clicking "Search this area" runs nearby category search and resets flag
+        viewModel.searchThisArea(pannedCenter)
+        advanceUntilIdle()
+        val updatedState = viewModel.screenState.value
+        assertThat(updatedState.hasCameraMovedSinceSearch).isFalse()
+        assertThat(updatedState.lastSearchedCenter?.latitude).isWithin(0.0001).of(40.0500)
+        assertThat(updatedState.allMarkers).isNotEmpty()
+    }
+
+    @Test
+    fun setMapMode_updatesMapModeState() = runTest {
+        assertThat(viewModel.screenState.value.mapMode).isEqualTo(Map3DMode.ROADMAP)
+        assertThat(viewModel.screenState.value.is3DView).isFalse()
+
+        viewModel.setMapMode(Map3DMode.HYBRID)
+        assertThat(viewModel.screenState.value.mapMode).isEqualTo(Map3DMode.HYBRID)
+        assertThat(viewModel.screenState.value.is3DView).isTrue()
+
+        viewModel.setMapMode(Map3DMode.SATELLITE)
+        assertThat(viewModel.screenState.value.mapMode).isEqualTo(Map3DMode.SATELLITE)
+        assertThat(viewModel.screenState.value.is3DView).isTrue()
+
+        viewModel.setMapMode(Map3DMode.ROADMAP)
+        assertThat(viewModel.screenState.value.mapMode).isEqualTo(Map3DMode.ROADMAP)
+        assertThat(viewModel.screenState.value.is3DView).isFalse()
     }
 
     @Test
@@ -111,6 +162,8 @@ class PlaceSearch3DViewModelTest {
         viewModel.toggleOrbit()
         val stateOn = viewModel.screenState.value
         assertThat(stateOn.isOrbiting).isTrue()
+        assertThat(stateOn.is3DView).isTrue()
+        assertThat(stateOn.mapMode).isEqualTo(Map3DMode.HYBRID)
         assertThat(stateOn.cameraMode).isInstanceOf(Camera3DMode.Orbiting::class.java)
 
         // Turn Orbit Off
@@ -121,22 +174,25 @@ class PlaceSearch3DViewModelTest {
     }
 
     @Test
-    fun toggle2D3DView_switchesPerspective() = runTest {
-        assertThat(viewModel.screenState.value.is3DView).isTrue()
+    fun toggle2D3DView_switchesPerspectiveAndMapMode() = runTest {
+        assertThat(viewModel.screenState.value.is3DView).isFalse()
+        assertThat(viewModel.screenState.value.mapMode).isEqualTo(Map3DMode.ROADMAP)
 
-        // Switch to 2D
-        viewModel.toggle2D3DView()
-        val state2D = viewModel.screenState.value
-        assertThat(state2D.is3DView).isFalse()
-        val cameraMode2D = state2D.cameraMode as Camera3DMode.FlyingTo
-        assertThat(cameraMode2D.target.tilt).isEqualTo(0.0)
-
-        // Switch back to 3D
+        // Switch from default 2D (ROADMAP) to 3D (HYBRID)
         viewModel.toggle2D3DView()
         val state3D = viewModel.screenState.value
         assertThat(state3D.is3DView).isTrue()
+        assertThat(state3D.mapMode).isEqualTo(Map3DMode.HYBRID)
         val cameraMode3D = state3D.cameraMode as Camera3DMode.FlyingTo
         assertThat(cameraMode3D.target.tilt).isEqualTo(50.0)
+
+        // Switch back to 2D (ROADMAP)
+        viewModel.toggle2D3DView()
+        val state2D = viewModel.screenState.value
+        assertThat(state2D.is3DView).isFalse()
+        assertThat(state2D.mapMode).isEqualTo(Map3DMode.ROADMAP)
+        val cameraMode2D = state2D.cameraMode as Camera3DMode.FlyingTo
+        assertThat(cameraMode2D.target.tilt).isEqualTo(0.0)
     }
 
     @Test
@@ -193,5 +249,22 @@ class PlaceSearch3DViewModelTest {
         viewModel.dismissPlaceDetails()
         assertThat(viewModel.screenState.value.selectedPlaceId).isNull()
         assertThat(viewModel.screenState.value.selectedPlace).isNull()
+    }
+
+    @Test
+    fun setMapMode_transitionsBetween2DAnd3DTilt() = runTest {
+        viewModel.setMapMode(Map3DMode.HYBRID)
+        val state3D = viewModel.screenState.value
+        assertThat(state3D.is3DView).isTrue()
+        assertThat(state3D.mapMode).isEqualTo(Map3DMode.HYBRID)
+        val cameraMode3D = state3D.cameraMode as Camera3DMode.FlyingTo
+        assertThat(cameraMode3D.target.tilt).isEqualTo(50.0)
+
+        viewModel.setMapMode(Map3DMode.ROADMAP)
+        val state2D = viewModel.screenState.value
+        assertThat(state2D.is3DView).isFalse()
+        assertThat(state2D.mapMode).isEqualTo(Map3DMode.ROADMAP)
+        val cameraMode2D = state2D.cameraMode as Camera3DMode.FlyingTo
+        assertThat(cameraMode2D.target.tilt).isEqualTo(0.0)
     }
 }

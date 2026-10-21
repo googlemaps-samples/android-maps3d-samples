@@ -61,6 +61,8 @@
     <!-- Camera and View Controls -->
     <string name="label_3d">3D</string>
     <string name="label_2d">2D</string>
+    <string name="chip_view_3d">🏙️ 3D Map</string>
+    <string name="chip_view_2d">🗺️ 2D Map</string>
 
     <!-- UI Action Feedback Messages -->
     <string name="switched_to_3d">Switched to 3D Perspective</string>
@@ -76,4 +78,17 @@
     <string name="error_find_location">Failed to find location</string>
     <string name="error_load_place_details">Failed to load place details</string>
     <string name="error_loading_3d_map">Error loading 3D map</string>
+    <string name="search_this_area">Search this area</string>
+    <string name="quick_settings_title">Map Settings</string>
+    <string name="map_mode_section">Map Mode</string>
+    <string name="map_mode_roadmap">Roadmap (2D Vector)</string>
+    <string name="map_mode_hybrid">Hybrid (3D + Labels)</string>
+    <string name="map_mode_satellite">Satellite (3D Mesh)</string>
+    <string name="color_scheme_section">Color Scheme</string>
+    <string name="color_scheme_system">Follow System</string>
+    <string name="color_scheme_light">Light Mode</string>
+    <string name="color_scheme_dark">Dark Mode</string>
+    <string name="ui_controls_section">Camera UI Controls</string>
+    <string name="settings_done">Done</string>
+    <string name="settings_button_desc">Open map settings</string>
 </resources>

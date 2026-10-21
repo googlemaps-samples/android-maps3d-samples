@@ -140,13 +140,17 @@ data class Map3DSettings(
     fun applyTo(googleMap3D: GoogleMap3D) {
         googleMap3D.setMapMode(mapMode)
 
-        // Apply dark / light mode via AppCompatDelegate
+        // Apply dark / light mode via AppCompatDelegate only when explicitly changed
+        val currentNightMode = AppCompatDelegate.getDefaultNightMode()
         val nightMode = when (colorScheme) {
             Map3DColorScheme.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
             Map3DColorScheme.DARK -> AppCompatDelegate.MODE_NIGHT_YES
             Map3DColorScheme.FOLLOW_SYSTEM -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         }
-        if (AppCompatDelegate.getDefaultNightMode() != nightMode) {
+        val isRedundantSystemDefault =
+            colorScheme == Map3DColorScheme.FOLLOW_SYSTEM &&
+                currentNightMode == AppCompatDelegate.MODE_NIGHT_UNSPECIFIED
+        if (!isRedundantSystemDefault && currentNightMode != nightMode) {
             AppCompatDelegate.setDefaultNightMode(nightMode)
         }
 

@@ -38,6 +38,7 @@ import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps3d.GoogleMap3D;
 import com.google.android.gms.maps3d.model.Camera;
+import com.google.android.gms.maps3d.model.FlyToOptions;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.Map3DMode;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -82,12 +83,15 @@ public class RoadmapModeActivity extends SampleBaseActivity {
   private View cardHeader;
   private View cardContent;
   private MaterialButton btnCollapse;
+  private MaterialButton btnToggle2D3D;
   private RadioGroup rgMapMode;
 
   // --- State Variables ---
 
   private boolean isCollapsed = false;
   private boolean isSyncingRadioGroup = false;
+  private boolean is3DMode = false;
+  private boolean hasSyncedInitialMode = false;
 
   // --- Handlers & Runnables ---
 
@@ -118,12 +122,16 @@ public class RoadmapModeActivity extends SampleBaseActivity {
   @NonNull
   @Override
   public Camera getInitialCamera() {
+    double initialTilt =
+        Map3DSettingsController.getShared().getSettings().getMapMode() != Map3DMode.ROADMAP
+            ? 65.0
+            : 0.0;
     return toValidCamera(new Camera(
-        new LatLngAltitude(SF_LOCATION.latitude, SF_LOCATION.longitude, 250.0),
+        new LatLngAltitude(SF_LOCATION.latitude, SF_LOCATION.longitude, 0.0),
         45.0,
-        65.0,
+        initialTilt,
         0.0,
-        800.0
+        2500.0
     ));
   }
 
@@ -131,6 +139,8 @@ public class RoadmapModeActivity extends SampleBaseActivity {
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
+    Map3DSettingsController.getShared().onSampleEntered(getDefaultMapMode());
+    is3DMode = Map3DSettingsController.getShared().getSettings().getMapMode() != Map3DMode.ROADMAP;
     super.onCreate(savedInstanceState);
 
     // Hide base pill scroll view as this activity manages its own overlay card
@@ -162,6 +172,22 @@ public class RoadmapModeActivity extends SampleBaseActivity {
     rgMapMode = findViewById(R.id.rg_map_mode);
     cardContent = rgMapMode;
     btnCollapse = findViewById(R.id.btn_collapse);
+    btnToggle2D3D = findViewById(R.id.btn_toggle_2d_3d);
+    updateToggle2D3DButtonText();
+
+    if (btnToggle2D3D != null) {
+      btnToggle2D3D.setOnClickListener(v -> {
+        int nextMode = is3DMode ? Map3DMode.ROADMAP : Map3DMode.HYBRID;
+        is3DMode = nextMode != Map3DMode.ROADMAP;
+        updateToggle2D3DButtonText();
+        Map3DSettingsController.getShared().setMapMode(nextMode);
+        onQuickSettingsChanged(Map3DSettingsController.getShared().getSettings());
+        if (googleMap3D != null) {
+          Map3DSettingsController.getShared().getSettings().applyTo(googleMap3D);
+          applyCameraPerspective(googleMap3D, is3DMode);
+        }
+      });
+    }
 
     if (btnCollapse != null) {
       btnCollapse.setOnClickListener(v -> {
@@ -198,9 +224,12 @@ public class RoadmapModeActivity extends SampleBaseActivity {
         } else {
           return;
         }
+        is3DMode = mode != Map3DMode.ROADMAP;
+        updateToggle2D3DButtonText();
         Map3DSettingsController.getShared().setMapMode(mode);
         if (googleMap3D != null) {
           Map3DSettingsController.getShared().getSettings().applyTo(googleMap3D);
+          applyCameraPerspective(googleMap3D, is3DMode);
         }
       });
     }
@@ -209,8 +238,31 @@ public class RoadmapModeActivity extends SampleBaseActivity {
     fadeHandler.postDelayed(fadeOutRunnable, 3000L);
   }
 
+  private void updateToggle2D3DButtonText() {
+    if (btnToggle2D3D != null) {
+      btnToggle2D3D.setText(
+          is3DMode
+              ? R.string.store_locator_switch_to_2d
+              : R.string.store_locator_switch_to_3d);
+    }
+  }
+
+  private void applyCameraPerspective(@NonNull GoogleMap3D map, boolean target3D) {
+    Camera base = getInitialCamera();
+    base.setTilt(target3D ? 65.0 : 0.0);
+    map.flyCameraTo(new FlyToOptions(base, 900));
+  }
+
   @Override
   protected void onQuickSettingsChanged(@NonNull Map3DSettings settings) {
+    boolean nextIs3D = settings.getMapMode() != Map3DMode.ROADMAP;
+    boolean modeChangedAfterInit = hasSyncedInitialMode && (is3DMode != nextIs3D);
+    hasSyncedInitialMode = true;
+    is3DMode = nextIs3D;
+    updateToggle2D3DButtonText();
+    if (modeChangedAfterInit && googleMap3D != null) {
+      applyCameraPerspective(googleMap3D, is3DMode);
+    }
     if (rgMapMode == null) {
       return;
     }

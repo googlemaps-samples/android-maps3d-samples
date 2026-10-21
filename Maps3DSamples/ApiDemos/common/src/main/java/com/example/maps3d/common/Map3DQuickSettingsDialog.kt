@@ -76,6 +76,7 @@ object Map3DQuickSettingsDialog {
         val cbPanV = view.findViewById<MaterialCheckBox>(R.id.cb_control_pan_v)
         val cbPanH = view.findViewById<MaterialCheckBox>(R.id.cb_control_pan_h)
         val btnReset = view.findViewById<Button>(R.id.btn_reset_settings)
+        val btnDone = view.findViewById<Button>(R.id.btn_done_settings)
 
         var isUpdatingUi = false
 
@@ -121,7 +122,8 @@ object Map3DQuickSettingsDialog {
                 R.id.rb_mode_roadmap -> Map3DMode.ROADMAP
                 else -> Map3DMode.HYBRID
             }
-            controller.setMapMode(newMode)
+            val updated = controller.setMapMode(newMode)
+            googleMap3D?.let { updated.applyTo(it) }
         }
 
         // Listen for Color Scheme changes
@@ -132,7 +134,8 @@ object Map3DQuickSettingsDialog {
                 R.id.rb_scheme_dark -> Map3DColorScheme.DARK
                 else -> Map3DColorScheme.FOLLOW_SYSTEM
             }
-            controller.setColorScheme(newScheme)
+            val updated = controller.setColorScheme(newScheme)
+            googleMap3D?.let { updated.applyTo(it) }
         }
 
         // Master switch toggle
@@ -140,6 +143,7 @@ object Map3DQuickSettingsDialog {
             if (isUpdatingUi) return@setOnCheckedChangeListener
             val updated = controller.setAllUiControls(isChecked)
             syncCheckboxes(updated.uiControls)
+            googleMap3D?.let { updated.applyTo(it) }
         }
 
         // Helper for individual checkboxes
@@ -156,6 +160,7 @@ object Map3DQuickSettingsDialog {
             isUpdatingUi = true
             switchAll.isChecked = updated.uiControls.allEnabled
             isUpdatingUi = false
+            googleMap3D?.let { updated.applyTo(it) }
         }
 
         cbZoom.setOnCheckedChangeListener { _, _ -> onIndividualControlToggled() }
@@ -168,18 +173,20 @@ object Map3DQuickSettingsDialog {
         btnReset?.setOnClickListener {
             val resetSettings = controller.reset(sampleDefaultMapMode)
             syncAllControls(resetSettings)
+            googleMap3D?.let { resetSettings.applyTo(it) }
         }
 
         val dialog = MaterialAlertDialogBuilder(context)
             .setTitle(R.string.map3d_settings_title)
             .setView(view)
-            .setPositiveButton(R.string.map3d_settings_done) { d, _ ->
-                d.dismiss()
-            }
             .setOnDismissListener {
                 onDismiss?.invoke()
             }
             .create()
+
+        btnDone?.setOnClickListener {
+            dialog.dismiss()
+        }
 
         dialog.window?.setFlags(
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,

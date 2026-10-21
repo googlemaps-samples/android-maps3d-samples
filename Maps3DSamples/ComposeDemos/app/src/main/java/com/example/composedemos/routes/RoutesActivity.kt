@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,6 +57,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -83,6 +85,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -97,6 +100,7 @@ import com.example.composedemos.BuildConfig
 import com.example.composedemos.R
 import com.example.maps3d.common.Map3DQuickSettingsWidget
 import com.example.maps3d.common.Map3DSessionTheme
+import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.GoogleMap3D
@@ -120,6 +124,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlin.math.abs
+import com.example.maps3dcommon.R as CommonR
 
 sealed interface RouteTracker {
     val name: String
@@ -185,7 +190,8 @@ class RoutesActivity : ComponentActivity() {
 fun RouteSampleScreen(viewModel: RouteViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
-    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.SATELLITE)
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.ROADMAP)
+    val is3DMode = settings.mapMode != Map3DMode.ROADMAP
 
     val context = LocalContext.current
     val sharedPrefs = remember { context.getSharedPreferences("route_prefs", Context.MODE_PRIVATE) }
@@ -196,6 +202,7 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
 
     // User calibrated camera position
     val initialCamera = remember {
+        val initial3D = Map3DSettingsController.shared.getSettings().mapMode != Map3DMode.ROADMAP
         camera {
             center = latLngAltitude {
                 latitude = 21.348567086690373
@@ -203,7 +210,7 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                 altitude = 0.0
             }
             heading = 38.685134043475976
-            tilt = 44.96296481747822
+            tilt = if (initial3D) 45.0 else 0.0
             range = 29158.68678946048
             roll = 0.0
         }
@@ -288,8 +295,8 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
     // 3. Collect the output state
     val positionAndHeading by trackingFlow.collectAsState(initial = PositionAndHeading(LatLng(0.0, 0.0), 0f))
 
-    // 4. Update camera reactively during flight
-    LaunchedEffect(positionAndHeading, flyModeActive, cameraRange, cameraHeadingOffset) {
+    // 4. Update camera reactively during flight or when 2D/3D mode changes
+    LaunchedEffect(positionAndHeading, flyModeActive, cameraRange, cameraHeadingOffset, is3DMode) {
         if (flyModeActive && positionAndHeading.position.latitude != 0.0) {
             cameraState = camera {
                 center = latLngAltitude {
@@ -298,8 +305,16 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                     altitude = 0.0
                 }
                 heading = (positionAndHeading.heading.toDouble() + cameraHeadingOffset).toHeading()
-                tilt = 65.0
+                tilt = if (is3DMode) 65.0 else 0.0
                 range = cameraRange.toDouble()
+            }.toValidCamera()
+        } else if (!flyModeActive) {
+            cameraState = camera {
+                center = initialCamera.center
+                heading = initialCamera.heading ?: 38.685134043475976
+                tilt = if (is3DMode) 45.0 else 0.0
+                range = initialCamera.range ?: 29158.68678946048
+                roll = 0.0
             }.toValidCamera()
         }
     }
@@ -441,22 +456,45 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                     color = MaterialTheme.colorScheme.onSurface,
                 )
 
-                IconButton(onClick = {
-                    currentTracker = when (currentTracker) {
-                        RouteTracker.Marker -> RouteTracker.RedCar
-                        RouteTracker.RedCar -> RouteTracker.BananaCar
-                        RouteTracker.BananaCar -> RouteTracker.Marker
-                    }
-                }) {
-                    Icon(
-                        imageVector = when (currentTracker) {
-                            RouteTracker.Marker -> Icons.Default.Place
-                            RouteTracker.RedCar -> Icons.Default.DirectionsCar
-                            RouteTracker.BananaCar -> Icons.Default.Star
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    FilledTonalButton(
+                        onClick = {
+                            val nextMode = if (is3DMode) Map3DMode.ROADMAP else Map3DMode.HYBRID
+                            Map3DSettingsController.shared.setMapMode(nextMode)
                         },
-                        contentDescription = "Toggle Tracker Style",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                    )
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                    ) {
+                        Text(
+                            text = stringResource(
+                                if (is3DMode) {
+                                    CommonR.string.store_locator_switch_to_2d
+                                } else {
+                                    CommonR.string.store_locator_switch_to_3d
+                                },
+                            ),
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    IconButton(onClick = {
+                        currentTracker = when (currentTracker) {
+                            RouteTracker.Marker -> RouteTracker.RedCar
+                            RouteTracker.RedCar -> RouteTracker.BananaCar
+                            RouteTracker.BananaCar -> RouteTracker.Marker
+                        }
+                    }) {
+                        Icon(
+                            imageVector = when (currentTracker) {
+                                RouteTracker.Marker -> Icons.Default.Place
+                                RouteTracker.RedCar -> Icons.Default.DirectionsCar
+                                RouteTracker.BananaCar -> Icons.Default.Star
+                            },
+                            contentDescription = "Toggle Tracker Style",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                 }
             }
         }
@@ -514,7 +552,7 @@ fun RouteSampleScreen(viewModel: RouteViewModel) {
                 .align(Alignment.TopEnd)
                 .statusBarsPadding()
                 .padding(top = 8.dp, end = 8.dp),
-            sampleDefaultMapMode = Map3DMode.SATELLITE,
+            sampleDefaultMapMode = Map3DMode.ROADMAP,
             googleMap3D = googleMap3D,
         )
     }

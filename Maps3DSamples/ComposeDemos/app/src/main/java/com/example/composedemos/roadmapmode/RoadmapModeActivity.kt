@@ -23,6 +23,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +36,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
@@ -46,19 +48,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.maps3d.common.Map3DQuickSettingsWidget
 import com.example.maps3d.common.Map3DSessionTheme
 import com.example.maps3d.common.Map3DSettingsController
+import com.example.maps3d.common.copy
 import com.example.maps3d.common.rememberMap3DSessionSettings
+import com.example.maps3d.common.toValidCamera
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.camera
+import com.google.android.gms.maps3d.model.flyToOptions
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.maps.android.compose3d.GoogleMap3D
+import com.example.maps3dcommon.R as CommonR
 
 class RoadmapModeActivity : ComponentActivity() {
 
@@ -88,19 +95,39 @@ fun RoadmapModeScreen() {
     var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
     val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.ROADMAP)
     val selectedMapMode = settings.mapMode
+    val is3DMode = selectedMapMode != Map3DMode.ROADMAP
 
     val initialLocation = RoadmapModeActivity.SF_LOCATION
     val currentCameraState by remember {
+        val initial3D = Map3DSettingsController.shared.getSettings().mapMode != Map3DMode.ROADMAP
         mutableStateOf(
             camera {
                 center = latLngAltitude {
                     latitude = initialLocation.latitude
                     longitude = initialLocation.longitude
-                    altitude = 250.0
+                    altitude = 0.0
                 }
                 heading = 45.0
-                tilt = 65.0
-                range = 800.0
+                tilt = if (initial3D) 65.0 else 0.0
+                range = 2500.0
+            },
+        )
+    }
+
+    val flyToModePerspective: (Int) -> Unit = { targetMode ->
+        val targetTilt = if (targetMode != Map3DMode.ROADMAP) 65.0 else 0.0
+        val targetCamera = currentCameraState.toValidCamera().copy(
+            center = latLngAltitude {
+                latitude = initialLocation.latitude
+                longitude = initialLocation.longitude
+                altitude = 0.0
+            },
+            tilt = targetTilt,
+        )
+        googleMap3D?.flyCameraTo(
+            flyToOptions {
+                endCamera = targetCamera
+                durationInMillis = 900
             },
         )
     }
@@ -129,11 +156,38 @@ fun RoadmapModeScreen() {
                     .fillMaxWidth()
                     .padding(12.dp),
             ) {
-                Text(
-                    text = "Map Mode",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(CommonR.string.map_mode_controls_title),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+
+                    FilledTonalButton(
+                        onClick = {
+                            val nextMode = if (is3DMode) Map3DMode.ROADMAP else Map3DMode.HYBRID
+                            Map3DSettingsController.shared.setMapMode(nextMode)
+                            flyToModePerspective(nextMode)
+                        },
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                        modifier = Modifier.height(34.dp),
+                    ) {
+                        Text(
+                            text = stringResource(
+                                if (is3DMode) {
+                                    CommonR.string.store_locator_switch_to_2d
+                                } else {
+                                    CommonR.string.store_locator_switch_to_3d
+                                },
+                            ),
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -155,6 +209,7 @@ fun RoadmapModeScreen() {
                                     selected = (selectedMapMode == modeValue),
                                     onClick = {
                                         Map3DSettingsController.shared.setMapMode(modeValue)
+                                        flyToModePerspective(modeValue)
                                     },
                                     role = Role.RadioButton,
                                 )
@@ -183,6 +238,9 @@ fun RoadmapModeScreen() {
                 .padding(top = 8.dp, end = 8.dp),
             sampleDefaultMapMode = Map3DMode.ROADMAP,
             googleMap3D = googleMap3D,
+            onSettingsChanged = { updatedSettings ->
+                flyToModePerspective(updatedSettings.mapMode)
+            },
         )
     }
 }

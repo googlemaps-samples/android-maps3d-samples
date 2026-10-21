@@ -64,7 +64,7 @@ class UiControlsActivity : SampleBaseActivity() {
     override val TAG = "UiControlsActivity"
 
     @Map3DMode
-    override val defaultMapMode: Int = Map3DMode.ROADMAP
+    override val defaultMapMode: Int = Map3DMode.HYBRID
 
     override val initialCamera: Camera
         get() = camera {

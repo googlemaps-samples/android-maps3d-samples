@@ -26,6 +26,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -33,24 +34,37 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
@@ -58,8 +72,11 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -67,6 +84,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
@@ -92,12 +111,21 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
+import com.google.android.gms.maps3d.UiControlSettings.ControlOrientation
+import com.google.android.gms.maps3d.UiControlSettings.ControlPlacement
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.CollisionBehavior
+import com.google.android.gms.maps3d.model.CompassControl
 import com.google.android.gms.maps3d.model.LatLngAltitude
+import com.google.android.gms.maps3d.model.Map3DControl
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.Marker
+import com.google.android.gms.maps3d.model.PanHorizontalControl
+import com.google.android.gms.maps3d.model.PanVerticalControl
 import com.google.android.gms.maps3d.model.PinConfiguration
+import com.google.android.gms.maps3d.model.RotateControl
+import com.google.android.gms.maps3d.model.TiltControl
+import com.google.android.gms.maps3d.model.ZoomControl
 import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.android.gms.maps3d.model.markerOptions
 import com.google.android.libraries.places.api.model.Place
@@ -114,15 +142,15 @@ import kotlin.time.Duration.Companion.milliseconds
  *
  * ### Architectural Pipeline & Step-by-Step Flow:
  * 1. **Initialization:** Hosts the 3D Map within Jetpack Compose via a FragmentContainerView
- *    and registers the [OnMap3DViewReadyCallback].
+ *    and registers the [OnMap3DViewReadyCallback] in [Map3DMode.ROADMAP] with a 2D-friendly low-tilt overview.
  * 2. **Reactive State Observation:** Collects immutable [PlaceSearch3DScreenState] from [PlaceSearch3DViewModel]
  *    using Unidirectional Data Flow (UDF).
  * 3. **Camera Kinematics:** Observes [Camera3DMode] state changes and drives smooth [Camera3DAnimator]
  *    fly-to transitions and continuous 360-degree orbit loops.
  * 4. **3D Marker Pipeline:** Diffs and renders [PlaceSearchResult] markers with custom pin styles,
  *    [AltitudeMode.RELATIVE_TO_MESH], elevation offsets, and `isExtruded` = true for white vertical stems.
- * 5. **Places Autocomplete:** Hosts [PlaceSearchTopBar] powered by Google Places Compose
- *    (`places-compose`) with automatic debouncing and prediction filtering.
+ * 5. **Places Autocomplete & Nearby Search:** Hosts [PlaceSearchTopBar] powered by Google Places Compose
+ *    (`places-compose`) with category chips and a "Search this area" pill button on camera pan/zoom.
  * 6. **Place Details Integration:** Displays Google Places UI Kit [PlaceDetailsCompactFragment]
  *    over the 3D map when a marker or search result is inspected.
  */
@@ -168,7 +196,7 @@ class MainActivity :
 
     /**
      * Top-level declarative UI composition hosting the 3D map, bottom sheet, search bar,
-     * floating camera controls, and place details overlay.
+     * floating camera controls, quick settings, and place details overlay.
      */
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -201,6 +229,11 @@ class MainActivity :
                     cameraAnimator.stopOrbit()
                 }
             }
+        }
+
+        // Reactive Map Mode updates (ROADMAP / HYBRID / SATELLITE)
+        LaunchedEffect(screenState.mapMode) {
+            googleMap3D?.setMapMode(screenState.mapMode)
         }
 
         // Step 3: Reactive 3D Marker Updates - diff and update map markers when places or selection changes
@@ -243,10 +276,10 @@ class MainActivity :
                         },
                     )
 
-                    // Step 6: Places Autocomplete Top Bar (powered by Google Places Compose)
+                    // Step 6: Places Autocomplete Top Bar + Category Chips + "Search this area" pill
                     PlaceSearchTopBar(
                         query = screenState.searchQuery,
-                        onQueryChange = { viewModel.onQueryChanged(it) },
+                        onQueryChange = { viewModel.onQueryChanged(it, getCurrentMapCenter()) },
                         predictions = screenState.autocompleteSuggestions,
                         onPlaceSelected = { place ->
                             keyboardController?.hide()
@@ -258,6 +291,21 @@ class MainActivity :
                             keyboardController?.hide()
                             focusManager.clearFocus()
                             viewModel.selectCategory(category, getCurrentMapCenter())
+                            scope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                        },
+                        is3DView = screenState.is3DView,
+                        onToggle2D3D = {
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+                            viewModel.toggle2D3DView(getCurrentMapCenter())
+                        },
+                        showSearchThisArea = screenState.hasCameraMovedSinceSearch,
+                        onSearchThisAreaClick = {
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+                            viewModel.searchThisArea(getCurrentMapCenter())
                             scope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
@@ -282,7 +330,7 @@ class MainActivity :
                         exit = fadeOut() + slideOutVertically { -it },
                         modifier = Modifier
                             .align(Alignment.TopCenter)
-                            .padding(top = 150.dp),
+                            .padding(top = if (screenState.hasCameraMovedSinceSearch) 200.dp else 150.dp),
                     ) {
                         Surface(
                             shape = RoundedCornerShape(20.dp),
@@ -338,6 +386,21 @@ class MainActivity :
                             .align(Alignment.CenterEnd)
                             .padding(end = 8.dp),
                     )
+
+                    // Quick Settings / Map Mode Toggle (ROADMAP / HYBRID / SATELLITE, Color Schemes, UI Controls)
+                    MapQuickSettingsOverlay(
+                        currentMapMode = screenState.mapMode,
+                        onMapModeSelected = { mode ->
+                            viewModel.setMapMode(mode, getCurrentMapCenter())
+                            googleMap3D?.setMapMode(mode)
+                        },
+                        onUiControlsToggled = { enabled ->
+                            applyUiControls(enabled)
+                        },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 156.dp, end = 24.dp),
+                    )
                 }
             }
 
@@ -362,19 +425,193 @@ class MainActivity :
     }
 
     @Composable
+    private fun MapQuickSettingsOverlay(
+        @Map3DMode currentMapMode: Int,
+        onMapModeSelected: (Int) -> Unit,
+        onUiControlsToggled: (Boolean) -> Unit,
+        modifier: Modifier = Modifier,
+    ) {
+        var showDialog by remember { mutableStateOf(false) }
+        var colorSchemeMode by remember { mutableIntStateOf(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) }
+        var uiControlsEnabled by remember { mutableStateOf(true) }
+
+        FloatingActionButton(
+            onClick = { showDialog = true },
+            modifier = modifier.size(40.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ) {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = stringResource(id = R.string.settings_button_desc),
+                modifier = Modifier.size(20.dp),
+            )
+        }
+
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.quick_settings_title),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                },
+                text = {
+                    Column(Modifier.verticalScroll(rememberScrollState())) {
+                        Text(
+                            text = stringResource(id = R.string.map_mode_section),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 4.dp),
+                        )
+                        Column(Modifier.selectableGroup()) {
+                            val modes = listOf(
+                                Map3DMode.ROADMAP to stringResource(id = R.string.map_mode_roadmap),
+                                Map3DMode.HYBRID to stringResource(id = R.string.map_mode_hybrid),
+                                Map3DMode.SATELLITE to stringResource(id = R.string.map_mode_satellite),
+                            )
+                            modes.forEach { (mode, label) ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(40.dp)
+                                        .selectable(
+                                            selected = (currentMapMode == mode),
+                                            onClick = { onMapModeSelected(mode) },
+                                            role = Role.RadioButton,
+                                        ),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    RadioButton(
+                                        selected = (currentMapMode == mode),
+                                        onClick = null,
+                                    )
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(start = 8.dp),
+                                    )
+                                }
+                            }
+                        }
+
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                        Text(
+                            text = stringResource(id = R.string.color_scheme_section),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 4.dp),
+                        )
+                        Column(Modifier.selectableGroup()) {
+                            val schemes = listOf(
+                                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM to stringResource(id = R.string.color_scheme_system),
+                                AppCompatDelegate.MODE_NIGHT_NO to stringResource(id = R.string.color_scheme_light),
+                                AppCompatDelegate.MODE_NIGHT_YES to stringResource(id = R.string.color_scheme_dark),
+                            )
+                            schemes.forEach { (scheme, label) ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(40.dp)
+                                        .selectable(
+                                            selected = (colorSchemeMode == scheme),
+                                            onClick = {
+                                                colorSchemeMode = scheme
+                                                AppCompatDelegate.setDefaultNightMode(scheme)
+                                            },
+                                            role = Role.RadioButton,
+                                        ),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    RadioButton(
+                                        selected = (colorSchemeMode == scheme),
+                                        onClick = null,
+                                    )
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(start = 8.dp),
+                                    )
+                                }
+                            }
+                        }
+
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(40.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.ui_controls_section),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                            Switch(
+                                checked = uiControlsEnabled,
+                                onCheckedChange = { checked ->
+                                    uiControlsEnabled = checked
+                                    onUiControlsToggled(checked)
+                                },
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showDialog = false }) {
+                        Text(text = stringResource(id = R.string.settings_done))
+                    }
+                },
+            )
+        }
+    }
+
+    private fun applyUiControls(enabled: Boolean) {
+        val uiSettings = googleMap3D?.getUiControlSettings() ?: return
+        val mainControls = if (enabled) {
+            listOf<Map3DControl>(
+                ZoomControl(ControlOrientation.VERTICAL),
+                TiltControl(ControlOrientation.VERTICAL),
+                RotateControl(ControlOrientation.VERTICAL),
+            )
+        } else {
+            emptyList()
+        }
+        val panControls = if (enabled) {
+            listOf<Map3DControl>(
+                PanVerticalControl(ControlOrientation.VERTICAL),
+                PanHorizontalControl(ControlOrientation.VERTICAL),
+                CompassControl(),
+            )
+        } else {
+            emptyList()
+        }
+        uiSettings.setUiControlsPlacement(mainControls, ControlPlacement.TRAILING)
+        uiSettings.setUiControlsPlacement(panControls, ControlPlacement.LEADING)
+    }
+
+    @Composable
     fun MapViewContainer(onMapTouched: () -> Unit = {}) {
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
 
         val map3DView = remember {
+            val initialState = viewModel.screenState.value
+            val initialPlace = initialState.selectedPlace
+            val initialTilt = if (initialState.mapMode != Map3DMode.ROADMAP) 50.0 else 0.0
             val config = Map3DInitConfig.create(
-                centerLat = 39.9989,
-                centerLng = -105.2828,
-                centerAlt = 1750.0,
-                heading = 25.0,
-                tilt = 50.0,
+                centerLat = initialPlace?.location?.latitude ?: 40.6892,
+                centerLng = initialPlace?.location?.longitude ?: -74.0445,
+                centerAlt = initialPlace?.location?.altitude ?: 10.0,
+                heading = 0.0,
+                tilt = initialTilt,
                 roll = 0.0,
-                range = 1400.0,
+                range = 2000.0,
                 minAltitude = 0.0,
                 maxAltitude = 1000000.0,
                 minHeading = 0.0,
@@ -382,7 +619,7 @@ class MainActivity :
                 minTilt = 0.0,
                 maxTilt = 90.0,
                 bounds = null,
-                mapMode = Map3DMode.HYBRID,
+                mapMode = initialState.mapMode,
                 mapId = null,
                 language = java.util.Locale.getDefault().language,
                 region = java.util.Locale.getDefault().country,
@@ -604,26 +841,36 @@ class MainActivity :
      *
      * Performs synchronized initialization:
      * 1. Caches the [GoogleMap3D] reference in [cameraAnimator].
-     * 2. Sets the display mode to [Map3DMode.HYBRID] for photorealistic 3D satellite imagery with street labels.
+     * 2. Sets the display mode to [Map3DMode.ROADMAP] for canonical 2D/abstract vector map styling.
      * 3. Renders the initial markers from [viewModel].
-     * 4. Flies to the active camera target (or defaults to the Boulder overview).
-     * 5. Registers a 3D click listener to inspect buildings and POIs.
+     * 4. Flies to the active camera target (or defaults to a 2D-friendly low-tilt overview).
+     * 5. Registers a camera change listener for "Search this area" nearby search and a 3D click listener.
      */
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
         this.googleMap3D = googleMap3D
         cameraAnimator.setMap(googleMap3D)
 
-        googleMap3D.setMapMode(Map3DMode.HYBRID)
-
         val currentState = viewModel.screenState.value
+        googleMap3D.setMapMode(currentState.mapMode)
+
         val initialSelectedId = currentState.selectedPlaceId ?: currentState.selectedPlace?.id
         updateMapMarkers(currentState.allMarkers, initialSelectedId)
 
         val activeMode = currentState.cameraMode
         if (activeMode is Camera3DMode.FlyingTo) {
+            googleMap3D.setCamera(activeMode.target.toCamera())
             cameraAnimator.flyToTarget(activeMode.target)
         } else {
-            googleMap3D.setCamera(Camera3DTarget.DEFAULT.toCamera())
+            val defaultTilt = if (currentState.mapMode != Map3DMode.ROADMAP) 50.0 else 0.0
+            googleMap3D.setCamera(
+                Camera3DTarget.DEFAULT.copy(tilt = defaultTilt, range = 2000.0).toCamera(),
+            )
+        }
+
+        googleMap3D.setCameraChangedListener { cameraPosition ->
+            runOnUiThread {
+                viewModel.onCameraMoved(cameraPosition.center)
+            }
         }
 
         googleMap3D.setMap3DClickListener { event ->
@@ -667,13 +914,14 @@ class MainActivity :
         if (isLocationPermissionGranted()) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 location?.let {
+                    val currentTilt = if (viewModel.screenState.value.is3DView) 50.0 else 0.0
                     val userLocation = Camera3DTarget(
                         latitude = it.latitude,
                         longitude = it.longitude,
                         altitude = it.altitude,
                         heading = 25.0,
-                        tilt = 50.0,
-                        range = 1400.0,
+                        tilt = currentTilt,
+                        range = 2000.0,
                     )
                     cameraAnimator.flyToTarget(userLocation)
                 } ?: run {
@@ -698,7 +946,8 @@ class MainActivity :
     }
 
     private fun moveToDefaultLocation() {
-        cameraAnimator.flyToTarget(Camera3DTarget.DEFAULT)
+        val currentTilt = if (viewModel.screenState.value.is3DView) 50.0 else 0.0
+        cameraAnimator.flyToTarget(Camera3DTarget.DEFAULT.copy(tilt = currentTilt, range = 2000.0))
     }
 
     override fun onDestroy() {

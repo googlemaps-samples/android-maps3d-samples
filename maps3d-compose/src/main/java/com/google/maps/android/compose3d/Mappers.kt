@@ -38,6 +38,7 @@ fun MarkerConfig.toMarkerOptions(overrideId: String? = null) = markerOptions {
     zIndex = this@toMarkerOptions.zIndex
     isExtruded = this@toMarkerOptions.isExtruded
     isDrawnWhenOccluded = this@toMarkerOptions.isDrawnWhenOccluded
+    isSizePreserved = this@toMarkerOptions.isSizePreserved
     collisionBehavior = this@toMarkerOptions.collisionBehavior
     styleView?.let { setStyle(it) }
     pinConfig?.let { pin ->

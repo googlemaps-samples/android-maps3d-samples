@@ -65,6 +65,7 @@ data class MarkerConfig(
     val zIndex: Int = 0,
     val isExtruded: Boolean = false,
     val isDrawnWhenOccluded: Boolean = false,
+    val isSizePreserved: Boolean = false,
     val collisionBehavior: Int = CollisionBehavior.REQUIRED,
     val pinConfig: PinConfig? = null,
     val onClick: ((Marker) -> Unit)? = null,

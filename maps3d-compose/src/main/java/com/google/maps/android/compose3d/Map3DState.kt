@@ -49,6 +49,20 @@ class Map3DState {
     var hasCalledOnMapReady: Boolean = false
 
     /**
+     * Records the initial [camera] and [mapMode] configured at [com.google.android.gms.maps3d.Map3DView]
+     * creation so that subsequent recompositions (e.g. toggling mapMode) do not redundantly re-apply
+     * the initial static camera over an active camera flight.
+     */
+    fun initFromOptions(camera: Camera, mapMode: Int) {
+        if (lastSyncedCamera == null) {
+            lastSyncedCamera = camera
+        }
+        if (lastSyncedMapMode == null) {
+            lastSyncedMapMode = mapMode
+        }
+    }
+
+    /**
      * Synchronizes the camera on the map only when the target [camera] has changed.
      */
     fun syncCamera(map: GoogleMap3D, camera: Camera) {

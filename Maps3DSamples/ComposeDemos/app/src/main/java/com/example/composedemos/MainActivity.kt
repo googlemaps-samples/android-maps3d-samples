@@ -21,20 +21,26 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.composedemos.advancedcameraanimation.AdvancedCameraAnimationActivity
 import com.example.composedemos.animatingmodels.AnimatingModelsActivity
@@ -51,14 +57,13 @@ import com.example.composedemos.markers.MarkersActivity
 import com.example.composedemos.models.ModelsActivity
 import com.example.composedemos.pathfollowing.PathFollowingActivity
 import com.example.composedemos.pathstyling.PathStylingActivity
-import com.example.composedemos.placeautocomplete.PlaceAutocompleteActivity
 import com.example.composedemos.placedetails.PlaceDetailsActivity
-import com.example.composedemos.placesearch.PlaceSearchActivity
 import com.example.composedemos.polygons.PolygonsActivity
 import com.example.composedemos.polylines.PolylinesActivity
 import com.example.composedemos.popovers.PopoversActivity
 import com.example.composedemos.roadmapmode.RoadmapModeActivity
 import com.example.composedemos.routes.RoutesActivity
+import com.example.composedemos.storelocator.StoreLocatorActivity
 import com.example.composedemos.uicontrols.UiControlsActivity
 import com.example.maps3d.common.Map3DSessionTheme
 
@@ -95,8 +100,41 @@ fun CatalogScreen() {
             )
         }
 
+        // Canonical 2D / Abstract Map Samples (Map3DMode.ROADMAP & Overlays)
+        item { CategoryHeader("2D / Abstract Map Samples (ROADMAP)") }
+        item {
+            SampleItem("Store Locator", badge = "2D / ROADMAP") {
+                context.startActivity(Intent(context, StoreLocatorActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Routes API (Route Preview)", badge = "2D / ROADMAP") {
+                context.startActivity(Intent(context, RoutesActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Roadmap Mode", badge = "2D / ROADMAP") {
+                context.startActivity(Intent(context, RoadmapModeActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Cloud Map Styling", badge = "2D / ROADMAP") {
+                context.startActivity(Intent(context, CloudStylingActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Data Visualization (Flood Fill)", badge = "2D / ROADMAP") {
+                context.startActivity(Intent(context, DataVisualizationActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("UI Controls") {
+                context.startActivity(Intent(context, UiControlsActivity::class.java))
+            }
+        }
+
         // ApiDemos Parity
-        item { CategoryHeader("ApiDemos Parity") }
+        item { CategoryHeader("Core 3D Maps SDK Samples") }
         item {
             SampleItem("Hello Map") {
                 context.startActivity(Intent(context, HelloMapActivity::class.java))
@@ -139,7 +177,7 @@ fun CatalogScreen() {
         }
 
         // Additional Catalog Requirements
-        item { CategoryHeader("Additional Catalog Requirements") }
+        item { CategoryHeader("Advanced & Motion 3D Samples") }
         item {
             SampleItem("Camera Restrictions") {
                 context.startActivity(Intent(context, CameraRestrictionsActivity::class.java))
@@ -148,11 +186,6 @@ fun CatalogScreen() {
         item {
             SampleItem("Flight Simulator") {
                 context.startActivity(Intent(context, FlightSimulatorActivity::class.java))
-            }
-        }
-        item {
-            SampleItem("Routes API") {
-                context.startActivity(Intent(context, RoutesActivity::class.java))
             }
         }
         item {
@@ -171,16 +204,6 @@ fun CatalogScreen() {
             }
         }
         item {
-            SampleItem("Place Search") {
-                context.startActivity(Intent(context, PlaceSearchActivity::class.java))
-            }
-        }
-        item {
-            SampleItem("Place Autocomplete") {
-                context.startActivity(Intent(context, PlaceAutocompleteActivity::class.java))
-            }
-        }
-        item {
             SampleItem("Place Details") {
                 context.startActivity(Intent(context, PlaceDetailsActivity::class.java))
             }
@@ -188,26 +211,6 @@ fun CatalogScreen() {
         item {
             SampleItem("Advanced Camera Animation") {
                 context.startActivity(Intent(context, AdvancedCameraAnimationActivity::class.java))
-            }
-        }
-        item {
-            SampleItem("Data Visualization (Flood Fill)") {
-                context.startActivity(Intent(context, DataVisualizationActivity::class.java))
-            }
-        }
-        item {
-            SampleItem("Cloud Map Styling") {
-                context.startActivity(Intent(context, CloudStylingActivity::class.java))
-            }
-        }
-        item {
-            SampleItem("Roadmap Mode") {
-                context.startActivity(Intent(context, RoadmapModeActivity::class.java))
-            }
-        }
-        item {
-            SampleItem("UI Controls") {
-                context.startActivity(Intent(context, UiControlsActivity::class.java))
             }
         }
         item {
@@ -234,7 +237,11 @@ fun CategoryHeader(text: String) {
 }
 
 @Composable
-fun SampleItem(title: String, onClick: () -> Unit) {
+fun SampleItem(
+    title: String,
+    badge: String? = null,
+    onClick: () -> Unit,
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -242,10 +249,33 @@ fun SampleItem(title: String, onClick: () -> Unit) {
             .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
-        Text(
-            text = title,
-            modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.bodyLarge,
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f),
+            )
+            if (badge != null) {
+                Text(
+                    text = badge,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(8.dp),
+                        )
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                )
+            }
+        }
     }
 }

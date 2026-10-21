@@ -1,0 +1,24 @@
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<resources>
+    <!-- Store Locator Marker Pin Colors (Dark Theme) -->
+    <!-- Google Yellow 300 / Material Dark accent for high contrast against dark 3D basemaps -->
+    <color name="store_pin_selected">#FDD663</color>
+    <!-- Google Blue 300 / Material Dark primary blue -->
+    <color name="store_pin_open">#8AB4F8</color>
+    <!-- Google Grey 300 / Material Dark neutral -->
+    <color name="store_pin_closed">#BDC1C6</color>
+</resources>

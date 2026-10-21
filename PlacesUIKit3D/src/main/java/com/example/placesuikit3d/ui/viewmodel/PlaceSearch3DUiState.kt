@@ -19,6 +19,7 @@ package com.example.placesuikit3d.ui.viewmodel
 import com.example.placesuikit3d.data.model.Camera3DTarget
 import com.example.placesuikit3d.data.model.PlaceSearchResult
 import com.google.android.gms.maps3d.model.LatLngAltitude
+import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.compose.autocomplete.models.AutocompletePlace
 
@@ -56,7 +57,10 @@ data class PlaceSearch3DScreenState(
     val selectedCategory: String = "🏛️ Landmarks",
     val searchQuery: String = "",
     val isOrbiting: Boolean = false,
-    val is3DView: Boolean = true,
+    val is3DView: Boolean = false,
+    @param:Map3DMode @get:Map3DMode val mapMode: Int = Map3DMode.ROADMAP,
+    val hasCameraMovedSinceSearch: Boolean = false,
+    val lastSearchedCenter: LatLngAltitude? = null,
     val allMarkers: List<PlaceSearchResult> = emptyList(),
     val autocompleteSuggestions: List<AutocompletePlace> = emptyList(),
     val infoMessage: String? = null,

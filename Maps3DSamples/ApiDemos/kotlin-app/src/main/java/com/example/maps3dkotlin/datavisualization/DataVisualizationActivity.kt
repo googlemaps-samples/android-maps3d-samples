@@ -29,6 +29,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.lifecycle.lifecycleScope
+import com.example.maps3d.common.Map3DSettings
+import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3d.common.toValidCamera
 import com.example.maps3dcommon.R
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
@@ -37,6 +39,7 @@ import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.LatLngAltitude
+import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.Polygon
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.flyToOptions
@@ -62,21 +65,28 @@ import kotlinx.coroutines.launch
 class DataVisualizationActivity : SampleBaseActivity() {
 
   override val TAG = "DataVisualizationActivity"
+  override val defaultMapMode: Int = Map3DMode.ROADMAP
 
-  override val initialCamera: Camera = camera {
-    center = latLngAltitude {
-      latitude = SF_FLOOD_CENTER.latitude
-      longitude = SF_FLOOD_CENTER.longitude
-      altitude = 120.0
-    }
-    heading = 35.0
-    tilt = 64.0
-    range = 1200.0
-  }.toValidCamera()
+  override val initialCamera: Camera
+    get() = camera {
+      center = latLngAltitude {
+        latitude = SF_FLOOD_CENTER.latitude
+        longitude = SF_FLOOD_CENTER.longitude
+        altitude = 0.0
+      }
+      heading = 35.0
+      tilt = if (Map3DSettingsController.shared.getSettings().mapMode == Map3DMode.ROADMAP) {
+        TILT_2D_ROADMAP
+      } else {
+        TILT_3D_HYBRID
+      }
+      range = 2200.0
+    }.toValidCamera()
 
   private var controlsCard: CardView? = null
   private var cardHeader: View? = null
   private var cardContent: View? = null
+  private var btnToggle2D3D: MaterialButton? = null
   private var btnCollapse: MaterialButton? = null
   private lateinit var floodDepthLabel: TextView
   private lateinit var floodRiskBadge: TextView
@@ -87,6 +97,8 @@ class DataVisualizationActivity : SampleBaseActivity() {
   private var currentFloodElevation = 10.0
   private var simulationJob: Job? = null
   private var isCollapsed = false
+  private var is3DMode = false
+  private var hasSyncedInitialMode = false
 
   private val fadeHandler = Handler(Looper.getMainLooper())
   private val fadeOutRunnable = Runnable {
@@ -103,6 +115,8 @@ class DataVisualizationActivity : SampleBaseActivity() {
   private val waterStrokeWidth = 2.5
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    Map3DSettingsController.shared.onSampleEntered(defaultMapMode)
+    is3DMode = Map3DSettingsController.shared.getSettings().mapMode != Map3DMode.ROADMAP
     super.onCreate(savedInstanceState)
 
     findViewById<View>(R.id.control_scroll_view)?.visibility = View.GONE
@@ -124,12 +138,18 @@ class DataVisualizationActivity : SampleBaseActivity() {
     controlsCard = findViewById(R.id.control_panel)
     cardHeader = findViewById(R.id.card_header)
     cardContent = findViewById(R.id.card_content)
+    btnToggle2D3D = findViewById(R.id.btn_toggle_2d_3d)
     btnCollapse = findViewById(R.id.btn_collapse)
 
     floodDepthLabel = findViewById(R.id.tv_flood_depth_label)
     floodRiskBadge = findViewById(R.id.tv_flood_risk_badge)
     floodSlider = findViewById(R.id.flood_slider)
     btnAnimateFlood = findViewById(R.id.btn_animate_flood)
+
+    btnToggle2D3D?.setOnClickListener {
+      toggle2D3DMapMode()
+    }
+    update2D3DToggleLabel(Map3DSettingsController.shared.settings.value.mapMode)
 
     btnCollapse?.setOnClickListener {
       if (isCollapsed) {
@@ -163,6 +183,64 @@ class DataVisualizationActivity : SampleBaseActivity() {
     }
 
     fadeHandler.postDelayed(fadeOutRunnable, 3000L)
+  }
+
+  private fun toggle2D3DMapMode() {
+    val currentMode = Map3DSettingsController.shared.settings.value.mapMode
+    val nextMode = if (currentMode == Map3DMode.ROADMAP) {
+      Map3DMode.HYBRID
+    } else {
+      Map3DMode.ROADMAP
+    }
+    is3DMode = nextMode != Map3DMode.ROADMAP
+    Map3DSettingsController.shared.setMapMode(nextMode)
+    update2D3DToggleLabel(nextMode)
+    googleMap3D?.let { map ->
+      Map3DSettingsController.shared.settings.value.applyTo(map)
+      applyCameraTilt(map, nextMode)
+    }
+  }
+
+  private fun applyCameraTilt(map: GoogleMap3D, @Map3DMode mode: Int) {
+    val targetTilt = if (mode == Map3DMode.ROADMAP) TILT_2D_ROADMAP else TILT_3D_HYBRID
+    val updatedCamera = camera {
+      center = latLngAltitude {
+        latitude = SF_FLOOD_CENTER.latitude
+        longitude = SF_FLOOD_CENTER.longitude
+        altitude = 0.0
+      }
+      heading = 35.0
+      tilt = targetTilt
+      roll = 0.0
+      range = 2200.0
+    }.toValidCamera()
+    map.flyCameraTo(
+      flyToOptions {
+        endCamera = updatedCamera
+        durationInMillis = 1_000L
+      },
+    )
+  }
+
+  private fun update2D3DToggleLabel(@Map3DMode mode: Int) {
+    btnToggle2D3D?.setText(
+      if (mode == Map3DMode.ROADMAP) {
+        R.string.store_locator_switch_to_3d
+      } else {
+        R.string.store_locator_switch_to_2d
+      },
+    )
+  }
+
+  override fun onQuickSettingsChanged(settings: Map3DSettings) {
+    val nextIs3D = settings.mapMode != Map3DMode.ROADMAP
+    val modeChangedAfterInit = hasSyncedInitialMode && is3DMode != nextIs3D
+    hasSyncedInitialMode = true
+    is3DMode = nextIs3D
+    update2D3DToggleLabel(settings.mapMode)
+    if (modeChangedAfterInit) {
+      googleMap3D?.let { applyCameraTilt(it, settings.mapMode) }
+    }
   }
 
   private fun collapseControls() {
@@ -209,12 +287,6 @@ class DataVisualizationActivity : SampleBaseActivity() {
 
   override fun onMapReady(googleMap3D: GoogleMap3D) {
     super.onMapReady(googleMap3D)
-    googleMap3D.flyCameraTo(
-      flyToOptions {
-        endCamera = initialCamera
-        durationInMillis = 1200
-      }
-    )
     lifecycleScope.launch(Dispatchers.Main) {
       updateFloodElevation(currentFloodElevation)
     }
@@ -353,6 +425,8 @@ class DataVisualizationActivity : SampleBaseActivity() {
 
   companion object {
     private const val POLYGON_ID = "flood_zone_polygon"
+    private const val TILT_2D_ROADMAP = 0.0
+    private const val TILT_3D_HYBRID = 64.0
 
     val SF_FLOOD_CENTER = LatLng(37.8025, -122.4030)
 

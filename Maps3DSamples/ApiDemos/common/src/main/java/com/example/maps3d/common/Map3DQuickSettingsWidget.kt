@@ -27,12 +27,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
@@ -247,7 +249,11 @@ fun Map3DQuickSettingsWidget(
                 )
             },
             text = {
-                Column(Modifier.verticalScroll(rememberScrollState())) {
+                Column(
+                    Modifier
+                        .heightIn(max = 360.dp)
+                        .verticalScroll(rememberScrollState()),
+                ) {
                     // Map Mode Section
                     Text(
                         text = stringResource(id = R.string.map3d_mode_section),
@@ -266,7 +272,7 @@ fun Map3DQuickSettingsWidget(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(40.dp)
+                                    .height(38.dp)
                                     .selectable(
                                         selected = (settings.mapMode == mode),
                                         onClick = {
@@ -290,7 +296,7 @@ fun Map3DQuickSettingsWidget(
                         }
                     }
 
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                     // Color Scheme Section
                     Text(
@@ -310,7 +316,7 @@ fun Map3DQuickSettingsWidget(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(40.dp)
+                                    .height(38.dp)
                                     .selectable(
                                         selected = (settings.colorScheme == scheme),
                                         onClick = {
@@ -334,13 +340,13 @@ fun Map3DQuickSettingsWidget(
                         }
                     }
 
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                     // UI Controls Section
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(40.dp),
+                            .height(38.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
@@ -389,12 +395,17 @@ fun Map3DQuickSettingsWidget(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(40.dp),
+                                .height(38.dp)
+                                .toggleable(
+                                    value = isChecked,
+                                    onValueChange = onToggle,
+                                    role = Role.Checkbox,
+                                ),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Checkbox(
                                 checked = isChecked,
-                                onCheckedChange = onToggle,
+                                onCheckedChange = null,
                             )
                             Text(
                                 text = label,
