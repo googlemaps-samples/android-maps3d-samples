@@ -14,12 +14,27 @@
 
 package com.example.maps3d.common
 
+import android.app.Activity
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.camera
 import com.google.android.gms.maps3d.model.latLngAltitude
 import java.util.Locale
 import kotlin.math.floor
+
+/**
+ * Enables sticky immersive mode so the 3D map canvas occupies the entire display,
+ * hiding status and navigation bars while allowing transient reveal on edge swipes.
+ */
+fun Activity.enableImmersiveMode() {
+    val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+    insetsController.systemBarsBehavior =
+        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    insetsController.hide(WindowInsetsCompat.Type.systemBars())
+}
 
 const val DEFAULT_HEADING = 0.0
 const val DEFAULT_TILT = 60.0

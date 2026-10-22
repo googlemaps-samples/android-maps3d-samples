@@ -84,7 +84,7 @@ def main():
         f.write(result.stdout)
     print(f"Pulled screenshot to {local_path}")
         
-    # 3. Scale Image by 50% (cross-platform: ffmpeg / convert / sips)
+    # 3. Scale Image by 50% (cross-platform: ffmpeg, falling back to sips on macOS)
     scale_ok, _ = run_command(f"ffmpeg -y -i {local_path} -vf scale=iw/2:ih/2 -pix_fmt rgb24 {local_path}.tmp.png && mv {local_path}.tmp.png {local_path}")
     if not scale_ok:
         dim_cmd = f"sips -g pixelWidth -g pixelHeight {local_path}"

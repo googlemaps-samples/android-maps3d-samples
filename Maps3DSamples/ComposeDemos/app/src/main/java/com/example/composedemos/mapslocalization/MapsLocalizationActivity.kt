@@ -67,13 +67,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.maps3d.common.LocalizationState
 import com.example.maps3d.common.MapLocalePreset
 import com.example.maps3d.common.MapsLocalizationViewModel
+import com.example.maps3d.common.enableImmersiveMode
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Map3DMode
@@ -131,13 +129,6 @@ class MapsLocalizationActivity : ComponentActivity() {
         if (hasFocus) {
             enableImmersiveMode()
         }
-    }
-
-    private fun enableImmersiveMode() {
-        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-        insetsController.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        insetsController.hide(WindowInsetsCompat.Type.systemBars())
     }
 }
 
