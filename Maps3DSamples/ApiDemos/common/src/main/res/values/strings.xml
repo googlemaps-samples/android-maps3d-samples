@@ -85,7 +85,7 @@
 
     <string name="camera_show_restriction">Show restriction</string>
     <string name="camera_hide_restriction">Hide restriction</string>
-    <string name="map_mode_roadmap">Roadmap (2D)</string>
+    <string name="map_mode_roadmap">Roadmap</string>
     <string name="map_mode_hybrid">Hybrid</string>
     <string name="map_mode_satellite">Satellite</string>
     <string name="camera_roll_label">Roll</string>

@@ -22,7 +22,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +36,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
@@ -44,6 +47,7 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
@@ -66,6 +70,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -93,6 +98,7 @@ import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.google.android.gms.maps3d.model.flyAroundOptions
 import com.google.android.gms.maps3d.model.flyToOptions
+import com.google.android.gms.maps3d.model.latLngAltitude
 import com.google.maps.android.compose3d.GoogleMap3D
 import kotlin.math.roundToInt
 import com.example.maps3dcommon.R as CommonR
@@ -127,12 +133,16 @@ fun CameraControlsScreen() {
     val context = LocalContext.current
     var isMapSteady by remember { mutableStateOf(false) }
     var googleMap3D by remember { mutableStateOf<GoogleMap3D?>(null) }
-    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.SATELLITE)
+    val settings by rememberMap3DSessionSettings(defaultMapMode = Map3DMode.ROADMAP)
 
     val initialCamera = remember {
-        esbCamera(AltitudeMode.RELATIVE_TO_GROUND)
+        resolveCameraForMapMode(
+            baseCamera = esbCamera(AltitudeMode.RELATIVE_TO_GROUND),
+            mapMode = settings.mapMode,
+        )
     }
 
+    var isCollapsed by remember { mutableStateOf(false) }
     var showRestriction by remember { mutableStateOf(false) }
     var isCameraRestricted by remember { mutableStateOf(false) }
     val selectedMapMode = settings.mapMode
@@ -214,8 +224,8 @@ fun CameraControlsScreen() {
             },
             onMapSteady = {
                 isMapSteady = true
-                // Workaround: RELATIVE_TO_MESH samples 3D tile height at marker creation time and
-                // does not re-sample as new tiles stream in. Re-add once onMapSteady confirms loaded tiles.
+                // Workaround: surface-relative modes sample 3D tile height at marker creation time.
+                // After flying to a new landmark across the country, refresh once destination tiles are steady.
                 if (needsMeshBeaconRefresh) {
                     needsMeshBeaconRefresh = false
                     beaconRefreshToken++
@@ -251,261 +261,332 @@ fun CameraControlsScreen() {
                 .fillMaxWidth(),
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
-                // Row 1: Fly to ESB & Fly around center
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    OutlinedButton(
-                        onClick = {
-                            activeTargetResId = CommonR.string.camera_target_esb
-                            needsMeshBeaconRefresh = (selectedAltitudeMode == AltitudeMode.RELATIVE_TO_MESH)
-                            flyToTarget(
-                                googleMap3D = googleMap3D,
-                                isMountain = false,
-                                altitudeMode = selectedAltitudeMode,
-                            )
-                        },
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Text(
-                            text = stringResource(CommonR.string.fly_to),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-
-                    OutlinedButton(
-                        onClick = { flyAroundCurrentCenter(googleMap3D) },
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Text(
-                            text = stringResource(CommonR.string.fly_around),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
-
-                // Row 2: Fly to Mt. Rainier
-                FilledTonalButton(
-                    onClick = {
-                        isCameraRestricted = false
-                        activeTargetResId = CommonR.string.camera_target_mt_rainier
-                        needsMeshBeaconRefresh = (selectedAltitudeMode == AltitudeMode.RELATIVE_TO_MESH)
-                        flyToTarget(
-                            googleMap3D = googleMap3D,
-                            isMountain = true,
-                            altitudeMode = selectedAltitudeMode,
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(
-                        text = stringResource(CommonR.string.fly_to_mountain),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-
-                // Row 3: AltitudeMode Selector Chips (RELATIVE_TO_GROUND, RELATIVE_TO_MESH, CLAMP_TO_GROUND, ABSOLUTE)
-                Text(
-                    text = stringResource(CommonR.string.altitude_mode),
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
-
-                val altitudeModes = listOf(
-                    AltitudeMode.RELATIVE_TO_GROUND to stringResource(CommonR.string.relative_to_ground),
-                    AltitudeMode.RELATIVE_TO_MESH to stringResource(CommonR.string.relative_to_mesh),
-                    AltitudeMode.CLAMP_TO_GROUND to stringResource(CommonR.string.clamp_to_ground),
-                    AltitudeMode.ABSOLUTE to stringResource(CommonR.string.absolute),
-                )
-
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    altitudeModes.forEach { (modeValue, modeLabel) ->
-                        FilterChip(
-                            selected = (selectedAltitudeMode == modeValue),
-                            onClick = {
-                                if (selectedAltitudeMode != modeValue) {
-                                    selectedAltitudeMode = modeValue
-                                    needsMeshBeaconRefresh = (modeValue == AltitudeMode.RELATIVE_TO_MESH)
-                                    flyToTarget(
-                                        googleMap3D = googleMap3D,
-                                        isMountain = isMountainTarget,
-                                        altitudeMode = modeValue,
-                                    )
-                                }
-                            },
-                            label = {
-                                Text(
-                                    text = modeLabel,
-                                    style = MaterialTheme.typography.labelSmall,
-                                )
-                            },
-                        )
-                    }
-                }
-
-                // Row 4: Show/Hide restriction cube & Restrict/Remove camera restriction
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    OutlinedButton(
-                        onClick = { showRestriction = !showRestriction },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = if (showRestriction) {
-                                MaterialTheme.colorScheme.secondaryContainer
-                            } else {
-                                Color.Transparent
-                            },
-                            contentColor = if (showRestriction) {
-                                MaterialTheme.colorScheme.onSecondaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.primary
-                            },
-                        ),
-                    ) {
-                        Text(
-                            text = stringResource(
-                                if (showRestriction) {
-                                    CommonR.string.camera_hide_restriction
-                                } else {
-                                    CommonR.string.camera_show_restriction
-                                },
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-
-                    OutlinedButton(
-                        onClick = { isCameraRestricted = !isCameraRestricted },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = if (isCameraRestricted) {
-                                MaterialTheme.colorScheme.secondaryContainer
-                            } else {
-                                Color.Transparent
-                            },
-                            contentColor = if (isCameraRestricted) {
-                                MaterialTheme.colorScheme.onSecondaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.primary
-                            },
-                        ),
-                    ) {
-                        Text(
-                            text = stringResource(
-                                if (isCameraRestricted) {
-                                    CommonR.string.camera_remove_restriction
-                                } else {
-                                    CommonR.string.camera_activate_restriction
-                                },
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
-
-                // Row 5: Map Mode RadioGroup (Roadmap 2D / Hybrid / Satellite)
+                // Header Row with title and collapse/expand toggle
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                        .selectableGroup(),
+                        .clickable { isCollapsed = !isCollapsed },
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    val modes = listOf(
-                        Map3DMode.ROADMAP to stringResource(CommonR.string.map_mode_roadmap),
-                        Map3DMode.HYBRID to stringResource(CommonR.string.map_mode_hybrid),
-                        Map3DMode.SATELLITE to stringResource(CommonR.string.map_mode_satellite),
-                    )
-                    modes.forEachIndexed { index, (modeValue, modeLabel) ->
-                        if (index > 0) {
-                            Spacer(modifier = Modifier.width(4.dp))
-                        }
-                        Row(
-                            modifier = Modifier
-                                .weight(1f)
-                                .selectable(
-                                    selected = (selectedMapMode == modeValue),
-                                    onClick = {
-                                        Map3DSettingsController.shared.setMapMode(modeValue)
-                                        applyMapModeCameraPerspective(googleMap3D, modeValue)
-                                    },
-                                    role = Role.RadioButton,
-                                )
-                                .padding(vertical = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            RadioButton(
-                                selected = (selectedMapMode == modeValue),
-                                onClick = null,
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = modeLabel,
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                        }
-                    }
-                }
-
-                // Row 6: Roll Slider + Reset Roll Button
-                Text(
-                    text = stringResource(CommonR.string.camera_roll_label_dynamic, rollValue),
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Slider(
-                        value = rollValue,
-                        onValueChange = { value ->
-                            val steppedValue = value.roundToInt().toFloat()
-                            rollValue = steppedValue
-                            updateMapRoll(googleMap3D, steppedValue.toDouble())
-                        },
-                        valueRange = -360f..360f,
-                        modifier = Modifier
-                            .weight(1f)
-                            .semantics { contentDescription = "Roll Slider" },
+                    Text(
+                        text = stringResource(CommonR.string.feature_title_camera_controls),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
                     )
 
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    FilledIconButton(
-                        onClick = {
-                            val resetValue = 0.0f
-                            rollValue = resetValue
-                            updateMapRoll(googleMap3D, resetValue.toDouble())
-                        },
+                    IconButton(
+                        onClick = { isCollapsed = !isCollapsed },
+                        modifier = Modifier.size(36.dp),
                     ) {
                         Icon(
-                            painter = painterResource(id = CommonR.drawable.outline_recenter_24),
+                            painter = painterResource(
+                                id = if (isCollapsed) {
+                                    CommonR.drawable.expand_less_24px
+                                } else {
+                                    CommonR.drawable.expand_more_24px
+                                },
+                            ),
                             contentDescription = stringResource(
-                                CommonR.string.reset_roll_content_description,
+                                id = if (isCollapsed) {
+                                    CommonR.string.expand_controls
+                                } else {
+                                    CommonR.string.collapse_controls
+                                },
                             ),
                         )
                     }
                 }
 
-                // Row 7: Camera State Telemetry
-                Text(
-                    text = stringResource(CommonR.string.camera_state_label),
-                    style = MaterialTheme.typography.titleSmall,
-                )
+                AnimatedVisibility(visible = !isCollapsed) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp),
+                    ) {
+                        // Row 1: Fly to ESB & Fly around center
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    val isNewLandmark =
+                                        (activeTargetResId != CommonR.string.camera_target_esb)
+                                    activeTargetResId = CommonR.string.camera_target_esb
+                                    flyToTarget(
+                                        googleMap3D = googleMap3D,
+                                        isMountain = false,
+                                        altitudeMode = selectedAltitudeMode,
+                                        mapMode = selectedMapMode,
+                                        onFlightFinished = {
+                                            if (isNewLandmark && selectedAltitudeMode != AltitudeMode.ABSOLUTE) {
+                                                needsMeshBeaconRefresh = true
+                                            }
+                                        },
+                                    )
+                                },
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                Text(
+                                    text = stringResource(CommonR.string.fly_to),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
 
-                Text(
-                    text = cameraStateText,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                            OutlinedButton(
+                                onClick = { flyAroundCurrentCenter(googleMap3D) },
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                Text(
+                                    text = stringResource(CommonR.string.fly_around),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                        }
+
+                        // Row 2: Fly to Mt. Rainier
+                        FilledTonalButton(
+                            onClick = {
+                                val isNewLandmark =
+                                    (activeTargetResId != CommonR.string.camera_target_mt_rainier)
+                                isCameraRestricted = false
+                                activeTargetResId = CommonR.string.camera_target_mt_rainier
+                                flyToTarget(
+                                    googleMap3D = googleMap3D,
+                                    isMountain = true,
+                                    altitudeMode = selectedAltitudeMode,
+                                    mapMode = selectedMapMode,
+                                    onFlightFinished = {
+                                        if (isNewLandmark && selectedAltitudeMode != AltitudeMode.ABSOLUTE) {
+                                            needsMeshBeaconRefresh = true
+                                        }
+                                    },
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(
+                                text = stringResource(CommonR.string.fly_to_mountain),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+
+                        // Row 3: AltitudeMode Selector Chips (RELATIVE_TO_GROUND, RELATIVE_TO_MESH, CLAMP_TO_GROUND, ABSOLUTE)
+                        Text(
+                            text = stringResource(CommonR.string.altitude_mode),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+
+                        val altitudeModes = listOf(
+                            AltitudeMode.RELATIVE_TO_GROUND to stringResource(CommonR.string.relative_to_ground),
+                            AltitudeMode.RELATIVE_TO_MESH to stringResource(CommonR.string.relative_to_mesh),
+                            AltitudeMode.CLAMP_TO_GROUND to stringResource(CommonR.string.clamp_to_ground),
+                            AltitudeMode.ABSOLUTE to stringResource(CommonR.string.absolute),
+                        )
+
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                        ) {
+                            altitudeModes.forEach { (modeValue, modeLabel) ->
+                                FilterChip(
+                                    selected = (selectedAltitudeMode == modeValue),
+                                    onClick = {
+                                        if (selectedAltitudeMode != modeValue) {
+                                            selectedAltitudeMode = modeValue
+                                            flyToTarget(
+                                                googleMap3D = googleMap3D,
+                                                isMountain = isMountainTarget,
+                                                altitudeMode = modeValue,
+                                                mapMode = selectedMapMode,
+                                            )
+                                        }
+                                    },
+                                    label = {
+                                        Text(
+                                            text = modeLabel,
+                                            style = MaterialTheme.typography.labelSmall,
+                                        )
+                                    },
+                                )
+                            }
+                        }
+
+                        // Row 4: Show/Hide restriction cube & Restrict/Remove camera restriction
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            OutlinedButton(
+                                onClick = { showRestriction = !showRestriction },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = if (showRestriction) {
+                                        MaterialTheme.colorScheme.secondaryContainer
+                                    } else {
+                                        Color.Transparent
+                                    },
+                                    contentColor = if (showRestriction) {
+                                        MaterialTheme.colorScheme.onSecondaryContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.primary
+                                    },
+                                ),
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        if (showRestriction) {
+                                            CommonR.string.camera_hide_restriction
+                                        } else {
+                                            CommonR.string.camera_show_restriction
+                                        },
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+
+                            OutlinedButton(
+                                onClick = { isCameraRestricted = !isCameraRestricted },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = if (isCameraRestricted) {
+                                        MaterialTheme.colorScheme.secondaryContainer
+                                    } else {
+                                        Color.Transparent
+                                    },
+                                    contentColor = if (isCameraRestricted) {
+                                        MaterialTheme.colorScheme.onSecondaryContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.primary
+                                    },
+                                ),
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        if (isCameraRestricted) {
+                                            CommonR.string.camera_remove_restriction
+                                        } else {
+                                            CommonR.string.camera_activate_restriction
+                                        },
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                        }
+
+                        // Row 5: Map Mode RadioGroup (Roadmap / Hybrid / Satellite)
+                        Text(
+                            text = stringResource(CommonR.string.map_mode),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .selectableGroup(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            val modes = listOf(
+                                Map3DMode.ROADMAP to stringResource(CommonR.string.roadmap),
+                                Map3DMode.HYBRID to stringResource(CommonR.string.hybrid),
+                                Map3DMode.SATELLITE to stringResource(CommonR.string.satellite),
+                            )
+                            modes.forEach { (modeValue, modeLabel) ->
+                                Row(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .selectable(
+                                            selected = (selectedMapMode == modeValue),
+                                            onClick = {
+                                                Map3DSettingsController.shared.setMapMode(modeValue)
+                                                googleMap3D?.setMapMode(modeValue)
+                                                applyMapModeCameraPerspective(
+                                                    googleMap3D = googleMap3D,
+                                                    mode = modeValue,
+                                                    isMountain = isMountainTarget,
+                                                    altitudeMode = selectedAltitudeMode,
+                                                )
+                                            },
+                                            role = Role.RadioButton,
+                                        )
+                                        .padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    RadioButton(
+                                        selected = (selectedMapMode == modeValue),
+                                        onClick = null,
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = modeLabel,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        maxLines = 1,
+                                    )
+                                }
+                            }
+                        }
+
+                        // Row 6: Roll Slider + Reset Roll Button
+                        Text(
+                            text = stringResource(
+                                CommonR.string.camera_roll_label_dynamic,
+                                rollValue,
+                            ),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Slider(
+                                value = rollValue,
+                                onValueChange = { value ->
+                                    val steppedValue = value.roundToInt().toFloat()
+                                    rollValue = steppedValue
+                                    updateMapRoll(googleMap3D, steppedValue.toDouble())
+                                },
+                                valueRange = -360f..360f,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .semantics { contentDescription = "Roll Slider" },
+                            )
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            FilledIconButton(
+                                onClick = {
+                                    val resetValue = 0.0f
+                                    rollValue = resetValue
+                                    updateMapRoll(googleMap3D, resetValue.toDouble())
+                                },
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = CommonR.drawable.outline_recenter_24),
+                                    contentDescription = stringResource(
+                                        CommonR.string.reset_roll_content_description,
+                                    ),
+                                )
+                            }
+                        }
+
+                        // Row 7: Camera State Telemetry
+                        Text(
+                            text = stringResource(CommonR.string.camera_state_label),
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+
+                        Text(
+                            text = cameraStateText,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
             }
         }
 
@@ -515,10 +596,38 @@ fun CameraControlsScreen() {
                 .align(Alignment.TopEnd)
                 .statusBarsPadding()
                 .padding(top = 8.dp, end = 8.dp),
-            sampleDefaultMapMode = Map3DMode.SATELLITE,
+            sampleDefaultMapMode = Map3DMode.ROADMAP,
             googleMap3D = googleMap3D,
+            onSettingsChanged = { updatedSettings ->
+                applyMapModeCameraPerspective(
+                    googleMap3D = googleMap3D,
+                    mode = updatedSettings.mapMode,
+                    isMountain = isMountainTarget,
+                    altitudeMode = selectedAltitudeMode,
+                )
+            },
         )
     }
+}
+
+/**
+ * Adapts a landmark [Camera] for the active [Map3DMode]: in 2D [Map3DMode.ROADMAP] mode,
+ * the map surface is a flat `0m` plane, so keeping `tilt = 0.0` and `altitude = 0.0` prevents
+ * high-elevation targets (like Mount Rainier at 4,392m) from projecting the camera sightline
+ * tens of kilometers away from the landmark.
+ */
+private fun resolveCameraForMapMode(baseCamera: Camera, @Map3DMode mapMode: Int): Camera = if (mapMode == Map3DMode.ROADMAP) {
+    baseCamera.copy(
+        center = latLngAltitude {
+            latitude = baseCamera.center.latitude
+            longitude = baseCamera.center.longitude
+            altitude = DataModel.CLAMP_ALTITUDE_METERS
+        },
+        tilt = 0.0,
+        altitudeMode = AltitudeMode.RELATIVE_TO_GROUND,
+    )
+} else {
+    baseCamera
 }
 
 /**
@@ -530,15 +639,21 @@ private fun flyToTarget(
     googleMap3D: GoogleMap3D?,
     isMountain: Boolean,
     @AltitudeMode altitudeMode: Int,
+    @Map3DMode mapMode: Int,
+    onFlightFinished: () -> Unit = {},
 ) {
     val map = googleMap3D ?: return
     if (isMountain) {
         map.setCameraRestriction(null)
     }
-    val targetCam = targetCamera(isMountain = isMountain, mode = altitudeMode)
-    if (isMountain) {
-        map.setCameraAnimationEndListener {
-            map.setCameraAnimationEndListener(null)
+    val targetCam = resolveCameraForMapMode(
+        baseCamera = targetCamera(isMountain = isMountain, mode = altitudeMode),
+        mapMode = mapMode,
+    )
+    map.setCameraAnimationEndListener {
+        map.setCameraAnimationEndListener(null)
+        onFlightFinished()
+        if (isMountain && mapMode != Map3DMode.ROADMAP) {
             map.flyCameraAround(
                 flyAroundOptions {
                     center = targetCam
@@ -547,8 +662,6 @@ private fun flyToTarget(
                 },
             )
         }
-    } else {
-        map.setCameraAnimationEndListener(null)
     }
     map.flyCameraTo(
         flyToOptions {
@@ -576,22 +689,30 @@ private fun flyAroundCurrentCenter(googleMap3D: GoogleMap3D?) {
 }
 
 /**
- * Smoothly transitions camera tilt between 2D perspective (0°) for [Map3DMode.ROADMAP]
- * and 3D perspective (67°) for [Map3DMode.HYBRID] / [Map3DMode.SATELLITE].
+ * Smoothly transitions camera perspective between 2D top-down (`0°` tilt) for [Map3DMode.ROADMAP]
+ * and 3D tilted perspective for [Map3DMode.HYBRID] / [Map3DMode.SATELLITE] while preserving focus
+ * on the active landmark target.
  */
-private fun applyMapModeCameraPerspective(googleMap3D: GoogleMap3D?, @Map3DMode mode: Int) {
-    val currentCamera = googleMap3D?.getCamera()?.toValidCamera() ?: return
+private fun applyMapModeCameraPerspective(
+    googleMap3D: GoogleMap3D?,
+    @Map3DMode mode: Int,
+    isMountain: Boolean,
+    @AltitudeMode altitudeMode: Int,
+) {
+    val map = googleMap3D ?: return
+    val currentCamera = map.getCamera()?.toValidCamera() ?: return
     val currentTilt = currentCamera.tilt ?: 67.0
-    val targetTilt = if (mode == Map3DMode.ROADMAP) {
-        0.0
-    } else if (currentTilt <= 30.0) {
-        67.0
-    } else {
+    if (mode != Map3DMode.ROADMAP && currentTilt > 30.0) {
         return
     }
-    googleMap3D.flyCameraTo(
+    map.setCameraAnimationEndListener(null)
+    val endCam = resolveCameraForMapMode(
+        baseCamera = targetCamera(isMountain = isMountain, mode = altitudeMode),
+        mapMode = mode,
+    )
+    map.flyCameraTo(
         flyToOptions {
-            endCamera = currentCamera.copy(tilt = targetTilt)
+            endCamera = endCam
             durationInMillis = 900
         },
     )

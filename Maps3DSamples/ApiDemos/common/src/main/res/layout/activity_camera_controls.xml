@@ -39,7 +39,7 @@
         android:id="@+id/map3dView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/camera_state"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/top_bar"
@@ -63,9 +63,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/map3dView">
-
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -73,209 +72,249 @@
             android:layout_margin="12dp"
             android:orientation="vertical">
 
+            <!-- Card Header with title and collapse/expand button -->
             <LinearLayout
+                android:id="@+id/card_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/fly_to"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                <TextView
+                    style="@style/TextAppearance.Material3.TitleSmall"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/fly_to"
-                    android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+                    android:text="@string/feature_title_camera_controls"
+                    android:textStyle="bold" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/fly_around"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:text="@string/fly_around"
-                    android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
-
+                    android:id="@+id/btn_collapse"
+                    style="?attr/materialIconButtonStyle"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:contentDescription="@string/collapse_controls"
+                    android:padding="0dp"
+                    app:icon="@drawable/expand_more_24px"
+                    app:iconSize="20dp"
+                    app:iconTint="?attr/colorOnSurfaceVariant" />
             </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/fly_to_mountain_button"
-                style="@style/Widget.Material3.Button.TonalButton"
+            <!-- Collapsible Content Section -->
+            <LinearLayout
+                android:id="@+id/card_content"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/fly_to_mountain"
-                android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
-
-            <TextView
-                style="@style/TextAppearance.Material3.LabelMedium"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="@string/altitude_mode" />
+                android:orientation="vertical">
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/altitude_mode_chip_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:chipSpacingHorizontal="6dp"
-                app:chipSpacingVertical="2dp"
-                app:selectionRequired="true"
-                app:singleSelection="true">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_altitude_relative_to_ground"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:checkable="true"
-                    android:checked="true"
-                    android:text="@string/relative_to_ground" />
+                    android:orientation="horizontal">
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_altitude_relative_to_mesh"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checkable="true"
-                    android:text="@string/relative_to_mesh" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/fly_to"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/fly_to"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_altitude_clamp_to_ground"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checkable="true"
-                    android:text="@string/clamp_to_ground" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/fly_around"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:text="@string/fly_around"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_altitude_absolute"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checkable="true"
-                    android:text="@string/absolute" />
-
-            </com.google.android.material.chip.ChipGroup>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/show_restriction"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
+                    android:id="@+id/fly_to_mountain_button"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:checkable="true"
-                    android:checked="false"
-                    android:text="@string/camera_show_restriction"
+                    android:text="@string/fly_to_mountain"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/toggle_restriction"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
+                <TextView
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:checkable="true"
-                    android:checked="false"
-                    android:text="@string/camera_activate_restriction"
-                    android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+                    android:layout_marginTop="4dp"
+                    android:text="@string/altitude_mode" />
 
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/altitude_mode_chip_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:chipSpacingHorizontal="6dp"
+                    app:chipSpacingVertical="2dp"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_altitude_relative_to_ground"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:checked="true"
+                        android:text="@string/relative_to_ground" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_altitude_relative_to_mesh"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/relative_to_mesh" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_altitude_clamp_to_ground"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/clamp_to_ground" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_altitude_absolute"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/absolute" />
+
+                </com.google.android.material.chip.ChipGroup>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/show_restriction"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checkable="true"
+                        android:checked="false"
+                        android:text="@string/camera_show_restriction"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/toggle_restriction"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:checkable="true"
+                        android:checked="false"
+                        android:text="@string/camera_activate_restriction"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+
+                </LinearLayout>
+
+                <TextView
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/map_mode" />
+
+                <RadioGroup
+                    android:id="@+id/map_mode_radio_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/map_mode_roadmap"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checked="true"
+                        android:singleLine="true"
+                        android:text="@string/map_mode_roadmap" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/map_mode_hybrid"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checked="false"
+                        android:singleLine="true"
+                        android:text="@string/map_mode_hybrid" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/map_mode_satellite"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checked="false"
+                        android:singleLine="true"
+                        android:text="@string/map_mode_satellite" />
+                </RadioGroup>
+
+                <TextView
+                    android:id="@+id/roll_slider_label"
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/camera_roll_label" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/roll_slider"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:stepSize="1.0"
+                        android:value="0.0"
+                        android:valueFrom="-360.0"
+                        android:valueTo="360.0"
+                        app:labelBehavior="gone" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/reset_roll_button"
+                        style="?attr/materialIconButtonFilledStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:contentDescription="@string/reset_roll_content_description"
+                        app:icon="@drawable/outline_recenter_24" />
+
+                </LinearLayout>
+
+                <TextView
+                    style="@style/TextAppearance.Material3.TitleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/camera_state_label" />
+
+                <TextView
+                    android:id="@+id/camera_state_text"
+                    style="@style/TextAppearance.Material3.BodyMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
             </LinearLayout>
-
-            <RadioGroup
-                android:id="@+id/map_mode_radio_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="2dp"
-                android:layout_marginHorizontal="16dp"
-                >
-
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/map_mode_roadmap"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:checked="false"
-                    android:text="@string/map_mode_roadmap"
-                    />
-
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/map_mode_hybrid"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:checked="false"
-                    android:layout_marginStart="4dp"
-                    android:text="@string/map_mode_hybrid"
-                    />
-
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/map_mode_satellite"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:layout_marginStart="4dp"
-                    android:text="@string/map_mode_satellite"
-                    />
-            </RadioGroup>
-
-            <TextView
-                android:id="@+id/roll_slider_label"
-                style="@style/TextAppearance.Material3.LabelMedium"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/camera_roll_label" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <com.google.android.material.slider.Slider
-                    android:id="@+id/roll_slider"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:valueFrom="-360.0"
-                    android:valueTo="360.0"
-                    android:value="0.0"
-                    android:stepSize="1.0"
-                    app:labelBehavior="gone" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/reset_roll_button"
-                    style="?attr/materialIconButtonFilledStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                app:icon="@drawable/outline_recenter_24"
-                android:contentDescription="@string/reset_roll_content_description" />
-
-            </LinearLayout>
-
-            <TextView
-                style="@style/TextAppearance.Material3.TitleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/camera_state_label" />
-
-            <TextView
-                android:id="@+id/camera_state_text"
-                style="@style/TextAppearance.Material3.BodyMedium"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>

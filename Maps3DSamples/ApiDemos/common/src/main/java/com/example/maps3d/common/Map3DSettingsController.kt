@@ -82,6 +82,20 @@ class Map3DSettingsController(
     }
 
     /**
+     * Adopts [sampleDefaultMapMode] as the active map mode when landing on a sample screen
+     * and clears [hasUserOverriddenMapMode] while preserving color scheme and UI control settings.
+     */
+    fun applySampleDefaultMapMode(@Map3DMode sampleDefaultMapMode: Int): Map3DSettings {
+        hasUserOverriddenMapMode = false
+        val sanitized = sanitizeMapMode(sampleDefaultMapMode) ?: return _settings.value
+        if (sanitized != _settings.value.mapMode) {
+            _settings.value = _settings.value.copy(mapMode = sanitized)
+            notifyListeners()
+        }
+        return _settings.value
+    }
+
+    /**
      * Resets all settings to defaults (`FOLLOW_SYSTEM`, all UI controls enabled,
      * and [sampleDefaultMapMode]) and clears [hasUserOverriddenMapMode].
      */
