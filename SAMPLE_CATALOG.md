@@ -13,7 +13,7 @@ Traditional View-based samples using Kotlin. Demonstrates a wide range of basic 
 ## ☕ [Java Samples](Maps3DSamples/ApiDemos/java-app/README.md)
 Traditional View-based samples using Java for developers preferring the classic language.
 
-## 📍 [Places UI Kit 3D Showcase](PlacesUIKit3D)
+## 📍 [Places UI Kit 3D Showcase](PlacesUIKit3D/README.md)
 Standalone application demonstrating integration of the Places UI Kit (Place Search, Place Autocomplete, and Place Details) with the Maps 3D SDK, including interactive camera fly-to animations, elevation-aware markers, and dynamic lighting.
 
 ## 🧩 [Documentation Snippets Catalog](snippets/CATALOG.md)
