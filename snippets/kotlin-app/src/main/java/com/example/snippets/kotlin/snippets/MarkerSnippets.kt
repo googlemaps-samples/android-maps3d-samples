@@ -163,14 +163,13 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
                 durationInMillis = 3000
             },
         )
+        // [END_EXCLUDE]
 
-        // [START_EXCLUDE]
         marker?.setClickListener {
             Handler(Looper.getMainLooper()).post {
                 Toast.makeText(context, "Marker Clicked!", Toast.LENGTH_SHORT).show()
             }
         }
-        // [END_EXCLUDE]
         // [END maps_android_3d_marker_click_kt]
     }
 
@@ -225,6 +224,7 @@ class MarkerSnippets(private val context: Context, private val map: TrackedMap3D
             },
         )
         // [END_EXCLUDE]
+        // [END maps_android_3d_marker_custom_icon_kt]
     }
 
     /**
