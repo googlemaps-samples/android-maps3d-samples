@@ -13,14 +13,14 @@ This guide assists developers in migrating their codebases to newer versions of 
 
 ---
 
-## Migrating from 0.2.2 to 16.0.0
+## Migrating from 0.2.2 to 16.0.1
 
-This release graduates the SDK version to `16.0.0` and updates the click listener API and XML attribute naming.
+This release graduates the SDK version to `16.0.1` (superseding `16.0.0` to resolve a JDK 21+ `javac` bytecode parameter annotation issue when compiling Java code against `Map3DControl`) and updates the click listener API and XML attribute naming.
 
 ### 1. Dependency Update
 Update the SDK dependency version in your `build.gradle` or `gradle/libs.versions.toml`:
 
-*   **Action**: Update `playServicesMaps3d` version from `0.2.2` to `16.0.0`.
+*   **Action**: Update `playServicesMaps3d` version from `0.2.2` (or `16.0.0`) to `16.0.1`.
 
 ### 2. Update `OnMap3DClickListener` Signature (`Map3DClickEvent` & `Boolean` Return)
 

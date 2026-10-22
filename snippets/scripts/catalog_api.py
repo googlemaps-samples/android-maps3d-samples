@@ -112,6 +112,12 @@ def parse_javap_output(snippets_dir):
 
     return usages
 
+def extract_annotation_field(annotation_body, field_name):
+    match = re.search(rf'{field_name}\s*=\s*((?:"[^"]*"\s*\+?\s*)+)', annotation_body)
+    if not match:
+        return ""
+    return "".join(re.findall(r'"([^"]*)"', match.group(1)))
+
 def generate_snippet_index(snippets_dir, file_map, region_tags):
     groups = defaultdict(lambda: {
         'description': '',
@@ -134,17 +140,14 @@ def generate_snippet_index(snippets_dir, file_map, region_tags):
                         continue
 
                 # Find Group
-                group_match = re.search(r'@SnippetGroup\((.*?)\)', content, re.DOTALL)
+                group_match = re.search(r'@SnippetGroup\(((?:[^")]|"[^"]*")*)\)', content, re.DOTALL)
                 if not group_match: continue
 
                 group_content = group_match.group(1)
-                group_title_match = re.search(r'title\s*=\s*"([^"]+)"', group_content)
-                group_desc_match = re.search(r'description\s*=\s*"([^"]+)"', group_content)
+                group_title = extract_annotation_field(group_content, 'title')
+                group_desc = extract_annotation_field(group_content, 'description')
 
-                if not group_title_match: continue
-
-                group_title = group_title_match.group(1)
-                group_desc = group_desc_match.group(1) if group_desc_match else ""
+                if not group_title: continue
 
                 if not groups[group_title]['description']:
                      groups[group_title]['description'] = group_desc
@@ -155,28 +158,31 @@ def generate_snippet_index(snippets_dir, file_map, region_tags):
                 for i, line in enumerate(lines):
                     if '@SnippetItem' in line:
                         # Grab context (usually next few lines have the full annotation)
-                        context = "\n".join(lines[i:i+10])
-                        item_match = re.search(r'@SnippetItem\((.*?)\)', context, re.DOTALL)
+                        context = "\n".join(lines[i:i+12])
+                        item_match = re.search(r'@SnippetItem\(((?:[^")]|"[^"]*")*)\)', context, re.DOTALL)
                         if item_match:
                             item_content = item_match.group(1)
-                            item_title_match = re.search(r'title\s*=\s*"([^"]+)"', item_content)
-                            item_desc_match = re.search(r'description\s*=\s*"([^"]+)"', item_content)
+                            item_title = extract_annotation_field(item_content, 'title')
+                            item_desc = extract_annotation_field(item_content, 'description')
 
-                            if item_title_match:
-                                item_title = item_title_match.group(1)
-                                item_desc = item_desc_match.group(1) if item_desc_match else ""
-                                
+                            if item_title:
                                 # Find active region tag mapping
                                 active_tag = "No Tag"
                                 start_line = i + 1
                                 end_line = i + 1
+
+                                next_item_line = len(lines) + 1
+                                for j in range(i + 1, len(lines)):
+                                    if '@SnippetItem' in lines[j]:
+                                        next_item_line = j + 1
+                                        break
                                 
                                 # Look up in region_tags
                                 if filepath in region_tags:
                                     for region in region_tags[filepath]:
                                         # Function index i is 0-based line index, region['start'] is 1-based
-                                        # Allow +- 10 lines buffer for comments/annotations preceding the START tag
-                                        if region['start'] <= (i + 15) and region['end'] >= i:
+                                        # Allow buffer for comments/annotations/setup preceding the START tag
+                                        if region['start'] < next_item_line and region['start'] <= (i + 30) and region['end'] >= i:
                                             active_tag = region['tag']
                                             start_line = region['start']
                                             end_line = region['end']
@@ -307,7 +313,9 @@ def main():
     print(f"Cataloging Maps3D API snippets...\nSCRIPT_DIR: {SCRIPT_DIR}\nSNIPPETS_DIR: {SNIPPETS_DIR}")
     
     print("Compiling Snippets to ensure fresh bytecode...")
-    res = subprocess.run(["./gradlew", "assembleDebug"], cwd=SNIPPETS_DIR, capture_output=True, text=True)
+    gradlew_dir = SNIPPETS_DIR if os.path.exists(os.path.join(SNIPPETS_DIR, "gradlew")) else os.path.dirname(SNIPPETS_DIR)
+    gradlew_tasks = ["assembleDebug"] if gradlew_dir == SNIPPETS_DIR else [":snippets:kotlin-app:assembleDebug", ":snippets:java-app:assembleDebug"]
+    res = subprocess.run(["./gradlew", *gradlew_tasks], cwd=gradlew_dir, capture_output=True, text=True)
     if res.returncode != 0:
          print(f"Warning: Build failed. javap results may be incomplete. {res.stderr}")
 
