@@ -140,18 +140,18 @@ This section maps high-level concepts (groups) to specific demonstration files a
 - **3. Click**:
   - *Description*: Adds a marker that logs a message when clicked.
   - **Kotlin**
-    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L140-L174)
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L140-L173)
     - Tag: `maps_android_3d_marker_click_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L114-L144)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L114-L142)
     - Tag: `maps_android_3d_marker_click_java`
 - **4. Custom Icon**:
   - *Description*: Adds a marker with a custom icon using PinConfiguration and Glyph styling.
   - **Kotlin**
-    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt:181](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L181)
-    - Tag: `No Tag`
+    - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L185-L227)
+    - Tag: `maps_android_3d_marker_custom_icon_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L154-L186)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L152-L184)
     - Tag: `maps_android_3d_marker_custom_icon_java`
 - **5. Color Glyph**:
   - *Description*: Adds a marker with a customized glyph color.
@@ -159,7 +159,7 @@ This section maps high-level concepts (groups) to specific demonstration files a
     - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L239-L271)
     - Tag: `maps_android_3d_marker_glyph_color_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L195-L213)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L193-L211)
     - Tag: `maps_android_3d_marker_glyph_color_java`
 - **6. Text Glyph**:
   - *Description*: Adds a marker with text inside the glyph.
@@ -167,7 +167,7 @@ This section maps high-level concepts (groups) to specific demonstration files a
     - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L283-L315)
     - Tag: `maps_android_3d_marker_glyph_text_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L220-L238)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L218-L236)
     - Tag: `maps_android_3d_marker_glyph_text_java`
 - **7. Circle Glyph**:
   - *Description*: Adds a marker with a default circle glyph.
@@ -175,7 +175,7 @@ This section maps high-level concepts (groups) to specific demonstration files a
     - [kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt](kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt#L327-L362)
     - Tag: `maps_android_3d_marker_glyph_circle_kt`
   - **Java**
-    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L247-L268)
+    - [java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java](java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java#L245-L266)
     - Tag: `maps_android_3d_marker_glyph_circle_java`
 
 ### Models
