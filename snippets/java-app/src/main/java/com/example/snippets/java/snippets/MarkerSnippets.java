@@ -127,7 +127,6 @@ public class MarkerSnippets {
         }
         // [END_EXCLUDE]
 
-        // [START_EXCLUDE]
         if (marker != null) {
             marker.setClickListener(
                     () ->
@@ -140,7 +139,6 @@ public class MarkerSnippets {
                                                                     Toast.LENGTH_SHORT)
                                                             .show()));
         }
-        // [END_EXCLUDE]
         // [END maps_android_3d_marker_click_java]
     }
 

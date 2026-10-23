@@ -44,7 +44,6 @@ class MapInitSnippets {
     /**
      * Initializes a standard 3D Map View using AndroidView in Compose.
      */
-    // [END_EXCLUDE]
     @Composable
     // [START_EXCLUDE]
     @Suppress("unused")
@@ -53,6 +52,7 @@ class MapInitSnippets {
         description = "Shows how to add a Map3DView to an AndroidView which bridges to " +
             "Jetpack Compose.",
     )
+    // [END_EXCLUDE]
     fun BasicMap3D() {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
