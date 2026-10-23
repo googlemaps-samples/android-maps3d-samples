@@ -62,9 +62,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import com.example.composedemos.cameracontrols.DataModel.EMPIRE_STATE_BUILDING_LATITUDE
 import com.example.composedemos.cameracontrols.DataModel.EMPIRE_STATE_BUILDING_LONGITUDE
 import com.example.composedemos.cameracontrols.DataModel.nycCameraRestriction
@@ -73,6 +70,7 @@ import com.example.maps3d.common.Map3DQuickSettingsWidget
 import com.example.maps3d.common.Map3DSessionTheme
 import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3d.common.copy
+import com.example.maps3d.common.enableImmersiveMode
 import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.example.maps3d.common.toCompassDirection
 import com.example.maps3d.common.toValidCamera
@@ -94,12 +92,7 @@ class CameraControlsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        // Hide system tray (immersive mode)
-        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
-        windowInsetsController.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        enableImmersiveMode()
 
         setContent {
             Map3DSessionTheme {

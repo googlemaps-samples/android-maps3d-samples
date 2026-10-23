@@ -134,7 +134,7 @@ val marker = googleMap3D.addMarker(markerOptions {
 marker?.setClickListener {
     // This block is executed when the marker is clicked
     lifecycleScope.launch(Dispatchers.Main) {
-        Toast.makeText(this, "Clicked on ${it.label}", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Clicked on ${marker.label}", Toast.LENGTH_SHORT).show()
     }
 }
 ```
@@ -153,10 +153,10 @@ markerOptions.setLabel("Reichstag Building");
 com.google.android.gms.maps3d.model.Marker marker = googleMap3D.addMarker(markerOptions);
 
 // Set a click listener on the marker instance
-marker.setClickListener(m -> {
+marker.setClickListener(() -> {
     // This block is executed when the marker is clicked
     runOnUiThread(() -> {
-        Toast.makeText(this, "Clicked on marker: " + m.getLabel(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Clicked on marker: " + marker.getLabel(), Toast.LENGTH_SHORT).show();
     });
 });
 ```

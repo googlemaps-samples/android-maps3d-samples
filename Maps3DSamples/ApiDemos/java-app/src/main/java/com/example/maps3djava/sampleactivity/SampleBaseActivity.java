@@ -18,6 +18,8 @@ package com.example.maps3djava.sampleactivity;
 import static com.example.maps3d.common.UtilitiesKt.toCameraString;
 import static com.example.maps3d.common.UtilitiesKt.toValidCamera;
 
+import com.example.maps3d.common.UtilitiesKt;
+
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,7 +36,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.example.maps3d.common.Map3DQuickSettingsButton;
 import com.example.maps3d.common.Map3DSettings;
@@ -208,11 +209,7 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
      * hiding status and navigation bars while allowing transient reveal on edge swipes.
      */
     protected void enableImmersiveMode() {
-        WindowInsetsControllerCompat insetsController = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-        if (insetsController != null) {
-            insetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-            insetsController.hide(WindowInsetsCompat.Type.systemBars());
-        }
+        UtilitiesKt.enableImmersiveMode(this);
     }
 
     @Override

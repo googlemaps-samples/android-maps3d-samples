@@ -71,6 +71,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.maps3d.common.LocalizationState
 import com.example.maps3d.common.MapLocalePreset
 import com.example.maps3d.common.MapsLocalizationViewModel
+import com.example.maps3d.common.enableImmersiveMode
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Map3DMode
@@ -90,6 +91,7 @@ class MapsLocalizationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        enableImmersiveMode()
 
         setContent {
             MaterialTheme {
@@ -114,6 +116,18 @@ class MapsLocalizationActivity : ComponentActivity() {
                     onNavigateUp = ::finish,
                 )
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        enableImmersiveMode()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            enableImmersiveMode()
         }
     }
 }
