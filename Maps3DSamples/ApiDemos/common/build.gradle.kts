@@ -86,7 +86,7 @@ dependencies {
     implementation(libs.androidx.material3)
 
     api(libs.play.services.base) // "com.google.android.gms:play-services-base:18.10.0"
-    api(libs.play.services.maps3d) // "com.google.android.gms:play-services-maps3d:0.2.2"
+    api(libs.play.services.maps3d) // "com.google.android.gms:play-services-maps3d:16.0.1"
     api(libs.android.maps.utils)
 }
 

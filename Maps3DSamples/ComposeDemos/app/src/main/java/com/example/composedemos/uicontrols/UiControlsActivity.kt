@@ -62,13 +62,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import com.example.maps3d.common.Map3DQuickSettingsWidget
 import com.example.maps3d.common.Map3DSessionTheme
 import com.example.maps3d.common.Map3DSettings
 import com.example.maps3d.common.Map3DUiControls
+import com.example.maps3d.common.enableImmersiveMode
 import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps.model.LatLng
@@ -115,13 +113,6 @@ class UiControlsActivity : ComponentActivity() {
         if (hasFocus) {
             enableImmersiveMode()
         }
-    }
-
-    private fun enableImmersiveMode() {
-        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-        insetsController.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        insetsController.hide(WindowInsetsCompat.Type.systemBars())
     }
 
     companion object {

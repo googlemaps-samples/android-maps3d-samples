@@ -96,7 +96,7 @@ class Map3DSettingsController(
     }
 
     /**
-     * Resets all settings to defaults (`FOLLOW_SYSTEM`, all UI controls enabled,
+     * Resets all settings to defaults (`FOLLOW_SYSTEM`, all UI controls disabled,
      * and [sampleDefaultMapMode]) and clears [hasUserOverriddenMapMode].
      */
     @JvmOverloads

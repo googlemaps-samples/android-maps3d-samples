@@ -69,6 +69,15 @@ def main():
         "ModelsVisualTest": "models_screenshot.png",
         "MarkersVisualTest": "markers_screenshot.png",
         "RoutesVisualTest": "routes_screenshot.png",
+        "PathFollowingVisualTest": "path_following_screenshot.png",
+        "AdvancedCameraAnimationVisualTest": "advanced_camera_animation_screenshot.png",
+        "DataVisualizationVisualTest": "data_visualization_screenshot.png",
+        "CloudStylingVisualTest": "cloud_styling_screenshot.png",
+        "RoadmapModeVisualTest": "roadmap_mode_screenshot.png",
+        "UiControlsVisualTest": "ui_controls_screenshot.png",
+        "FieldOfViewVisualTest": "field_of_view_screenshot.png",
+        "Projection3DVisualTest": "projection_3d_screenshot.png",
+        "MapsLocalizationVisualTest": "maps_localization_screenshot.png",
     }
     
     filename = filename_mapping.get(test_class, f"{test_class.lower()}_screenshot.png")
@@ -86,29 +95,28 @@ def main():
         f.write(result.stdout)
     print(f"Pulled screenshot to {local_path}")
         
-    # 3. Scale Image using sips (macOS built-in)
-    dim_cmd = f"sips -g pixelWidth -g pixelHeight {local_path}"
-    success, dim_output = run_command(dim_cmd)
-    if not success:
-        print("Failed to get image dimensions.")
-        sys.exit(1)
-        
-    try:
-        width = int(re.search(r"pixelWidth: (\d+)", dim_output).group(1))
-        height = int(re.search(r"pixelHeight: (\d+)", dim_output).group(1))
-    except AttributeError:
-        print(f"Failed to parse dimensions from output: {dim_output}")
-        sys.exit(1)
-        
-    new_width = int(width * 0.5)
-    new_height = int(height * 0.5)
-    
-    print(f"Scaling from {width}x{height} to {new_width}x{new_height}")
-    scale_cmd = f"sips -z {new_height} {new_width} {local_path}"
-    success, _ = run_command(scale_cmd)
-    if not success:
-        print("Failed to scale image.")
-        sys.exit(1)
+    # 3. Scale Image by 50% (cross-platform: ffmpeg, falling back to sips on macOS)
+    scale_ok, _ = run_command(f"ffmpeg -y -i {local_path} -vf scale=iw/2:ih/2 -pix_fmt rgb24 {local_path}.tmp.png && mv {local_path}.tmp.png {local_path}")
+    if not scale_ok:
+        dim_cmd = f"sips -g pixelWidth -g pixelHeight {local_path}"
+        success, dim_output = run_command(dim_cmd)
+        if not success:
+            print("Failed to get image dimensions.")
+            sys.exit(1)
+        try:
+            width = int(re.search(r"pixelWidth: (\d+)", dim_output).group(1))
+            height = int(re.search(r"pixelHeight: (\d+)", dim_output).group(1))
+        except AttributeError:
+            print(f"Failed to parse dimensions from output: {dim_output}")
+            sys.exit(1)
+        new_width = int(width * 0.5)
+        new_height = int(height * 0.5)
+        print(f"Scaling from {width}x{height} to {new_width}x{new_height}")
+        scale_cmd = f"sips -z {new_height} {new_width} {local_path}"
+        success, _ = run_command(scale_cmd)
+        if not success:
+            print("Failed to scale image.")
+            sys.exit(1)
         
     # 4. Move to Source
     app_dir_mapping = {
@@ -136,6 +144,15 @@ def main():
         "ModelsVisualTest": "Models",
         "MarkersVisualTest": "Markers",
         "RoutesVisualTest": "Routes API",
+        "PathFollowingVisualTest": "Path Following",
+        "AdvancedCameraAnimationVisualTest": "Advanced Camera Animation",
+        "DataVisualizationVisualTest": "Data Visualization",
+        "CloudStylingVisualTest": "Cloud Map Styling",
+        "RoadmapModeVisualTest": "Roadmap Mode",
+        "UiControlsVisualTest": "UI Controls",
+        "FieldOfViewVisualTest": "Field Of View",
+        "Projection3DVisualTest": "3D Projection",
+        "MapsLocalizationVisualTest": "Maps Localization",
     }
     
     feature_name = mapping.get(test_class)

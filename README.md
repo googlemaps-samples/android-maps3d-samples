@@ -19,18 +19,17 @@ empowers developers to bring immersive, real-world 3D experiences into their And
 terrain, and landmarks, offering users a richer and more interactive way to explore geographical data. Key features include programmatic camera control 
 for cinematic fly-throughs, the ability to add 3D markers and models to the map, and drawing custom polylines and polygons in a 3D space.
 
-This repository provides a collection of sample applications to help you get started and explore the capabilities of the Maps3D SDK:
+This repository provides a collection of sample applications to help you get started and explore the capabilities of the Maps3D SDK. See the **[Sample Catalog](SAMPLE_CATALOG.md)** for a complete feature matrix with screenshots across all environments:
 
-* **[Maps3DSamples/ApiDemos](Maps3DSamples/ApiDemos)**: This module showcases the fundamental API features using Kotlin and traditional
-Android Views. It's a great starting point to understand core concepts like map instantiation, camera manipulation, and adding various map objects.
-* **[Maps3DSamples/advanced](Maps3DSamples/advanced)**: For developers using Jetpack Compose, this sample demonstrates
-how to integrate the Maps3D SDK into a declarative UI. It utilizes helper classes to bridge the SDK's View-based SDK with Compose, offering a more modern
-approach to building UIs with 3D maps.
+* **[Maps3DSamples/ComposeDemos](Maps3DSamples/ComposeDemos/app/README.md)**: Modern, declarative Jetpack Compose samples built with the `maps3d-compose` library.
+* **[Maps3DSamples/ApiDemos](Maps3DSamples/ApiDemos)**: Showcases fundamental and advanced API features using traditional Android Views in both **[Kotlin](Maps3DSamples/ApiDemos/kotlin-app/README.md)** and **[Java](Maps3DSamples/ApiDemos/java-app/README.md)**.
+* **[PlacesUIKit3D](PlacesUIKit3D/README.md)**: Demonstrates integrating the Places UI Kit (Place Search, Place Autocomplete, and Place Details) with the Maps 3D SDK.
+* **[Maps3DSamples/advanced](Maps3DSamples/advanced)**: Demonstrates View-interop patterns for bridging `Map3DView` with Jetpack Compose and `ViewModel`.
 * **[snippets](snippets)**: A collection of standalone, extraction-ready code snippets demonstrating standard integration endpoints in both Kotlin and Java. Includes a coordinate checklist mapping tracker listed in [CATALOG.md](snippets/CATALOG.md).
 
 ## View-based Kotlin Samples
 
-**[Maps3DSamples/ApiDemos]([Maps3DSamples/ApiDemos])**: This repo contains the following samples:
+**[Maps3DSamples/ApiDemos](Maps3DSamples/ApiDemos)**: This repo contains the following samples:
 
 **[Maps3DSamples/ApiDemos/kotlin-app](Maps3DSamples/ApiDemos/kotlin-app)**: Demonstrates various features of the **Maps3D SDK for Android**
 using Kotlin and Android Views. This module includes examples for:

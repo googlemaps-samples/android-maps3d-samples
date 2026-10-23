@@ -26,9 +26,7 @@ import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
@@ -38,6 +36,7 @@ import com.example.maps3d.common.Map3DQuickSettingsButton
 import com.example.maps3d.common.Map3DSettings
 import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3d.common.Map3DUiControls
+import com.example.maps3d.common.enableImmersiveMode as enableWindowImmersiveMode
 import com.google.android.gms.maps3d.model.Map3DMode
 import com.example.maps3d.common.toCameraString
 import com.example.maps3d.common.toValidCamera
@@ -255,10 +254,7 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
      * hiding status and navigation bars while allowing transient reveal on edge swipes.
      */
     protected fun enableImmersiveMode() {
-        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-        insetsController.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        insetsController.hide(WindowInsetsCompat.Type.systemBars())
+        enableWindowImmersiveMode()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

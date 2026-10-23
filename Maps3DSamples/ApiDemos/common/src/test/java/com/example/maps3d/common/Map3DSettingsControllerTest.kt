@@ -155,19 +155,20 @@ class Map3DSettingsControllerTest {
     }
 
     @Test
-    fun initialState_uiControlsDefaultToEnabled() {
+    fun initialState_uiControlsDefaultToDisabled() {
         val state = controller.getSettings()
-        assertTrue(state.uiControls.allEnabled)
-        assertTrue(state.uiControls.zoom)
-        assertTrue(state.uiControls.tilt)
-        assertTrue(state.uiControls.rotate)
-        assertTrue(state.uiControls.compass)
-        assertTrue(state.uiControls.panVertical)
-        assertTrue(state.uiControls.panHorizontal)
+        assertTrue(state.uiControls.noneEnabled)
+        assertFalse(state.uiControls.zoom)
+        assertFalse(state.uiControls.tilt)
+        assertFalse(state.uiControls.rotate)
+        assertFalse(state.uiControls.compass)
+        assertFalse(state.uiControls.panVertical)
+        assertFalse(state.uiControls.panHorizontal)
     }
 
     @Test
     fun setAllUiControls_false_disablesAllAndNotifies() {
+        controller.setAllUiControls(true)
         var notified = false
         controller.addListener { notified = true }
 
@@ -180,7 +181,6 @@ class Map3DSettingsControllerTest {
 
     @Test
     fun setAllUiControls_true_enablesAll() {
-        controller.setAllUiControls(false)
         val updated = controller.setAllUiControls(true)
         assertTrue(updated.uiControls.allEnabled)
     }
@@ -190,11 +190,11 @@ class Map3DSettingsControllerTest {
         var captured: Map3DSettings? = null
         controller.addListener { captured = it }
 
-        val updated = controller.updateUiControl(zoom = false)
+        val updated = controller.updateUiControl(zoom = true)
 
-        assertFalse(updated.uiControls.zoom)
-        assertTrue(updated.uiControls.tilt)
-        assertFalse(captured?.uiControls?.zoom ?: true)
+        assertTrue(updated.uiControls.zoom)
+        assertFalse(updated.uiControls.tilt)
+        assertTrue(captured?.uiControls?.zoom ?: false)
     }
 
     @Test
@@ -249,7 +249,7 @@ class Map3DSettingsControllerTest {
     fun reset_restoresDefaultsAndClearsUserOverrideFlag() {
         controller.setMapMode(Map3DMode.ROADMAP)
         controller.setColorScheme(Map3DColorScheme.DARK)
-        controller.setAllUiControls(false)
+        controller.setAllUiControls(true)
         assertTrue(controller.hasUserOverriddenMapMode)
 
         val resetState = controller.reset(sampleDefaultMapMode = Map3DMode.SATELLITE)
@@ -257,7 +257,7 @@ class Map3DSettingsControllerTest {
         assertFalse(controller.hasUserOverriddenMapMode)
         assertEquals(Map3DMode.SATELLITE, resetState.mapMode)
         assertEquals(Map3DColorScheme.FOLLOW_SYSTEM, resetState.colorScheme)
-        assertTrue(resetState.uiControls.allEnabled)
+        assertTrue(resetState.uiControls.noneEnabled)
         assertEquals(resetState, controller.settings.value)
 
         // Subsequent sample navigation should again adopt sample defaults
@@ -290,6 +290,7 @@ class Map3DSettingsControllerTest {
 
     @Test
     fun setControlsPosition_leading_updatesPlacementAndAdjustsFabMargin() {
+        controller.setAllUiControls(true)
         assertEquals(ControlPlacement.TRAILING, controller.getSettings().uiControls.controlsPosition)
 
         val updated = controller.setControlsPosition(ControlPlacement.LEADING)
