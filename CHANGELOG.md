@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.19.0](https://github.com/googlemaps-samples/android-maps3d-samples/compare/v1.18.0...v1.19.0) (2026-10-23)
+
+
+### Features
+
+* default 3D map UI controls to off outside UiControlsActivity and update 16.0.1 docs/catalogs ([#89](https://github.com/googlemaps-samples/android-maps3d-samples/issues/89)) ([cb553e0](https://github.com/googlemaps-samples/android-maps3d-samples/commit/cb553e08d766d1c468ca07dc45c7aaf81b5871e5))
+
+
+### Bug Fixes
+
+* **snippets:** correct region tag markers in marker and map init snippets ([#91](https://github.com/googlemaps-samples/android-maps3d-samples/issues/91)) ([3b4ee95](https://github.com/googlemaps-samples/android-maps3d-samples/commit/3b4ee9589ef1629701080943c874e2f8efadf3b9))
+
 ## [1.18.0](https://github.com/googlemaps-samples/android-maps3d-samples/compare/v1.17.0...v1.18.0) (2026-10-22)
 
 
