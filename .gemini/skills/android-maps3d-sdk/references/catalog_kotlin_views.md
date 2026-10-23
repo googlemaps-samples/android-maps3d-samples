@@ -1,263 +1,725 @@
 # Common Operations Catalog (Kotlin + Views)
 
-This catalog provides short, reference snippets for common operations when using the Google Maps 3D SDK with Kotlin and XML Views.
+This catalog provides verified, region-tagged reference snippets for common operations when using the Google Maps 3D SDK (`16.0.1+`) with Kotlin and Android Views.
 
-## 1. Adding a Marker
-Description: Markers point out points of interest. You can set position, altitude mode, and labels.
-
-```kotlin
-val marker = map.addMarker(MarkerOptions()
-    .position(LatLngAltitude(37.7749, -122.4194, 0.0))
-    .altitudeMode(AltitudeMode.RELATIVE_TO_GROUND)
-    .label("San Francisco"))
-```
-
-## 2. Adding a Polyline
-Description: Polylines are lines on the map. Use matching IDs to update them instead of re-adding.
+## 1. Scene Readiness & Steady State Listeners
+Description: Listening for when the 3D scene is 100% loaded (`setOnMapReadyListener`) and when the camera stops moving and rendering settles (`setOnMapSteadyListener`).
 
 ```kotlin
-val polyline = map.addPolyline(PolylineOptions()
-    .add(LatLngAltitude(37.77, -122.41, 0.0))
-    .add(LatLngAltitude(37.78, -122.42, 0.0))
-    .color(Color.RED)
-    .width(5f))
+// [START maps_android_3d_init_listeners_kt]
+val mainHandler = Handler(Looper.getMainLooper())
 
-// To update:
-polyline.points = newPointsList
-```
-
-## 3. Adding a Polygon
-Description: Polygons represent areas.
-
-```kotlin
-val polygon = map.addPolygon(PolygonOptions()
-    .add(LatLngAltitude(37.77, -122.41, 0.0))
-    .add(LatLngAltitude(37.78, -122.41, 0.0))
-    .add(LatLngAltitude(37.78, -122.42, 0.0))
-    .fillColor(Color.argb(128, 255, 0, 0)))
-```
-
-## 4. Camera Animation
-Description: Animating the camera to a new position or flying around a center.
-
-```kotlin
-// Fly To
-map.flyTo(FlyToOptions()
-    .endCamera(targetCamera)
-    .durationInMillis(3000))
-
-// Fly Around
-map.flyAround(FlyAroundOptions()
-    .center(currentCamera)
-    .durationInMillis(5000)
-    .rounds(1.0))
-```
-
-## 5. Handling Map Click Events
-Description: Listening for clicks on the map.
-
-```kotlin
-map.addOnMapClickListener { latLngAltitude ->
-    // Handle click at location
-    val lat = latLngAltitude.latitude
-    val lng = latLngAltitude.longitude
-}
-```
-
-## 6. Object Animation (Moving Objects)
-Description: Animating the position of an object (like a Marker or Polygon) using Android `ValueAnimator` or Coroutines.
-
-### Using ValueAnimator
-```kotlin
-val animator = ValueAnimator.ofFloat(0f, 1f)
-animator.duration = 1000
-animator.addUpdateListener { animation ->
-    val fraction = animation.animatedValue as Float
-    val newLat = startLat + (endLat - startLat) * fraction
-    val newLng = startLng + (endLng - startLng) * fraction
-    marker.position = LatLngAltitude(newLat, newLng, 0.0)
-}
-animator.start()
-```
-
-### Using Coroutines (Custom)
-```kotlin
-suspend fun animateMarker(marker: Marker, start: LatLng, end: LatLng, duration: Long = 1000) {
-    val steps = duration / 20
-    val stepLat = (end.latitude - start.latitude) / steps
-    val stepLng = (end.longitude - start.longitude) / steps
-    var currentLat = start.latitude
-    var currentLng = start.longitude
-
-    for (i in 0 until steps) {
-        currentLat += stepLat
-        currentLng += stepLng
-        marker.position = LatLngAltitude(currentLat, currentLng, 0.0)
-        delay(20)
-    }
-    marker.position = LatLngAltitude(end.latitude, end.longitude, 0.0)
-}
-## 9. Waiting for Scene to Settle (Steady State)
-Description: The 3D SDK can notify you when the scene has fully rendered (terrain and mesh data loaded). This is crucial for high-fidelity snapshots or visual synchronization.
-
-### Callback Pattern
-```kotlin
-map.setOnMapSteadyListener { isSteady ->
-    if (isSteady) {
-        // Scene is settled and fully rendered
-        map.setOnMapSteadyListener(null) // Clear if one-shot
-    }
-}
-```
-
-### Coroutine Pattern
-```kotlin
-suspend fun GoogleMap3D.awaitMapSteady(timeout: Duration): Boolean = suspendCancellableCoroutine { cont ->
-    setOnMapSteadyListener { isSteady ->
-        if (isSteady) {
-            setOnMapSteadyListener(null)
-            cont.resume(true)
+map.setOnMapReadyListener { sceneReadiness ->
+    if (sceneReadiness == 1.0) {
+        // Scene is fully loaded
+        mainHandler.post {
+            Toast.makeText(context, "Map Scene Ready (100%)", Toast.LENGTH_SHORT).show()
         }
     }
-    // Add timeout logic if needed (see full samples)
 }
+
+map.setOnMapSteadyListener { isSceneSteady ->
+    if (isSceneSteady) {
+        // Camera is not moving and data is loaded
+        mainHandler.post {
+            Toast.makeText(context, "Map Scene Steady", Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+// [END maps_android_3d_init_listeners_kt]
 ```
 
-## 7. Object Click Listeners
-Description: Unlike the 2D SDK, click listeners are set directly on the object instances (Marker, Polyline, Polygon, Model) rather than on the map.
+## 2. Adding Markers (Basic, Advanced & Custom Glyphs)
+Description: Markers point out points of interest using `markerOptions { ... }`. You can set `position`, `altitudeMode`, `label`, `collisionBehavior`, `isExtruded`, `isDrawnWhenOccluded`, and custom `PinConfiguration` / `Glyph` styles.
+
+### Basic Marker
+```kotlin
+// [START maps_android_3d_marker_add_kt]
+val position = latLngAltitude {
+    latitude = 37.4220
+    longitude = -122.0841
+    altitude = 10.0
+}
+
+val options = markerOptions {
+    this.position = position
+    label = "Basic Marker"
+    // MarkerOptions uses label, not title.
+}
+
+map.addMarker(options)
+// [END maps_android_3d_marker_add_kt]
+```
+
+### Advanced Priority & Extruded Marker
+```kotlin
+// [START maps_android_3d_marker_options_kt]
+val options = markerOptions {
+    position = latLngAltitude {
+        latitude = 37.4220
+        longitude = -122.0841
+        altitude = 10.0
+    }
+    altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+    label = "Priority Marker"
+    collisionBehavior = CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY
+    isExtruded = true
+    isDrawnWhenOccluded = true
+}
+
+map.addMarker(options)
+// [END maps_android_3d_marker_options_kt]
+```
+
+### Styled Glyphs (`PinConfiguration` & `Glyph`)
+```kotlin
+// [START maps_android_3d_marker_glyph_color_kt]
+val options = markerOptions {
+    position = latLngAltitude {
+        latitude = 37.4220
+        longitude = -122.0841
+        altitude = 10.0
+    }
+    label = "Color Glyph"
+    setStyle(
+        PinConfiguration.builder()
+            .setGlyph(Glyph.fromColor(Color.CYAN))
+            .build(),
+    )
+}
+map.addMarker(options)
+// [END maps_android_3d_marker_glyph_color_kt]
+```
 
 ```kotlin
-// Marker
-marker.setClickListener {
-    // Handle marker click
-    // NOTE: This is not on the UI thread!
+// [START maps_android_3d_marker_glyph_text_kt]
+val options = markerOptions {
+    position = latLngAltitude {
+        latitude = 37.4220
+        longitude = -122.0841
+        altitude = 10.0
+    }
+    label = "Text Glyph"
+    setStyle(
+        PinConfiguration.builder()
+            .setGlyph(Glyph.fromText("NYC"))
+            .build(),
+    )
 }
+map.addMarker(options)
+// [END maps_android_3d_marker_glyph_text_kt]
+```
 
-// Polyline
-polyline.setClickListener {
-    // Handle polyline click
-    // NOTE: This is not on the UI thread!
+```kotlin
+// [START maps_android_3d_marker_glyph_circle_kt]
+val glyph = Glyph.fromCircle()
+glyph.color = Color.MAGENTA
+
+val options = markerOptions {
+    position = latLngAltitude {
+        latitude = 37.4220
+        longitude = -122.0841
+        altitude = 10.0
+    }
+    label = "Circle Glyph"
+    setStyle(
+        PinConfiguration.builder()
+            .setGlyph(glyph)
+            .build(),
+    )
 }
+map.addMarker(options)
+// [END maps_android_3d_marker_glyph_circle_kt]
 ```
 
 > [!WARNING]
-> The `setClickListener` callback does **NOT** execute on the UI thread. If you need to update views or perform UI operations, you must switch to the main thread (e.g., using `withContext(Dispatchers.Main)` or `Handler(Looper.getMainLooper()).post(...)`).
+> Object click listeners (`marker.setClickListener`, `polyline.setClickListener`, `polygon.setClickListener`, `model.setClickListener`) do **NOT** execute on the UI thread. Always switch to the main thread (`Handler(Looper.getMainLooper()).post { ... }`) when updating views or showing a `Toast`.
 
+## 3. Adding Polylines (Basic & Styled)
+Description: Polylines draw 2D or 3D extruded paths on the map using `polylineOptions { ... }`.
 
-## 8. Stopping & Waiting for Camera Animations
-Description: Controlling camera animations and waiting for their completion.
-
-### Stopping Animations
+### Basic Polyline
 ```kotlin
-// Halts any in-progress camera movement
-map.stopCameraAnimation()
+// [START maps_android_3d_polyline_add_kt]
+val points = listOf(
+    latLngAltitude {
+        latitude = 37.42
+        longitude = -122.08
+        altitude = 0.0
+    },
+    latLngAltitude {
+        latitude = 37.43
+        longitude = -122.09
+        altitude = 0.0
+    },
+    latLngAltitude {
+        latitude = 37.44
+        longitude = -122.08
+        altitude = 0.0
+    },
+)
 
-// Clear the listener as well if needed
-map.setCameraAnimationEndListener(null)
-```
-
-### Waiting for Completion (Callback)
-```kotlin
-map.setCameraAnimationEndListener {
-    // Trigger next action after animation ends
+val options = polylineOptions {
+    path = points
+    strokeColor = Color.RED
+    strokeWidth = 10.0
+    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
 }
-map.flyTo(...)
+
+val polyline = map.addPolyline(options)
+// [END maps_android_3d_polyline_add_kt]
 ```
 
-### Waiting for Completion (Coroutine)
+### Extruded & Outlined Polyline
 ```kotlin
-// Using a custom suspend function wrapper (common pattern)
-suspend fun GoogleMap3D.awaitFlyTo(options: FlyToOptions) = suspendCancellableCoroutine { cont ->
-    setCameraAnimationEndListener {
-        setCameraAnimationEndListener(null)
-        cont.resume(Unit)
+// [START maps_android_3d_polyline_options_kt]
+val points = listOf(
+    latLngAltitude {
+        latitude = 37.42
+        longitude = -122.08
+        altitude = 50.0
+    },
+    latLngAltitude {
+        latitude = 37.43
+        longitude = -122.09
+        altitude = 100.0
+    },
+)
+
+val options = polylineOptions {
+    path = points
+    strokeColor = 0xFFFF00FF.toInt() // Magenta
+    strokeWidth = 2.0
+    outerColor = 0xFF00FF00.toInt() // Green
+    outerWidth = 1.0
+    altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+    extruded = true
+    geodesic = true
+    drawsOccludedSegments = true
+}
+
+val polyline = map.addPolyline(options)
+// [END maps_android_3d_polyline_options_kt]
+```
+
+## 4. Adding Polygons (Basic, Extruded & With Hole)
+Description: Polygons represent 2D areas or 3D extruded volumes using `polygonOptions { ... }`.
+
+### Basic Polygon
+```kotlin
+// [START maps_android_3d_polygon_add_kt]
+val points = listOf(
+    latLngAltitude {
+        latitude = 37.42
+        longitude = -122.08
+        altitude = 0.0
+    },
+    latLngAltitude {
+        latitude = 37.42
+        longitude = -122.09
+        altitude = 0.0
+    },
+    latLngAltitude {
+        latitude = 37.43
+        longitude = -122.09
+        altitude = 0.0
+    },
+    latLngAltitude {
+        latitude = 37.43
+        longitude = -122.08
+        altitude = 0.0
+    },
+    latLngAltitude {
+        latitude = 37.42
+        longitude = -122.08
+        altitude = 0.0
+    },
+)
+
+val options = polygonOptions {
+    path = points
+    fillColor = Color.RED
+    strokeColor = Color.BLUE
+    strokeWidth = 5.0
+    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+}
+
+val polygon = map.addPolygon(options)
+// [END maps_android_3d_polygon_add_kt]
+```
+
+### Extruded Polygon (3D Volume)
+```kotlin
+// [START maps_android_3d_polygon_extruded_kt]
+val points = listOf(
+    latLngAltitude {
+        latitude = 37.42
+        longitude = -122.08
+        altitude = 50.0
+    },
+    latLngAltitude {
+        latitude = 37.42
+        longitude = -122.09
+        altitude = 50.0
+    },
+    latLngAltitude {
+        latitude = 37.43
+        longitude = -122.09
+        altitude = 50.0
+    },
+    latLngAltitude {
+        latitude = 37.43
+        longitude = -122.08
+        altitude = 50.0
+    },
+    latLngAltitude {
+        latitude = 37.42
+        longitude = -122.08
+        altitude = 50.0
+    },
+)
+
+val options = polygonOptions {
+    path = points
+    fillColor = 0x88FF0000.toInt() // Semi-transparent red
+    extruded = true
+    geodesic = true
+    altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+}
+
+val polygon = map.addPolygon(options)
+// [END maps_android_3d_polygon_extruded_kt]
+```
+
+### Polygon with Interior Hole
+```kotlin
+// [START maps_android_3d_polygon_hole_kt]
+val outerPoints = listOf(
+    latLngAltitude {
+        latitude = 37.422
+        longitude = -122.084
+        altitude = 0.0
+    },
+    latLngAltitude {
+        latitude = 37.422
+        longitude = -122.086
+        altitude = 0.0
+    },
+    latLngAltitude {
+        latitude = 37.424
+        longitude = -122.086
+        altitude = 0.0
+    },
+    latLngAltitude {
+        latitude = 37.424
+        longitude = -122.084
+        altitude = 0.0
+    },
+    latLngAltitude {
+        latitude = 37.422
+        longitude = -122.084
+        altitude = 0.0
+    },
+)
+
+val innerPoints = listOf(
+    latLngAltitude {
+        latitude = 37.4225
+        longitude = -122.0845
+        altitude = 0.0
+    },
+    latLngAltitude {
+        latitude = 37.4225
+        longitude = -122.0855
+        altitude = 0.0
+    },
+    latLngAltitude {
+        latitude = 37.4235
+        longitude = -122.0855
+        altitude = 0.0
+    },
+    latLngAltitude {
+        latitude = 37.4235
+        longitude = -122.0845
+        altitude = 0.0
+    },
+    latLngAltitude {
+        latitude = 37.4225
+        longitude = -122.0845
+        altitude = 0.0
+    },
+)
+
+val options = polygonOptions {
+    path = outerPoints
+    fillColor = Color.GREEN
+    // Inner paths is optional, wrap inner vertices with Hole
+    innerPaths = listOf(Hole(innerPoints))
+    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+}
+
+val polygon = map.addPolygon(options)
+// [END maps_android_3d_polygon_hole_kt]
+```
+
+## 5. Adding a 3D Model (GLB)
+Description: Loading and placing glTF/GLB assets on the map using `modelOptions { ... }`.
+
+```kotlin
+// [START maps_android_3d_model_add_kt]
+val position = latLngAltitude {
+    latitude = 37.4220
+    longitude = -122.0841
+    altitude = 100.0
+}
+
+val options = modelOptions {
+    this.position = position
+    url = SAUCER_URL
+    altitudeMode = AltitudeMode.RELATIVE_TO_MESH
+    orientation = orientation {
+        tilt = 90.0
+        heading = 0.0
+        roll = 0.0
     }
-    flyTo(options)
+    scale = vector3D {
+        x = 10.0
+        y = 10.0
+        z = 10.0
+    }
 }
+
+val model = map.addModel(options)
+// [END maps_android_3d_model_add_kt]
 ```
 
-## 10. Adding a 3D Model
-Description: Loading and placing glTF assets on the map.
+## 6. Adding a Popover (Info Window)
+Description: 2D Android Views anchored to a marker or 3D location that automatically face the camera.
 
+### Marker-Anchored Popover
 ```kotlin
-val model = map.addModel(ModelOptions()
-    .position(LatLngAltitude(37.7749, -122.4194, 0.0))
-    .url("https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/Airplane.glb")
-    .scale(Vector3D(1.0, 1.0, 1.0))
-    .altitudeMode(AltitudeMode.RELATIVE_TO_GROUND))
-```
+// [START maps_android_3d_popover_add_kt]
+// Create a marker first
+val markerOptions = markerOptions {
+    position = latLngAltitude {
+        latitude = 37.422
+        longitude = -122.084
+        altitude = 0.0
+    }
+}
+val marker = map.addMarker(markerOptions) ?: return
 
-## 11. Adding a Popover (Info Window)
-Description: 2D views that stick to a 3D location and always face the camera.
-
-```kotlin
+// Create a custom view for the popover
 val textView = TextView(context).apply {
-    text = "Hello World"
+    text = context.getString(R.string.popover_hello)
+    setPadding(16, 16, 16, 16)
     setBackgroundColor(Color.WHITE)
 }
 
-val popover = map.addPopover(PopoverOptions()
-    .positionAnchor(LatLngAltitude(37.7749, -122.4194, 10.0))
-    .content(textView)
-    .altitudeMode(AltitudeMode.RELATIVE_TO_MESH)
-    .autoCloseEnabled(true))
+// Add popover anchored to the marker
+val options = popoverOptions {
+    content = textView
+    positionAnchor = marker
+    altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+}
 
-popover.show()
+val popover = map.addPopover(options)
+
+// You can show/hide it
+popover?.show()
+// [END maps_android_3d_popover_add_kt]
 ```
 
-## 12. Extruded Polygons (3D Volumes)
-Description: Turning flat footprints into 3D volumes by duplicating vertices at height and stitching sides.
+### Configured Popover (`autoCloseEnabled` / `autoPanEnabled`)
+```kotlin
+// [START maps_android_3d_popover_options_kt]
+// Create a marker at an interesting location (e.g., Golden Gate Bridge)
+val markerOptions = markerOptions {
+    position = latLngAltitude {
+        latitude = 37.8199
+        longitude = -122.4783
+        altitude = 0.0
+    }
+    label = "Golden Gate Bridge"
+}
+val marker = map.addMarker(markerOptions) ?: return
+
+val textView = TextView(context).apply {
+    text = context.getString(R.string.popover_info)
+    setPadding(16, 16, 16, 16)
+    setBackgroundColor(Color.WHITE)
+}
+
+val options = popoverOptions {
+    content = textView
+    positionAnchor = marker
+    autoCloseEnabled = true // Close when clicking elsewhere
+    autoPanEnabled = false // Do not pan to popover
+}
+
+val popover = map.addPopover(options)
+popover?.show()
+// [END maps_android_3d_popover_options_kt]
+```
+
+## 7. Camera Animation, Events & Restrictions
+Description: Animating the camera (`flyCameraTo`, `flyCameraAround`, `stopCameraAnimation`), listening to camera movement (`setCameraChangedListener`), and restricting camera bounds (`setCameraRestriction`).
+
+### Fly Camera To Position
+```kotlin
+// [START maps_android_3d_camera_fly_to_kt]
+val targetCamera = camera {
+    center = latLngAltitude {
+        latitude = 38.743829
+        longitude = -109.499512
+        altitude = 1460.37
+    }
+    tilt = 76.16
+    heading = 338.52
+    range = 191.71
+    roll = 0.0
+}
+
+val options = flyToOptions {
+    endCamera = targetCamera
+    durationInMillis = 5000
+}
+
+map.flyCameraTo(options)
+// [END maps_android_3d_camera_fly_to_kt]
+```
+
+### Orbit Camera (`flyCameraAround`)
+```kotlin
+// [START maps_android_3d_camera_fly_around_kt]
+lifecycleScope.launch {
+    val targetCamera = camera {
+        center = latLngAltitude {
+            latitude = 38.743502
+            longitude = -109.499374
+            altitude = 1467.0
+        }
+        tilt = 58.1
+        heading = 349.6
+        range = 138.2
+        roll = 0.0
+    }
+
+    // Although not completely necessary, the experience will be usually be better by
+    // waiting for the camera to steady before starting the flyCameraAround
+    map.setCamera(targetCamera)
+
+    // Orbit around the target using DSL
+    val options = flyAroundOptions {
+        center = targetCamera
+        rounds = 2.0 // 2 full rotations
+        durationInMillis = 6_000
+    }
+
+    map.setOnMapSteadyListener { isSceneSteady: Boolean ->
+        if (isSceneSteady) {
+            map.setOnMapSteadyListener(null) // Cleanup
+            map.flyCameraAround(options)
+        }
+    }
+}
+// [END maps_android_3d_camera_fly_around_kt]
+```
+
+### Stop Camera Animation
+```kotlin
+// [START maps_android_3d_camera_stop_kt]
+lifecycleScope.launch {
+    val targetCamera = camera {
+        center = latLngAltitude {
+            latitude = 38.743502
+            longitude = -109.499374
+            altitude = 1467.0
+        }
+        tilt = 58.1
+        heading = 349.6
+        range = 138.2
+        roll = 0.0
+    }
+
+    // 1. Start a perpetual flyAround animation so we have something to stop
+    map.flyCameraAround(
+        flyAroundOptions {
+            center = targetCamera
+            rounds = 10.0
+            durationInMillis = 30_000
+        },
+    )
+
+    lifecycleScope.launch {
+        delay(2.seconds) // Let it fly for 2 seconds
+        map.stopCameraAnimation() // 2. Stop it immediately
+        Log.d("Maps3D", "Camera stopped")
+    }
+}
+// [END maps_android_3d_camera_stop_kt]
+```
+
+### Listen to Camera Change Events
+```kotlin
+// [START maps_android_3d_camera_events_kt]
+var lastLogTime = 0L
+map.setCameraChangedListener { camera ->
+    val currentTime = System.currentTimeMillis()
+    if (currentTime - lastLogTime > 500) { // Limit to 1 log per 500ms
+        lastLogTime = currentTime
+        Log.d(
+            "Maps3D",
+            "Camera State: " +
+                "Center: ${camera.center}, " +
+                "Heading: ${camera.heading}, " +
+                "Tilt: ${camera.tilt}, " +
+                "Roll: ${camera.roll}, " +
+                "Range: ${camera.range}",
+        )
+    }
+}
+// [END maps_android_3d_camera_events_kt]
+```
+
+### Listen to Steady State
+```kotlin
+// [START maps_android_3d_camera_steady_kt]
+map.setOnMapSteadyListener { isSceneSteady: Boolean ->
+    Log.d("Maps3D", "Map Is Steady: $isSceneSteady")
+}
+// [END maps_android_3d_camera_steady_kt]
+```
+
+### Camera Restrictions (`CameraRestriction` & `LatLngBounds`)
+```kotlin
+// [START maps_android_3d_camera_restriction_kt]
+// Move the camera inside the restricted bounds so we focus on NYC
+map.setCamera(
+    camera {
+        center = latLngAltitude {
+            latitude = 40.748233
+            longitude = -73.985663
+            altitude = 1500.0
+        }
+    },
+)
+
+val nycBounds = latLngBounds {
+    northEastLat = 40.856492
+    northEastLng = -73.802409
+    southWestLat = 40.685630
+    southWestLng = -74.050304
+}
+
+val restriction = cameraRestriction {
+    minAltitude = 500.0
+    maxAltitude = 10000.0
+    bounds = nycBounds
+}
+
+map.setCameraRestriction(restriction)
+// [END maps_android_3d_camera_restriction_kt]
+```
+
+## 8. Handling Map & Place Click Events (`Map3DClickEvent`)
+Description: In SDK `16.0.1+`, `setMap3DClickListener` receives a `Map3DClickEvent` (`event.location` and `event.placeId`) and returns a `Boolean` (`true` if consumed, `false` otherwise).
 
 ```kotlin
-// Helper to extrude (see full Codelab for complete implementation)
-fun extrude(basePoints: List<LatLngAltitude>, height: Double): List<List<LatLngAltitude>> {
-    // Implementation creates top points and side walls...
-    return faces
+// [START maps_android_3d_place_click_kt]
+map.setMap3DClickListener { event ->
+    val placeId = event.placeId
+    if (placeId != null) {
+        // Handle place click - Show a Toast on the UI thread
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(context, "Clicked Place ID: $placeId", Toast.LENGTH_SHORT).show()
+        }
+        return@setMap3DClickListener true
+    }
+    return@setMap3DClickListener false
 }
-
-// Adding extruded faces to map
-val faces = extrude(basePoints, 35.0)
-faces.forEach { face ->
-    map.addPolygon(PolygonOptions()
-        .addAll(face)
-        .fillColor(Color.argb(128, 255, 215, 0))
-        .altitudeMode(AltitudeMode.ABSOLUTE))
-}
+// [END maps_android_3d_place_click_kt]
 ```
 
-## 13. Camera State Logger (Debug Helper)
-Description: A utility to log the current camera state to Logcat on every movement, helping you design 3D views.
+## 9. Map Localization (`LocaleOptions` & `setLocale`)
+Description: Dynamically localizing 3D map labels to a specific language and region or resetting to the device default locale.
 
 ```kotlin
-map.addOnCameraMoveListener {
-    val camera = map.camera
-    Log.d("CameraLogger", """
-        Camera State:
-        Lat: ${camera.center.latitude}
-        Lng: ${camera.center.longitude}
-        Alt: ${camera.center.altitude}
-        Heading: ${camera.heading}
-        Tilt: ${camera.tilt}
-        Range: ${camera.range}
-    """.trimIndent())
+// [START maps_android_3d_localization_chinese_kt]
+val localeOptions = LocaleOptions().apply {
+    language = "zh"
+    region = "CN"
 }
+map.setLocale(localeOptions)
+// [END maps_android_3d_localization_chinese_kt]
 ```
-
-## 14. 3D View Validation (Testing)
-Description: Verifying that the `Map3DView` is visible and loads correctly using Espresso.
 
 ```kotlin
-@Test
-fun testMapVisible() {
-    // Launch Activity
-    ActivityScenario.launch(MapActivity::class.java)
-    
-    // Verify Map3DView is displayed
-    onView(withId(R.id.map3d_view))
-        .check(matches(isDisplayed()))
+// [START maps_android_3d_localization_default_kt]
+val defaultLocale = Locale.getDefault()
+val defaultLocaleOptions = LocaleOptions().apply {
+    language = defaultLocale.language
+    region = defaultLocale.country
 }
+map.setLocale(defaultLocaleOptions)
+// [END maps_android_3d_localization_default_kt]
 ```
 
+## 10. Built-in 3D UI Controls (`UiControlSettings`)
+Description: Configuring or hiding the built-in 3D camera UI controls (`ZoomControl`, `TiltControl`, `RotateControl`, `PanVerticalControl`, `PanHorizontalControl`, `CompassControl`, `Spacer`) across screen edges (`TRAILING`, `LEADING`, `TOP`, `BOTTOM`).
 
+### Configure Trailing & Leading Controls
+```kotlin
+// [START maps_android_3d_ui_controls_placement_kt]
+map.getUiControlSettings()?.let { uiSettings ->
+    val trailingControls = listOf(
+        ZoomControl(ControlOrientation.VERTICAL),
+        TiltControl(ControlOrientation.VERTICAL),
+        RotateControl(ControlOrientation.VERTICAL),
+    )
+    uiSettings.setUiControlsPlacement(trailingControls, ControlPlacement.TRAILING)
 
+    val leadingControls = listOf(
+        PanVerticalControl(ControlOrientation.VERTICAL),
+        PanHorizontalControl(ControlOrientation.VERTICAL),
+        CompassControl(),
+    )
+    uiSettings.setUiControlsPlacement(leadingControls, ControlPlacement.LEADING)
+}
+// [END maps_android_3d_ui_controls_placement_kt]
+```
 
+### Horizontal Controls with Spacers on Top & Bottom Edges
+```kotlin
+// [START maps_android_3d_ui_controls_orientation_kt]
+map.getUiControlSettings()?.let { uiSettings ->
+    val topControls = listOf(
+        CompassControl(),
+        Spacer(),
+        RotateControl(ControlOrientation.HORIZONTAL),
+        TiltControl(ControlOrientation.HORIZONTAL),
+    )
+    uiSettings.setUiControlsPlacement(topControls, ControlPlacement.TOP)
+
+    val bottomControls = listOf(
+        ZoomControl(ControlOrientation.HORIZONTAL),
+        Spacer(),
+        PanHorizontalControl(ControlOrientation.HORIZONTAL),
+        PanVerticalControl(ControlOrientation.HORIZONTAL),
+    )
+    uiSettings.setUiControlsPlacement(bottomControls, ControlPlacement.BOTTOM)
+}
+// [END maps_android_3d_ui_controls_orientation_kt]
+```
+
+### Hide All UI Controls
+```kotlin
+// [START maps_android_3d_ui_controls_hide_kt]
+map.getUiControlSettings()?.let { uiSettings ->
+    uiSettings.setUiControlsPlacement(emptyList(), ControlPlacement.TRAILING)
+    uiSettings.setUiControlsPlacement(emptyList(), ControlPlacement.LEADING)
+    uiSettings.setUiControlsPlacement(emptyList(), ControlPlacement.TOP)
+    uiSettings.setUiControlsPlacement(emptyList(), ControlPlacement.BOTTOM)
+}
+// [END maps_android_3d_ui_controls_hide_kt]
+```
