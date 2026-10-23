@@ -96,10 +96,13 @@ class Map3DState {
      * Synchronizes the markers on the map with the provided list of configurations.
      */
     fun syncMarkers(map: GoogleMap3D, markerConfigs: List<MarkerConfig>) {
-        val keysToRemove = markers.keys.toMutableSet()
+        val currentKeys = markerConfigs.mapTo(mutableSetOf()) { it.key }
+        val keysToRemove = markers.keys - currentKeys
+        keysToRemove.forEach { key ->
+            markers.remove(key)?.second?.remove()
+        }
 
         markerConfigs.forEach { config ->
-            keysToRemove.remove(config.key)
             val existing = markers[config.key]
 
             if (existing != null) {
@@ -118,11 +121,6 @@ class Map3DState {
                     markers[config.key] = Pair(config, newMarker)
                 }
             }
-        }
-
-        keysToRemove.forEach { key ->
-            markers[key]?.second?.remove()
-            markers.remove(key)
         }
     }
 

@@ -266,6 +266,21 @@ class Map3DSettingsControllerTest {
     }
 
     @Test
+    fun applySampleDefaultMapMode_adoptsDefaultAndPreservesThemeAndControls() {
+        controller.setMapMode(Map3DMode.ROADMAP)
+        controller.setColorScheme(Map3DColorScheme.DARK)
+        controller.updateUiControl(zoom = false)
+        assertTrue(controller.hasUserOverriddenMapMode)
+
+        val updated = controller.applySampleDefaultMapMode(Map3DMode.SATELLITE)
+
+        assertFalse(controller.hasUserOverriddenMapMode)
+        assertEquals(Map3DMode.SATELLITE, updated.mapMode)
+        assertEquals(Map3DColorScheme.DARK, updated.colorScheme)
+        assertFalse(updated.uiControls.zoom)
+    }
+
+    @Test
     fun calculateFabMarginDp_adjustsWithActiveTrailingControls() {
         assertEquals(336, Map3DUiControls(zoom = true, tilt = true, rotate = true).calculateFabMarginDp())
         assertEquals(232, Map3DUiControls(zoom = true, tilt = true, rotate = false).calculateFabMarginDp())

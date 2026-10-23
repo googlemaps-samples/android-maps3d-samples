@@ -16,10 +16,16 @@ package com.example.maps3djava.cameracontrols;
 
 import android.graphics.Color;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.maps3d.model.AltitudeMode;
+import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.CameraRestriction;
+import com.google.android.gms.maps3d.model.Glyph;
 import com.google.android.gms.maps3d.model.LatLngAltitude;
 import com.google.android.gms.maps3d.model.LatLngBounds;
+import com.google.android.gms.maps3d.model.MarkerOptions;
+import com.google.android.gms.maps3d.model.PinConfiguration;
 import com.google.android.gms.maps3d.model.PolygonOptions;
 
 import java.util.ArrayList;
@@ -30,11 +36,48 @@ import java.util.stream.Collectors;
 
 /**
  * DataModel is an object that holds constants and calculated values related to the New York City
- * area, specifically for camera restrictions and polygon definitions.
+ * area and Mount Rainier summit for camera controls, relative altitude animations, and restrictions.
  */
 public final class DataModel {
-    public static final double EMPIRE_STATE_BUILDING_LATITUDE = 40.748233;
-    public static final double EMPIRE_STATE_BUILDING_LONGITUDE = -73.985663;
+    // Target 1: Empire State Building (443m 3D skyscraper mesh in Midtown Manhattan)
+    public static final double EMPIRE_STATE_BUILDING_LATITUDE = 40.748433;
+    public static final double EMPIRE_STATE_BUILDING_LONGITUDE = -73.985656;
+    public static final double ESB_ABSOLUTE_ALTITUDE_METERS = 212.0;
+    public static final double ESB_BASE_RANGE_METERS = 950.0;
+    public static final long ESB_FLY_TO_DURATION_MS = 2_000L;
+    public static final String ESB_MARKER_ID = "esb_altitude_beacon";
+
+    // Target 2: Mount Rainier Summit (4,392m high-altitude mountain peak in Washington State)
+    public static final double MT_RAINIER_LATITUDE = 46.8523;
+    public static final double MT_RAINIER_LONGITUDE = -121.7603;
+    public static final double MT_RAINIER_GROUND_ELEVATION_METERS = 4392.0;
+    public static final double MT_RAINIER_BASE_RANGE_METERS = 1450.0;
+    public static final long MT_RAINIER_FLY_TO_DURATION_MS = 3_000L;
+    public static final long MT_RAINIER_ORBIT_DURATION_MS = 6_000L;
+    public static final double MT_RAINIER_ORBIT_ROUNDS = 1.0;
+    public static final String MT_RAINIER_MARKER_ID = "mt_rainier_summit_beacon";
+
+    // Unified AltitudeMode clearances & camera framing shared across all targets
+    public static final double RELATIVE_CLEARANCE_METERS = 100.0;
+    public static final double RELATIVE_MESH_CLEARANCE_METERS = 360.0;
+    public static final double CLAMP_ALTITUDE_METERS = 0.0;
+
+    public static final double RELATIVE_GROUND_HEADING = 34.0;
+    public static final double RELATIVE_GROUND_TILT = 65.0;
+
+    public static final double RELATIVE_MESH_HEADING = 125.0;
+    public static final double RELATIVE_MESH_TILT = 65.0;
+    public static final double RELATIVE_MESH_RANGE_FACTOR = 1.0;
+
+    public static final double CLAMP_HEADING = 205.0;
+    public static final double CLAMP_TILT = 62.0;
+
+    public static final double ABSOLUTE_HEADING = 310.0;
+    public static final double ABSOLUTE_TILT = 52.0;
+    public static final double ABSOLUTE_RANGE_FACTOR = 1.3;
+
+    // High-visibility Google yellow (#F4B400) for the altitude reference beacon
+    private static final int BEACON_BACKGROUND_COLOR = Color.rgb(244, 180, 0);
 
     private static final double NYC_SOUTH_WEST_LAT = 40.68563088976172;
     private static final double NYC_SOUTH_WEST_LNG = -74.05030430240065;
@@ -65,6 +108,215 @@ public final class DataModel {
             90.0,
             nycBounds
     );
+
+    /**
+     * Unified {@link Camera} builder for any landmark target across all four {@link AltitudeMode} options:
+     * <ul>
+     *   <li>{@link AltitudeMode#RELATIVE_TO_GROUND}: {@link #RELATIVE_CLEARANCE_METERS} (+100m) above bare terrain (DTM).</li>
+     *   <li>{@link AltitudeMode#RELATIVE_TO_MESH}: {@link #RELATIVE_MESH_CLEARANCE_METERS} (+360m) above the 3D surface/building mesh (DSM).</li>
+     *   <li>{@link AltitudeMode#CLAMP_TO_GROUND}: {@link #CLAMP_ALTITUDE_METERS} (0m) anchored directly on the ground surface.</li>
+     *   <li>{@link AltitudeMode#ABSOLUTE}: {@code absoluteAltitudeMeters} above EGM96 mean sea level (212m mid-tower at ESB,
+     *   4,392m summit at Mount Rainier).</li>
+     * </ul>
+     */
+    @NonNull
+    public static Camera buildTargetCamera(
+            double latitude,
+            double longitude,
+            double absoluteAltitudeMeters,
+            double baseRangeMeters,
+            @AltitudeMode int mode
+    ) {
+        if (mode == AltitudeMode.RELATIVE_TO_MESH) {
+            return new Camera(
+                    new LatLngAltitude(
+                            latitude,
+                            longitude,
+                            RELATIVE_MESH_CLEARANCE_METERS
+                    ),
+                    RELATIVE_MESH_HEADING,
+                    RELATIVE_MESH_TILT,
+                    0.0,
+                    baseRangeMeters * RELATIVE_MESH_RANGE_FACTOR,
+                    AltitudeMode.RELATIVE_TO_MESH
+            );
+        } else if (mode == AltitudeMode.CLAMP_TO_GROUND) {
+            return new Camera(
+                    new LatLngAltitude(
+                            latitude,
+                            longitude,
+                            CLAMP_ALTITUDE_METERS
+                    ),
+                    CLAMP_HEADING,
+                    CLAMP_TILT,
+                    0.0,
+                    baseRangeMeters,
+                    AltitudeMode.RELATIVE_TO_GROUND
+            );
+        } else if (mode == AltitudeMode.ABSOLUTE) {
+            return new Camera(
+                    new LatLngAltitude(
+                            latitude,
+                            longitude,
+                            absoluteAltitudeMeters
+                    ),
+                    ABSOLUTE_HEADING,
+                    ABSOLUTE_TILT,
+                    0.0,
+                    baseRangeMeters * ABSOLUTE_RANGE_FACTOR,
+                    AltitudeMode.ABSOLUTE
+            );
+        } else {
+            return new Camera(
+                    new LatLngAltitude(
+                            latitude,
+                            longitude,
+                            RELATIVE_CLEARANCE_METERS
+                    ),
+                    RELATIVE_GROUND_HEADING,
+                    RELATIVE_GROUND_TILT,
+                    0.0,
+                    baseRangeMeters,
+                    AltitudeMode.RELATIVE_TO_GROUND
+            );
+        }
+    }
+
+    /**
+     * Unified {@link MarkerOptions} builder for any landmark target across all four {@link AltitudeMode} options:
+     * <ul>
+     *   <li>{@link AltitudeMode#RELATIVE_TO_GROUND}: {@link #RELATIVE_CLEARANCE_METERS} (+100m) extruded above bare ground (DTM).</li>
+     *   <li>{@link AltitudeMode#RELATIVE_TO_MESH}: {@link #RELATIVE_MESH_CLEARANCE_METERS} (+360m) extruded above the 3D mesh (DSM).</li>
+     *   <li>{@link AltitudeMode#CLAMP_TO_GROUND}: {@link #CLAMP_ALTITUDE_METERS} (0m) clamped flat onto the ground surface.</li>
+     *   <li>{@link AltitudeMode#ABSOLUTE}: {@code absoluteAltitudeMeters} anchored at fixed EGM96 sea-level elevation.</li>
+     * </ul>
+     *
+     * @param refreshToken Incremented only when {@link AltitudeMode#RELATIVE_TO_MESH} is active and
+     *   {@code onMapSteady} fires after a flight. The Maps 3D SDK evaluates {@code RELATIVE_TO_MESH}
+     *   height against loaded 3D tiles at marker creation time and does not re-sample once high-LOD
+     *   destination tiles stream in, so a new ID forces re-creation against the loaded mesh.
+     */
+    @NonNull
+    public static MarkerOptions buildTargetBeaconOptions(
+            @NonNull String markerIdPrefix,
+            double latitude,
+            double longitude,
+            double absoluteAltitudeMeters,
+            @NonNull String glyphText,
+            @NonNull String label,
+            @AltitudeMode int mode,
+            int refreshToken
+    ) {
+        double beaconAltitude;
+        int beaconAltitudeMode;
+        if (mode == AltitudeMode.RELATIVE_TO_MESH) {
+            beaconAltitude = RELATIVE_MESH_CLEARANCE_METERS;
+            beaconAltitudeMode = AltitudeMode.RELATIVE_TO_MESH;
+        } else if (mode == AltitudeMode.CLAMP_TO_GROUND) {
+            beaconAltitude = CLAMP_ALTITUDE_METERS;
+            beaconAltitudeMode = AltitudeMode.CLAMP_TO_GROUND;
+        } else if (mode == AltitudeMode.ABSOLUTE) {
+            beaconAltitude = absoluteAltitudeMeters;
+            beaconAltitudeMode = AltitudeMode.ABSOLUTE;
+        } else {
+            beaconAltitude = RELATIVE_CLEARANCE_METERS;
+            beaconAltitudeMode = AltitudeMode.RELATIVE_TO_GROUND;
+        }
+        MarkerOptions options = new MarkerOptions();
+        // Include refreshToken so RELATIVE_TO_MESH markers re-sample after 3D tiles load.
+        options.setId(markerIdPrefix + "_" + mode + "_" + refreshToken);
+        options.setPosition(new LatLngAltitude(
+                latitude,
+                longitude,
+                beaconAltitude
+        ));
+        options.setLabel(label);
+        options.setAltitudeMode(beaconAltitudeMode);
+        options.setExtruded(mode != AltitudeMode.CLAMP_TO_GROUND);
+        options.setDrawnWhenOccluded(true);
+        options.setStyle(PinConfiguration.builder()
+                .setScale(1.4f)
+                .setBackgroundColor(BEACON_BACKGROUND_COLOR)
+                .setBorderColor(Color.WHITE)
+                .setGlyph(Glyph.fromText(glyphText))
+                .build());
+        return options;
+    }
+
+    @NonNull
+    public static Camera getTargetCamera(boolean isMountain, @AltitudeMode int mode) {
+        return isMountain ? getMtRainierCamera(mode) : getEsbCamera(mode);
+    }
+
+    @NonNull
+    public static MarkerOptions getTargetBeaconOptions(
+            boolean isMountain,
+            @NonNull String label,
+            @AltitudeMode int mode,
+            int refreshToken
+    ) {
+        return isMountain
+                ? getMtRainierBeaconOptions(label, mode, refreshToken)
+                : getEsbBeaconOptions(label, mode, refreshToken);
+    }
+
+    @NonNull
+    public static Camera getEsbCamera(@AltitudeMode int mode) {
+        return buildTargetCamera(
+                EMPIRE_STATE_BUILDING_LATITUDE,
+                EMPIRE_STATE_BUILDING_LONGITUDE,
+                ESB_ABSOLUTE_ALTITUDE_METERS,
+                ESB_BASE_RANGE_METERS,
+                mode
+        );
+    }
+
+    @NonNull
+    public static MarkerOptions getEsbBeaconOptions(
+            @NonNull String label,
+            @AltitudeMode int mode,
+            int refreshToken
+    ) {
+        return buildTargetBeaconOptions(
+                ESB_MARKER_ID,
+                EMPIRE_STATE_BUILDING_LATITUDE,
+                EMPIRE_STATE_BUILDING_LONGITUDE,
+                ESB_ABSOLUTE_ALTITUDE_METERS,
+                "🏢",
+                label,
+                mode,
+                refreshToken
+        );
+    }
+
+    @NonNull
+    public static Camera getMtRainierCamera(@AltitudeMode int mode) {
+        return buildTargetCamera(
+                MT_RAINIER_LATITUDE,
+                MT_RAINIER_LONGITUDE,
+                MT_RAINIER_GROUND_ELEVATION_METERS,
+                MT_RAINIER_BASE_RANGE_METERS,
+                mode
+        );
+    }
+
+    @NonNull
+    public static MarkerOptions getMtRainierBeaconOptions(
+            @NonNull String label,
+            @AltitudeMode int mode,
+            int refreshToken
+    ) {
+        return buildTargetBeaconOptions(
+                MT_RAINIER_MARKER_ID,
+                MT_RAINIER_LATITUDE,
+                MT_RAINIER_LONGITUDE,
+                MT_RAINIER_GROUND_ELEVATION_METERS,
+                "⛰️",
+                label,
+                mode,
+                refreshToken
+        );
+    }
 
     /**
      * Defines the base face of a polygon representing the ground area of New York City.

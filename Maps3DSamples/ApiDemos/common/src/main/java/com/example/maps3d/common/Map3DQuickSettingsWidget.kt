@@ -115,7 +115,7 @@ fun rememberMap3DSessionSettings(
         }
     }
     remember(defaultMapMode, controller) {
-        controller.onSampleEntered(defaultMapMode)
+        controller.applySampleDefaultMapMode(defaultMapMode)
         true
     }
     return controller.settings.collectAsState()
