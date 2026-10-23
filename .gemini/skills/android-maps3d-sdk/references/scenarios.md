@@ -1,242 +1,144 @@
 # Scenario Storyboard Catalog
 
-This catalog provides "orchestration recipes" for complex, multi-step workflows in the 3D SDK. Instead of atomic snippets, these scenarios demonstrate how to synchronize asynchronous events (camera motion, asset loading, rendering steady state) to create high-fidelity user experiences.
+This catalog provides orchestration architectures for complex, multi-step workflows in the Google Maps 3D SDK (`16.0.1+`). Instead of atomic calls, these scenarios demonstrate how to synchronize asynchronous events (camera motion, asset loading, rendering steady state, and fragment interop) to create high-fidelity 3D user experiences.
 
 ---
 
 ## Scenario 1: The Immersive Arrival
-Description: Transitioning from a high-altitude "Global View" to a specific building with high-detail 3D assets. This pattern handles the race condition between camera movement and mesh loading.
+Description: Transitioning from a high-altitude "Global View" to a specific building with high-detail 3D assets. This pattern handles the race condition between camera movement and 3D mesh loading.
 
 ### The Strategy (Orchestration Logic)
-1.  **Travel**: Execute a cinematic `flyTo` from the current camera to the target.
-2.  **Synchronization**: Use the **Double-Wait Pattern**. Wait for the camera animation to end and for the map steady-state (ensures the building mesh is loaded before placing assets).
-3.  **Enhancement**: Add a high-detail 3D model (glTF) at the location.
-4.  **Context**: Show a Popover with metadata.
-5.  **Engagement**: Start a slow `flyAround` to provide a 360-degree context.
+1.  **Travel**: Execute a cinematic `flyCameraTo` (`flyToOptions { ... }`) from the current camera to the target.
+2.  **Synchronization**: Use the **Double-Wait Pattern**. Wait for the camera animation to end and for the map steady state (`setOnMapSteadyListener`) so the building mesh is loaded before placing assets.
+3.  **Enhancement**: Add a high-detail 3D model (glTF/GLB) at the location using `addModel(modelOptions { ... })`.
+4.  **Context**: Anchor and show a `Popover` (`addPopover(popoverOptions { ... })` + `popover.show()`) with metadata.
+5.  **Engagement**: Start a slow `flyCameraAround` (`flyAroundOptions { ... }`) to provide a 360-degree orbit context.
 
-### The Storyboard Code (Kotlin + Coroutines)
+### Verified Building Blocks (Kotlin)
+Combine the following region-tagged building blocks in a coroutine:
 
 ```kotlin
-/**
- * SCENARIO: The Immersive Arrival
- * Orchestrates a high-to-low altitude transition with asset loading.
- * 
- * Note: Assumes extensions like `awaitFlyTo` and `awaitMapSteady` are available
- * (see catalogs for implementation).
- */
-suspend fun GoogleMap3D.executeImmersiveArrival(
-    targetLocation: LatLngAltitude,
-    modelUrl: String,
-    title: String,
-    context: Context
-) {
-    // 1. Travel: High-speed cinematic flight
-    val targetCamera = Camera.builder()
-        .center(targetLocation)
-        .range(500.0) // Close zoom
-        .tilt(45.0)
-        .heading(0.0)
-        .build()
-    
-    // Custom awaitFlyTo extension ensures we don't proceed until we arrive
-    awaitFlyTo(FlyToOptions.builder()
-        .endCamera(targetCamera)
-        .durationInMillis(4000)
-        .build())
-
-    // 2. Synchronization: Wait for the 3D mesh (buildings/terrain) to settle
-    // This prevents the "popping" of 3D models into empty space
-    awaitMapSteady(timeout = 5000)
-
-    // 3. Enhancement: Place the hero asset
-    val model = addModel(ModelOptions.builder()
-        .position(targetLocation)
-        .url(modelUrl)
-        .altitudeMode(AltitudeMode.RELATIVE_TO_MESH)
-        .build())
-
-    // 4. Context: Show the info UI
-    val textView = TextView(context).apply { text = title }
-    val popover = addPopover(PopoverOptions.builder()
-        .positionAnchor(LatLngAltitude(targetLocation.latitude, targetLocation.longitude, targetLocation.altitude + 20.0))
-        .content(textView)
-        .build())
-    popover.show()
-
-    // 5. Engagement: Subtle rotation to show off the 3D space
-    flyAround(FlyAroundOptions.builder()
-        .center(camera) // Rotate around current view
-        .durationInMillis(20000)
-        .rounds(0.5)
-        .build())
+// [START maps_android_3d_camera_fly_to_kt]
+val targetCamera = camera {
+    center = latLngAltitude {
+        latitude = 38.743829
+        longitude = -109.499512
+        altitude = 1460.37
+    }
+    tilt = 76.16
+    heading = 338.52
+    range = 191.71
+    roll = 0.0
 }
+
+val options = flyToOptions {
+    endCamera = targetCamera
+    durationInMillis = 5000
+}
+
+map.flyCameraTo(options)
+// [END maps_android_3d_camera_fly_to_kt]
+```
+
+```kotlin
+// [START maps_android_3d_model_add_kt]
+val position = latLngAltitude {
+    latitude = 37.4220
+    longitude = -122.0841
+    altitude = 100.0
+}
+
+val options = modelOptions {
+    this.position = position
+    url = SAUCER_URL
+    altitudeMode = AltitudeMode.RELATIVE_TO_MESH
+    orientation = orientation {
+        tilt = 90.0
+        heading = 0.0
+        roll = 0.0
+    }
+    scale = vector3D {
+        x = 10.0
+        y = 10.0
+        z = 10.0
+    }
+}
+
+val model = map.addModel(options)
+// [END maps_android_3d_model_add_kt]
+```
+
+```kotlin
+// [START maps_android_3d_camera_fly_around_kt]
+lifecycleScope.launch {
+    val targetCamera = camera {
+        center = latLngAltitude {
+            latitude = 38.743502
+            longitude = -109.499374
+            altitude = 1467.0
+        }
+        tilt = 58.1
+        heading = 349.6
+        range = 138.2
+        roll = 0.0
+    }
+
+    // Although not completely necessary, the experience will be usually be better by
+    // waiting for the camera to steady before starting the flyCameraAround
+    map.setCamera(targetCamera)
+
+    // Orbit around the target using DSL
+    val options = flyAroundOptions {
+        center = targetCamera
+        rounds = 2.0 // 2 full rotations
+        durationInMillis = 6_000
+    }
+
+    map.setOnMapSteadyListener { isSceneSteady: Boolean ->
+        if (isSceneSteady) {
+            map.setOnMapSteadyListener(null) // Cleanup
+            map.flyCameraAround(options)
+        }
+    }
+}
+// [END maps_android_3d_camera_fly_around_kt]
 ```
 
 ---
 
-## Scenario 2: The Flyover Tour
-Description: A guided tour that visits multiple points of interest sequentially, waiting for the scene to settle at each stop before proceeding.
+## Scenario 2: The Keyframe Flyover Tour (`AdvancedCameraAnimationActivity`)
+Description: A guided tour that visits multiple points of interest sequentially, waiting for the camera animation and 3D scene mesh to settle at each stop before proceeding, with support for stationary target tracking and 360° orbits.
 
 ### The Strategy
-1.  **Fly to Stop**: Move to the first POI.
-2.  **Wait**: Wait for camera and mesh to settle.
-3.  **Pause/Inspect**: Hold the view for a few seconds or trigger an action (e.g., show a marker).
-4.  **Repeat**: Move to the next POI.
-
-### The Storyboard Code (Kotlin + Coroutines)
-
-```kotlin
-suspend fun GoogleMap3D.executeFlyoverTour(
-    stops: List<LatLngAltitude>,
-    onStopVisited: (Int) -> Unit
-) {
-    stops.forEachIndexed { index, stop ->
-        // Fly to stop
-        val camera = Camera.builder().center(stop).range(1000.0).tilt(30.0).build()
-        awaitFlyTo(FlyToOptions.builder().endCamera(camera).durationInMillis(3000).build())
-        
-        // Wait for mesh
-        awaitMapSteady(timeout = 5000)
-        
-        // Trigger callback (e.g., show UI or highlight asset)
-        onStopVisited(index)
-        
-        // Hold for inspection
-        delay(2000)
-    }
-}
-```
+1.  **Fly to Stop**: Move to the current keyframe POI using `map.flyCameraTo(flyToOptions { ... })`.
+2.  **Wait**: Wait for the camera animation to complete and `setOnMapSteadyListener` to report `true`.
+3.  **Pause / Orbit**: Hold the view or execute `map.flyCameraAround(flyAroundOptions { ... })`.
+4.  **Advance**: Move to the next keyframe stop.
+5.  **Reference Implementation**: See `Maps3DSamples/ApiDemos/common/src/main/java/com/example/maps3d/common/AdvancedCameraEngine.kt` and `AdvancedCameraAnimationActivity` across `ComposeDemos`, `kotlin-app`, and `java-app`.
 
 ---
 
-## Scenario 3: The Fragment Interop Overlay (Places UI Kit)
-Description: Hosting a traditional Android Fragment (like the Places UI Kit `PlaceDetailsCompactFragment`) inside a Compose UI anchored to map events. This solves the problem of rapid recomposition causing fragment recreation.
+## Scenario 3: The Fragment Interop Overlay (`PlaceDetailsActivity` & `PlacesUIKit3D`)
+Description: Hosting a traditional Android Fragment (like the Places UI Kit `PlaceDetailsCompactFragment`) inside a Compose or View UI anchored to 3D map place click events (`setMap3DClickListener`).
 
 ### The Strategy
-1.  **Single Instantiation**: Create the `FragmentContainerView` and transact the Fragment exactly ONCE in the `factory` block of `AndroidView`.
-2.  **Decoupled Updates**: Use `LaunchedEffect` keyed on the state (e.g., `placeId`) to update the existing fragment, avoiding full recreation.
-3.  **Activity Support**: Use the Activity's `supportFragmentManager` directly to avoid Hilt context casting issues (cast `LocalContext.current` to `FragmentActivity`).
-
-### The Storyboard Code (Kotlin + Compose)
-
-```kotlin
-@Composable
-fun PlaceDetailsOverlay(
-    placeId: String,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val containerId = remember { View.generateViewId() }
-    val context = LocalContext.current
-    val supportFragmentManager = remember(context) {
-        (context as FragmentActivity).supportFragmentManager
-    }
-
-    // Decoupled state observer: Updates existing fragment when placeId changes
-    LaunchedEffect(placeId) {
-        val fragment = supportFragmentManager.findFragmentById(containerId) as? PlaceDetailsCompactFragment
-        if (fragment != null) {
-            fragment.loadWithPlaceId(placeId)
-        }
-    }
-
-    Box(modifier = modifier) {
-        AndroidView(
-            factory = { ctx ->
-                FragmentContainerView(ctx).apply {
-                    id = containerId
-                    
-                    val newFragment = PlaceDetailsCompactFragment.newInstance(
-                        PlaceDetailsCompactFragment.ALL_CONTENT,
-                        Orientation.VERTICAL,
-                        R.style.CustomizedPlaceDetailsTheme
-                    )
-                    
-                    supportFragmentManager.commit {
-                        replace(containerId, newFragment)
-                    }
-                    
-                    post { newFragment.loadWithPlaceId(placeId) }
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-    
-    // Clean up fragment when leaving composition
-    DisposableEffect(containerId) {
-        onDispose {
-            supportFragmentManager.findFragmentById(containerId)?.let {
-                supportFragmentManager.commit { remove(it) }
-            }
-        }
-    }
-}
-```
+1.  **Listen for Place Clicks**: Register `map.setMap3DClickListener { event -> ... }` and inspect `event.placeId` (returning `true` when consumed).
+2.  **Single Instantiation in Compose**: Create the `FragmentContainerView` and transact `PlaceDetailsCompactFragment.newInstance(...)` once in the `factory` block of `AndroidView`.
+3.  **Decoupled Updates**: Use `LaunchedEffect(placeId)` to call `fragment.loadWithPlaceId(placeId)` when the selected `placeId` changes, avoiding fragment recreation on recomposition.
+4.  **Reference Implementations**:
+    *   `Maps3DSamples/ComposeDemos/app/src/main/java/com/example/composedemos/placedetails/PlaceDetailsActivity.kt`
+    *   `PlacesUIKit3D/` (Full standalone showcase with Place Search, Place Autocomplete, Place Details, and elevation-aware 3D camera framing).
 
 ---
 
-## Scenario 4: Continuous Route Tracking (Drone View)
-Description: Simulating a smooth, frame-driven flight along a complex polyline route, updating camera and markers on each frame. This avoids the jerky movement of waypoint jumping.
+## Scenario 4: Continuous Route & Path Following (`RoutesActivity` & `PathFollowingActivity`)
+Description: Simulating a smooth, frame-driven flight along a 3D polyline route, updating camera and/or 3D models on each hardware frame (`withFrameNanos` / `Choreographer.FrameCallback`) with decoupled user gesture overrides.
 
 ### The Strategy
-1.  **Headless Engine**: Use a `LaunchedEffect` with `withFrameMillis` to run a continuous physics loop.
-2.  **Interpolation**: Calculate the precise position along the route based on elapsed distance.
-3.  **Smooth Camera**: Use linear interpolation (lerp) and spherical linear interpolation (slerp) for camera position and heading to prevent jitter.
-4.  **Object Mutation**: Directly mutate existing object properties (e.g., `m.orientation = ...`) rather than recreating objects to maintain 60FPS.
-
-### The Storyboard Code (Kotlin + Compose)
-
-```kotlin
-@Composable
-fun RouteFlightEngine(
-    map3D: GoogleMap3D?,
-    path: List<LatLng>,
-    isPlaying: Boolean,
-    speedMps: Float
-) {
-    val safeMap = map3D ?: return
-    val cumulativeDistances = remember(path) { calculateCumulativeDistances(path) }
-    val totalDistance = cumulativeDistances.last()
-
-    var elapsedDistance by remember { mutableFloatStateOf(0f) }
-    var lastFrameTime by remember { mutableLongStateOf(0L) }
-
-    LaunchedEffect(isPlaying, path) {
-        if (!isPlaying) return@LaunchedEffect
-
-        while (isPlaying) {
-            withFrameMillis { frameTime ->
-                if (lastFrameTime == 0L) {
-                    lastFrameTime = frameTime
-                    return@withFrameMillis
-                }
-                val dtMs = frameTime - lastFrameTime
-                lastFrameTime = frameTime
-
-                // Advance distance
-                elapsedDistance += (speedMps * (dtMs / 1000.0)).toFloat()
-                if (elapsedDistance >= totalDistance) elapsedDistance = totalDistance.toFloat()
-
-                // Calculate interpolated position
-                val targetPos = getInterpolatedPoint(elapsedDistance.toDouble(), path, cumulativeDistances)
-                
-                // Update camera smoothly
-                val currentCamera = safeMap.camera
-                val newCamera = Camera.builder()
-                    .center(targetPos)
-                    .heading(currentCamera.heading) // Or calculate lookahead heading
-                    .tilt(currentCamera.tilt)
-                    .range(currentCamera.range)
-                    .build()
-                
-                safeMap.setCamera(newCamera)
-            }
-        }
-    }
-}
-```
-> [!NOTE]
-> This is a simplified extraction. Refer to the full sample in `Maps3DSamples/advanced/app/src/main/java/com/example/advancedmaps3dsamples/route/RouteSampleActivity.kt` for advanced details on `slerpHeading`, lookahead vectors, and the "Teleport to Null Island" pattern for hiding inactive models.
-
-
+1.  **Pure Kinematic Engine**: Compute cumulative distances, interpolated `LatLngAltitude` positions, and lookahead headings in a pure Kotlin math/controller engine (`PathFollowingEngine` / `PathFollowingController`).
+2.  **Frame-Synchronized Loop**: Drive time integration using `Choreographer.FrameCallback` (Views) or `withFrameNanos` (Compose).
+3.  **Dual-Polyline Progress & Gesture Decoupling**: Render both the completed and remaining route polylines (`updatePolyline` / `addPolyline`), and allow user pan/tilt/zoom gestures to decouple from the automated camera heading/tilt while following the path.
+4.  **Reference Implementations**:
+    *   `Maps3DSamples/ApiDemos/common/src/main/java/com/example/maps3d/common/PathFollowingEngine.kt`
+    *   `Maps3DSamples/ComposeDemos/app/src/main/java/com/example/composedemos/pathfollowing/PathFollowingActivity.kt`
+    *   `Maps3DSamples/ComposeDemos/app/src/main/java/com/example/composedemos/routes/RoutesActivity.kt`

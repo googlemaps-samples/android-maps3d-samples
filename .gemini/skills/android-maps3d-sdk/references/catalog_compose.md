@@ -1,365 +1,144 @@
 # Common Operations Catalog (Jetpack Compose)
 
-This catalog provides reference snippets for common operations when using the Google Maps 3D SDK with Jetpack Compose (via `AndroidView` interoperability).
+This catalog provides verified reference snippets for using the Google Maps 3D SDK (`16.0.1+`) with Jetpack Compose—both via raw `AndroidView` interoperability and via the declarative `maps3d-compose` (`GoogleMap3D`) library used throughout `Maps3DSamples/ComposeDemos`.
 
-## 0. The Reusable `Map3DContainer` Pattern
-Description: The recommended way to use `Map3DView` in Compose is to create a reusable wrapper Composable that handles lifecycle and map state.
+## 1. Basic `AndroidView` + `Map3DView` Bridge
+Description: Bridging `Map3DView` directly into Jetpack Compose using `AndroidView`, passing a required `Map3DMode` (`Map3DMode.HYBRID`, `Map3DMode.SATELLITE`, or `Map3DMode.ROADMAP`), and awaiting `getMap3DViewAsync`.
 
 ```kotlin
+// [START maps_android_3d_init_basic_kt]
 @Composable
-fun Map3DContainer(
-    modifier: Modifier = Modifier,
-    options: Map3DOptions,
-    onMapReady: (GoogleMap3D) -> Unit
-) {
+fun BasicMap3D() {
     AndroidView(
-        modifier = modifier,
+        modifier = Modifier.fillMaxSize(),
         factory = { context ->
-            Map3DView(context, options).apply {
-                onCreate(null) // Handle lifecycle manually if needed
+            Map3DView(context, Map3DMode.HYBRID).apply {
+                getMap3DViewAsync(object : OnMap3DViewReadyCallback {
+                    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
+                        val camera = camera {
+                            center = latLngAltitude {
+                                latitude = 40.0150
+                                longitude = -105.2705
+                                altitude = 5000.0
+                            }
+                            heading = 0.0
+                            tilt = 45.0
+                            roll = 0.0
+                            range = 10000.0
+                        }
+                        googleMap3D.setCamera(camera)
+                    }
+                    override fun onError(error: Exception) {
+                        // Log exception trace guiding developers to key deficits or mismatches
+                        Log.e("MapInitSnippets", "Failed to initialize 3D Map: ${error.message}", error)
+                    }
+                })
             }
         },
-        update = { view ->
-            view.getMap3DViewAsync(object : OnMap3DViewReadyCallback {
-                override fun onMap3DViewReady(map: GoogleMap3D) {
-                    onMapReady(map)
-                }
-                override fun onError(e: Exception) {
-                    // Handle error
-                }
-            })
-        },
-        onRelease = { view ->
-            view.onDestroy()
-        }
     )
 }
+// [END maps_android_3d_init_basic_kt]
 ```
 
-## 1. Adding a Marker
+> [!IMPORTANT]
+> When embedding `Map3DView` in `AndroidView` in production apps, always forward `ON_RESUME` / `ON_PAUSE` via a `LifecycleEventObserver` inside a `DisposableEffect` and call `map3dView.onDestroy()` inside `AndroidView`'s `onRelease` block, or use the `GoogleMap3D` composable from `maps3d-compose` (`Maps3DSamples/ComposeDemos`), which handles lifecycle, readiness, and state synchronization automatically.
 
-Description: Markers point out points of interest.
+## 2. Declarative `GoogleMap3D` Composable (`maps3d-compose`)
+Description: In `Maps3DSamples/ComposeDemos` and projects using `maps3d-compose`, `com.google.maps.android.compose3d.GoogleMap3D` manages `Map3DView` lifecycle, `Map3DInitConfig`, camera synchronization, click events (`onMapClick` and `onPlaceClick`), and declarative state lists (`markers`, `polylines`, `polygons`, `models`, `popovers`, `cameraRestriction`).
 
+### Signature & Parameters (`maps3d-compose`)
+*   `camera: Camera`: Hoisted camera state (`camera { ... }`).
+*   `mapMode: Int`: `Map3DMode.HYBRID`, `Map3DMode.SATELLITE`, or `Map3DMode.ROADMAP`.
+*   `options: Map3DInitConfig`: Created via `Map3DInitConfig.create(..., mapMode = mapMode, mapId = ...)`.
+*   `markers: List<MarkerConfig>`, `polylines: List<PolylineConfig>`, `polygons: List<PolygonConfig>`, `models: List<ModelConfig>`, `popovers: List<PopoverConfig>`.
+*   `cameraRestriction: CameraRestriction?`: Bounds and altitude limits.
+*   `onMapReady: (GoogleMap3D) -> Unit`: Exposes the underlying `GoogleMap3D` instance for imperative operations (`flyCameraTo`, `flyCameraAround`, `stopCameraAnimation`, `setLocale`, `getUiControlSettings()`).
+*   `onMapSteady: () -> Unit` & `onMapSteadyChange: (Boolean) -> Unit`: Scene steady callbacks.
+*   `onMapClick: ((LatLngAltitude) -> Unit)?` & `onPlaceClick: ((String) -> Unit)?`: Map and POI click callbacks (note: in `16.0.1+`, tapping a place falls back to `onMapClick(event.location)` when `onPlaceClick` is `null`).
+
+## 3. Imperative Operations Inside Compose (`onMapReady` / `LaunchedEffect`)
+Description: Once you obtain the `GoogleMap3D` reference via `onMapReady` (or `getMap3DViewAsync`), use the exact SDK `16.0.1` methods shown below inside `LaunchedEffect` or event callbacks:
+
+### Camera Fly-To Animation (`flyCameraTo`)
 ```kotlin
-var marker by remember { mutableStateOf<Marker?>(null) }
-
-AndroidView(
-    factory = { context ->
-        Map3DView(context).apply {
-            getMapAsync { map ->
-                marker = map.addMarker(MarkerOptions()
-                    .position(LatLngAltitude(37.7749, -122.4194, 0.0))
-                    .label("San Francisco"))
-            }
-        }
-    },
-    update = { view ->
-        // Update marker properties if needed
+// [START maps_android_3d_camera_fly_to_kt]
+val targetCamera = camera {
+    center = latLngAltitude {
+        latitude = 38.743829
+        longitude = -109.499512
+        altitude = 1460.37
     }
-)
-```
-
-## 2. Adding a Polyline
-Description: Polylines are lines on the map.
-
-```kotlin
-var polyline by remember { mutableStateOf<Polyline?>(null) }
-
-AndroidView(
-    factory = { context ->
-        Map3DView(context).apply {
-            getMapAsync { map ->
-                polyline = map.addPolyline(PolylineOptions()
-                    .add(LatLngAltitude(37.77, -122.41, 0.0))
-                    .add(LatLngAltitude(37.78, -122.42, 0.0))
-                    .color(Color.RED))
-            }
-        }
-    },
-    update = { view ->
-        // To update points:
-        polyline?.points = newPointsList
-    }
-)
-```
-
-## 3. Camera Animation
-Description: Animating the camera using the map instance.
-
-```kotlin
-var map3D by remember { mutableStateOf<GoogleMap3D?>(null) }
-
-AndroidView(
-    factory = { context ->
-        Map3DView(context).apply {
-            getMapAsync { map ->
-                map3D = map
-            }
-        }
-    }
-)
-
-// Trigger animation in a side effect
-LaunchedEffect(trigger) {
-    map3D?.flyTo(FlyToOptions()
-        .endCamera(targetCamera)
-        .durationInMillis(3000))
+    tilt = 76.16
+    heading = 338.52
+    range = 191.71
+    roll = 0.0
 }
-```
 
-## 4. Handling Map Click Events
-Description: Listening for clicks on the map.
-
-```kotlin
-AndroidView(
-    factory = { context ->
-        Map3DView(context).apply {
-            getMapAsync { map ->
-                map.addOnMapClickListener { location ->
-                    onMapClick(location)
-                }
-            }
-        }
-    }
-)
-```
-
-## 5. Object Animation (Moving Objects)
-Description: Animating the position of an object using Compose animation states.
-
-```kotlin
-var marker by remember { mutableStateOf<Marker?>(null) }
-val moveTrigger by remember { mutableStateOf(false) }
-
-// Animate a fraction from 0 to 1
-val fraction by animateFloatAsState(
-    targetValue = if (moveTrigger) 1f else 0f,
-    animationSpec = tween(durationMillis = 1000)
-)
-
-// Calculate intermediate position
-val currentLat = startLat + (endLat - startLat) * fraction
-val currentLng = startLng + (endLng - startLng) * fraction
-
-// Update marker position in the update block or side effect
-AndroidView(
-    factory = { /* ... */ },
-    update = { view ->
-        marker?.position = LatLngAltitude(currentLat, currentLng, 0.0)
-    }
-)
-```
-
-## 6. Object Click Listeners
-Description: Setting click listeners on objects within the `AndroidView` factory or update block.
-
-```kotlin
-AndroidView(
-    factory = { context ->
-        Map3DView(context).apply {
-            getMapAsync { map ->
-                val marker = map.addMarker(...)
-                marker.setClickListener {
-                    // Handle marker click
-                    // NOTE: This is not on the UI thread!
-                }
-            }
-        }
-    }
-)
-```
-
-> [!WARNING]
-> The `setClickListener` callback does **NOT** execute on the UI thread. If you need to update Compose state or perform UI operations, you must switch to the main thread (e.g., using `withContext(Dispatchers.Main)` or updating a thread-safe state).
-
-
-## 7. Stopping & Waiting for Camera Animations
-Description: Controlling camera animations in Compose side effects.
-
-### Stopping Animations
-```kotlin
-LaunchedEffect(stopTrigger) {
-    if (stopTrigger) {
-        map3D?.stopCameraAnimation()
-    }
+val options = flyToOptions {
+    endCamera = targetCamera
+    durationInMillis = 5000
 }
+
+map.flyCameraTo(options)
+// [END maps_android_3d_camera_fly_to_kt]
 ```
 
-### Waiting for Completion
+### Map & Place Click Handling (`setMap3DClickListener`)
 ```kotlin
-LaunchedEffect(trigger) {
-    map3D?.let { map ->
-        // Using the custom awaitFlyTo extension mentioned in Kotlin catalog
-        map.awaitFlyTo(FlyToOptions()
-            .endCamera(targetCamera)
-            .durationInMillis(3000))
-        
-        // This runs AFTER animation completes
-        onAnimationComplete()
+// [START maps_android_3d_place_click_kt]
+map.setMap3DClickListener { event ->
+    val placeId = event.placeId
+    if (placeId != null) {
+        // Handle place click - Show a Toast on the UI thread
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(context, "Clicked Place ID: $placeId", Toast.LENGTH_SHORT).show()
+        }
+        return@setMap3DClickListener true
     }
+    return@setMap3DClickListener false
 }
+// [END maps_android_3d_place_click_kt]
 ```
 
-## 8. Waiting for Scene to Settle (Steady State)
-Description: Hoisting the map steady state to Compose state.
-
+### Map Localization (`LocaleOptions` & `setLocale`)
 ```kotlin
-var isMapSteady by remember { mutableStateOf(false) }
-
-AndroidView(
-    factory = { context ->
-        Map3DView(context).apply {
-            getMapAsync { map ->
-                map.setOnMapSteadyListener { steady ->
-                    isMapSteady = steady
-                }
-            }
-        }
-    }
-)
-
-// React to steady state
-if (isMapSteady) {
-    // Scene is fully rendered
+// [START maps_android_3d_localization_chinese_kt]
+val localeOptions = LocaleOptions().apply {
+    language = "zh"
+    region = "CN"
 }
+map.setLocale(localeOptions)
+// [END maps_android_3d_localization_chinese_kt]
 ```
 
-## 9. Adding a 3D Model
-Description: Adding a model within `AndroidView`.
-
+### Configuring or Hiding Built-in UI Controls (`UiControlSettings`)
 ```kotlin
-AndroidView(
-    factory = { context ->
-        Map3DView(context).apply {
-            getMapAsync { map ->
-                map.addModel(ModelOptions()
-                    .position(LatLngAltitude(37.7749, -122.4194, 0.0))
-                    .url("https://.../model.glb"))
-            }
-        }
-    }
-)
-```
+// [START maps_android_3d_ui_controls_placement_kt]
+map.getUiControlSettings()?.let { uiSettings ->
+    val trailingControls = listOf(
+        ZoomControl(ControlOrientation.VERTICAL),
+        TiltControl(ControlOrientation.VERTICAL),
+        RotateControl(ControlOrientation.VERTICAL),
+    )
+    uiSettings.setUiControlsPlacement(trailingControls, ControlPlacement.TRAILING)
 
-## 10. Adding a Popover (Info Window)
-Description: Adding a popover within `AndroidView`.
-
-```kotlin
-AndroidView(
-    factory = { context ->
-        Map3DView(context).apply {
-            getMapAsync { map ->
-                val textView = TextView(context).apply { text = "Hello" }
-                map.addPopover(PopoverOptions()
-                    .positionAnchor(LatLngAltitude(37.7749, -122.4194, 10.0))
-                    .content(textView))
-            }
-        }
-    }
-)
-```
-
-## 11. Extruded Polygons (3D Volumes)
-Description: Adding extruded polygons within `AndroidView`.
-
-```kotlin
-AndroidView(
-    factory = { context ->
-        Map3DView(context).apply {
-            getMapAsync { map ->
-                val faces = extrude(basePoints, 35.0)
-                faces.forEach { face ->
-                    map.addPolygon(PolygonOptions()
-                        .addAll(face)
-                        .fillColor(Color.argb(128, 255, 215, 0)))
-                }
-            }
-        }
-    }
-)
-```
-
-## 12. ViewModel Integration
-Description: The advanced sample demonstrates hoisting the `GoogleMap3D` instance to a `ViewModel` to manage state and handle actions outside the UI tree.
-
-```kotlin
-class MapViewModel : ViewModel() {
-    private val _googleMap3D = MutableStateFlow<GoogleMap3D?>(null)
-    val googleMap3D: StateFlow<GoogleMap3D?> = _googleMap3D.asStateFlow()
-
-    private val _isMapSteady = MutableStateFlow(false)
-    val isMapSteady: StateFlow<Boolean> = _isMapSteady.asStateFlow()
-
-    fun setGoogleMap3D(map: GoogleMap3D) {
-        _googleMap3D.value = map
-    }
-
-    fun onMapSteadyChange(isSteady: Boolean) {
-        _isMapSteady.value = isSteady
-    }
-
-    fun releaseGoogleMap3D() {
-        _googleMap3D.value = null
-    }
+    val leadingControls = listOf(
+        PanVerticalControl(ControlOrientation.VERTICAL),
+        PanHorizontalControl(ControlOrientation.VERTICAL),
+        CompassControl(),
+    )
+    uiSettings.setUiControlsPlacement(leadingControls, ControlPlacement.LEADING)
 }
+// [END maps_android_3d_ui_controls_placement_kt]
 ```
 
-In your Composable:
 ```kotlin
-val viewModel: MapViewModel = viewModel()
-val map3D by viewModel.googleMap3D.collectAsState()
-
-ThreeDMap(
-    options = mapOptions,
-    onMapReady = { map ->
-        viewModel.setGoogleMap3D(map)
-        map.setOnMapSteadyListener { isSteady ->
-            viewModel.onMapSteadyChange(isSteady)
-        }
-    }
-)
-```
-
-## 13. Camera State Logger (Debug Helper)
-Description: A utility to log the current camera state to Logcat on every movement, helping you design 3D views.
-
-```kotlin
-AndroidView(
-    factory = { context ->
-        Map3DView(context).apply {
-            getMapAsync { map ->
-                map.addOnCameraMoveListener {
-                    val camera = map.camera
-                    Log.d("CameraLogger", "Lat: ${camera.center.latitude}, Lng: ${camera.center.longitude}, Alt: ${camera.center.altitude}, Heading: ${camera.heading}, Tilt: ${camera.tilt}, Range: ${camera.range}")
-                }
-            }
-        }
-    }
-)
-```
-
-## 14. 3D View Validation (Testing)
-Description: Verifying that the `Map3DView` is visible using `ComposeTestRule`.
-
-```kotlin
-@Test
-fun testMapVisible() {
-    composeTestRule.setContent {
-        Map3DContainer(
-            modifier = Modifier.testTag("map3d_container"),
-            options = Map3DOptions(),
-            onMapReady = {}
-        )
-    }
-    
-    // Verify AndroidView hosting Map3DView is displayed
-    composeTestRule.onNodeWithTag("map3d_container")
-        .assertIsDisplayed()
+// [START maps_android_3d_ui_controls_hide_kt]
+map.getUiControlSettings()?.let { uiSettings ->
+    uiSettings.setUiControlsPlacement(emptyList(), ControlPlacement.TRAILING)
+    uiSettings.setUiControlsPlacement(emptyList(), ControlPlacement.LEADING)
+    uiSettings.setUiControlsPlacement(emptyList(), ControlPlacement.TOP)
+    uiSettings.setUiControlsPlacement(emptyList(), ControlPlacement.BOTTOM)
 }
+// [END maps_android_3d_ui_controls_hide_kt]
 ```
-
-
-
-
-
-
