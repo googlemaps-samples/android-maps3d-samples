@@ -1,4 +1,5 @@
 import com.google.android.gms.maps3d.GoogleMap3D;
+import com.google.android.gms.maps3d.OnCameraAnimationEndListener;
 import com.google.android.gms.maps3d.OnCameraChangedListener;
 import com.google.android.gms.maps3d.OnMap3DClickListener;
 import com.google.android.gms.maps3d.OnMapReadyListener;
@@ -82,6 +83,10 @@ public class TrackedMap3D {
 
     public void stopCameraAnimation() {
         delegate.stopCameraAnimation();
+    }
+
+    public void setCameraAnimationEndListener(OnCameraAnimationEndListener listener) {
+        delegate.setCameraAnimationEndListener(listener);
     }
 
     public void setCameraChangedListener(OnCameraChangedListener listener) {

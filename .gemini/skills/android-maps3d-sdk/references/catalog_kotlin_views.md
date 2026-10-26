@@ -71,24 +71,34 @@ map.addMarker(options)
 // [END maps_android_3d_marker_options_kt]
 ```
 
-### Styled Glyphs (`PinConfiguration` & `Glyph`)
+### Custom Icon & Styled Glyphs (`PinConfiguration` & `Glyph`)
 ```kotlin
-// [START maps_android_3d_marker_glyph_color_kt]
+// [START maps_android_3d_marker_custom_icon_kt]
+// Create a Glyph with a custom image
+val glyphImage = Glyph.fromColor(Color.YELLOW)
+// Use the Maps SDK's ImageView, not the Android widget
+glyphImage.setImage(ImageView(R.mipmap.ic_launcher))
+
 val options = markerOptions {
     position = latLngAltitude {
         latitude = 37.4220
         longitude = -122.0841
         altitude = 10.0
     }
-    label = "Color Glyph"
+    label = "Custom Icon Marker"
+    // Set the style using PinConfiguration
     setStyle(
         PinConfiguration.builder()
-            .setGlyph(Glyph.fromColor(Color.CYAN))
+            .setScale(1.5f)
+            .setGlyph(glyphImage)
+            .setBackgroundColor(Color.BLUE)
+            .setBorderColor(Color.WHITE)
             .build(),
     )
 }
+
 map.addMarker(options)
-// [END maps_android_3d_marker_glyph_color_kt]
+// [END maps_android_3d_marker_custom_icon_kt]
 ```
 
 ```kotlin
@@ -109,27 +119,27 @@ val options = markerOptions {
 map.addMarker(options)
 // [END maps_android_3d_marker_glyph_text_kt]
 ```
+> *Note*: You can also style glyphs with `Glyph.fromColor(Color.CYAN)` (`maps_android_3d_marker_glyph_color_kt`) or `Glyph.fromCircle().apply { color = Color.MAGENTA }` (`maps_android_3d_marker_glyph_circle_kt`); see [`MarkerSnippets.kt`](../../../../snippets/kotlin-app/src/main/java/com/example/snippets/kotlin/snippets/MarkerSnippets.kt).
 
+### Object Click Listeners (`setClickListener`)
 ```kotlin
-// [START maps_android_3d_marker_glyph_circle_kt]
-val glyph = Glyph.fromCircle()
-glyph.color = Color.MAGENTA
+// [START maps_android_3d_marker_click_kt]
+val marker = map.addMarker(
+    markerOptions {
+        position = latLngAltitude {
+            latitude = 37.42
+            longitude = -122.08
+            altitude = 0.0
+        }
+    },
+)
 
-val options = markerOptions {
-    position = latLngAltitude {
-        latitude = 37.4220
-        longitude = -122.0841
-        altitude = 10.0
+marker?.setClickListener {
+    Handler(Looper.getMainLooper()).post {
+        Toast.makeText(context, "Marker Clicked!", Toast.LENGTH_SHORT).show()
     }
-    label = "Circle Glyph"
-    setStyle(
-        PinConfiguration.builder()
-            .setGlyph(glyph)
-            .build(),
-    )
 }
-map.addMarker(options)
-// [END maps_android_3d_marker_glyph_circle_kt]
+// [END maps_android_3d_marker_click_kt]
 ```
 
 > [!WARNING]
@@ -363,7 +373,7 @@ val polygon = map.addPolygon(options)
 ```
 
 ## 5. Adding a 3D Model (GLB)
-Description: Loading and placing glTF/GLB assets on the map using `modelOptions { ... }`.
+Description: Loading and placing glTF/GLB assets on the map using `modelOptions { ... }` (where `SAUCER_URL` is a `.glb` asset URL such as `"https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/UFO.glb"`).
 
 ```kotlin
 // [START maps_android_3d_model_add_kt]

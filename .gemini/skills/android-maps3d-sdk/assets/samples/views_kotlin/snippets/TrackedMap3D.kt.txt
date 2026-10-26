@@ -1,4 +1,5 @@
 import com.google.android.gms.maps3d.GoogleMap3D
+import com.google.android.gms.maps3d.OnCameraAnimationEndListener
 import com.google.android.gms.maps3d.OnCameraChangedListener
 import com.google.android.gms.maps3d.OnMap3DClickListener
 import com.google.android.gms.maps3d.OnMapReadyListener
@@ -63,6 +64,7 @@ class TrackedMap3D(
     fun flyCameraTo(options: FlyToOptions) = delegate.flyCameraTo(options)
     fun flyCameraAround(options: FlyAroundOptions) = delegate.flyCameraAround(options)
     fun stopCameraAnimation() = delegate.stopCameraAnimation()
+    fun setCameraAnimationEndListener(listener: OnCameraAnimationEndListener?) = delegate.setCameraAnimationEndListener(listener)
     fun setCameraChangedListener(listener: OnCameraChangedListener?) = delegate.setCameraChangedListener(listener)
     fun setMap3DClickListener(listener: OnMap3DClickListener?) = delegate.setMap3DClickListener(listener)
     fun setOnMapReadyListener(listener: OnMapReadyListener?) = delegate.setOnMapReadyListener(listener)

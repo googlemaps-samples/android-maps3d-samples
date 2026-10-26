@@ -12,14 +12,14 @@ Depending on whether you are working inside the `android-maps3d-samples` reposit
 
 ### 1. Local Workspace (If working inside the sample repo)
 If you are working directly in the `android-maps3d-samples` repository, consult these local catalogs and directories:
-*   **Master Sample Catalog**: [`./SAMPLE_CATALOG.md`](../../../SAMPLE_CATALOG.md)
-*   **SDK Migration Guide (`0.2.x` → `16.0.1`)**: [`./MIGRATION_GUIDE.md`](../../../MIGRATION_GUIDE.md)
-*   **Documentation Snippets Catalog**: [`./snippets/CATALOG.md`](../../../snippets/CATALOG.md) (Standalone, region-tagged Kotlin and Java snippets in `./snippets/kotlin-app` and `./snippets/java-app`)
-*   **Jetpack Compose Samples Catalog**: [`./Maps3DSamples/ComposeDemos/app/README.md`](../../../Maps3DSamples/ComposeDemos/app/README.md) (Declarative samples powered by `./maps3d-compose`)
-*   **Kotlin + Views Samples Catalog**: [`./Maps3DSamples/ApiDemos/kotlin-app/README.md`](../../../Maps3DSamples/ApiDemos/kotlin-app/README.md)
-*   **Java + Views Samples Catalog**: [`./Maps3DSamples/ApiDemos/java-app/README.md`](../../../Maps3DSamples/ApiDemos/java-app/README.md)
+*   **Master Sample Catalog**: [`./SAMPLE_CATALOG.md`](../../../../SAMPLE_CATALOG.md)
+*   **SDK Migration Guide (`0.2.x` → `16.0.1`)**: [`./MIGRATION_GUIDE.md`](../../../../MIGRATION_GUIDE.md)
+*   **Documentation Snippets Catalog**: [`./snippets/CATALOG.md`](../../../../snippets/CATALOG.md) (Standalone, region-tagged Kotlin and Java snippets in `./snippets/kotlin-app` and `./snippets/java-app`)
+*   **Jetpack Compose Samples Catalog**: [`./Maps3DSamples/ComposeDemos/app/README.md`](../../../../Maps3DSamples/ComposeDemos/app/README.md) (Declarative samples powered by `./maps3d-compose`)
+*   **Kotlin + Views Samples Catalog**: [`./Maps3DSamples/ApiDemos/kotlin-app/README.md`](../../../../Maps3DSamples/ApiDemos/kotlin-app/README.md)
+*   **Java + Views Samples Catalog**: [`./Maps3DSamples/ApiDemos/java-app/README.md`](../../../../Maps3DSamples/ApiDemos/java-app/README.md)
 *   **Shared Common Controllers & Utilities**: `./Maps3DSamples/ApiDemos/common/` (`Map3DSettingsController`, `Projection3D`, `CameraGestureInterceptor`, `PathFollowingEngine`, `AdvancedCameraEngine`, `DataVisualizationEngine`, etc.)
-*   **Places UI Kit 3D Showcase**: [`./PlacesUIKit3D/README.md`](../../../PlacesUIKit3D/README.md) (Standalone Clean Architecture + MVVM + Compose showcase integrating Places UI Kit with Maps 3D)
+*   **Places UI Kit 3D Showcase**: [`./PlacesUIKit3D/README.md`](../../../../PlacesUIKit3D/README.md) (Standalone Clean Architecture + MVVM + Compose showcase integrating Places UI Kit with Maps 3D)
 
 ### Expanded Feature Matrix Across Sample Apps
 

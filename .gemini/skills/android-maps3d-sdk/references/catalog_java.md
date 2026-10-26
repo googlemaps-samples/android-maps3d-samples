@@ -137,19 +137,6 @@ Marker marker = map.addMarker(options);
 ```
 
 ```java
-// [START maps_android_3d_marker_glyph_color_java]
-LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
-
-MarkerOptions options = new MarkerOptions();
-options.setPosition(position);
-options.setLabel("Color Glyph");
-options.setStyle(PinConfiguration.builder().setGlyph(Glyph.fromColor(Color.CYAN)).build());
-
-map.addMarker(options);
-// [END maps_android_3d_marker_glyph_color_java]
-```
-
-```java
 // [START maps_android_3d_marker_glyph_text_java]
 LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
 
@@ -161,21 +148,30 @@ options.setStyle(PinConfiguration.builder().setGlyph(Glyph.fromText("NYC")).buil
 map.addMarker(options);
 // [END maps_android_3d_marker_glyph_text_java]
 ```
+> *Note*: You can also style glyphs with `Glyph.fromColor(Color.CYAN)` (`maps_android_3d_marker_glyph_color_java`) or `Glyph.fromCircle()` (`maps_android_3d_marker_glyph_circle_java`); see [`MarkerSnippets.java`](../../../../snippets/java-app/src/main/java/com/example/snippets/java/snippets/MarkerSnippets.java).
 
+### Object Click Listeners (`setClickListener`)
 ```java
-// [START maps_android_3d_marker_glyph_circle_java]
-LatLngAltitude position = new LatLngAltitude(37.4220, -122.0841, 10.0);
-
-Glyph glyph = Glyph.fromCircle();
-glyph.setColor(Color.MAGENTA);
-
+// [START maps_android_3d_marker_click_java]
+LatLngAltitude position = new LatLngAltitude(37.42, -122.08, 0.0);
 MarkerOptions options = new MarkerOptions();
 options.setPosition(position);
-options.setLabel("Circle Glyph");
-options.setStyle(PinConfiguration.builder().setGlyph(glyph).build());
 
-map.addMarker(options);
-// [END maps_android_3d_marker_glyph_circle_java]
+Marker marker = map.addMarker(options);
+
+if (marker != null) {
+    marker.setClickListener(
+            () ->
+                    new Handler(Looper.getMainLooper())
+                            .post(
+                                    () ->
+                                            Toast.makeText(
+                                                            context,
+                                                            "Marker Clicked!",
+                                                            Toast.LENGTH_SHORT)
+                                                    .show()));
+}
+// [END maps_android_3d_marker_click_java]
 ```
 
 > [!WARNING]
@@ -306,7 +302,7 @@ Polygon polygon = map.addPolygon(options);
 ```
 
 ## 5. Adding a 3D Model (GLB)
-Description: Loading and placing glTF/GLB assets on the map using `ModelOptions`.
+Description: Loading and placing glTF/GLB assets on the map using `ModelOptions` (where `SAUCER_URL` is a `.glb` asset URL such as `"https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/UFO.glb"`).
 
 ```java
 // [START maps_android_3d_model_add_java]
@@ -389,21 +385,14 @@ Description: Animating the camera (`flyCameraTo`, `flyCameraAround`, `stopCamera
 ### Fly Camera To Position
 ```java
 // [START maps_android_3d_camera_fly_to_java]
-/** Animates the camera to a specific position (coordinates, heading, tilt) over a duration. */
-@SnippetItem(
-        title = "1. Fly To",
-        description =
-                "Animates the camera to a specific position with a tilt and heading over 5 seconds.")
-public void flyCameraToPosition() {
-    LatLngAltitude center = new LatLngAltitude(38.743829, -109.499512, 1460.37);
-    // Create a target camera:
-    Camera targetCamera = new Camera(center, 338.52, 76.16, 0.0, 191.71);
+LatLngAltitude center = new LatLngAltitude(38.743829, -109.499512, 1460.37);
+// Create a target camera:
+Camera targetCamera = new Camera(center, 338.52, 76.16, 0.0, 191.71);
 
-    // FlyToOptions constructor: endCamera, durationInMillis
-    FlyToOptions options = new FlyToOptions(targetCamera, 5000L);
+// FlyToOptions constructor: endCamera, durationInMillis
+FlyToOptions options = new FlyToOptions(targetCamera, 5000L);
 
-    map.flyCameraTo(options);
-}
+map.flyCameraTo(options);
 // [END maps_android_3d_camera_fly_to_java]
 ```
 

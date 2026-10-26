@@ -9,13 +9,13 @@ Description: Transitioning from a high-altitude "Global View" to a specific buil
 
 ### The Strategy (Orchestration Logic)
 1.  **Travel**: Execute a cinematic `flyCameraTo` (`flyToOptions { ... }`) from the current camera to the target.
-2.  **Synchronization**: Use the **Double-Wait Pattern**. Wait for the camera animation to end and for the map steady state (`setOnMapSteadyListener`) so the building mesh is loaded before placing assets.
+2.  **Synchronization**: Use the **Double-Wait Pattern** (`awaitCameraAnimation` + `awaitMapSteady` in `references/utilities_kotlin.md`). Wait for the camera animation to end (`setCameraAnimationEndListener`) and for the map steady state (`setOnMapSteadyListener`) so the building mesh is loaded before placing assets.
 3.  **Enhancement**: Add a high-detail 3D model (glTF/GLB) at the location using `addModel(modelOptions { ... })`.
 4.  **Context**: Anchor and show a `Popover` (`addPopover(popoverOptions { ... })` + `popover.show()`) with metadata.
 5.  **Engagement**: Start a slow `flyCameraAround` (`flyAroundOptions { ... }`) to provide a 360-degree orbit context.
 
 ### Verified Building Blocks (Kotlin)
-Combine the following region-tagged building blocks in a coroutine:
+Combine the following region-tagged building blocks in a coroutine (where `SAUCER_URL = "https://storage.googleapis.com/gmp-maps-demos/p3d-map/assets/UFO.glb"`):
 
 ```kotlin
 // [START maps_android_3d_camera_fly_to_kt]
