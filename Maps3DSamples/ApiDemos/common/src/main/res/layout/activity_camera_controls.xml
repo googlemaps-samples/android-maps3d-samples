@@ -43,28 +43,38 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/top_bar"
-        map3d:centerAlt="175"
-        map3d:centerLat="40.748392"
-        map3d:centerLng="-73.986060"
-        map3d:heading="26"
+        map3d:centerAlt="100"
+        map3d:centerLat="40.748433"
+        map3d:centerLng="-73.985656"
+        map3d:heading="34"
         map3d:maxAltitude="1000000"
         map3d:maxHeading="360"
         map3d:maxTilt="90"
         map3d:minAltitude="0"
         map3d:minHeading="0"
         map3d:minTilt="0"
-        map3d:mapMode="satellite"
-        map3d:range="4000"
+        map3d:mapMode="hybrid"
+        map3d:range="950"
         map3d:roll="0"
-        map3d:tilt="67" />
+        map3d:tilt="65" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/camera_state_top_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.37" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/camera_state"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_constrainedHeight="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/camera_state_top_guideline"
+        app:layout_constraintVertical_bias="1.0">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -100,13 +110,17 @@
                     app:iconTint="?attr/colorOnSurfaceVariant" />
             </LinearLayout>
 
-            <!-- Collapsible Content Section -->
-            <LinearLayout
-                android:id="@+id/card_content"
+            <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:orientation="vertical">
+                android:layout_height="wrap_content">
+
+                <!-- Collapsible Content Section -->
+                <LinearLayout
+                    android:id="@+id/card_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -244,8 +258,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:checked="true"
-                        android:singleLine="true"
+                        android:checked="false"
+                        android:maxLines="1"
                         android:text="@string/map_mode_roadmap" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
@@ -253,8 +267,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:checked="false"
-                        android:singleLine="true"
+                        android:checked="true"
+                        android:maxLines="1"
                         android:text="@string/map_mode_hybrid" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
@@ -263,7 +277,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:checked="false"
-                        android:singleLine="true"
+                        android:maxLines="1"
                         android:text="@string/map_mode_satellite" />
                 </RadioGroup>
 
@@ -314,7 +328,8 @@
                     style="@style/TextAppearance.Material3.BodyMedium"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
-            </LinearLayout>
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
@@ -323,7 +338,7 @@
         android:id="@+id/quick_settings_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="340dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:elevation="8dp"
         android:translationZ="8dp"

@@ -21,7 +21,6 @@ import android.view.ViewGroup
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.annotation.StringRes
-import androidx.core.view.WindowCompat
 import com.example.maps3d.common.Map3DSettings
 import com.example.maps3d.common.Map3DSettingsController
 import com.example.maps3d.common.copy
@@ -34,7 +33,6 @@ import com.example.maps3dkotlin.cameracontrols.DataModel.ESB_FLY_TO_DURATION_MS
 import com.example.maps3dkotlin.cameracontrols.DataModel.MT_RAINIER_FLY_TO_DURATION_MS
 import com.example.maps3dkotlin.cameracontrols.DataModel.MT_RAINIER_ORBIT_DURATION_MS
 import com.example.maps3dkotlin.cameracontrols.DataModel.MT_RAINIER_ORBIT_ROUNDS
-import com.example.maps3dkotlin.cameracontrols.DataModel.esbCamera
 import com.example.maps3dkotlin.cameracontrols.DataModel.nycCameraRestriction
 import com.example.maps3dkotlin.cameracontrols.DataModel.nycPolygonOptions
 import com.example.maps3dkotlin.cameracontrols.DataModel.targetBeaconOptions
@@ -42,7 +40,6 @@ import com.example.maps3dkotlin.cameracontrols.DataModel.targetCamera
 import com.example.maps3dkotlin.sampleactivity.SampleBaseActivity
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DView
-import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
 import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.Map3DMode
@@ -58,11 +55,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
+class CameraControlsActivity : SampleBaseActivity() {
     override val TAG: String = this::class.java.simpleName
 
+    override val layoutResId: Int = R.layout.activity_camera_controls
+
     @Map3DMode
-    override val defaultMapMode: Int = Map3DMode.ROADMAP
+    override val defaultMapMode: Int = Map3DMode.HYBRID
 
     private lateinit var cameraStateText: TextView
     private lateinit var rollSlider: Slider
@@ -70,10 +69,13 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
     private var isSyncingRadioGroup = false
     private var isCollapsed = false
 
-    private var restrictionCubeFaces: MutableList<Polygon> = mutableListOf()
+    private val restrictionCubeFaces: MutableList<Polygon> = mutableListOf()
     private var activeBeaconMarker: Marker? = null
     private var beaconRefreshToken = 0
     private var needsMeshBeaconRefresh = false
+
+    @Map3DMode
+    private var lastAppliedMapMode: Int = Map3DMode.HYBRID
 
     @AltitudeMode
     private var selectedAltitudeMode: Int = AltitudeMode.RELATIVE_TO_GROUND
@@ -83,19 +85,26 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
 
     override val initialCamera: Camera
         get() = resolveCameraForMapMode(
-            baseCamera = esbCamera(AltitudeMode.RELATIVE_TO_GROUND),
+            baseCamera = targetCamera(
+                isMountain = activeTargetResId == R.string.camera_target_mt_rainier,
+                mode = selectedAltitudeMode,
+            ),
             mapMode = Map3DSettingsController.shared.settings.value.mapMode,
         )
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Map3DSettingsController.shared.applySampleDefaultMapMode(defaultMapMode)
+        if (savedInstanceState != null) {
+            selectedAltitudeMode = savedInstanceState.getInt(
+                STATE_SELECTED_ALTITUDE_MODE,
+                AltitudeMode.RELATIVE_TO_GROUND,
+            )
+            activeTargetResId = savedInstanceState.getInt(
+                STATE_ACTIVE_TARGET_RES_ID,
+                R.string.camera_target_esb,
+            )
+            isCollapsed = savedInstanceState.getBoolean(STATE_IS_COLLAPSED, false)
+        }
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        setContentView(R.layout.activity_camera_controls)
-
-        map3DView = findViewById(R.id.map3dView)
-        map3DView.onCreate(savedInstanceState)
-        map3DView.getMap3DViewAsync(this)
 
         cameraStateText = findViewById(R.id.camera_state_text)
 
@@ -107,6 +116,11 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         val cardContainer = findViewById<ViewGroup?>(R.id.camera_state)
         val cardContent = findViewById<View?>(R.id.card_content)
         val btnCollapse = findViewById<MaterialButton?>(R.id.btn_collapse)
+        if (isCollapsed) {
+            btnCollapse?.setIconResource(R.drawable.expand_less_24px)
+            btnCollapse?.contentDescription = getString(R.string.expand_controls)
+            cardContent?.visibility = View.GONE
+        }
         val toggleCollapse = View.OnClickListener {
             isCollapsed = !isCollapsed
             btnCollapse?.setIconResource(
@@ -133,7 +147,17 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
             flyToTarget(R.string.camera_target_mt_rainier)
         }
 
-        findViewById<ChipGroup>(R.id.altitude_mode_chip_group).setOnCheckedStateChangeListener { _, checkedIds ->
+        val altitudeChipGroup = findViewById<ChipGroup>(R.id.altitude_mode_chip_group)
+        val initialChipId = when (selectedAltitudeMode) {
+            AltitudeMode.RELATIVE_TO_MESH -> R.id.chip_altitude_relative_to_mesh
+            AltitudeMode.CLAMP_TO_GROUND -> R.id.chip_altitude_clamp_to_ground
+            AltitudeMode.ABSOLUTE -> R.id.chip_altitude_absolute
+            else -> R.id.chip_altitude_relative_to_ground
+        }
+        if (altitudeChipGroup.checkedChipId != initialChipId) {
+            altitudeChipGroup.check(initialChipId)
+        }
+        altitudeChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
             val checkedId = checkedIds.firstOrNull() ?: return@setOnCheckedStateChangeListener
             val newMode = when (checkedId) {
                 R.id.chip_altitude_relative_to_ground -> AltitudeMode.RELATIVE_TO_GROUND
@@ -208,6 +232,13 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(STATE_SELECTED_ALTITUDE_MODE, selectedAltitudeMode)
+        outState.putInt(STATE_ACTIVE_TARGET_RES_ID, activeTargetResId)
+        outState.putBoolean(STATE_IS_COLLAPSED, isCollapsed)
+    }
+
     override fun onQuickSettingsChanged(settings: Map3DSettings) {
         val group = findViewById<RadioGroup?>(R.id.map_mode_radio_group) ?: return
         val targetId = when (settings.mapMode) {
@@ -224,9 +255,9 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
                 group.check(targetId)
             }
             isSyncingRadioGroup = false
-            googleMap3D?.let { map ->
-                applyMapModeCameraPerspective(map, settings.mapMode)
-            }
+        }
+        googleMap3D?.let { map ->
+            applyMapModeCameraPerspective(map, settings.mapMode)
         }
     }
 
@@ -252,18 +283,29 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         }
 
     private fun applyMapModeCameraPerspective(map: GoogleMap3D, @Map3DMode mode: Int) {
-        val isMountain = (activeTargetResId == R.string.camera_target_mt_rainier)
+        val previousMode = lastAppliedMapMode
+        if (previousMode == mode) return
+        lastAppliedMapMode = mode
+        val isTransitioningRoadmap =
+            previousMode == Map3DMode.ROADMAP || mode == Map3DMode.ROADMAP
+        if (!isTransitioningRoadmap) return
+
+        val isMountain = activeTargetResId == R.string.camera_target_mt_rainier
         val targetCam = resolveCameraForMapMode(
             baseCamera = targetCamera(isMountain = isMountain, mode = selectedAltitudeMode),
             mapMode = mode,
         )
         map.setCameraAnimationEndListener(null)
-        map.flyCameraTo(
-            flyToOptions {
-                endCamera = targetCam
-                durationInMillis = 900
-            },
-        )
+        map.setCamera(targetCam)
+        updateCameraPosition(targetCam)
+        map3DView.postDelayed({
+            if (!isDestroyed && !isFinishing &&
+                Map3DSettingsController.shared.settings.value.mapMode == mode
+            ) {
+                this.googleMap3D?.setCamera(targetCam)
+                updateCameraPosition(targetCam)
+            }
+        }, 250L)
     }
 
     private fun updateRollSliderLabel(value: Float) {
@@ -288,6 +330,8 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
      * @param googleMap3D The [GoogleMap3D] object representing the 3D map.
      */
     override fun onMapReady(googleMap3D: GoogleMap3D) {
+        Map3DSettingsController.shared.onSampleEntered(defaultMapMode)
+        lastAppliedMapMode = Map3DSettingsController.shared.settings.value.mapMode
         super.onMapReady(googleMap3D)
         this.googleMap3D = googleMap3D
 
@@ -297,10 +341,9 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
             if (isSteady) {
                 map3DView.contentDescription = "MapSteady"
                 // Workaround: surface-relative modes sample 3D tile height at marker creation time.
-                // After flying to a new landmark across the country, refresh once destination tiles are steady.
+                // Refresh once destination or 3D mesh tiles are steady.
                 if (needsMeshBeaconRefresh) {
                     needsMeshBeaconRefresh = false
-                    beaconRefreshToken++
                     runOnUiThread { upsertActiveBeacon() }
                 }
             }
@@ -346,7 +389,8 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
      */
     private fun upsertActiveBeacon() {
         val map = googleMap3D ?: return
-        val isMountain = (activeTargetResId == R.string.camera_target_mt_rainier)
+        beaconRefreshToken++
+        val isMountain = activeTargetResId == R.string.camera_target_mt_rainier
         val beaconOptions = targetBeaconOptions(
             isMountain = isMountain,
             label = getBeaconLabel(isMountain, selectedAltitudeMode),
@@ -364,15 +408,16 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
      */
     private fun flyToTarget(@StringRes targetResId: Int) {
         val map = googleMap3D ?: return
-        val isNewLandmark = (activeTargetResId != targetResId)
+        val isNewLandmark = activeTargetResId != targetResId
         activeTargetResId = targetResId
-        val isMountain = (targetResId == R.string.camera_target_mt_rainier)
+        val isMountain = targetResId == R.string.camera_target_mt_rainier
 
         // Clear NYC bounds restriction if active so the camera can travel to Washington State
         if (isMountain) {
             setCameraRestricted(false)
         }
 
+        needsMeshBeaconRefresh = selectedAltitudeMode != AltitudeMode.ABSOLUTE
         upsertActiveBeacon()
 
         val activeMapMode = Map3DSettingsController.shared.settings.value.mapMode
@@ -382,8 +427,11 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
         )
         map.setCameraAnimationEndListener {
             map.setCameraAnimationEndListener(null)
-            if (isNewLandmark && selectedAltitudeMode != AltitudeMode.ABSOLUTE) {
-                needsMeshBeaconRefresh = true
+            if (isNewLandmark || selectedAltitudeMode == AltitudeMode.RELATIVE_TO_MESH) {
+                runOnUiThread {
+                    upsertActiveBeacon()
+                    needsMeshBeaconRefresh = selectedAltitudeMode != AltitudeMode.ABSOLUTE
+                }
             }
             if (isMountain && activeMapMode != Map3DMode.ROADMAP) {
                 map.flyCameraAround(
@@ -421,14 +469,20 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
     }
 
     // Camera does not support CLAMP_TO_GROUND; it uses RELATIVE_TO_GROUND at 0m clearance.
-    private fun getCameraAltitudeModeLabel(@AltitudeMode mode: Int): String =
-        when (mode) {
-            AltitudeMode.RELATIVE_TO_GROUND, AltitudeMode.CLAMP_TO_GROUND ->
-                getString(R.string.altitude_mode_relative_to_ground_code)
-            AltitudeMode.RELATIVE_TO_MESH ->
-                getString(R.string.altitude_mode_relative_to_mesh_code)
-            else ->
-                getString(R.string.altitude_mode_absolute_code)
+    // In 2D ROADMAP mode, resolveCameraForMapMode also forces RELATIVE_TO_GROUND.
+    private fun getCameraAltitudeModeLabel(
+        @AltitudeMode mode: Int,
+        @Map3DMode mapMode: Int,
+    ): String =
+        if (mapMode == Map3DMode.ROADMAP ||
+            mode == AltitudeMode.RELATIVE_TO_GROUND ||
+            mode == AltitudeMode.CLAMP_TO_GROUND
+        ) {
+            getString(R.string.altitude_mode_relative_to_ground_code)
+        } else if (mode == AltitudeMode.RELATIVE_TO_MESH) {
+            getString(R.string.altitude_mode_relative_to_mesh_code)
+        } else {
+            getString(R.string.altitude_mode_absolute_code)
         }
 
     /**
@@ -437,6 +491,7 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
      */
     private fun updateCameraPosition(camera: Camera) {
         val nbsp = "\u00A0"
+        val activeMapMode = Map3DSettingsController.shared.settings.value.mapMode
 
         val cameraStateString = buildString {
             // Latitude
@@ -470,7 +525,7 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
                 getString(
                     R.string.camera_target_and_altitude_mode_format,
                     getString(activeTargetResId),
-                    getCameraAltitudeModeLabel(selectedAltitudeMode),
+                    getCameraAltitudeModeLabel(selectedAltitudeMode, activeMapMode),
                 )
             )
         }
@@ -482,5 +537,11 @@ class CameraControlsActivity : SampleBaseActivity(), OnMap3DViewReadyCallback {
             rollSlider.value = resetValue
             updateRollSliderLabel(resetValue)
         }
+    }
+
+    companion object {
+        private const val STATE_SELECTED_ALTITUDE_MODE = "state_selected_altitude_mode"
+        private const val STATE_ACTIVE_TARGET_RES_ID = "state_active_target_res_id"
+        private const val STATE_IS_COLLAPSED = "state_is_collapsed"
     }
 }

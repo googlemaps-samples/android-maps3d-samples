@@ -27,14 +27,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
-import androidx.core.view.WindowCompat;
 
 import com.example.maps3d.common.Map3DSettings;
 import com.example.maps3d.common.Map3DSettingsController;
 import com.example.maps3dcommon.R;
 import com.example.maps3djava.sampleactivity.SampleBaseActivity;
 import com.google.android.gms.maps3d.GoogleMap3D;
-import com.google.android.gms.maps3d.OnMap3DViewReadyCallback;
 import com.google.android.gms.maps3d.model.AltitudeMode;
 import com.google.android.gms.maps3d.model.Camera;
 import com.google.android.gms.maps3d.model.FlyAroundOptions;
@@ -51,16 +49,19 @@ import com.google.android.material.slider.Slider;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CameraControlsActivity extends SampleBaseActivity implements OnMap3DViewReadyCallback {
+public class CameraControlsActivity extends SampleBaseActivity {
+    private static final String STATE_SELECTED_ALTITUDE_MODE = "state_selected_altitude_mode";
+    private static final String STATE_ACTIVE_TARGET_RES_ID = "state_active_target_res_id";
+    private static final String STATE_IS_COLLAPSED = "state_is_collapsed";
+
     @Override
     public final String getTAG() {
         return this.getClass().getSimpleName();
     }
 
     @Override
-    @Map3DMode
-    protected int getDefaultMapMode() {
-        return Map3DMode.ROADMAP;
+    protected int getLayoutResId() {
+        return R.layout.activity_camera_controls;
     }
 
     private TextView cameraStateText;
@@ -74,6 +75,9 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
     private int beaconRefreshToken = 0;
     private boolean needsMeshBeaconRefresh = false;
 
+    @Map3DMode
+    private int lastAppliedMapMode = Map3DMode.HYBRID;
+
     @AltitudeMode
     private int selectedAltitudeMode = AltitudeMode.RELATIVE_TO_GROUND;
 
@@ -82,22 +86,27 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
 
     @Override
     public final Camera getInitialCamera() {
+        boolean isMountain = activeTargetResId == R.string.camera_target_mt_rainier;
         return resolveCameraForMapMode(
-                DataModel.getEsbCamera(AltitudeMode.RELATIVE_TO_GROUND),
+                DataModel.getTargetCamera(isMountain, selectedAltitudeMode),
                 Map3DSettingsController.getShared().getSettings().getMapMode()
         );
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Map3DSettingsController.getShared().applySampleDefaultMapMode(getDefaultMapMode());
+        if (savedInstanceState != null) {
+            selectedAltitudeMode = savedInstanceState.getInt(
+                    STATE_SELECTED_ALTITUDE_MODE,
+                    AltitudeMode.RELATIVE_TO_GROUND
+            );
+            activeTargetResId = savedInstanceState.getInt(
+                    STATE_ACTIVE_TARGET_RES_ID,
+                    R.string.camera_target_esb
+            );
+            isCollapsed = savedInstanceState.getBoolean(STATE_IS_COLLAPSED, false);
+        }
         super.onCreate(savedInstanceState);
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-        setContentView(R.layout.activity_camera_controls);
-
-        map3DView = findViewById(R.id.map3dView);
-        map3DView.onCreate(savedInstanceState);
-        map3DView.getMap3DViewAsync(this);
 
         cameraStateText = findViewById(R.id.camera_state_text);
 
@@ -109,6 +118,15 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
         ViewGroup cardContainer = findViewById(R.id.camera_state);
         View cardContent = findViewById(R.id.card_content);
         MaterialButton btnCollapse = findViewById(R.id.btn_collapse);
+        if (isCollapsed) {
+            if (btnCollapse != null) {
+                btnCollapse.setIconResource(R.drawable.expand_less_24px);
+                btnCollapse.setContentDescription(getString(R.string.expand_controls));
+            }
+            if (cardContent != null) {
+                cardContent.setVisibility(View.GONE);
+            }
+        }
         View.OnClickListener toggleCollapse = view -> {
             isCollapsed = !isCollapsed;
             if (btnCollapse != null) {
@@ -143,6 +161,19 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
         );
 
         ChipGroup altitudeModeChipGroup = findViewById(R.id.altitude_mode_chip_group);
+        int initialChipId;
+        if (selectedAltitudeMode == AltitudeMode.RELATIVE_TO_MESH) {
+            initialChipId = R.id.chip_altitude_relative_to_mesh;
+        } else if (selectedAltitudeMode == AltitudeMode.CLAMP_TO_GROUND) {
+            initialChipId = R.id.chip_altitude_clamp_to_ground;
+        } else if (selectedAltitudeMode == AltitudeMode.ABSOLUTE) {
+            initialChipId = R.id.chip_altitude_absolute;
+        } else {
+            initialChipId = R.id.chip_altitude_relative_to_ground;
+        }
+        if (altitudeModeChipGroup.getCheckedChipId() != initialChipId) {
+            altitudeModeChipGroup.check(initialChipId);
+        }
         altitudeModeChipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
             if (checkedIds.isEmpty()) {
                 return;
@@ -234,6 +265,14 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
     }
 
     @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STATE_SELECTED_ALTITUDE_MODE, selectedAltitudeMode);
+        outState.putInt(STATE_ACTIVE_TARGET_RES_ID, activeTargetResId);
+        outState.putBoolean(STATE_IS_COLLAPSED, isCollapsed);
+    }
+
+    @Override
     protected void onQuickSettingsChanged(@NonNull Map3DSettings settings) {
         RadioGroup group = findViewById(R.id.map_mode_radio_group);
         if (group == null) {
@@ -256,9 +295,9 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
                 group.check(targetId);
             }
             isSyncingRadioGroup = false;
-            if (googleMap3D != null) {
-                applyMapModeCameraPerspective(googleMap3D, mapMode);
-            }
+        }
+        if (googleMap3D != null) {
+            applyMapModeCameraPerspective(googleMap3D, mapMode);
         }
     }
 
@@ -289,13 +328,34 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
     }
 
     private void applyMapModeCameraPerspective(@NonNull GoogleMap3D map, @Map3DMode int mode) {
-        boolean isMountain = (activeTargetResId == R.string.camera_target_mt_rainier);
+        int previousMode = lastAppliedMapMode;
+        if (previousMode == mode) {
+            return;
+        }
+        lastAppliedMapMode = mode;
+        boolean isTransitioningRoadmap =
+                previousMode == Map3DMode.ROADMAP || mode == Map3DMode.ROADMAP;
+        if (!isTransitioningRoadmap) {
+            return;
+        }
+
+        boolean isMountain = activeTargetResId == R.string.camera_target_mt_rainier;
         Camera targetCamera = resolveCameraForMapMode(
                 DataModel.getTargetCamera(isMountain, selectedAltitudeMode),
                 mode
         );
         map.setCameraAnimationEndListener(null);
-        map.flyCameraTo(new FlyToOptions(targetCamera, 900));
+        map.setCamera(targetCamera);
+        updateCameraPosition(targetCamera);
+        if (map3DView != null) {
+            map3DView.postDelayed(() -> {
+                if (!isDestroyed() && !isFinishing() && this.googleMap3D != null
+                        && Map3DSettingsController.getShared().getSettings().getMapMode() == mode) {
+                    this.googleMap3D.setCamera(targetCamera);
+                    updateCameraPosition(targetCamera);
+                }
+            }, 250L);
+        }
     }
 
     private void updateRollSliderLabel(float value) {
@@ -311,12 +371,14 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
     }
 
     /**
-     * Called when the [Map3DView] is ready to be used.
+     * Called when the {@link com.google.android.gms.maps3d.Map3DView} is ready to be used.
      *
-     * @param googleMap3D The [GoogleMap3D] object representing the 3D map.
+     * @param googleMap3D The {@link GoogleMap3D} object representing the 3D map.
      */
     @Override
     protected void onMapReady(@NonNull GoogleMap3D googleMap3D) {
+        Map3DSettingsController.getShared().onSampleEntered(getDefaultMapMode());
+        lastAppliedMapMode = Map3DSettingsController.getShared().getSettings().getMapMode();
         super.onMapReady(googleMap3D);
         this.googleMap3D = googleMap3D;
 
@@ -328,10 +390,9 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
                     map3DView.setContentDescription("MapSteady");
                 }
                 // Workaround: surface-relative modes sample 3D tile height at marker creation time.
-                // After flying to a new landmark across the country, refresh once destination tiles are steady.
+                // Refresh once destination or 3D mesh tiles are steady.
                 if (needsMeshBeaconRefresh) {
                     needsMeshBeaconRefresh = false;
-                    beaconRefreshToken++;
                     runOnUiThread(this::upsertActiveBeacon);
                 }
             }
@@ -380,7 +441,8 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
         if (googleMap3D == null) {
             return;
         }
-        boolean isMountain = (activeTargetResId == R.string.camera_target_mt_rainier);
+        beaconRefreshToken++;
+        boolean isMountain = activeTargetResId == R.string.camera_target_mt_rainier;
         MarkerOptions beaconOptions = DataModel.getTargetBeaconOptions(
                 isMountain,
                 getBeaconLabel(isMountain, selectedAltitudeMode),
@@ -402,15 +464,16 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
         if (googleMap3D == null) {
             return;
         }
-        boolean isNewLandmark = (activeTargetResId != targetResId);
+        boolean isNewLandmark = activeTargetResId != targetResId;
         activeTargetResId = targetResId;
-        boolean isMountain = (targetResId == R.string.camera_target_mt_rainier);
+        boolean isMountain = targetResId == R.string.camera_target_mt_rainier;
 
         // Clear NYC bounds restriction if active so the camera can travel to Washington State
         if (isMountain) {
             setCameraRestricted(false);
         }
 
+        needsMeshBeaconRefresh = selectedAltitudeMode != AltitudeMode.ABSOLUTE;
         upsertActiveBeacon();
 
         int activeMapMode = Map3DSettingsController.getShared().getSettings().getMapMode();
@@ -421,8 +484,11 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
         googleMap3D.setCameraAnimationEndListener(() -> {
             if (googleMap3D != null) {
                 googleMap3D.setCameraAnimationEndListener(null);
-                if (isNewLandmark && selectedAltitudeMode != AltitudeMode.ABSOLUTE) {
-                    needsMeshBeaconRefresh = true;
+                if (isNewLandmark || selectedAltitudeMode == AltitudeMode.RELATIVE_TO_MESH) {
+                    runOnUiThread(() -> {
+                        upsertActiveBeacon();
+                        needsMeshBeaconRefresh = selectedAltitudeMode != AltitudeMode.ABSOLUTE;
+                    });
                 }
                 if (isMountain && activeMapMode != Map3DMode.ROADMAP) {
                     FlyAroundOptions orbitOptions = new FlyAroundOptions(
@@ -458,9 +524,12 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
     }
 
     // Camera does not support CLAMP_TO_GROUND; it uses RELATIVE_TO_GROUND at 0m clearance.
+    // In 2D ROADMAP mode, resolveCameraForMapMode also forces RELATIVE_TO_GROUND.
     @NonNull
-    private String getCameraAltitudeModeLabel(@AltitudeMode int mode) {
-        if (mode == AltitudeMode.RELATIVE_TO_GROUND || mode == AltitudeMode.CLAMP_TO_GROUND) {
+    private String getCameraAltitudeModeLabel(@AltitudeMode int mode, @Map3DMode int mapMode) {
+        if (mapMode == Map3DMode.ROADMAP
+                || mode == AltitudeMode.RELATIVE_TO_GROUND
+                || mode == AltitudeMode.CLAMP_TO_GROUND) {
             return getString(R.string.altitude_mode_relative_to_ground_code);
         } else if (mode == AltitudeMode.RELATIVE_TO_MESH) {
             return getString(R.string.altitude_mode_relative_to_mesh_code);
@@ -478,6 +547,7 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
         double tilt = camera.getTilt() != null ? camera.getTilt() : 0.0;
         double range = camera.getRange() != null ? camera.getRange() : 0.0;
         double roll = camera.getRoll() != null ? camera.getRoll() : 0.0;
+        int activeMapMode = Map3DSettingsController.getShared().getSettings().getMapMode();
 
         String baseCameraState = getString(R.string.camera_state_format,
                 camera.getCenter().getLatitude(),
@@ -491,7 +561,7 @@ public class CameraControlsActivity extends SampleBaseActivity implements OnMap3
         String targetAndMode = getString(
                 R.string.camera_target_and_altitude_mode_format,
                 getString(activeTargetResId),
-                getCameraAltitudeModeLabel(selectedAltitudeMode)
+                getCameraAltitudeModeLabel(selectedAltitudeMode, activeMapMode)
         );
         String cameraStateString = baseCameraState + "\n" + targetAndMode;
 
