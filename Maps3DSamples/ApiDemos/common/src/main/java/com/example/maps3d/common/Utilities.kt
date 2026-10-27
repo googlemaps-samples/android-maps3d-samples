@@ -18,6 +18,7 @@ import android.app.Activity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.google.android.gms.maps3d.model.AltitudeMode
 import com.google.android.gms.maps3d.model.Camera
 import com.google.android.gms.maps3d.model.LatLngAltitude
 import com.google.android.gms.maps3d.model.camera
@@ -69,6 +70,19 @@ val DEFAULT_CAMERA: Camera = camera {
 }
 
 /**
+ * Checks whether [mode] is supported by [Camera].
+ *
+ * The Maps 3D SDK [Camera] only accepts [AltitudeMode.ABSOLUTE],
+ * [AltitudeMode.RELATIVE_TO_GROUND], and [AltitudeMode.RELATIVE_TO_MESH].
+ * [AltitudeMode.CLAMP_TO_GROUND] is only valid for ground overlays and markers,
+ * and throws an [IllegalArgumentException] if set on a [Camera].
+ */
+fun isValidCameraAltitudeMode(@AltitudeMode mode: Int?): Boolean =
+    mode == AltitudeMode.ABSOLUTE ||
+        mode == AltitudeMode.RELATIVE_TO_GROUND ||
+        mode == AltitudeMode.RELATIVE_TO_MESH
+
+/**
  * Converts a nullable Camera object into a valid, non-null Camera object.
  * If the input is null, returns the DEFAULT_CAMERA configuration.
  * If the input is non-null, validates its components (center, heading, tilt, roll, range)
@@ -90,6 +104,10 @@ fun Camera?.toValidCamera(): Camera {
         tilt = source.tilt.toTilt()
         roll = source.roll.toRoll()
         range = source.range.toRange()
+        val sourceAltitudeMode = source.altitudeMode
+        if (isValidCameraAltitudeMode(sourceAltitudeMode)) {
+            altitudeMode = sourceAltitudeMode
+        }
     }
 }
 
@@ -252,12 +270,14 @@ fun Number.toCompassDirection(): String {
  * @param roll The new roll to use, or null to keep the current roll.
  * @return A new [Camera] object with the specified properties updated.
  */
+@JvmOverloads
 fun Camera.copy(
     center: LatLngAltitude? = null,
     heading: Double? = null,
     tilt: Double? = null,
     range: Double? = null,
     roll: Double? = null,
+    @AltitudeMode altitudeMode: Int? = null,
 ): Camera {
     val objectToCopy = this
     return camera {
@@ -266,6 +286,10 @@ fun Camera.copy(
         this.tilt = tilt ?: objectToCopy.tilt
         this.range = range ?: objectToCopy.range
         this.roll = roll ?: objectToCopy.roll
+        val resolvedAltitudeMode = altitudeMode ?: objectToCopy.altitudeMode
+        if (isValidCameraAltitudeMode(resolvedAltitudeMode)) {
+            this.altitudeMode = resolvedAltitudeMode
+        }
     }
 }
 
