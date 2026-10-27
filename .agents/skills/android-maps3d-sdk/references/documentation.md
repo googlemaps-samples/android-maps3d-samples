@@ -1,6 +1,6 @@
 # Google Maps 3D SDK Documentation & Resources
 
-This file guides you to external and internal resources for the Google Maps 3D SDK (`16.0.1+`). Because this SDK is rapidly evolving, these resources are your primary source of truth.
+This file guides you to external and internal resources for the Google Maps 3D SDK. Because this SDK is rapidly evolving, these resources are your primary source of truth.
 
 ## External Documentation
 *   **Official Reference**: [Google Maps Platform 3D SDK for Android](https://developers.google.com/maps/documentation/android-3d-sdk)

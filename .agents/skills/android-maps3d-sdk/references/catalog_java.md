@@ -1,6 +1,6 @@
 # Common Operations Catalog (Java)
 
-This catalog provides verified, region-tagged reference snippets for common operations when using the Google Maps 3D SDK (`16.0.1+`) with Java and Android Views.
+This catalog provides verified, region-tagged reference snippets for common operations when using the Google Maps 3D SDK with Java and Android Views.
 
 ## 1. Map Initialization & Readiness Listeners
 Description: Initializing a `Map3DView` programmatically with a valid `Map3DMode` and listening for readiness (`OnMapReadyListener`) and steady state (`OnMapSteadyListener`).
@@ -493,7 +493,7 @@ map.setCameraRestriction(restriction);
 ```
 
 ## 8. Handling Map & Place Click Events (`Map3DClickEvent`)
-Description: In SDK `16.0.1+`, `OnMap3DClickListener.onMap3DClick` receives a `Map3DClickEvent` (`event.getLocation()` and `event.getPlaceId()`) and returns a `boolean` (`true` if consumed, `false` otherwise).
+Description: `OnMap3DClickListener.onMap3DClick` receives a `Map3DClickEvent` (`event.getLocation()` and `event.getPlaceId()`) and returns a `boolean` (`true` if consumed, `false` otherwise).
 
 ```java
 // [START maps_android_3d_place_click_java]

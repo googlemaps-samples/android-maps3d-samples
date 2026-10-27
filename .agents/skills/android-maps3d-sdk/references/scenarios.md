@@ -1,6 +1,6 @@
 # Scenario Storyboard Catalog
 
-This catalog provides orchestration architectures for complex, multi-step workflows in the Google Maps 3D SDK (`16.0.1+`). Instead of atomic calls, these scenarios demonstrate how to synchronize asynchronous events (camera motion, asset loading, rendering steady state, and fragment interop) to create high-fidelity 3D user experiences.
+This catalog provides orchestration architectures for complex, multi-step workflows in the Google Maps 3D SDK. Instead of atomic calls, these scenarios demonstrate how to synchronize asynchronous events (camera motion, asset loading, rendering steady state, and fragment interop) to create high-fidelity 3D user experiences.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: android-maps3d-sdk
-description: Integrates the Google Maps 3D SDK (16.0.1+) into an Android application across Jetpack Compose, Kotlin Views, and Java Views. Provides procedural guidance for setup, lifecycle management, map modes (Hybrid, Satellite, Roadmap), UI controls, map localization, camera animations and restrictions, 3D projection, and 3D object manipulation (Markers, Polylines, Polygons, Models, Popovers). Use when the user wants to build immersive 3D map experiences or migrate from 2D maps.
+description: Integrates the Google Maps 3D SDK into an Android application across Jetpack Compose, Kotlin Views, and Java Views. Provides procedural guidance for setup, lifecycle management, map modes (Hybrid, Satellite, Roadmap), UI controls, map localization, camera animations and restrictions, 3D projection, and 3D object manipulation (Markers, Polylines, Polygons, Models, Popovers). Use when the user wants to build immersive 3D map experiences or migrate from 2D maps.
 license: Apache-2.0
 compatibility: Requires an Android project and internet access. Uses play-services-maps3d version 16.0.1 or higher.
 metadata:
@@ -11,10 +11,10 @@ metadata:
 
 # Android Maps 3D SDK Integration
 
-This skill guides you through integrating the Google Maps 3D SDK (`play-services-maps3d:16.0.1+`) into an Android project. It follows the principles of progressive disclosure and relies on environment-specific templates and verified region-tagged snippets.
+This skill guides you through integrating the Google Maps 3D SDK into an Android project. It follows the principles of progressive disclosure and relies on environment-specific templates and verified region-tagged snippets.
 
 > [!IMPORTANT]
-> **Limited Training Data Alert**: The Google Maps 3D SDK is a rapidly evolving technology (graduated to `16.0.1`). Your internal parametric knowledge is likely outdated or incomplete. You **MUST NOT** guess API signatures (such as legacy `Map3DOptions`, `getMapAsync`, `flyTo`, `addOnMapClickListener`, or `map3d:mode`). You **MUST** consult the local templates in `assets/samples/`, the reference catalogs in `references/`, and the repository map in `references/documentation.md` before generating any code.
+> **Limited Training Data Alert**: The Google Maps 3D SDK is a rapidly evolving technology. Your internal parametric knowledge is likely outdated or incomplete. You **MUST NOT** guess API signatures (such as legacy `Map3DOptions`, `getMapAsync`, `flyTo`, `addOnMapClickListener`, or `map3d:mode`). You **MUST** consult the local templates in `assets/samples/`, the reference catalogs in `references/`, and the repository map in `references/documentation.md` before generating any code.
 
 ## Prerequisites & Skill Alignment
 
@@ -53,7 +53,7 @@ Based on your discovery, follow the **Selection Logic** to retrieve boilerplate 
 2.  Check if Lifecycle Management is required (always for 3D maps).
 3.  **Retrieve** the corresponding boilerplate from `assets/samples/` (e.g., `assets/samples/views_kotlin/MapActivity.kt.txt`).
 4.  If object tracking is needed, **retrieve** the snippet from `assets/samples/views_kotlin/snippets/`.
-5.  **Reference** the memory management and SDK `16.0.1` rules in `references/best_practices.md` to ensure the generated code follows SDK safety guidelines.
+5.  **Reference** the memory management and SDK rules in `references/best_practices.md` to ensure the generated code follows SDK safety guidelines.
 
 ### Step 2: Base Setup
 Regardless of the environment, the following setup is required.
@@ -136,7 +136,7 @@ Consult `references/best_practices.md` for detailed explanation of rules. Key ru
 1. **Valid `mapMode` Required at Initialization**: Always specify `map3d:mapMode="hybrid"` (or `"satellite"` / `"roadmap"`) in XML or pass `Map3DMode` / `Map3DInitConfig.create(..., mapMode = ...)` when constructing `Map3DView` programmatically. Never use the legacy `map3d:mode` attribute or removed `Map3DOptions` class.
 2. **Initialization Delay & Readiness**: Wait for `setOnMapReadyListener` or introduce a short delay before initializing map elements on cold starts.
 3. **Object Management**: Use the `TrackedMap3D` delegate to clean up objects (`Marker`, `Polyline`, `Polygon`, `Model`, `Popover`, and `UiControlSettings`) on destroy to avoid cruft across singleton engine reuse.
-4. **Click Listener Contract (SDK 16.0.1+)**: `setMap3DClickListener` receives a `Map3DClickEvent` (`event.location`, `event.placeId`) and must return a `Boolean` (`true` if consumed, `false` otherwise). Object-level `setClickListener` callbacks run off the UI thread—always dispatch UI updates to the main thread.
+4. **Click Listener Contract**: `setMap3DClickListener` receives a `Map3DClickEvent` (`event.location`, `event.placeId`) and must return a `Boolean` (`true` if consumed, `false` otherwise). Object-level `setClickListener` callbacks run off the UI thread—always dispatch UI updates to the main thread.
 5. **Utilities**: Use validation utilities (`toValidCamera()`) to prevent crashes, and path utilities for smoothing/simplification (see `references/utilities_kotlin.md` or `references/utilities_java.md`).
 6. **Double-Wait Pattern**: For animations, wait for camera animation end AND map steady state (`setOnMapSteadyListener`).
 7. **Unit Conversions**: For type-safe measurements and conversions, see `references/units_kotlin.md` or `references/units_java.md` (Optional).

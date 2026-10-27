@@ -1,6 +1,6 @@
 # Common Operations Catalog (Jetpack Compose)
 
-This catalog provides verified reference snippets for using the Google Maps 3D SDK (`16.0.1+`) with Jetpack Compose—both via raw `AndroidView` interoperability and via the declarative `maps3d-compose` (`GoogleMap3D`) library used throughout `Maps3DSamples/ComposeDemos`.
+This catalog provides verified reference snippets for using the Google Maps 3D SDK with Jetpack Compose—both via raw `AndroidView` interoperability and via the declarative `maps3d-compose` (`GoogleMap3D`) library used throughout `Maps3DSamples/ComposeDemos`.
 
 ## 1. Basic `AndroidView` + `Map3DView` Bridge
 Description: Bridging `Map3DView` directly into Jetpack Compose using `AndroidView`, passing a required `Map3DMode` (`Map3DMode.HYBRID`, `Map3DMode.SATELLITE`, or `Map3DMode.ROADMAP`), and awaiting `getMap3DViewAsync`.
@@ -54,10 +54,10 @@ Description: In `Maps3DSamples/ComposeDemos` and projects using `maps3d-compose`
 *   `cameraRestriction: CameraRestriction?`: Bounds and altitude limits.
 *   `onMapReady: (GoogleMap3D) -> Unit`: Exposes the underlying `GoogleMap3D` instance for imperative operations (`flyCameraTo`, `flyCameraAround`, `stopCameraAnimation`, `setLocale`, `getUiControlSettings()`).
 *   `onMapSteady: () -> Unit` & `onMapSteadyChange: (Boolean) -> Unit`: Scene steady callbacks.
-*   `onMapClick: ((LatLngAltitude) -> Unit)?` & `onPlaceClick: ((String) -> Unit)?`: Map and POI click callbacks (note: in `16.0.1+`, tapping a place falls back to `onMapClick(event.location)` when `onPlaceClick` is `null`).
+*   `onMapClick: ((LatLngAltitude) -> Unit)?` & `onPlaceClick: ((String) -> Unit)?`: Map and POI click callbacks (note: tapping a place falls back to `onMapClick(event.location)` when `onPlaceClick` is `null`).
 
 ## 3. Imperative Operations Inside Compose (`onMapReady` / `LaunchedEffect`)
-Description: Once you obtain the `GoogleMap3D` reference via `onMapReady` (or `getMap3DViewAsync`), use the exact SDK `16.0.1` methods shown below inside `LaunchedEffect` or event callbacks:
+Description: Once you obtain the `GoogleMap3D` reference via `onMapReady` (or `getMap3DViewAsync`), use the exact SDK methods shown below inside `LaunchedEffect` or event callbacks:
 
 ### Camera Fly-To Animation (`flyCameraTo`)
 ```kotlin

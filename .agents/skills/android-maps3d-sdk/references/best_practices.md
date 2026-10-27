@@ -1,8 +1,8 @@
-# Best Practices for Android Maps 3D SDK (`16.0.1+`)
+# Best Practices for Android Maps 3D SDK
 
 This document explains the architectural decisions, initialization rules, and runtime constraints when working with the Google Maps 3D SDK for Android.
 
-## 1. Mandatory `mapMode` at Initialization (SDK `0.2.2+` / `16.0.1`)
+## 1. Mandatory `mapMode` at Initialization
 
 A valid `mapMode` (`Map3DMode.HYBRID`, `Map3DMode.SATELLITE`, or `Map3DMode.ROADMAP`) is strictly required when creating `Map3DView`.
 *   **XML Layouts**: Always use `map3d:mapMode="hybrid"` (or `"satellite"` / `"roadmap"`). Never use the legacy `map3d:mode` attribute—omitting `map3d:mapMode` causes `Map3DView` to fail initialization with `IllegalStateException: Unable to load map. Please specify a valid map mode.`.
@@ -35,7 +35,7 @@ If you add markers, polylines, polygons, 3D models, popovers, or UI control plac
 ### The Delegate Solution
 Use a wrapper like `TrackedMap3D` (see `assets/samples/views_kotlin/snippets/TrackedMap3D.kt.txt` and `assets/samples/views_java/snippets/TrackedMap3D.java.txt`) to track all objects added during a session, and call `clearAll()` in `onDestroy`.
 
-## 5. Click Listeners & Threading (SDK `16.0.1+`)
+## 5. Click Listeners & Threading
 
 *   **Map & Place Clicks (`setMap3DClickListener`)**: Receives a `Map3DClickEvent` containing `event.location` (`LatLngAltitude`) and `event.placeId` (`String?`), and **must return a `Boolean`** (`true` if the click was consumed, `false` to allow default propagation).
 *   **Object Clicks (`marker.setClickListener`, `polyline.setClickListener`, `polygon.setClickListener`, `model.setClickListener`)**: These callbacks do **NOT** execute on the Android main UI thread. Always switch to the main thread (`Handler(Looper.getMainLooper()).post { ... }` or `withContext(Dispatchers.Main)`) before showing a `Toast` or updating Android Views.

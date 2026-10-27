@@ -1,6 +1,6 @@
 # Common Operations Catalog (Kotlin + Views)
 
-This catalog provides verified, region-tagged reference snippets for common operations when using the Google Maps 3D SDK (`16.0.1+`) with Kotlin and Android Views.
+This catalog provides verified, region-tagged reference snippets for common operations when using the Google Maps 3D SDK with Kotlin and Android Views.
 
 ## 1. Scene Readiness & Steady State Listeners
 Description: Listening for when the 3D scene is 100% loaded (`setOnMapReadyListener`) and when the camera stops moving and rendering settles (`setOnMapSteadyListener`).
@@ -633,7 +633,7 @@ map.setCameraRestriction(restriction)
 ```
 
 ## 8. Handling Map & Place Click Events (`Map3DClickEvent`)
-Description: In SDK `16.0.1+`, `setMap3DClickListener` receives a `Map3DClickEvent` (`event.location` and `event.placeId`) and returns a `Boolean` (`true` if consumed, `false` otherwise).
+Description: `setMap3DClickListener` receives a `Map3DClickEvent` (`event.location` and `event.placeId`) and returns a `Boolean` (`true` if consumed, `false` otherwise).
 
 ```kotlin
 // [START maps_android_3d_place_click_kt]
