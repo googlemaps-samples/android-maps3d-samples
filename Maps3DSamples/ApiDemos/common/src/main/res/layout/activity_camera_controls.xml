@@ -39,184 +39,297 @@
         android:id="@+id/map3dView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/camera_state"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/top_bar"
-        map3d:centerAlt="175"
-        map3d:centerLat="40.748392"
-        map3d:centerLng="-73.986060"
-        map3d:heading="26"
+        map3d:centerAlt="100"
+        map3d:centerLat="40.748433"
+        map3d:centerLng="-73.985656"
+        map3d:heading="34"
         map3d:maxAltitude="1000000"
         map3d:maxHeading="360"
         map3d:maxTilt="90"
         map3d:minAltitude="0"
         map3d:minHeading="0"
         map3d:minTilt="0"
-        map3d:mapMode="satellite"
-        map3d:range="4000"
+        map3d:mapMode="hybrid"
+        map3d:range="950"
         map3d:roll="0"
-        map3d:tilt="67" />
+        map3d:tilt="65" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/camera_state_top_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.37" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/camera_state"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_constrainedHeight="true"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/map3dView">
-
+        app:layout_constraintTop_toBottomOf="@+id/camera_state_top_guideline"
+        app:layout_constraintVertical_bias="1.0">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
+            android:layout_margin="12dp"
             android:orientation="vertical">
 
+            <!-- Card Header with title and collapse/expand button -->
             <LinearLayout
+                android:id="@+id/card_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/fly_to"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                <TextView
+                    style="@style/TextAppearance.Material3.TitleSmall"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/fly_to"
-                    android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+                    android:text="@string/feature_title_camera_controls"
+                    android:textStyle="bold" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/fly_around"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:text="@string/fly_around"
-                    android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
-
+                    android:id="@+id/btn_collapse"
+                    style="?attr/materialIconButtonStyle"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:contentDescription="@string/collapse_controls"
+                    android:padding="0dp"
+                    app:icon="@drawable/expand_more_24px"
+                    app:iconSize="20dp"
+                    app:iconTint="?attr/colorOnSurfaceVariant" />
             </LinearLayout>
 
-            <LinearLayout
+            <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content">
+
+                <!-- Collapsible Content Section -->
+                <LinearLayout
+                    android:id="@+id/card_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/fly_to"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/fly_to"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/fly_around"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:text="@string/fly_around"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+
+                </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/show_restriction"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
+                    android:id="@+id/fly_to_mountain_button"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:checkable="true"
-                    android:checked="false"
-                    android:text="@string/camera_show_restriction"
+                    android:text="@string/fly_to_mountain"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/toggle_restriction"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
+                <TextView
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:checkable="true"
-                    android:checked="false"
-                    android:text="@string/camera_activate_restriction"
-                    android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+                    android:layout_marginTop="4dp"
+                    android:text="@string/altitude_mode" />
 
-            </LinearLayout>
-
-            <RadioGroup
-                android:id="@+id/map_mode_radio_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp"
-                android:layout_marginHorizontal="8dp"
-                >
-
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/map_mode_roadmap"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/altitude_mode_chip_group"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:checked="false"
-                    android:text="@string/map_mode_roadmap"
-                    />
+                    app:chipSpacingHorizontal="6dp"
+                    app:chipSpacingVertical="2dp"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
 
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/map_mode_hybrid"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_altitude_relative_to_ground"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:checked="true"
+                        android:text="@string/relative_to_ground" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_altitude_relative_to_mesh"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/relative_to_mesh" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_altitude_clamp_to_ground"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/clamp_to_ground" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_altitude_absolute"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/absolute" />
+
+                </com.google.android.material.chip.ChipGroup>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:checked="false"
-                    android:layout_marginStart="4dp"
-                    android:text="@string/map_mode_hybrid"
-                    />
+                    android:orientation="horizontal">
 
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/map_mode_satellite"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/show_restriction"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checkable="true"
+                        android:checked="false"
+                        android:text="@string/camera_show_restriction"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/toggle_restriction"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:checkable="true"
+                        android:checked="false"
+                        android:text="@string/camera_activate_restriction"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+
+                </LinearLayout>
+
+                <TextView
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:layout_marginStart="4dp"
-                    android:text="@string/map_mode_satellite"
-                    />
-            </RadioGroup>
+                    android:layout_marginTop="4dp"
+                    android:text="@string/map_mode" />
 
-            <TextView
-                android:id="@+id/roll_slider_label"
-                style="@style/TextAppearance.Material3.LabelMedium"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/camera_roll_label" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <com.google.android.material.slider.Slider
-                    android:id="@+id/roll_slider"
-                    android:layout_width="0dp"
+                <RadioGroup
+                    android:id="@+id/map_mode_radio_group"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:valueFrom="-360.0"
-                    android:valueTo="360.0"
-                    android:value="0.0"
-                    android:stepSize="1.0"
-                    app:labelBehavior="gone" />
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/reset_roll_button"
-                    style="?attr/materialIconButtonFilledStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                app:icon="@drawable/outline_recenter_24"
-                android:contentDescription="@string/reset_roll_content_description" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/map_mode_roadmap"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checked="false"
+                        android:maxLines="1"
+                        android:text="@string/map_mode_roadmap" />
 
-            </LinearLayout>
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/map_mode_hybrid"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checked="true"
+                        android:maxLines="1"
+                        android:text="@string/map_mode_hybrid" />
 
-            <TextView
-                style="@style/TextAppearance.Material3.TitleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/camera_state_label" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/map_mode_satellite"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checked="false"
+                        android:maxLines="1"
+                        android:text="@string/map_mode_satellite" />
+                </RadioGroup>
 
-            <TextView
-                android:id="@+id/camera_state_text"
-                style="@style/TextAppearance.Material3.BodyMedium"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/roll_slider_label"
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/camera_roll_label" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/roll_slider"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:stepSize="1.0"
+                        android:value="0.0"
+                        android:valueFrom="-360.0"
+                        android:valueTo="360.0"
+                        app:labelBehavior="gone" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/reset_roll_button"
+                        style="?attr/materialIconButtonFilledStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:contentDescription="@string/reset_roll_content_description"
+                        app:icon="@drawable/outline_recenter_24" />
+
+                </LinearLayout>
+
+                <TextView
+                    style="@style/TextAppearance.Material3.TitleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/camera_state_label" />
+
+                <TextView
+                    android:id="@+id/camera_state_text"
+                    style="@style/TextAppearance.Material3.BodyMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
@@ -225,7 +338,7 @@
         android:id="@+id/quick_settings_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="340dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:elevation="8dp"
         android:translationZ="8dp"
