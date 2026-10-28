@@ -236,28 +236,78 @@ fun haversineDistance(p1: LatLng, p2: LatLng): Double {
 }
 ```
 
-## Synchronization Utilities
+## Synchronization Utilities (Double-Wait Pattern)
 
-### Double-Wait Utility
-
-Use `awaitArrivedAndSteady()` to ensure the camera has arrived and the 3D scene has fully rendered before proceeding.
+Use `awaitCameraAnimation(...)` followed by `awaitMapSteady(...)` to ensure both the camera animation has completed (`setCameraAnimationEndListener`) and the 3D scene mesh has fully settled (`setOnMapSteadyListener`) before proceeding.
 
 ```kotlin
 import com.google.android.gms.maps3d.GoogleMap3D
-import kotlinx.coroutines.suspendCancellableCoroutine
+import com.google.android.gms.maps3d.model.FlyAroundOptions
+import com.google.android.gms.maps3d.model.FlyToOptions
 import kotlin.coroutines.resume
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
- * Standardized "Double-Wait" utility.
- * Waits for the map to become steady (rendering complete and camera idle).
- * Use this after starting a camera animation to ensure the scene is fully loaded.
+ * Waits until the map has finished loading visible 3D tiles and the camera is steady,
+ * with a timeout so execution never hangs indefinitely if tiles are slow to load.
  */
-suspend fun GoogleMap3D.awaitArrivedAndSteady(timeoutMs: Long = 5000): Boolean = suspendCancellableCoroutine { cont ->
-    setOnMapSteadyListener { isSteady ->
-        if (isSteady) {
-            setOnMapSteadyListener(null)
-            cont.resume(true)
+suspend fun GoogleMap3D.awaitMapSteady(timeout: Duration = 5.seconds): Boolean {
+    return withTimeoutOrNull(timeout) {
+        suspendCancellableCoroutine { continuation ->
+            setOnMapSteadyListener { isSteady ->
+                if (isSteady) {
+                    setOnMapSteadyListener(null) // Cleanup listener
+                    if (continuation.isActive) {
+                        continuation.resume(true)
+                    }
+                }
+            }
+
+            continuation.invokeOnCancellation {
+                setOnMapSteadyListener(null)
+            }
         }
+    } ?: false
+}
+
+/**
+ * Registers [GoogleMap3D.setCameraAnimationEndListener] before triggering [GoogleMap3D.flyCameraTo]
+ * and stops the camera animation if the coroutine is cancelled.
+ */
+suspend fun GoogleMap3D.awaitCameraAnimation(options: FlyToOptions) = suspendCancellableCoroutine { continuation ->
+    setCameraAnimationEndListener {
+        setCameraAnimationEndListener(null)
+        if (continuation.isActive) {
+            continuation.resume(Unit)
+        }
+    }
+    flyCameraTo(options)
+
+    continuation.invokeOnCancellation {
+        stopCameraAnimation()
+        setCameraAnimationEndListener(null)
+    }
+}
+
+/**
+ * Registers [GoogleMap3D.setCameraAnimationEndListener] before triggering [GoogleMap3D.flyCameraAround]
+ * and stops the camera animation if the coroutine is cancelled.
+ */
+suspend fun GoogleMap3D.awaitCameraAnimation(options: FlyAroundOptions) = suspendCancellableCoroutine { continuation ->
+    setCameraAnimationEndListener {
+        setCameraAnimationEndListener(null)
+        if (continuation.isActive) {
+            continuation.resume(Unit)
+        }
+    }
+    flyCameraAround(options)
+
+    continuation.invokeOnCancellation {
+        stopCameraAnimation()
+        setCameraAnimationEndListener(null)
     }
 }
 ```
