@@ -33,7 +33,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.CameraAlt
@@ -44,11 +46,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -60,6 +64,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.advancedmaps3dsamples.R
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
@@ -79,14 +86,14 @@ class ScenariosActivity : ComponentActivity() {
 
   override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
-    intent.extras?.getString("scenario")?.let { scenarioName: String ->
-      viewModel.setScenario(scenarioName)
-    }
+    setIntent(intent)
+    handleScenarioIntent(intent)
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
+    handleScenarioIntent(intent)
     setContent {
       val viewState by viewModel.viewState.collectAsStateWithLifecycle()
       val currentCamera by viewModel.currentCamera.collectAsStateWithLifecycle(Camera.DEFAULT_CAMERA)
@@ -96,24 +103,40 @@ class ScenariosActivity : ComponentActivity() {
 
       val cameraAttribute by viewModel.trackedAttribute.collectAsStateWithLifecycle()
 
+      DisposableEffect(viewState.scenario) {
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        if (viewState.scenario != null) {
+          insetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+          insetsController.hide(WindowInsetsCompat.Type.systemBars())
+        } else {
+          insetsController.show(WindowInsetsCompat.Type.systemBars())
+        }
+        onDispose {
+          insetsController.show(WindowInsetsCompat.Type.systemBars())
+        }
+      }
+
       AdvancedMaps3DSamplesTheme(
         dynamicColor = false
       ) {
         Scaffold(
           modifier = Modifier.fillMaxSize(),
           topBar = {
-            CenterAlignedTopAppBar(
-              colors = topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-              ),
-              title = {
-                Text(stringResource(viewState.scenario?.titleId ?: R.string.scenarios_none))
-              }
-            )
+            if (viewState.scenario == null) {
+              CenterAlignedTopAppBar(
+                colors = topAppBarColors(
+                  containerColor = MaterialTheme.colorScheme.primaryContainer,
+                  titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
+                title = {
+                  Text(stringResource(R.string.scenarios_none))
+                },
+              )
+            }
           }
         ) { innerPadding ->
-          val modifier = Modifier.padding(innerPadding)
+          val modifier = if (viewState.scenario == null) Modifier.padding(innerPadding) else Modifier
           viewState.scenario?.let { scenario ->
             Box(modifier = modifier.fillMaxSize()) {
 
@@ -164,6 +187,16 @@ class ScenariosActivity : ComponentActivity() {
       }
     }
   }
+
+  private fun handleScenarioIntent(intent: Intent?) {
+    val scenarioName =
+      intent?.extras?.getString("scenario")
+        ?: intent?.data?.lastPathSegment
+        ?: intent?.data?.host
+    if (!scenarioName.isNullOrBlank()) {
+      viewModel.setScenario(scenarioName)
+    }
+  }
 }
 
 /**
@@ -182,6 +215,7 @@ fun ScenarioPicker(modifier: Modifier, onScenarioClicked: (Scenario) -> Unit) {
     modifier = modifier
       .testTag("scenario_picker")
       .fillMaxSize()
+      .verticalScroll(rememberScrollState())
       .padding(16.dp),
     verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
