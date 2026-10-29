@@ -33,7 +33,7 @@
         <!-- <activity
             android:name=".Map3DComposeActivity"
             android:exported="true"
-            android:label="Aloha Compose" /> -->
+            android:label="@string/title_activity_compose" /> -->
     </application>
 
 </manifest>
