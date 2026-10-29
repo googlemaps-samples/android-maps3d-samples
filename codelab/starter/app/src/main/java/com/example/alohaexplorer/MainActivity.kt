@@ -4,8 +4,48 @@ import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import kotlinx.coroutines.Job
+// TODO: Step 1.2 - Uncomment imports after adding the Maps 3D SDK dependency
+// import android.graphics.Color
+// import android.widget.Button
+// import android.widget.TextView
+// import android.widget.Toast
+// import androidx.lifecycle.lifecycleScope
+// import com.google.android.gms.maps3d.GoogleMap3D
+// import com.google.android.gms.maps3d.Map3DView
+// import com.google.android.gms.maps3d.OnMap3DViewReadyCallback
+// import com.google.android.gms.maps3d.Popover
+// import com.google.android.gms.maps3d.model.AltitudeMode
+// import com.google.android.gms.maps3d.model.Camera
+// import com.google.android.gms.maps3d.model.Glyph
+// import com.google.android.gms.maps3d.model.ImageView
+// import com.google.android.gms.maps3d.model.Marker
+// import com.google.android.gms.maps3d.model.MarkerOptions
+// import com.google.android.gms.maps3d.model.Model
+// import com.google.android.gms.maps3d.model.Polygon
+// import com.google.android.gms.maps3d.model.Polyline
+// import com.google.android.gms.maps3d.model.camera
+// import com.google.android.gms.maps3d.model.flyAroundOptions
+// import com.google.android.gms.maps3d.model.flyToOptions
+// import com.google.android.gms.maps3d.model.latLngAltitude
+// import com.google.android.gms.maps3d.model.markerOptions
+// import com.google.android.gms.maps3d.model.modelOptions
+// import com.google.android.gms.maps3d.model.orientation
+// import com.google.android.gms.maps3d.model.pinConfiguration
+// import com.google.android.gms.maps3d.model.polygonOptions
+// import com.google.android.gms.maps3d.model.polylineOptions
+// import com.google.android.gms.maps3d.model.popoverOptions
+// import com.google.android.gms.maps3d.model.popoverShadow
+// import com.google.android.gms.maps3d.model.popoverStyle
+// import com.google.android.gms.maps3d.model.vector3D
+// import kotlin.time.Duration
+// import kotlin.time.Duration.Companion.seconds
+// import kotlinx.coroutines.Dispatchers
+// import kotlinx.coroutines.delay
+// import kotlinx.coroutines.launch
 
 /**
  * This is the main entry point for the "Aloha Explorer" 3D Maps Codelab.
@@ -23,88 +63,24 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.2 - Implement OnMap3DV
     // private val activeModels = mutableListOf<Model>()
     // private val activePopovers = mutableListOf<Popover>()
 
-    private var currentAnimationJob: Job? = null
-
     // Constants are located in HonoluluData.kt
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Fix: Ensure the bundle can deserialize the Maps 3D SDK's Camera Parcelable on rotation
         savedInstanceState?.classLoader = javaClass.classLoader
         super.onCreate(savedInstanceState)
+
         // Enables "Edge-to-Edge" mode, allowing the map to draw behind the system bars
+        // (status bar and navigation bar) for a more immersive experience.
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        // **Window Insets Handling**:
-        // Because we are in Edge-to-Edge mode, we must manually ensure our UI elements
-        // don't get covered by system bars.
-        // 1. Map: Needs padding at the TOP so the Google Logo/Compass don't overlap the status bar.
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.map3dView)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
-            insets
-        }
-
-        // 2. Controls: Need padding at the BOTTOM so buttons aren't covered by the gesture/nav bar.
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.controls_scroll_view)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val basePadding = (16 * resources.displayMetrics.density).toInt() // 16dp
-            v.setPadding(systemBars.left, basePadding, systemBars.right, systemBars.bottom + basePadding)
-            insets
-        }
+        setUpInsets()
 
         // TODO: Step 1.3 - Initialize Map3DView and Map Lifecycle
     }
 
-    // TODO: Step 1.3 - Implement onMap3DViewReady
-    /*
-    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-        this@MainActivity.googleMap3D = googleMap3D
-
-        lifecycleScope.launch {
-            startFromGlobalView(googleMap3D)
-            setupButtons(googleMap3D)
-        }
-    }
-    */
-
-
-    
-    // TODO: Step 1.3 - Start from Global View
-    /*
-    private fun startFromGlobalView(map: GoogleMap3D) {
-        // TODO: Step 1.3 - Set the Camera
-    }
-    */
-
-    // TODO: Step 2 - Fly to Honolulu
-    /*
-    private suspend fun flyToHonolulu(map: GoogleMap3D) {
-        // TODO: Step 2 - Position the Camera high above Honolulu
-        // Wait for the animation to finish
-        // Wait for tiles to load and settle
-        // Wait for the animation to finish
-    }
-    */
-
-    // TODO: Step 2 - Helper to fly to markers (for other buttons)
-    /*
-    private suspend fun flyToMarkers(map: GoogleMap3D) {
-        // Fly to the Iolani Palace
-        // Wait for the animation to finish
-    }
-    */
-
-    /*
-    private suspend fun flyToBalloon(map: GoogleMap3D) {
-        // Fly to the Balloon on Waikiki Beach
-        // Wait for the animation to finish
-    }
-    */
-
-    // See Utilities.kt for Robustness helpers (awaitMapSteady, awaitCameraAnimation)
-    
-    // TODO: Step 4 (and others) - Reset Map Helper
+    // TODO: Step 1.2 - Reset Map Helper
     /*
     private fun resetMap() {
         activeMarkers.forEach { it.remove() }
@@ -118,9 +94,46 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.2 - Implement OnMap3DV
 
         activeModels.forEach { it.remove() }
         activeModels.clear()
-        
+
         activePopovers.forEach { it.remove() }
         activePopovers.clear()
+    }
+    */
+
+    // TODO: Step 1.3 - Implement onMap3DViewReady
+    /*
+    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
+        this@MainActivity.googleMap3D = googleMap3D
+
+        lifecycleScope.launch {
+            // 1.3. Start from Global View
+            startFromGlobalView(googleMap3D)
+
+            // Setup UI Buttons
+            setupButtons(googleMap3D)
+        }
+    }
+    */
+
+    // TODO: Step 1.3 - Start from Global View
+    /*
+    private fun startFromGlobalView(map: GoogleMap3D) {
+        // TODO: Step 1.3 - Set the Camera
+    }
+    */
+
+    // TODO: Step 2 & Step 3 - Fly to Honolulu and Orbit
+    // See Utilities.kt for Robustness helpers (awaitMapSteady, awaitCameraAnimation)
+    /*
+    private suspend fun flyToHonolulu(map: GoogleMap3D) {
+        // TODO: Step 2 & Step 3 - Fly to Honolulu, wait for tiles to settle, and orbit
+    }
+    */
+
+    // TODO: Step 4 - Add Clickable Marker Helper
+    /*
+    private fun addClickableMarker(map: GoogleMap3D, markerOptions: MarkerOptions) {
+        // Add marker, attach click listener with Toast, and track in activeMarkers
     }
     */
 
@@ -129,47 +142,49 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.2 - Implement OnMap3DV
     private fun addMarkers(map: GoogleMap3D) {
         resetMap()
 
-        // 1. Add ABSOLUTE Marker
-        
-        // 2. Add RELATIVE_TO_GROUND Marker
-        
-        // 3. Add CLAMP_TO_GROUND Marker
+        // 4.1. ABSOLUTE: Altitude is relative to the WGS84 ellipsoid (rough sea level).
 
-        // 4. Add RELATIVE_TO_MESH Marker
+        // 4.2. RELATIVE_TO_GROUND: Altitude is added to the terrain height at that point.
+
+        // 4.3. CLAMP_TO_GROUND: Snaps to the terrain.
+
+        // 4.4. RELATIVE_TO_MESH: Relative to 3D buildings/trees.
     }
     */
 
     // TODO: Step 5 - Advanced Custom Markers
     /*
     private fun addCustomMarkers(map: GoogleMap3D) {
-        // Implementation provided in Advanced Custom Markers step
+        resetMap()
+
+        // 5.1. Styled Pin
+
+        // 5.2. Image Glyph (Hibiscus)
+
+        // 5.3. Text Glyph
     }
     */
 
-    // TODO: Step 6 - Add Polygon
+    // TODO: Step 6 & Step 7 - Add Extruded Polygon & Click Listener
+    // See Utilities.kt for extrudePolygon Algorithm
     /*
     private fun addPolygon(map: GoogleMap3D) {
         resetMap()
 
         // Define the base (ground) shape of Iolani Palace
-        
+
         // Extrude!
-        
-        // Add all faces to the map
-        
-        // Step 6: Tapping the Turf
+
+        // Add all faces to the map and attach click listeners (Step 7: Tapping the Turf)
     }
     */
-    
-    // See Utilities.kt for extrudePolygon Algorithm
+
     // TODO: Step 8 - Setup Polylines
     /*
     private fun setupPolylines(map: GoogleMap3D) {
         resetMap()
 
-        // Draw path to Waikiki
-        
-        // Jump the camera to the Polyline to see it
+        // Draw geodesic path from Iolani Palace to Waikiki
     }
     */
 
@@ -178,44 +193,76 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.2 - Implement OnMap3DV
     private fun setupBalloon(map: GoogleMap3D) {
         resetMap()
 
-        // Add "Balloon" Model (glTF)
-        
-        // Setup click listener
+        // Add "Balloon" Model (glTF), attach click listener, and track in activeModels
     }
     */
-    
+
     // TODO: Step 10 - Setup Popover
     /*
     private fun setupPopover(map: GoogleMap3D) {
         resetMap()
 
-        // 1. Add a marker to serve as a visual anchor reference
-        
-        // 2. Create a simple text view for the popover content
-        
-        // 3. Add a Popover attached to the same location
-        
-        // 4. Show popover on marker click
+        // 10.1. Add a marker to serve as a visual anchor reference
+
+        // 10.2. Create a simple text view for the popover content
+
+        // 10.3. Add a Popover attached to the marker
+
+        // 10.4. Show popover on marker click (and show immediately for demo purposes)
     }
     */
-    
+
     // TODO: Step 11 - Scenic Tour Challenge
     /*
     private suspend fun flyTour(map: GoogleMap3D) {
-        // Define Locations
-        
-        // Add all markers for the tour
-        
-        // Fly to each location (CHALLENGE!)
-        // 1. Tell the map to flyCameraTo this 'location'. 
-        // 2. Wait for the animation to finish using awaitCameraAnimation(map)
-        // 3. Optional: Add a delay so the user can enjoy the view before flying to the next!
+        // 11.1. Define Tour Locations
+
+        // 11.2. Reset map and add markers for all tour stops
+
+        // 11.3. Fly to each location (CHALLENGE!):
+        //   1. Create a target Camera (tilt = 45.0, range = 2500.0, heading = 0.0)
+        //   2. Fly to the camera and wait using flyCameraToAndWait(map, camera, duration = 3.seconds)
+        //   3. Wait for 3D tiles to settle using map.awaitMapSteady(5.seconds)
+        //   4. Orbit 360 degrees using map.awaitCameraAnimation(flyAroundOptions { ... })
+        //   5. Pause briefly using delay(1.5.seconds) before moving to the next stop
     }
     */
 
-    // TODO: Step 1.2 - Uncomment the setupButtons boilerplate after adding Maps 3D SDK dependencies
-    /*
+    private fun setUpInsets() {
+        // **Immersive Mode**:
+        // Hide the system bars (status bar and navigation bar) for a full-screen 3D map
+        // experience. Swiping from the screen edge reveals them transiently.
+        // Remove these lines if you prefer to keep the system bars visible at all times.
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
 
+        // **Window Insets Handling**:
+        // Because we are in Edge-to-Edge mode, we ensure our bottom UI controls
+        // don't get covered by the navigation bar when system bars are visible.
+        // We add an extra 16dp base padding for aesthetics.
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.controls_scroll_view)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val basePadding = (16 * resources.displayMetrics.density).toInt() // 16dp
+            v.setPadding(
+                systemBars.left,
+                basePadding,
+                systemBars.right,
+                systemBars.bottom + basePadding
+            )
+            insets
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // PRE-PROVIDED BOILERPLATE (Kept out of the way)
+    // ------------------------------------------------------------------------
+
+    private var currentAnimationJob: Job? = null
+
+    // TODO: Step 1.3 - Uncomment the setupButtons boilerplate after adding Maps 3D SDK dependencies
+    /*
     /**
      * Sets up click listeners for the UI buttons to trigger camera animations.
      * Note how we wrap the calls in `lifecycleScope.launch`. This is because:
@@ -224,7 +271,9 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.2 - Implement OnMap3DV
      */
     private fun setupButtons(map: GoogleMap3D) {
         findViewById<Button>(R.id.btn_fly_honolulu).setOnClickListener {
+            // Cancel any ongoing tour or flight
             currentAnimationJob?.cancel()
+            // "Launch" starts a new coroutine.
             currentAnimationJob = lifecycleScope.launch {
                 resetMap()
                 flyToHonolulu(map)
@@ -259,7 +308,7 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.2 - Implement OnMap3DV
             currentAnimationJob?.cancel()
             currentAnimationJob = lifecycleScope.launch {
                 setupPolylines(map)
-                flyCameraToAndWait(map, BALLOON_CAMERA)
+                flyCameraToAndWait(map, POLYLINE_CAMERA)
             }
         }
 
@@ -281,8 +330,8 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.2 - Implement OnMap3DV
 
         findViewById<Button>(R.id.btn_tour).setOnClickListener {
             currentAnimationJob?.cancel()
-            currentAnimationJob = lifecycleScope.launch { 
-                flyTour(map) 
+            currentAnimationJob = lifecycleScope.launch {
+                flyTour(map)
             }
         }
 
@@ -293,7 +342,6 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.2 - Implement OnMap3DV
     }
 
     private suspend fun flyCameraToAndWait(map: GoogleMap3D, camera: Camera, duration: Duration = 2.seconds) {
-        // See Utilities.kt
         map.awaitCameraAnimation(
             flyToOptions {
                 endCamera = camera
@@ -302,6 +350,4 @@ class MainActivity : AppCompatActivity() /*, TODO: Step 1.2 - Implement OnMap3DV
         )
     }
     */
-
-
 }

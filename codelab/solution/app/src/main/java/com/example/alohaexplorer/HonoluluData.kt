@@ -43,8 +43,8 @@ val KOKO_HEAD = latLngAltitude {
 }
 
 val PEARL_HARBOR = latLngAltitude {
-    latitude = 21.31861
-    longitude = -157.92250
+    latitude = 21.3649
+    longitude = -157.9500
     altitude = 0.0
 }
 
@@ -103,6 +103,17 @@ val CUSTOM_MARKER_CAMERA = camera {
     this.heading = 39.0
     this.tilt = 68.0
     this.range = 1399.0
+}
+
+val POLYLINE_CAMERA = camera {
+    center = latLngAltitude {
+        latitude = 21.2917
+        longitude = -157.8437
+        altitude = 0.0
+    }
+    tilt = 55.0
+    range = 5500.0
+    heading = 35.0
 }
 
 val BALLOON_CAMERA = camera {

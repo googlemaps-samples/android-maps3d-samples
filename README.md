@@ -24,6 +24,7 @@ This repository provides a collection of sample applications to help you get sta
 * **[Maps3DSamples/ComposeDemos](Maps3DSamples/ComposeDemos/app/README.md)**: Modern, declarative Jetpack Compose samples built with the `maps3d-compose` library.
 * **[Maps3DSamples/ApiDemos](Maps3DSamples/ApiDemos)**: Showcases fundamental and advanced API features using traditional Android Views in both **[Kotlin](Maps3DSamples/ApiDemos/kotlin-app/README.md)** and **[Java](Maps3DSamples/ApiDemos/java-app/README.md)**.
 * **[PlacesUIKit3D](PlacesUIKit3D/README.md)**: Demonstrates integrating the Places UI Kit (Place Search, Place Autocomplete, and Place Details) with the Maps 3D SDK.
+* **[codelab](codelab/codelab.md)**: **Aloha Explorer** step-by-step codelab (`starter` and `solution` projects) covering 3D camera flights, altitude modes, custom markers, extruded 3D polygons, geodesic polylines, glTF models, popovers, and Jetpack Compose interop.
 * **[Maps3DSamples/advanced](Maps3DSamples/advanced)**: Demonstrates View-interop patterns for bridging `Map3DView` with Jetpack Compose and `ViewModel`.
 * **[snippets](snippets)**: A collection of standalone, extraction-ready code snippets demonstrating standard integration endpoints in both Kotlin and Java. Includes a coordinate checklist mapping tracker listed in [CATALOG.md](snippets/CATALOG.md).
 

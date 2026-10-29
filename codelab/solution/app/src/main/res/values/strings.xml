@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Aloha Explorer</string>
+    <string name="title_activity_compose">Aloha Compose</string>
 
     <string name="toast_clicked">Clicked %1$s</string>
     <string name="label_absolute">Absolute (100m)</string>
@@ -11,12 +12,19 @@
     <string name="label_hibiscus">Hibiscus Marker</string>
     <string name="label_polygon">Iolani Palace Polygon</string>
 
-    <string name="label_image_glyph">Image Glyph</string>
     <string name="toast_palace">The Royal Palace: A symbol of Hawaiian sovereignty.</string>
-    <string name="toast_balloon">Clicked the Balloon!</string>
     <string name="clicked_the_balloon">Clicked the Balloon!</string>
     <string name="the_royal_palace">The Royal Palace: A symbol of Hawaiian sovereignty.</string>
     <string name="fly_to_honolulu">Fly to Honolulu</string>
+
+    <!-- Scenic Tour Landmarks -->
+    <string name="tour_honolulu">Honolulu</string>
+    <string name="tour_diamond_head">Diamond Head</string>
+    <string name="tour_hanauma_bay">Hanauma Bay</string>
+    <string name="tour_koko_head">Koko Head</string>
+    <string name="tour_lanikai_beach">Lanikai Beach</string>
+    <string name="tour_mount_kaala">Mount Ka\'ala</string>
+    <string name="tour_pearl_harbor">Pearl Harbor</string>
 
     <!-- UI Buttons -->
     <string name="btn_camera">Camera</string>
