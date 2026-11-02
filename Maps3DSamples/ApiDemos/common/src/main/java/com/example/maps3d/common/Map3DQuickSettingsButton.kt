@@ -16,16 +16,11 @@
 
 package com.example.maps3d.common
 
-import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import android.util.AttributeSet
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Map3DMode
@@ -57,7 +52,7 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
         val map = attachedMap ?: mapProvider?.invoke()
         map?.let { updatedSettings.applyTo(it) }
         updateTopMarginForUiControls(updatedSettings.uiControls)
-        applyStatusBarInsetsToSiblingMapView()
+        requestSiblingMapViewInsets()
         onSettingsChangedListener?.onSettingsChanged(updatedSettings)
     }
 
@@ -99,6 +94,7 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
     private var mapProvider: (() -> GoogleMap3D?)? = null
     private var activeDialog: AlertDialog? = null
     private var onSettingsChangedListener: OnSettingsChangedListener? = null
+    private var lastAppliedUiControls: Map3DUiControls? = null
 
     init {
         setImageResource(R.drawable.settings_24px)
@@ -107,7 +103,7 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
 
         ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
             updateTopMarginForUiControls()
-            applyStatusBarInsetsToSiblingMapView()
+            requestSiblingMapViewInsets()
             insets
         }
 
@@ -118,36 +114,12 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        hideHostSystemBars()
         settingsController.addListener(controllerListener)
         updateTopMarginForUiControls()
-        applyStatusBarInsetsToSiblingMapView()
+        requestSiblingMapViewInsets()
         ViewCompat.requestApplyInsets(this)
         post {
-            hideHostSystemBars()
             updateTopMarginForUiControls()
-        }
-    }
-
-    override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
-        super.onWindowFocusChanged(hasWindowFocus)
-        if (hasWindowFocus) {
-            hideHostSystemBars()
-        }
-    }
-
-    private fun hideHostSystemBars() {
-        var ctx: Context? = context
-        while (ctx is ContextWrapper) {
-            if (ctx is Activity) {
-                val window = ctx.window
-                val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-                insetsController.systemBarsBehavior =
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                insetsController.hide(WindowInsetsCompat.Type.systemBars())
-                break
-            }
-            ctx = ctx.baseContext
         }
     }
 
@@ -163,12 +135,9 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
         return parentGroup.findViewById(R.id.map3dView)
     }
 
-    private fun applyStatusBarInsetsToSiblingMapView() {
+    private fun requestSiblingMapViewInsets() {
         val mapView = findSiblingMapView() ?: return
-        Map3DSettings.applyStatusBarInsetsToMapView(
-            mapView = mapView,
-            explicitStatusBarTop = statusBarTopOffsetPx.takeIf { it > 0 },
-        )
+        ViewCompat.requestApplyInsets(mapView)
     }
 
     private fun resolveEffectiveStatusBarOffsetPx(): Int {
@@ -179,11 +148,24 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
     }
 
     /**
+     * Re-applies the top margin for the most recently configured [Map3DUiControls] (or the
+     * active [settingsController] controls if none have been explicitly set yet).
+     */
+    fun updateTopMarginForUiControls() {
+        val controls = lastAppliedUiControls ?: getSettings().uiControls
+        applyTopMargin(controls)
+    }
+
+    /**
      * Adjusts this button's top margin so it sits directly below the active trailing camera UI
      * controls ([Map3DUiControls.zoom], [Map3DUiControls.tilt], [Map3DUiControls.rotate]).
      */
-    @JvmOverloads
-    fun updateTopMarginForUiControls(uiControls: Map3DUiControls = getSettings().uiControls) {
+    fun updateTopMarginForUiControls(uiControls: Map3DUiControls) {
+        lastAppliedUiControls = uiControls
+        applyTopMargin(uiControls)
+    }
+
+    private fun applyTopMargin(uiControls: Map3DUiControls) {
         val lp = layoutParams as? ViewGroup.MarginLayoutParams ?: return
         val density = resources.displayMetrics.density
         val baseMarginDp = uiControls.calculateFabMarginDp()
@@ -203,17 +185,18 @@ class Map3DQuickSettingsButton @JvmOverloads constructor(
     fun attachMap(googleMap3D: GoogleMap3D?) {
         this.attachedMap = googleMap3D
         val currentSettings = settingsController.getSettings()
-        updateTopMarginForUiControls(currentSettings.uiControls)
+        updateTopMarginForUiControls()
         if (googleMap3D != null) {
             currentSettings.applyTo(googleMap3D)
-            applyStatusBarInsetsToSiblingMapView()
+            requestSiblingMapViewInsets()
             // Re-apply after a short delay to ensure native engine layout pass preserves controls
             postDelayed({
                 if (attachedMap == googleMap3D) {
                     val latest = settingsController.getSettings()
                     latest.applyTo(googleMap3D)
-                    updateTopMarginForUiControls(latest.uiControls)
-                    applyStatusBarInsetsToSiblingMapView()
+                    updateTopMarginForUiControls()
+                    requestSiblingMapViewInsets()
+                    onSettingsChangedListener?.onSettingsChanged(latest)
                 }
             }, 350L)
         }

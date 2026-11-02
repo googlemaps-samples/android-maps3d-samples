@@ -99,14 +99,17 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
             lastStatusBarTop = statusBarTop;
         }
         if (map3DView != null) {
-            Map3DSettings.applyStatusBarInsetsToMapView(map3DView, lastStatusBarTop);
+            ViewCompat.requestApplyInsets(map3DView);
         }
 
         Map3DQuickSettingsButton quickSettingsButton = findViewById(R.id.quick_settings_button);
         if (quickSettingsButton != null) {
-            Map3DUiControls currentUi = uiControls != null ? uiControls : quickSettingsButton.getSettings().getUiControls();
             quickSettingsButton.setStatusBarTopOffsetPx(lastStatusBarTop != null ? lastStatusBarTop : 0);
-            quickSettingsButton.updateTopMarginForUiControls(currentUi);
+            if (uiControls != null) {
+                quickSettingsButton.updateTopMarginForUiControls(uiControls);
+            } else {
+                quickSettingsButton.updateTopMarginForUiControls();
+            }
         }
     }
 
@@ -123,7 +126,7 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
             lastStatusBarTop = 0;
             Map3DView currentMapView = findViewById(R.id.map3dView);
             if (currentMapView != null) {
-                Map3DSettings.applyStatusBarInsetsToMapView(currentMapView, 0);
+                ViewCompat.requestApplyInsets(currentMapView);
             }
             Map3DQuickSettingsButton button = findViewById(R.id.quick_settings_button);
             if (button != null) {
@@ -155,13 +158,13 @@ public abstract class SampleBaseActivity extends AppCompatActivity implements On
                     controlScrollView.setLayoutParams(layoutParams);
                 }
 
-                return WindowInsetsCompat.CONSUMED;
+                return windowInsets;
             });
         }
 
         Map3DView currentMapView = findViewById(R.id.map3dView);
         if (currentMapView != null) {
-            Map3DSettings.applyStatusBarInsetsToMapView(currentMapView, lastStatusBarTop);
+            ViewCompat.requestApplyInsets(currentMapView);
         }
     }
 
