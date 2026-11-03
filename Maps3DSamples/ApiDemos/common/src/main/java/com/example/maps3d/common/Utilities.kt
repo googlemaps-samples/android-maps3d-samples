@@ -27,14 +27,14 @@ import java.util.Locale
 import kotlin.math.floor
 
 /**
- * Enables sticky immersive mode so the 3D map canvas occupies the entire display,
- * hiding status and navigation bars while allowing transient reveal on edge swipes.
+ * Configures system bar behavior for edge-to-edge 3D map rendering while keeping
+ * status and navigation bars visible so [WindowInsetsCompat.Type.systemBars] insets can be verified.
  */
 fun Activity.enableImmersiveMode() {
     val insetsController = WindowCompat.getInsetsController(window, window.decorView)
     insetsController.systemBarsBehavior =
         WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-    insetsController.hide(WindowInsetsCompat.Type.systemBars())
+    insetsController.show(WindowInsetsCompat.Type.systemBars())
 }
 
 const val DEFAULT_HEADING = 0.0
