@@ -14,6 +14,7 @@
 
 package com.example.advancedmaps3dsamples.scenarios
 
+import android.util.Log
 import com.google.android.gms.maps3d.model.FlyAroundOptions
 import com.google.android.gms.maps3d.model.FlyToOptions
 import kotlinx.coroutines.coroutineScope
@@ -58,7 +59,7 @@ data class FlyAroundStep(
       coroutineScope {
         val switchJob = launch {
           delay(switchDelayMillis)
-          android.util.Log.i("FlyAroundStep", "Switching map mode to $switchMapMode after ${switchDelayMillis}ms")
+          Log.i("FlyAroundStep", "Switching map mode to $switchMapMode after ${switchDelayMillis}ms")
           viewModel.setMapMode(switchMapMode)
         }
         try {

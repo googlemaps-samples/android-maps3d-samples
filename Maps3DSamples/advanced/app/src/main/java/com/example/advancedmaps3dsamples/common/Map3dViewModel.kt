@@ -18,6 +18,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.advancedmaps3dsamples.utils.CameraUpdate
+import com.example.advancedmaps3dsamples.utils.awaitCameraUpdate as executeCameraUpdate
 import com.example.advancedmaps3dsamples.utils.copy
 import com.example.advancedmaps3dsamples.utils.toCameraUpdate
 import com.example.advancedmaps3dsamples.utils.toHeading
@@ -404,6 +405,6 @@ abstract class Map3dViewModel : ViewModel() {
 
   suspend fun awaitCameraUpdate(cameraUpdate: CameraUpdate) {
     val controller = _googleMap3D.filterNotNull().first()
-    com.example.advancedmaps3dsamples.utils.awaitCameraUpdate(controller, cameraUpdate)
+    executeCameraUpdate(controller, cameraUpdate)
   }
 }
