@@ -45,7 +45,7 @@ internal fun ThreeDMap(
     viewModel.onMapSteadyChange(isSteady)
   }
 
-  val map3dView = remember(mapsConfig) {
+  val map3dView = remember(mapsConfig.centerLat, mapsConfig.centerLng, mapsConfig.range, mapsConfig.heading, mapsConfig.tilt) {
     Map3DView(context = context, config = mapsConfig).apply {
       getMap3DViewAsync(
         object : OnMap3DViewReadyCallback {
@@ -64,7 +64,7 @@ internal fun ThreeDMap(
     }
   }
 
-  DisposableEffect(lifecycleOwner, map3dView) {
+  DisposableEffect(lifecycleOwner) {
     val observer = LifecycleEventObserver { _, event ->
       when (event) {
         Lifecycle.Event.ON_CREATE -> map3dView.onCreate(null)

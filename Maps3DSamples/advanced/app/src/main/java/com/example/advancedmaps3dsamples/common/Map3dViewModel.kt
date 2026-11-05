@@ -68,6 +68,7 @@ abstract class Map3dViewModel : ViewModel() {
    * Consumers should use the `mapReady` flow to react to the availability of the map.
    */
   private var _googleMap3D = MutableStateFlow<GoogleMap3D?>(null)
+  val googleMap3D = _googleMap3D.asStateFlow()
 
   private val _cameraRestriction = MutableStateFlow<CameraRestriction?>(null)
   val cameraRestriction = _cameraRestriction.asStateFlow()
@@ -402,8 +403,7 @@ abstract class Map3dViewModel : ViewModel() {
   }
 
   suspend fun awaitCameraUpdate(cameraUpdate: CameraUpdate) {
-    _googleMap3D.value?.let { controller ->
-      com.example.advancedmaps3dsamples.utils.awaitCameraUpdate(controller, cameraUpdate)
-    }
+    val controller = _googleMap3D.filterNotNull().first()
+    com.example.advancedmaps3dsamples.utils.awaitCameraUpdate(controller, cameraUpdate)
   }
 }

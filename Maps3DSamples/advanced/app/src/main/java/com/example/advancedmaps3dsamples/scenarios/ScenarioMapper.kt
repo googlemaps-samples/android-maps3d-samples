@@ -152,6 +152,7 @@ fun String.toMap3DMode(): Int {
     return when (this.lowercase()) {
         "hybrid" -> Map3DMode.HYBRID
         "satellite" -> Map3DMode.SATELLITE
+        "roadmap" -> Map3DMode.ROADMAP
         else -> {
             Log.w(TAG, "Unsupported map mode '$this', defaulting to SATELLITE.")
             Map3DMode.SATELLITE
@@ -172,7 +173,18 @@ fun String.toAnimation(): List<AnimationStep> {
                 when (key.trim().lowercase()) {
                     "flyto" -> add(FlyToStep(value.toFlyTo()))
                     "delay" -> add(DelayStep(value.toDelay()))
-                    "flyaround" -> add(FlyAroundStep(value.toFlyAround()))
+                    "flyaround" -> {
+                        val options = value.toFlyAround()
+                        val attributes = value.toAttributesMap()
+                        val switchModeStr = attributes["switchmode"] ?: attributes["switchMode"]
+                        val switchMode = switchModeStr?.toMap3DMode()
+                        val switchDelay = (attributes["switchdelay"] ?: attributes["switchDelay"])?.toLongOrNull() ?: 0L
+                        Log.d(TAG, "Parsed flyAround: switchMode=$switchMode ($switchModeStr), switchDelay=$switchDelay")
+                        add(FlyAroundStep(options, switchMapMode = switchMode, switchDelayMillis = switchDelay))
+                    }
+                    "setmapmode", "mapmode" -> {
+                        add(SetMapModeStep(value.trim().toMap3DMode()))
+                    }
                     "waituntilthemapissteady" -> {
                         add(WaitUntilTheMapIsSteadyStep(value.toTimeout()))
                     }

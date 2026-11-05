@@ -46,12 +46,20 @@ import com.example.advancedmaps3dsamples.scenarios.ScenariosActivity
 import com.example.advancedmaps3dsamples.ui.theme.AdvancedMaps3DSamplesTheme
 import dagger.hilt.android.AndroidEntryPoint
 
-data class MapSample(@StringRes val label: Int, val clazz: Class<*>)
+data class MapSample(
+    @StringRes val label: Int,
+    val clazz: Class<*>,
+    val scenario: String? = null,
+)
 
 private val samples =
     listOf(
-        MapSample(R.string.map_sample_basic, BasicComposeMapActivity::class.java),
+        MapSample(R.string.scenarios_seattle_cinematic_reveal, ScenariosActivity::class.java, "seattle_cinematic_reveal"),
+        MapSample(R.string.scenarios_uk_shard_tower_bridge, ScenariosActivity::class.java, "uk_shard_to_tower_bridge"),
+        MapSample(R.string.scenarios_brazil_copacabana_ipanema, ScenariosActivity::class.java, "brazil_copacabana_to_ipanema"),
+        MapSample(R.string.scenarios_scenic_world_tour, ScenariosActivity::class.java, "scenic_world_tour"),
         MapSample(R.string.map_sample_scenarios, ScenariosActivity::class.java),
+        MapSample(R.string.map_sample_basic, BasicComposeMapActivity::class.java),
         MapSample(R.string.map_sample_route, RouteSampleActivity::class.java),
     )
 
@@ -83,7 +91,7 @@ class MainActivity : ComponentActivity() {
                         for (sample in samples) {
                             Sample(
                                 sample = sample,
-                                onClick = { launchActivity(sample.clazz) },
+                                onClick = { launchActivity(sample) },
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }
@@ -94,12 +102,15 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    private fun launchActivity(clazz: Class<*>) {
+    private fun launchActivity(sample: MapSample) {
         try {
-            startActivity(Intent(this, clazz))
+            val intent = Intent(this, sample.clazz).apply {
+                sample.scenario?.let { putExtra("scenario", it) }
+            }
+            startActivity(intent)
         } catch (e: ClassNotFoundException) {
-            Log.e("SamplesMenu", "Activity not found: $clazz", e)
-            Toast.makeText(this, "Activity not found: $clazz", Toast.LENGTH_SHORT).show()
+            Log.e("SamplesMenu", "Activity not found: ${sample.clazz}", e)
+            Toast.makeText(this, "Activity not found: ${sample.clazz}", Toast.LENGTH_SHORT).show()
         }
     }
 }
