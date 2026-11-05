@@ -73,6 +73,7 @@ dependencies {
     implementation(libs.material)
     api(libs.androidx.lifecycle.viewmodel.ktx)
     testImplementation(libs.junit)
+    testImplementation(libs.json)
     testImplementation(libs.google.truth)
     testImplementation(libs.androidx.arch.core.testing)
     testImplementation(libs.kotlinx.coroutines.test)

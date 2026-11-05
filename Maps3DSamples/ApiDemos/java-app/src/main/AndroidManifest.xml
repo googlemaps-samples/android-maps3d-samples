@@ -17,6 +17,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:name="com.example.maps3djava.Maps3DJavaApplication"
         android:allowBackup="true"
@@ -225,6 +227,13 @@
             android:name="com.example.maps3djava.storelocator.StoreLocatorActivity"
             android:theme="@style/Theme.Maps3DSamples"
             android:label="@string/feature_title_store_locator"
+            android:exported="true"
+            />
+
+        <activity
+            android:name="com.example.maps3djava.hillyroadalerts.HillyRoadAlertsActivity"
+            android:theme="@style/Theme.Maps3DSamples"
+            android:label="@string/feature_title_hilly_road_alerts"
             android:exported="true"
             />
 
