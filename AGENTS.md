@@ -88,8 +88,16 @@ When generating, refactoring, or editing code, strictly adhere to these rules:
 1. **Zero Wildcard Imports:**
    - ❌ `import com.google.android.gms.maps.model.*` is **strictly forbidden**.
    - ✅ Every imported symbol must be explicitly listed to conform to `ktlint` and `spotless`.
-2. **Spotless Compliance:**
-   - Always verify and run `./gradlew spotlessApply` on touched modules before finishing a task.
+2. **Spotless Compliance & Token-Efficient CLI Execution:**
+   - Always verify and run `./gradlew spotlessApply --console=plain --quiet` on touched modules before finishing a task.
+   - **Gradle (`./gradlew`):** Always pass `--console=plain --quiet` (or `-q`) on standard build, compile, formatting, install, and test commands to suppress noisy task lifecycle logs and conserve context tokens:
+     ```bash
+     ./gradlew <tasks> --console=plain --quiet
+     ```
+     *(Exception: Omit `--quiet` while keeping `--console=plain` only when explicitly auditing compiler/deprecation warnings `w:` or diagnosing task-level build progress.)*
+   - **Other CLI Tools:**
+     - **Git:** `git status -s`, `git diff --stat`, `git fetch -q`, `git checkout -q`
+     - **ADB Logcat:** `adb logcat -d -s AndroidRuntime:E *:S` (always filter by tag/priority rather than dumping unfiltered logs)
 3. **Modern Kotlin Idioms & Pragmatic Warning Hygiene:**
    - Prefer modern standard library idioms where applicable (e.g., `kotlin.time.Duration` with `delay(100.milliseconds)` instead of legacy millisecond `Long`s).
    - Prefer Android KTX extensions (e.g., `hexColorString.toColorInt()`) over legacy utility methods.
