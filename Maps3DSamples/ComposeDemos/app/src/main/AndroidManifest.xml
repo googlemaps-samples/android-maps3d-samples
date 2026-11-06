@@ -17,6 +17,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:name=".ComposeDemosApplication"
         android:allowBackup="true"
@@ -67,6 +69,7 @@
         <activity android:name=".fieldofview.FieldOfViewActivity" android:exported="true" android:label="Field Of View" />
         <activity android:name=".mapslocalization.MapsLocalizationActivity" android:exported="true" android:label="Maps Localization" />
         <activity android:name=".storelocator.StoreLocatorActivity" android:exported="true" android:label="Store Locator" />
+        <activity android:name=".hillyroadalerts.HillyRoadAlertsActivity" android:exported="true" android:label="@string/feature_title_hilly_road_alerts" />
 
     </application>
 

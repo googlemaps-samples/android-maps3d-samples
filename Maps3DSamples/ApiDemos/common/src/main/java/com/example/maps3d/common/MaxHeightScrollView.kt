@@ -66,6 +66,16 @@ class MaxHeightScrollView @JvmOverloads constructor(
         super.onMeasure(widthMeasureSpec, constrainedHeightSpec)
     }
 
+    /**
+     * Dynamically sets the maximum allowed height in pixels and requests a layout pass.
+     */
+    fun setMaxHeightPx(px: Int) {
+        if (maxHeightPx != px) {
+            maxHeightPx = px
+            requestLayout()
+        }
+    }
+
     companion object {
         private const val DEFAULT_MAX_HEIGHT_DP = 480
     }

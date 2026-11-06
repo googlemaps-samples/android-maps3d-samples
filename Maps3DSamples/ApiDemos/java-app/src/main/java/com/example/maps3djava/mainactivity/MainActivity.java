@@ -38,6 +38,7 @@ import com.example.maps3djava.datavisualization.DataVisualizationActivity;
 import com.example.maps3djava.fieldofview.FieldOfViewActivity;
 import com.example.maps3djava.flightsimulator.FlightSimulatorActivity;
 import com.example.maps3djava.hellomap.HelloMapActivity;
+import com.example.maps3djava.hillyroadalerts.HillyRoadAlertsActivity;
 import com.example.maps3djava.mapinteractions.MapInteractionsActivity;
 import com.example.maps3djava.mapslocalization.MapsLocalizationActivity;
 import com.example.maps3djava.markers.MarkersActivity;
@@ -81,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
                     put(R.string.feature_title_camera_restrictions, CameraRestrictionsActivity.class);
                     put(R.string.feature_title_flight_simulator, FlightSimulatorActivity.class);
                     put(R.string.feature_title_path_following, PathFollowingActivity.class);
+                    put(R.string.feature_title_hilly_road_alerts, HillyRoadAlertsActivity.class);
                     put(R.string.feature_title_path_styling, PathStylingActivity.class);
                     put(R.string.feature_title_animating_models, AnimatingModelsActivity.class);
                     put(R.string.feature_title_place_details, PlaceDetailsActivity.class);
