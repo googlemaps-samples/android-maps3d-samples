@@ -152,13 +152,16 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
             lastStatusBarTop = statusBarTop
         }
         if (::map3DView.isInitialized) {
-            Map3DSettings.applyStatusBarInsetsToMapView(map3DView, lastStatusBarTop)
+            ViewCompat.requestApplyInsets(map3DView)
         }
         // Keep the Quick Settings FAB directly below the active trailing controls
         findViewById<Map3DQuickSettingsButton>(R.id.quick_settings_button)?.let { button ->
-            val currentUi = uiControls ?: button.getSettings().uiControls
             button.statusBarTopOffsetPx = lastStatusBarTop ?: 0
-            button.updateTopMarginForUiControls(currentUi)
+            if (uiControls != null) {
+                button.updateTopMarginForUiControls(uiControls)
+            } else {
+                button.updateTopMarginForUiControls()
+            }
         }
     }
 
@@ -173,7 +176,7 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
         if (!hasOverlayAppBar) {
             lastStatusBarTop = 0
             findViewById<Map3DView?>(R.id.map3dView)?.let { currentMapView ->
-                Map3DSettings.applyStatusBarInsetsToMapView(currentMapView, 0)
+                ViewCompat.requestApplyInsets(currentMapView)
             }
             findViewById<Map3DQuickSettingsButton?>(R.id.quick_settings_button)?.let { button ->
                 button.statusBarTopOffsetPx = 0
@@ -201,12 +204,12 @@ abstract class SampleBaseActivity : AppCompatActivity(), OnMap3DViewReadyCallbac
                     scrollView.layoutParams = layoutParams
                 }
 
-                WindowInsetsCompat.CONSUMED
+                insets
             }
         }
 
         findViewById<Map3DView?>(R.id.map3dView)?.let { currentMapView ->
-            Map3DSettings.applyStatusBarInsetsToMapView(currentMapView, lastStatusBarTop)
+            ViewCompat.requestApplyInsets(currentMapView)
         }
     }
 

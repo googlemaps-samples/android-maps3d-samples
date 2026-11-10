@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -62,6 +63,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.view.ViewCompat
 import com.example.maps3d.common.Map3DQuickSettingsWidget
 import com.example.maps3d.common.Map3DSessionTheme
 import com.example.maps3d.common.Map3DSettings
@@ -187,9 +189,9 @@ fun UiControlsScreen() {
         uiSettings.setUiControlsPlacement(primaryControls, primaryPlacement)
         uiSettings.setUiControlsPlacement(secondaryControls, secondaryPlacement)
         Map3DSettings.findMap3DView(view.rootView)?.let { mapView ->
-            Map3DSettings.applyStatusBarInsetsToMapView(mapView)
+            ViewCompat.requestApplyInsets(mapView)
             mapView.post {
-                Map3DSettings.applyStatusBarInsetsToMapView(mapView)
+                ViewCompat.requestApplyInsets(mapView)
             }
         }
     }
@@ -208,6 +210,7 @@ fun UiControlsScreen() {
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
+                .navigationBarsPadding()
                 .padding(12.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),

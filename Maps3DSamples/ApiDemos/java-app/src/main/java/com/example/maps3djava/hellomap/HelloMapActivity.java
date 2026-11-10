@@ -64,7 +64,7 @@ public class HelloMapActivity extends AppCompatActivity implements OnMap3DViewRe
         if (insetsController != null) {
             insetsController.setSystemBarsBehavior(
                     WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-            insetsController.hide(WindowInsetsCompat.Type.systemBars());
+            insetsController.show(WindowInsetsCompat.Type.systemBars());
         }
     }
 

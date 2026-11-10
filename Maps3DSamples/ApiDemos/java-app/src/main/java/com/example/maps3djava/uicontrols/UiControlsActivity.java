@@ -30,6 +30,7 @@ import android.widget.RadioGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
+import androidx.core.view.ViewCompat;
 import com.example.maps3d.common.Map3DQuickSettingsButton;
 import com.example.maps3d.common.Map3DSettings;
 import com.example.maps3d.common.Map3DUiControls;
@@ -140,6 +141,7 @@ public class UiControlsActivity extends SampleBaseActivity {
     ViewGroup container = findViewById(R.id.map_container);
     if (container != null) {
       getLayoutInflater().inflate(R.layout.control_panel_ui_controls, container, true);
+      ViewCompat.requestApplyInsets(container);
     }
 
     MaterialToolbar topBar = findViewById(R.id.top_bar);
@@ -221,7 +223,26 @@ public class UiControlsActivity extends SampleBaseActivity {
       });
     }
 
+    Map3DQuickSettingsButton initialButton = findViewById(R.id.quick_settings_button);
+    if (initialButton != null) {
+      initialButton.updateTopMarginForUiControls(buildCurrentUiControls());
+    }
+
     fadeHandler.postDelayed(fadeOutRunnable, 3000L);
+  }
+
+  private Map3DUiControls buildCurrentUiControls() {
+    boolean isLeading =
+        rgPlacement != null && rgPlacement.getCheckedRadioButtonId() == R.id.rb_placement_leading;
+    int primaryPlacement = isLeading ? ControlPlacement.LEADING : ControlPlacement.TRAILING;
+    return new Map3DUiControls(
+        chipZoom != null && chipZoom.isChecked(),
+        chipTilt != null && chipTilt.isChecked(),
+        chipRotate != null && chipRotate.isChecked(),
+        chipCompass != null && chipCompass.isChecked(),
+        chipPanVertical != null && chipPanVertical.isChecked(),
+        chipPanHorizontal != null && chipPanHorizontal.isChecked(),
+        primaryPlacement);
   }
 
   private void setAllChips(boolean checked) {
@@ -239,6 +260,12 @@ public class UiControlsActivity extends SampleBaseActivity {
    * Applies the UI controls configuration directly to the {@link GoogleMap3D} instance using the SDK API.
    */
   private void applyControlsToMap() {
+    Map3DUiControls localUiControls = buildCurrentUiControls();
+    Map3DQuickSettingsButton quickSettingsButton = findViewById(R.id.quick_settings_button);
+    if (quickSettingsButton != null) {
+      quickSettingsButton.updateTopMarginForUiControls(localUiControls);
+    }
+
     if (googleMap3D == null) {
       return;
     }
@@ -248,49 +275,38 @@ public class UiControlsActivity extends SampleBaseActivity {
     }
 
     List<Map3DControl> primaryControls = new ArrayList<>();
-    if (chipZoom != null && chipZoom.isChecked()) {
+    if (localUiControls.getZoom()) {
       primaryControls.add(new ZoomControl(ControlOrientation.VERTICAL));
     }
-    if (chipTilt != null && chipTilt.isChecked()) {
+    if (localUiControls.getTilt()) {
       primaryControls.add(new TiltControl(ControlOrientation.VERTICAL));
     }
-    if (chipRotate != null && chipRotate.isChecked()) {
+    if (localUiControls.getRotate()) {
       primaryControls.add(new RotateControl(ControlOrientation.VERTICAL));
     }
 
     List<Map3DControl> secondaryControls = new ArrayList<>();
-    if (chipPanVertical != null && chipPanVertical.isChecked()) {
+    if (localUiControls.getPanVertical()) {
       secondaryControls.add(new PanVerticalControl(ControlOrientation.VERTICAL));
     }
-    if (chipPanHorizontal != null && chipPanHorizontal.isChecked()) {
+    if (localUiControls.getPanHorizontal()) {
       secondaryControls.add(new PanHorizontalControl(ControlOrientation.VERTICAL));
     }
-    if (chipCompass != null && chipCompass.isChecked()) {
+    if (localUiControls.getCompass()) {
       secondaryControls.add(new CompassControl());
     }
 
-    boolean isLeading = rgPlacement != null && rgPlacement.getCheckedRadioButtonId() == R.id.rb_placement_leading;
-    int primaryPlacement = isLeading ? ControlPlacement.LEADING : ControlPlacement.TRAILING;
-    int secondaryPlacement = isLeading ? ControlPlacement.TRAILING : ControlPlacement.LEADING;
+    int primaryPlacement = localUiControls.getControlsPosition();
+    int secondaryPlacement =
+        primaryPlacement == ControlPlacement.LEADING
+            ? ControlPlacement.TRAILING
+            : ControlPlacement.LEADING;
 
     uiSettings.setUiControlsPlacement(primaryControls, primaryPlacement);
     uiSettings.setUiControlsPlacement(secondaryControls, secondaryPlacement);
-    Map3DUiControls localUiControls = new Map3DUiControls(
-        chipZoom != null && chipZoom.isChecked(),
-        chipTilt != null && chipTilt.isChecked(),
-        chipRotate != null && chipRotate.isChecked(),
-        chipCompass != null && chipCompass.isChecked(),
-        chipPanVertical != null && chipPanVertical.isChecked(),
-        chipPanHorizontal != null && chipPanHorizontal.isChecked(),
-        primaryPlacement
-    );
-    Map3DQuickSettingsButton quickSettingsButton = findViewById(R.id.quick_settings_button);
-    if (quickSettingsButton != null) {
-      quickSettingsButton.updateTopMarginForUiControls(localUiControls);
-    }
     if (map3DView != null) {
-      Map3DSettings.applyStatusBarInsetsToMapView(map3DView);
-      map3DView.post(() -> Map3DSettings.applyStatusBarInsetsToMapView(map3DView));
+      ViewCompat.requestApplyInsets(map3DView);
+      map3DView.post(() -> ViewCompat.requestApplyInsets(map3DView));
     }
   }
 
