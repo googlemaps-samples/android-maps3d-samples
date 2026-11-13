@@ -14,9 +14,12 @@
 
 package com.example.advancedmaps3dsamples.scenarios
 
+import android.util.Log
 import com.google.android.gms.maps3d.model.FlyAroundOptions
 import com.google.android.gms.maps3d.model.FlyToOptions
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 sealed interface AnimationStep {
   suspend operator fun invoke(viewModel: ScenariosViewModel)
@@ -46,8 +49,33 @@ data class FlyToStep(val flyToOptions: FlyToOptions) : AnimationStep {
   }
 }
 
-data class FlyAroundStep(val flyAroundOptions: FlyAroundOptions) : AnimationStep {
+data class FlyAroundStep(
+  val flyAroundOptions: FlyAroundOptions,
+  val switchMapMode: Int? = null,
+  val switchDelayMillis: Long = 0L,
+) : AnimationStep {
   override suspend operator fun invoke(viewModel: ScenariosViewModel) {
-    viewModel.awaitFlyAround(flyAroundOptions)
+    if (switchMapMode != null && switchDelayMillis > 0) {
+      coroutineScope {
+        val switchJob = launch {
+          delay(switchDelayMillis)
+          Log.i("FlyAroundStep", "Switching map mode to $switchMapMode after ${switchDelayMillis}ms")
+          viewModel.setMapMode(switchMapMode)
+        }
+        try {
+          viewModel.awaitFlyAround(flyAroundOptions)
+        } finally {
+          switchJob.cancel()
+        }
+      }
+    } else {
+      viewModel.awaitFlyAround(flyAroundOptions)
+    }
+  }
+}
+
+data class SetMapModeStep(val mapMode: Int) : AnimationStep {
+  override suspend operator fun invoke(viewModel: ScenariosViewModel) {
+    viewModel.setMapMode(mapMode)
   }
 }
