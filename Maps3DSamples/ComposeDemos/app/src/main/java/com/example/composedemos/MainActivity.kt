@@ -51,6 +51,7 @@ import com.example.composedemos.datavisualization.DataVisualizationActivity
 import com.example.composedemos.fieldofview.FieldOfViewActivity
 import com.example.composedemos.flightsimulator.FlightSimulatorActivity
 import com.example.composedemos.hellomap.HelloMapActivity
+import com.example.composedemos.hillyroadalerts.HillyRoadAlertsActivity
 import com.example.composedemos.mapinteractions.MapInteractionsActivity
 import com.example.composedemos.mapslocalization.MapsLocalizationActivity
 import com.example.composedemos.markers.MarkersActivity
@@ -191,6 +192,11 @@ fun CatalogScreen() {
         item {
             SampleItem("Path Following") {
                 context.startActivity(Intent(context, PathFollowingActivity::class.java))
+            }
+        }
+        item {
+            SampleItem("Hilly & Undulating Road Alerts") {
+                context.startActivity(Intent(context, HillyRoadAlertsActivity::class.java))
             }
         }
         item {
