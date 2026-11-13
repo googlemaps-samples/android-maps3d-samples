@@ -2,7 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Step 1: Internet Permission is required for loading tiles and models -->
     <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -15,14 +17,14 @@
 
         <meta-data
             android:name="com.google.android.geo.maps3d.API_KEY"
-            android:value="${MAPS3D_API_KEY}"
-            />
+            android:value="${MAPS3D_API_KEY}" />
 
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -30,7 +32,7 @@
         <activity
             android:name=".Map3DComposeActivity"
             android:exported="true"
-            android:label="Aloha Compose" />
+            android:label="@string/title_activity_compose" />
     </application>
 
 </manifest>

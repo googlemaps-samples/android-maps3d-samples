@@ -21,6 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DInitConfig
 import com.google.android.gms.maps3d.Map3DView
@@ -36,21 +39,13 @@ import kotlinx.coroutines.launch
  * Configure the initial state of the 3D Map.
  * This global configuration ensures the map starts where we want it (High above Honolulu).
  */
-val map3DConfig: Map3DInitConfig = Map3DInitConfig.create().copy(
+val map3DConfig: Map3DInitConfig = Map3DInitConfig.create(
     centerLat = HONOLULU.latitude,
     centerLng = HONOLULU.longitude,
     centerAlt = 1000.0,
     heading = 0.0,
-    tilt = 0.0,
-    roll = 0.0,
     range = 10_000_000.0, // Start with a "Global View" from space
-    minHeading = 0.0,
-    maxHeading = 360.0,
-    minTilt = 0.0,
-    maxTilt = 90.0,
-    bounds = null,
     mapMode = Map3DMode.HYBRID,
-    mapId = null,
 )
 
 /**
@@ -63,11 +58,19 @@ class Map3DComposeActivity : ComponentActivity() {
         setContent {
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 Map3DContainer(
-                    modifier = Modifier.padding(innerPadding),
+                    modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()),
                     config = map3DConfig
                 )
             }
         }
+
+        // Hide the system bars (status bar and navigation bar) for a full-screen 3D map
+        // experience. Swiping from the screen edge reveals them transiently.
+        // Remove these lines if you prefer to keep the system bars visible at all times.
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     }
 }
 
@@ -85,22 +88,19 @@ fun Map3DContainer(
     // We use a state holder to remember the GoogleMap3D object once it's initialized.
     // This allows us to interact with the GoogleMap3D object later in response to UI events.
     // In a more complex app, we would normally hold this state in a ViewModel or similar.
-    //
-    // https://github.com/googlemaps-samples/android-maps3d-samples/tree/main/Maps3DSamples/advanced
-    // presents a more complex reference sample.
     var googleMap by remember { mutableStateOf<GoogleMap3D?>(null) }
-    
+
     // CoroutineScope to launch suspending functions.
     val coroutineScope = rememberCoroutineScope()
 
     var animationJob by remember { mutableStateOf<Job?>(null) }
 
     Box(modifier = modifier.fillMaxSize()) {
-        
+
         // AndroidView is the bridge between Compose and Views.
         AndroidView(
             modifier = Modifier.fillMaxSize(),
-            
+
             // factory: Called ONCE to create the View.
             // We initialize the specific Map3DView here.
             factory = { context ->
@@ -112,25 +112,25 @@ fun Map3DContainer(
                     onResume()
                 }
             },
-            
+
             // update: Called when the Composable recomposes.
             // We use this to attach listeners or update properties.
             update = { view ->
                 view.getMap3DViewAsync(
                     object : OnMap3DViewReadyCallback {
-                        override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
+                        override fun onMap3DViewReady(map3D: GoogleMap3D) {
                             // Save the googleMap3D for UI events.
-                            googleMap = googleMap3D
+                            googleMap = map3D
                         }
 
-                        override fun onError(error: Exception) {
+                        override fun onError(e: Exception) {
                             googleMap = null
-                            throw error
+                            throw e
                         }
                     }
                 )
             },
-            
+
             // onRelease: Called when this Composable is removed from the composition.
             // We clean up the View here to prevent memory leaks and stop the renderer.
             onRelease = { view ->
@@ -147,11 +147,11 @@ fun Map3DContainer(
             onClick = {
                 animationJob?.cancel()
 
-                googleMap?.let { googleMap ->
+                googleMap?.let { map ->
                     // Launch a coroutine to run our cinematic sequence
                     animationJob = coroutineScope.launch {
                         // 1. Fly to Honolulu and wait for the fly-to to finish
-                        googleMap.awaitCameraAnimation(
+                        map.awaitCameraAnimation(
                             flyToOptions {
                                 endCamera = camera {
                                     center = HONOLULU
@@ -163,7 +163,7 @@ fun Map3DContainer(
                         )
 
                         // 2. Orbit and wait for the fly-around to finish
-                        googleMap.awaitCameraAnimation(
+                        map.awaitCameraAnimation(
                             flyAroundOptions {
                                 center = camera {
                                     center = HONOLULU

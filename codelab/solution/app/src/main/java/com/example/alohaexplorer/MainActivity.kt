@@ -8,7 +8,9 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.Map3DView
@@ -37,12 +39,12 @@ import com.google.android.gms.maps3d.model.popoverOptions
 import com.google.android.gms.maps3d.model.popoverShadow
 import com.google.android.gms.maps3d.model.popoverStyle
 import com.google.android.gms.maps3d.model.vector3D
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * This is the main entry point for the "Aloha Explorer" 3D Maps Codelab.
@@ -58,21 +60,22 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
     // The main view component for the 3D Map.
     private lateinit var map3DView: Map3DView
-    
+
     // The API object we use to interact with the map once it's ready.
     private var googleMap3D: GoogleMap3D? = null
 
     // **State Management**:
     // We keep track of the objects we add to the map (Markers, Polygons, etc.) so we can
     // remove them later. This prevents "ghost" objects from piling up if the user
-    // clicks buttons multiple times.  We do this in the activity for simplicity, but recommend
+    // clicks buttons multiple times. We do this in the activity for simplicity, but recommend
     // tracking state in a view model.
-
     private val activeMarkers = mutableListOf<Marker>()
     private val activePolygons = mutableListOf<Polygon>()
     private val activePolylines = mutableListOf<Polyline>()
     private val activeModels = mutableListOf<Model>()
     private val activePopovers = mutableListOf<Popover>()
+
+    // Constants are located in HonoluluData.kt
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Fix: Ensure the bundle can deserialize the Maps 3D SDK's Camera Parcelable on rotation
@@ -88,192 +91,18 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
         // 1.3. Initialize Map3DView
         map3DView = findViewById(R.id.map3dView)
-        
+
         // 1.4. Map Lifecycle
         // Manually trigger onCreate (and unpack any saved state from rotation)
         val mapState = savedStateRegistry.consumeRestoredStateForKey("map3d_state_provider")
         map3DView.onCreate(mapState)
-        
-        // Attach the automated Lifecycle Observer to gracefully handle 
+
+        // Attach the automated Lifecycle Observer to gracefully handle
         // onResume, onPause, onDestroy, and onSaveInstanceState.
         lifecycle.addObserver(Map3DLifecycleObserver(map3DView, this))
 
         // This starts the map loading process. onMap3DViewReady will be called when it's done.
         map3DView.getMap3DViewAsync(this)
-    }
-
-    /**
-     * Called when the Map is fully loaded and ready to be used.
-     * This is where we can start interacting with the `googleMap3D` object.
-     */
-    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
-        this@MainActivity.googleMap3D = googleMap3D
-
-        lifecycleScope.launch {
-            // 1.3. Start from Global View
-            startFromGlobalView(googleMap3D)
-            
-            // Setup UI Buttons
-            setupButtons(googleMap3D)
-        }
-    }
-
-    private fun setupPopover(map: GoogleMap3D) {
-        resetMap()
-
-        // 10.1. Add a marker to serve as a visual anchor reference
-        val palaceMarker = map.addMarker(
-            markerOptions {
-                position = IOLANI_PALACE
-                label = getString(R.string.label_polygon)
-                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                isExtruded = true
-            }
-        ) ?: return
-        activeMarkers.add(palaceMarker)
-
-        // 10.2. Create a simple text view for the popover content
-        val textView = TextView(this@MainActivity).apply {
-            text = getString(R.string.toast_palace)
-            setPadding(32, 16, 32, 16)
-            setTextColor(Color.BLACK)
-            setBackgroundColor(Color.WHITE)
-        }
-
-        // 10.3. Add a Popover attached to the marker
-        val popover = map.addPopover(popoverOptions {
-            positionAnchor = palaceMarker
-            altitudeMode = AltitudeMode.RELATIVE_TO_MESH
-            content = textView
-            autoCloseEnabled = true // Close when user clicks elsewhere
-            autoPanEnabled = true   // Move camera to ensure popover is visible
-            popoverStyle = popoverStyle {
-                backgroundColor = Color.WHITE
-                borderRadius = 16f
-                shadow = popoverShadow {
-                    color = Color.DKGRAY
-                    radius = 8f
-                    offsetX = 4f
-                    offsetY = 4f
-                }
-            }
-        })
-
-        // Track it
-        activePopovers.add(popover)
-
-        // 10.4. Show popover on marker click (and show immediately for demo purposes)
-        palaceMarker.setClickListener {
-            popover.show()
-        }
-        popover.show()
-    }
-
-    private suspend fun flyTour(map: GoogleMap3D) {
-        val locations = listOf(
-            HONOLULU to "Honolulu",
-            DIAMOND_HEAD to "Diamond Head",
-            HANAUMA_BAY to "Hanauma Bay",
-            KOKO_HEAD to "Koko Head",
-            LANIKAI_BEACH to "Lanikai Beach",
-            MOUNT_KAALA to "Mount Ka'ala",
-            PEARL_HARBOR to "Pearl Harbor"
-        )
-        
-        // Add all markers for the tour
-        resetMap()
-        locations.forEach { (location, name) ->
-            activeMarkers.add(map.addMarker(
-                markerOptions {
-                    position = location
-                    label = name
-                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                    isExtruded = true
-                }
-            )!!)
-        }
-
-        // Fly to each location
-        for ((location, _) in locations) {
-            val camera = camera {
-                center = location
-                tilt = 45.0
-                range = 2500.0
-                heading = 0.0
-            }
-
-            flyCameraToAndWait(
-                map,
-                camera,
-                duration = 3.seconds
-            )
-
-            // Wait for the scene to load (with a 5-second timeout so it never hangs)
-            map.awaitMapSteady(5.seconds)
-
-            map.awaitCameraAnimation(
-                flyAroundOptions {
-                    center = camera
-                    rounds = 1.0
-                    durationInMillis = 3.seconds.inWholeMilliseconds
-                }
-            )
-
-            // Pause at each location
-            delay(1.5.seconds)
-        }
-    }
-
-    private fun startFromGlobalView(map: GoogleMap3D) {
-        // Initial Position: "Global View" aka Space View
-        map.setCamera(
-            camera {
-                center = latLngAltitude {
-                    latitude = 21.3069
-                    longitude = -157.8583
-                    altitude = 0.0
-                }
-                tilt = 0.0     // Looking straight down
-                range = 5_000_000.0 // 5,000 km altitude for a wide view
-            }
-        )
-    }
-
-    private suspend fun flyToHonolulu(map: GoogleMap3D) {
-        // Duration for the animation
-        val flyDuration = 5.seconds
-        val orbitDuration = 10.seconds
-        
-        // Fly to Honolulu and wait for the animation to finish
-        map.awaitCameraAnimation(
-            // **FlyToOptions**: Configures how the camera moves.
-            flyToOptions {
-                endCamera = camera {
-                    center = HONOLULU
-                    tilt = 45.0
-                    range = 20_000.0 // Zoomed out a bit from the city
-                    heading = 0.0
-                }
-                durationInMillis = flyDuration.inWholeMilliseconds
-            }
-        )
-        map.awaitMapSteady(5.seconds) // Wait for tiles to load and settle
-        
-        // Orbit around Honolulu and wait for the animation to finish
-        map.awaitCameraAnimation(
-            flyAroundOptions {
-                // **FlyAroundOptions**: Orbits around a specific point.
-                // We reuse the target parameters to be precise, or could read map.camera
-                center = camera {
-                    center = HONOLULU
-                    tilt = 45.0
-                    range = 20_000.0
-                    heading = 0.0
-                }
-                rounds = 1.0 // One full circle
-                durationInMillis = orbitDuration.inWholeMilliseconds
-            }
-        )
     }
 
     /**
@@ -298,102 +127,69 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         activePopovers.clear()
     }
 
-    private fun addPolygon(map: GoogleMap3D) {
-        resetMap()
+    /**
+     * Called when the Map is fully loaded and ready to be used.
+     * This is where we can start interacting with the `googleMap3D` object.
+     */
+    override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
+        this@MainActivity.googleMap3D = googleMap3D
 
-        // Define the base (ground) shape of Iolani Palace.
-        // Uses the constant defined in HonoluluData.kt
-        val palaceBaseFace = IOLANI_PALACE_GEO.windowed(2, 2).map {
-            latLngAltitude { latitude = it[0]; longitude = it[1]; altitude = 0.0 }
-        }.let { points -> points + points.first() }
+        lifecycleScope.launch {
+            // 1.3. Start from Global View
+            startFromGlobalView(googleMap3D)
 
-        // **Extrusion**: Turn a 2D shape into a 3D building by duplicating the path upwards
-        // and connecting the edges.
-        val palaceCube = extrudePolygon(palaceBaseFace, 35.0) // 35 meters tall
-
-        // Add all faces (top, bottom, sides) to the map
-        palaceCube.forEach { facePoints ->
-            map.addPolygon(
-                polygonOptions {
-                    path = facePoints
-                    fillColor = Color.argb(100, 255, 215, 0) // Gold with transparency
-                    strokeColor = Color.YELLOW
-                    strokeWidth = 5.0
-                    altitudeMode = AltitudeMode.ABSOLUTE
-                }
-            ).also { face ->
-                // Remember the polygon for clean up
-                activePolygons.add(face)
-
-                // 7.1. Tapping the Turf
-                // Add click listener to each face
-                face.setClickListener {
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        Toast.makeText(
-                            this@MainActivity,
-                            getString(R.string.the_royal_palace),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            }
+            // Setup UI Buttons
+            setupButtons(googleMap3D)
         }
     }
 
-    private fun setupPolylines(map: GoogleMap3D) {
-        resetMap()
-
-        // 8. Polylines
-        // Draw path to Waikiki
-        activePolylines.add(map.addPolyline(
-            polylineOptions {
-                path = listOf(IOLANI_PALACE, WAIKIKI)
-                strokeWidth = 10.0
-                strokeColor = Color.BLUE
-                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-                geodesic = true
-                drawsOccludedSegments = true
-            }
-        ))
-    }
-
-    private fun setupBalloon(map: GoogleMap3D) {
-        resetMap()
-
-        // Add "Balloon" Model (glTF)
-        // Models are external 3D assets.
-        val balloon = map.addModel(
-            modelOptions {
-                position = latLngAltitude {
-                    latitude = WAIKIKI.latitude
-                    longitude = WAIKIKI.longitude
-                    altitude = 20.0 // Float 20 meters above the beach
-                }
-                altitudeMode = AltitudeMode.ABSOLUTE
-                // **Orientation**: Rotate the model in 3D space.
-                orientation = orientation {
-                    heading = 0.0 // North
-                    tilt = 0.0    // Upright
-                    roll = 0.0    // Level
-                }
-                url = BALLOON_MODEL_URL
-                // **Scale**: Resize the model. (x=5, y=5, z=5) makes it 5x larger.
-                scale = vector3D { x = BALLOON_SCALE; y = BALLOON_SCALE; z = BALLOON_SCALE }
+    private fun startFromGlobalView(map: GoogleMap3D) {
+        // Initial Position: "Global View" aka Space View
+        map.setCamera(
+            camera {
+                center = HONOLULU
+                tilt = 0.0 // Looking straight down
+                heading = 0.0
+                range = 5_000_000.0 // 5,000 km altitude for a wide view
             }
         )
-
-        // Add click listener
-        balloon.setClickListener {
-            lifecycleScope.launch(Dispatchers.Main) {
-                Toast.makeText(this@MainActivity,
-                    getString(R.string.clicked_the_balloon), Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        // Track it so we can remove it later
-        activeModels.add(balloon)
     }
 
+    private suspend fun flyToHonolulu(map: GoogleMap3D) {
+        // Duration for the animation
+        val flyDuration = 5.seconds
+        val orbitDuration = 10.seconds
+
+        // Fly to Honolulu and wait for the animation to finish
+        map.awaitCameraAnimation(
+            // **FlyToOptions**: Configures how the camera moves.
+            flyToOptions {
+                endCamera = camera {
+                    center = HONOLULU
+                    tilt = 45.0
+                    range = 20_000.0 // Zoomed out a bit from the city
+                    heading = 0.0
+                }
+                durationInMillis = flyDuration.inWholeMilliseconds
+            }
+        )
+        map.awaitMapSteady(5.seconds) // Wait for tiles to load and settle
+
+        // Orbit around Honolulu and wait for the animation to finish
+        map.awaitCameraAnimation(
+            flyAroundOptions {
+                // **FlyAroundOptions**: Orbits around a specific point.
+                center = camera {
+                    center = HONOLULU
+                    tilt = 45.0
+                    range = 20_000.0
+                    heading = 0.0
+                }
+                rounds = 1.0 // One full circle
+                durationInMillis = orbitDuration.inWholeMilliseconds
+            }
+        )
+    }
 
     /**
      * Helper function for adding a clickable marker.
@@ -534,20 +330,225 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         })
     }
 
+    private fun addPolygon(map: GoogleMap3D) {
+        resetMap()
 
-    private fun setUpInsets() {
-        // **Window Insets Handling**:
-        // Because we are in Edge-to-Edge mode, we must manually ensure our UI elements
-        // don't get covered by system bars.
-        // 1.2.1. Map: Needs padding at the TOP so the Google Logo/Compass don't overlap the status bar.
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.map3dView)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
-            insets
+        // Define the base (ground) shape of Iolani Palace.
+        // Uses the constant defined in HonoluluData.kt
+        val palaceBaseFace = IOLANI_PALACE_GEO.windowed(2, 2).map {
+            latLngAltitude { latitude = it[0]; longitude = it[1]; altitude = 0.0 }
+        }.let { points -> points + points.first() }
+
+        // **Extrusion**: Turn a 2D shape into a 3D building by duplicating the path upwards
+        // and connecting the edges.
+        val palaceCube = extrudePolygon(palaceBaseFace, 35.0) // 35 meters tall
+
+        // Add all faces (top, bottom, sides) to the map
+        palaceCube.forEach { facePoints ->
+            map.addPolygon(
+                polygonOptions {
+                    path = facePoints
+                    fillColor = Color.argb(100, 255, 215, 0) // Gold with transparency
+                    strokeColor = Color.YELLOW
+                    strokeWidth = 5.0
+                    altitudeMode = AltitudeMode.ABSOLUTE
+                }
+            ).also { face ->
+                // Remember the polygon for clean up
+                activePolygons.add(face)
+
+                // 7.1. Tapping the Turf
+                // Add click listener to each face
+                face.setClickListener {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            getString(R.string.the_royal_palace),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setupPolylines(map: GoogleMap3D) {
+        resetMap()
+
+        // 8. Polylines
+        // Draw path to Waikiki
+        activePolylines.add(map.addPolyline(
+            polylineOptions {
+                path = listOf(IOLANI_PALACE, WAIKIKI)
+                strokeWidth = 10.0
+                strokeColor = Color.BLUE
+                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                geodesic = true
+                drawsOccludedSegments = true
+            }
+        ))
+    }
+
+    private fun setupBalloon(map: GoogleMap3D) {
+        resetMap()
+
+        // Add "Balloon" Model (glTF)
+        // Models are external 3D assets.
+        val balloon = map.addModel(
+            modelOptions {
+                position = latLngAltitude {
+                    latitude = WAIKIKI.latitude
+                    longitude = WAIKIKI.longitude
+                    altitude = 20.0 // Float 20 meters above the beach
+                }
+                altitudeMode = AltitudeMode.ABSOLUTE
+                // **Orientation**: Rotate the model in 3D space.
+                orientation = orientation {
+                    heading = 0.0 // North
+                    tilt = 0.0    // Upright
+                    roll = 0.0    // Level
+                }
+                url = BALLOON_MODEL_URL
+                // **Scale**: Resize the model. (x=5, y=5, z=5) makes it 5x larger.
+                scale = vector3D { x = BALLOON_SCALE; y = BALLOON_SCALE; z = BALLOON_SCALE }
+            }
+        )
+
+        // Add click listener
+        balloon.setClickListener {
+            lifecycleScope.launch(Dispatchers.Main) {
+                Toast.makeText(
+                    this@MainActivity,
+                    getString(R.string.clicked_the_balloon),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
 
-        // 1.2.2. Controls: Need padding at the BOTTOM so buttons aren't covered by the gesture/nav bar.
-        //    We add an extra 16dp base padding for aesthetics.
+        // Track it so we can remove it later
+        activeModels.add(balloon)
+    }
+
+    private fun setupPopover(map: GoogleMap3D) {
+        resetMap()
+
+        // 10.1. Add a marker to serve as a visual anchor reference
+        val palaceMarker = map.addMarker(
+            markerOptions {
+                position = IOLANI_PALACE
+                label = getString(R.string.label_polygon)
+                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                isExtruded = true
+            }
+        ) ?: return
+        activeMarkers.add(palaceMarker)
+
+        // 10.2. Create a simple text view for the popover content
+        val textView = TextView(this@MainActivity).apply {
+            text = getString(R.string.toast_palace)
+            setPadding(32, 16, 32, 16)
+            setTextColor(Color.BLACK)
+            setBackgroundColor(Color.WHITE)
+        }
+
+        // 10.3. Add a Popover attached to the marker
+        val popover = map.addPopover(popoverOptions {
+            positionAnchor = palaceMarker
+            altitudeMode = AltitudeMode.RELATIVE_TO_MESH
+            content = textView
+            autoCloseEnabled = true // Close when user clicks elsewhere
+            autoPanEnabled = true   // Move camera to ensure popover is visible
+            popoverStyle = popoverStyle {
+                backgroundColor = Color.WHITE
+                borderRadius = 16f
+                shadow = popoverShadow {
+                    color = Color.DKGRAY
+                    radius = 8f
+                    offsetX = 4f
+                    offsetY = 4f
+                }
+            }
+        })
+
+        // Track it
+        activePopovers.add(popover)
+
+        // 10.4. Show popover on marker click (and show immediately for demo purposes)
+        palaceMarker.setClickListener {
+            popover.show()
+        }
+        popover.show()
+    }
+
+    private suspend fun flyTour(map: GoogleMap3D) {
+        val locations = listOf(
+            HONOLULU to getString(R.string.tour_honolulu),
+            DIAMOND_HEAD to getString(R.string.tour_diamond_head),
+            HANAUMA_BAY to getString(R.string.tour_hanauma_bay),
+            KOKO_HEAD to getString(R.string.tour_koko_head),
+            LANIKAI_BEACH to getString(R.string.tour_lanikai_beach),
+            MOUNT_KAALA to getString(R.string.tour_mount_kaala),
+            PEARL_HARBOR to getString(R.string.tour_pearl_harbor)
+        )
+
+        // Add all markers for the tour
+        resetMap()
+        locations.forEach { (location, name) ->
+            activeMarkers.add(map.addMarker(
+                markerOptions {
+                    position = location
+                    label = name
+                    altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                    isExtruded = true
+                }
+            )!!)
+        }
+
+        // Fly to each location
+        for ((location, _) in locations) {
+            val camera = camera {
+                center = location
+                tilt = 45.0
+                range = 2500.0
+                heading = 0.0
+            }
+
+            flyCameraToAndWait(
+                map,
+                camera,
+                duration = 3.seconds
+            )
+
+            // Wait for the scene to load (with a 5-second timeout so it never hangs)
+            map.awaitMapSteady(5.seconds)
+
+            map.awaitCameraAnimation(
+                flyAroundOptions {
+                    center = camera
+                    rounds = 1.0
+                    durationInMillis = 3.seconds.inWholeMilliseconds
+                }
+            )
+
+            // Pause at each location
+            delay(1.5.seconds)
+        }
+    }
+
+    private fun setUpInsets() {
+        // **Immersive Mode**:
+        // Hide the system bars (status bar and navigation bar) for a full-screen 3D map
+        // experience. Swiping from the screen edge reveals them transiently.
+        // Remove these lines if you prefer to keep the system bars visible at all times.
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+
+        // **Window Insets Handling**:
+        // Because we are in Edge-to-Edge mode, we ensure our bottom UI controls
+        // don't get covered by the navigation bar when system bars are visible.
+        // We add an extra 16dp base padding for aesthetics.
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.controls_scroll_view)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val basePadding = (16 * resources.displayMetrics.density).toInt() // 16dp
@@ -612,7 +613,7 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             currentAnimationJob?.cancel()
             currentAnimationJob = lifecycleScope.launch {
                 setupPolylines(map)
-                flyCameraToAndWait(map, BALLOON_CAMERA)
+                flyCameraToAndWait(map, POLYLINE_CAMERA)
             }
         }
 
@@ -634,8 +635,8 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
         findViewById<Button>(R.id.btn_tour).setOnClickListener {
             currentAnimationJob?.cancel()
-            currentAnimationJob = lifecycleScope.launch { 
-                flyTour(map) 
+            currentAnimationJob = lifecycleScope.launch {
+                flyTour(map)
             }
         }
 
@@ -653,5 +654,4 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
             }
         )
     }
-
 }

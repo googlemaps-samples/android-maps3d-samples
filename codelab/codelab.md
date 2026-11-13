@@ -25,18 +25,19 @@ Using the **Google Maps 3D SDK for Android**, you will transform a standard flat
 Before we start coding, ensure your environment is ready.
 
 1.  **Enable the SDK**:
-    *   Go to the [Google Cloud Console](https://console.cloud.google.com/marketplace/product/google/mapsandroid.googleapis.com).
+    *   Go to the [Google Cloud Console](https://console.cloud.google.com/marketplace/product/google/maps3d.googleapis.com).
     *   Select your project and click **Enable** to turn on the "Maps 3D SDK for Android".
     *   Make sure you have an API Key created in the "Credentials" section.
 
 2.  **Add Your API Key**:
-    To authenticate with Google Maps Platform services, your app must provide an API key. We use the **Secrets Gradle Plugin** to do this securely. 
-    
-    > **[!NOTE] Why the Secrets Plugin?**
-    > Hardcoding an API key into your Android Manifest or source code is dangerous! If you check your code into GitHub, malicious bots can scrape your key! 
-    > 
+    To authenticate with Google Maps Platform services, your app must provide an API key. We use the **Secrets Gradle Plugin** to do this securely.
+
+    > [!NOTE]
+    > **Why the Secrets Plugin?**
+    > Hardcoding an API key into your Android Manifest or source code is dangerous! If you check your code into GitHub, malicious bots can scrape your key!
+    >
     > The Secrets Gradle Plugin extracts the key from a local text file and injects it into the build process securely without exposing it to version control.
-    
+
     The `starter` project comes with the Secrets plugin pre-configured for you! All you need to do is create a new file called `secrets.properties` in the root of your project and add:
     ```properties
     MAPS3D_API_KEY=YOUR_API_KEY_HERE
@@ -53,11 +54,11 @@ Before we start coding, ensure your environment is ready.
     }
     ```
 
-    *  **Be sure to sync the project if you haven't already!**
+    *   **Be sure to sync the project if you haven't already!**
 
 4.  **Uncomment SDK-Dependent Files**:
     The starter project contains several helper files (`HonoluluData.kt`, `Map3DLifecycleObserver.kt`, and `Utilities.kt`) that rely heavily on the Maps 3D SDK. They were temporarily commented out to prevent compilation errors before you synced the SDK dependency.
-    *   Open `HonoluluData.kt`. Remove the `/*` at the top and the `*/` at the bottom to uncomment the file.
+    *   Open `HonoluluData.kt`. Remove the `/* TODO: ...` line at the top and the `*/` at the bottom to uncomment the file.
     *   Do the same for `Map3DLifecycleObserver.kt`.
     *   Do the same for `Utilities.kt`.
 
@@ -105,16 +106,24 @@ To insert the 3D Map, find the `TextView` with the `id` of `@+id/map3dView` and 
 
 ### Step 1.2: Project Skeleton
 
-Open `MainActivity.kt`. We will set up the class structure, state variables, and handle the "Edge-to-Edge" UI logic here. Note that all of our geographic constants and model URLs have been pre-defined for you in `HonoluluData.kt` to keep this class clean.
+Open `MainActivity.kt`. We will set up the class structure, uncomment the imports at the top of the file, declare our state tracking lists, and uncomment the `resetMap()` helper. Note that all of our geographic constants and model URLs have been pre-defined for you in `HonoluluData.kt`, and edge-to-edge Window Insets and **Sticky Immersive Mode** are pre-configured in `setUpInsets()`.
+
+> [!TIP]
+> **Full-Screen Immersive Mode**
+> Inside `setUpInsets()`, we use `WindowCompat.getInsetsController(window, window.decorView)` to hide the system status and navigation bars (`windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())`) with `BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE`. This gives the 3D scene an unobstructed, full-screen canvas while allowing users to reveal the system bars transiently by swiping from the edge of the screen. If you prefer to keep the system bars visible at all times, simply remove those three lines from `setUpInsets()`.
 
 **Tasks**:
-1.  Setup **State Management** lists to track objects.
-2.  Handle **Window Insets** in `onCreate`.
+1.  Uncomment the imports at the top of `MainActivity.kt`.
+2.  Implement `OnMap3DViewReadyCallback` on `MainActivity`.
+3.  Uncomment `map3DView`, `googleMap3D`, the **State Management** lists (`activeMarkers`, `activePolygons`, `activePolylines`, `activeModels`, `activePopovers`), and `resetMap()`.
 
 ```kotlin
 class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
 
+    // The main view component for the 3D Map.
     private lateinit var map3DView: Map3DView
+
+    // The API object we use to interact with the map once it's ready.
     private var googleMap3D: GoogleMap3D? = null
 
     // State Management: Track objects to remove them later
@@ -125,62 +134,89 @@ class MainActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
     private val activePopovers = mutableListOf<Popover>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Fix: Ensure the bundle can deserialize the Maps 3D SDK's Camera Parcelable on rotation
+        savedInstanceState?.classLoader = javaClass.classLoader
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        // Handle Insets (Status Bar & Nav Bar)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.map3dView)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
-            insets
-        }
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.controls_scroll_view)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val basePadding = (16 * resources.displayMetrics.density).toInt() // 16dp
-            v.setPadding(systemBars.left, basePadding, systemBars.right, systemBars.bottom + basePadding)
-            insets
-        }
+        setUpInsets()
+
+        // TODO: Step 1.3 - Initialize Map3DView and Map Lifecycle
     }
 
     // Helper to clear the map before adding new content
     private fun resetMap() {
-        activeMarkers.forEach { it.remove() }; activeMarkers.clear()
-        activePolygons.forEach { it.remove() }; activePolygons.clear()
-        activePolylines.forEach { it.remove() }; activePolylines.clear()
-        activeModels.forEach { it.remove() }; activeModels.clear()
-        activePopovers.forEach { it.remove() }; activePopovers.clear()
+        activeMarkers.forEach { it.remove() }
+        activeMarkers.clear()
+
+        activePolygons.forEach { it.remove() }
+        activePolygons.clear()
+
+        activePolylines.forEach { it.remove() }
+        activePolylines.clear()
+
+        activeModels.forEach { it.remove() }
+        activeModels.clear()
+
+        activePopovers.forEach { it.remove() }
+        activePopovers.clear()
     }
 
     // We'll implement onMap3DViewReady in the next step!
     override fun onMap3DViewReady(googleMap3D: GoogleMap3D) {
         // TODO: Initialize map
     }
+
+    private fun setUpInsets() {
+        // Immersive Mode: Hide the system bars (status bar and navigation bar) for a
+        // full-screen 3D map experience. Swiping from the screen edge reveals them transiently.
+        // Remove these lines if you prefer to keep the system bars visible at all times.
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+
+        // Window Insets Handling: Ensure bottom UI controls don't get covered by the
+        // navigation bar when system bars are visible.
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.controls_scroll_view)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val basePadding = (16 * resources.displayMetrics.density).toInt() // 16dp
+            v.setPadding(
+                systemBars.left,
+                basePadding,
+                systemBars.right,
+                systemBars.bottom + basePadding
+            )
+            insets
+        }
+    }
 }
 ```
 
 ### Step 1.3: Initialize the Map
 
-Now separate the boilerplate from the logic. We will initialize the `Map3DView` and set up our callback.
+Now let's initialize the `Map3DView`, register our lifecycle observer, and implement the map-ready callback.
 
 1.  **Initialize View**: Add the `map3DView` setup code to the end of `onCreate`.
-2.  **Handle Callback**: Implement `onMap3DViewReady` to receive the `GoogleMap3D` controller.
-3.  **Setup Controls**: Configure the bottom sheet buttons.
+2.  **Handle Callback**: Implement `onMap3DViewReady` and `startFromGlobalView` to position the camera high above Honolulu.
+3.  **Setup Controls**: Uncomment `setupButtons` and `flyCameraToAndWait` at the bottom of `MainActivity.kt`.
 
 Add this logic to `MainActivity.kt`:
 
 ```kotlin
     override fun onCreate(savedInstanceState: Bundle?) {
         // ... previous code ...
-        
-        // Initialize the Map3DView
+
+        // 1.3. Initialize Map3DView
         map3DView = findViewById(R.id.map3dView)
-        
+
         // 1.4. Map Lifecycle
         // Manually trigger onCreate (and unpack any saved state from rotation)
         val mapState = savedStateRegistry.consumeRestoredStateForKey("map3d_state_provider")
         map3DView.onCreate(mapState)
-        
+
         // Attach the automated Lifecycle Observer
         lifecycle.addObserver(Map3DLifecycleObserver(map3DView, this))
 
@@ -191,27 +227,31 @@ Add this logic to `MainActivity.kt`:
         this@MainActivity.googleMap3D = googleMap3D
 
         lifecycleScope.launch {
-            // Start from space!
+            // 1.3. Start from Global View
             startFromGlobalView(googleMap3D)
-            
-            // Wire up buttons
+
+            // Setup UI Buttons
             setupButtons(googleMap3D)
         }
     }
 
-    // Helper: Start the camera from a global view
     private fun startFromGlobalView(map: GoogleMap3D) {
+        // Initial Position: "Global View" aka Space View
         map.setCamera(
             camera {
-                center = latLngAltitude { latitude = 0.0; longitude = 0.0; altitude = 0.0 }
-                range = 25_000_000.0 // 25,000 km
-                tilt = 0.0
+                center = HONOLULU
+                tilt = 0.0 // Looking straight down
                 heading = 0.0
+                range = 5_000_000.0 // 5,000 km altitude for a wide view
             }
         )
     }
 ```
-> **Note**: When you uncomment `setupButtons(googleMap3D)` at the bottom of your file, you will see red errors for `flyToHonolulu`, `addMarkers`, and the other feature helper functions called inside `setupButtons`. Don't worry! We will implement each of these in the next sections.
+
+> [!NOTE]
+> When you uncomment `setupButtons(googleMap3D)` at the bottom of your file, you will see unresolved reference errors for `flyToHonolulu`, `addMarkers`, and the other feature helper functions called inside `setupButtons`. Don't worry! We will implement each of these in the next sections.
+
+<img src="images/global_view.png" alt="Initial Global View of the Hawaiian Islands from space" width="300"/>
 
 ### Step 1.4: Map Lifecycle (The Modern Way)
 
@@ -219,7 +259,7 @@ Unlike standard Android Views, the `Map3DView` contains a powerful 3D rendering 
 
 Normally, this would mean overriding `onResume`, `onPause`, `onDestroy`, and `onSaveInstanceState` in your `MainActivity` and manually forwarding those events to the map.
 
-**To avoid this messy boilerplate, we have pre-provided `Map3DLifecycleObserver.kt`.** 
+**To avoid this messy boilerplate, we have pre-provided `Map3DLifecycleObserver.kt`.**
 
 This useful utility class implements `DefaultLifecycleObserver`. By calling `lifecycle.addObserver(Map3DLifecycleObserver(map3DView, this))` inside `onCreate`, the map will automatically listen to your Activity's lifecycle events, keeping your UI controller clean!
 
@@ -233,24 +273,25 @@ Now that we’re in Hawaii, let's head to the historic **Iolani Palace**. Unlike
 We want to fly from space down to Honolulu, and then orbit the palace.
 
 ### The Setup
-We use `flyToOptions` to define the flight.
+We use `flyToOptions` to define the flight:
 
 ```kotlin
 private suspend fun flyToHonolulu(map: GoogleMap3D) {
     // Duration using Kotlin Duration extension
     val flyDuration = 5.seconds
-    
+
     map.flyCameraTo(
         flyToOptions {
             endCamera = camera {
                 center = HONOLULU
                 tilt = 45.0 // Angled view
-                range = 20000.0 // 20km away
+                range = 20_000.0 // 20km away
+                heading = 0.0
             }
             durationInMillis = flyDuration.inWholeMilliseconds
         }
     )
-    // Wait...
+    // Next: How do we wait for the flight to finish before orbiting?
 }
 ```
 
@@ -262,14 +303,15 @@ Here is where many developers trip up. Animations take time. Network loading tak
 
 **The Solution: Suspending Helper Functions**
 
-> **[!NOTE] Deep Dive: The Magic of `suspendCancellableCoroutine`**
+> [!NOTE]
+> **Deep Dive: The Magic of `suspendCancellableCoroutine`**
 > The Maps 3D SDK relies heavily on trailing callback functions (e.g. `setCameraAnimationEndListener`). If you want to fly to five different places sequentially, chaining five callbacks inside each other quickly turns into an unreadable "Pyramid of Doom" (affectionately known as Callback Hell).
-> 
+>
 > By wrapping these listeners inside Kotlin's `suspendCancellableCoroutine`, we temporarily pause the execution of our Kotlin code *without blocking the main UI thread*! Once the Maps SDK fires the callback indicating the flight is over, `continuation.resume(Unit)` allows our code to cleanly wake back up and proceed to the next line.
 >
 > **The Result:** We can write flat, sequential, and highly readable synchronous-looking code!
 
-Open `Utilities.kt` to see how we wrap the SDK's callback-based listeners into Kotlin Coroutine `suspend` extension functions on `GoogleMap3D`. This lets us write linear, readable code like "Fly THERE, then wait, then Fly HERE".
+Open `Utilities.kt` to see how we wrap the SDK's callback-based listeners into Kotlin Coroutine `suspend` extension functions on `GoogleMap3D`. This lets us write linear, readable code like "Fly THERE, then wait, then Orbit HERE".
 
 ```kotlin
 // Registers the animation-end listener before starting the flight, and stops the camera if cancelled
@@ -325,13 +367,47 @@ suspend fun GoogleMap3D.awaitMapSteady(timeout: Duration = 5.seconds): Boolean {
 }
 ```
 
-Now our flight plan in `flyToHonolulu` looks like this:
+Now update `flyToHonolulu` in `MainActivity.kt` to use `awaitCameraAnimation` and `awaitMapSteady` so the camera flies in, waits for the 3D tiles to settle, and then orbits Honolulu:
 
 ```kotlin
-    map.awaitCameraAnimation(flyToOptions { ... })     // Fly and wait for flight to finish
-    map.awaitMapSteady(5.seconds)                      // Wait for 3D tiles to load (up to 5s)
-    map.awaitCameraAnimation(flyAroundOptions { ... }) // Orbit and wait for orbit to finish
+    private suspend fun flyToHonolulu(map: GoogleMap3D) {
+        // Duration for the animation
+        val flyDuration = 5.seconds
+        val orbitDuration = 10.seconds
+
+        // Fly to Honolulu and wait for the animation to finish
+        map.awaitCameraAnimation(
+            // **FlyToOptions**: Configures how the camera moves.
+            flyToOptions {
+                endCamera = camera {
+                    center = HONOLULU
+                    tilt = 45.0
+                    range = 20_000.0 // Zoomed out a bit from the city
+                    heading = 0.0
+                }
+                durationInMillis = flyDuration.inWholeMilliseconds
+            }
+        )
+        map.awaitMapSteady(5.seconds) // Wait for tiles to load and settle
+
+        // Orbit around Honolulu and wait for the animation to finish
+        map.awaitCameraAnimation(
+            flyAroundOptions {
+                // **FlyAroundOptions**: Orbits around a specific point.
+                center = camera {
+                    center = HONOLULU
+                    tilt = 45.0
+                    range = 20_000.0
+                    heading = 0.0
+                }
+                rounds = 1.0 // One full circle
+                durationInMillis = orbitDuration.inWholeMilliseconds
+            }
+        )
+    }
 ```
+
+<img src="images/fly_to_honolulu.png" alt="Camera flyover and 45-degree angled orbit above Honolulu" width="300"/>
 
 ---
 
@@ -350,91 +426,85 @@ Objects in a 3D world need to know where they sit on the vertical "Z-axis".
 You noticed we call `resetMap()` at the start. This prevents "ghost objects"—markers from previous clicks staying on the map. We iterate through our tracking lists (`activeMarkers`, etc.), call `.remove()` on each object to clear it from the 3D engine, and then clear the list.
 
 We also use a custom `addClickableMarker(map: GoogleMap3D, markerOptions: MarkerOptions)` helper method. Instead of duplicating the `Toast` listener and the list-tracking logic for every single marker, this helper centralizes it:
+
 ```kotlin
-private fun addClickableMarker(map: GoogleMap3D, markerOptions: MarkerOptions) {
-    map.addMarker(markerOptions)?.also { marker ->
-        marker.setClickListener {
-            lifecycleScope.launch(Dispatchers.Main) {
-                Toast.makeText(
-                    this@MainActivity,
-                    getString(R.string.toast_clicked, marker.label),
-                    Toast.LENGTH_SHORT
-                ).show()
+    private fun addClickableMarker(map: GoogleMap3D, markerOptions: MarkerOptions) {
+        map.addMarker(markerOptions)?.also { marker ->
+            marker.setClickListener {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        getString(R.string.toast_clicked, marker.label),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
+            activeMarkers.add(marker)
         }
-        activeMarkers.add(marker)
     }
-}
 ```
 
+Now implement `addMarkers(map: GoogleMap3D)` in `MainActivity.kt`:
 
 ```kotlin
-private fun addMarkers(map: GoogleMap3D) {
-    resetMap()
+    private fun addMarkers(map: GoogleMap3D) {
+        resetMap()
 
-    // 4.1. ABSOLUTE: Altitude is relative to the WGS84 ellipsoid (rough sea level).
-    addClickableMarker(map, markerOptions {
-        position = latLngAltitude {
-            latitude = IOLANI_PALACE.latitude
-            longitude = IOLANI_PALACE.longitude
-            altitude = 100.0 // 100 meters above sea level
-        }
-        altitudeMode = AltitudeMode.ABSOLUTE
-        label = getString(R.string.label_absolute)
-        isDrawnWhenOccluded = true
-        isExtruded = true // Draws a line to the ground
-    })
+        // 4.1. ABSOLUTE: Altitude is relative to the WGS84 ellipsoid (rough sea level).
+        addClickableMarker(map, markerOptions {
+            position = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude
+                longitude = IOLANI_PALACE.longitude
+                altitude = 100.0 // 100 meters above sea level
+            }
+            altitudeMode = AltitudeMode.ABSOLUTE
+            label = getString(R.string.label_absolute)
+            isDrawnWhenOccluded = true
+            isExtruded = true // Draws a line to the ground
+        })
 
-    // 4.2. RELATIVE_TO_GROUND: Altitude is added to the terrain height at that point.
-    addClickableMarker(map, markerOptions {
-        position = latLngAltitude {
-            latitude = IOLANI_PALACE.latitude + 0.001
-            longitude = IOLANI_PALACE.longitude
-            altitude = 50.0 // 50m above ground
-        }
-        altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
-        label = getString(R.string.label_relative)
-        isDrawnWhenOccluded = true
-        isExtruded = true
-    })
+        // 4.2. RELATIVE_TO_GROUND: Altitude is added to the terrain height at that point.
+        addClickableMarker(map, markerOptions {
+            position = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude + 0.001
+                longitude = IOLANI_PALACE.longitude
+                altitude = 50.0 // 50m above ground
+            }
+            altitudeMode = AltitudeMode.RELATIVE_TO_GROUND
+            label = getString(R.string.label_relative)
+            isDrawnWhenOccluded = true
+            isExtruded = true
+        })
 
-    // 4.3. CLAMP_TO_GROUND: Snaps to the terrain.
-    addClickableMarker(map, markerOptions {
-        position = latLngAltitude {
-            latitude = IOLANI_PALACE.latitude - 0.001
-            longitude = IOLANI_PALACE.longitude
-            altitude = 0.0 // Ignored
-        }
-        altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-        label = getString(R.string.label_clamped)
-        isDrawnWhenOccluded = true
-        isExtruded = true
-    })
+        // 4.3. CLAMP_TO_GROUND: Snaps to the terrain.
+        addClickableMarker(map, markerOptions {
+            position = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude - 0.001
+                longitude = IOLANI_PALACE.longitude
+                altitude = 0.0 // Ignored
+            }
+            altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+            label = getString(R.string.label_clamped)
+            isDrawnWhenOccluded = true
+            isExtruded = true
+        })
 
-    // 4.4. RELATIVE_TO_MESH: Relative to 3D buildings/trees.
-    addClickableMarker(map, markerOptions {
-        position = latLngAltitude {
-            latitude = IOLANI_PALACE.latitude
-            longitude = IOLANI_PALACE.longitude - 0.001
-            altitude = 10.0 // 10m above the 3D mesh surface
-        }
-        altitudeMode = AltitudeMode.RELATIVE_TO_MESH
-        label = getString(R.string.label_relative_mesh)
-        isDrawnWhenOccluded = true
-        isExtruded = true
-    })
-}
+        // 4.4. RELATIVE_TO_MESH: Relative to 3D buildings/trees.
+        addClickableMarker(map, markerOptions {
+            position = latLngAltitude {
+                latitude = IOLANI_PALACE.latitude
+                longitude = IOLANI_PALACE.longitude - 0.001
+                altitude = 10.0 // 10m above the 3D mesh surface
+            }
+            altitudeMode = AltitudeMode.RELATIVE_TO_MESH
+            label = getString(R.string.label_relative_mesh)
+            isDrawnWhenOccluded = true
+            isExtruded = true
+        })
+    }
 ```
 
-<!-- TODO: Add screenshot here.
-     Subject: "Four Markers"
-     Description: Show the four markers around Iolani Palace.
-     - "Absolute" marker should be floating high up.
-     - "Relative" marker should be floating 50m above ground.
-     - "Clamped" marker should be on the ground.
-     - "Relative to Mesh" marker should sit 10m above the 3D building/tree mesh.
-     Highlight the visual vertical line (extrusion) connecting the floating markers to the ground. 
--->
+<img src="images/four_markers.png" alt="Four markers around Iolani Palace showing ABSOLUTE, RELATIVE_TO_GROUND, CLAMP_TO_GROUND, and RELATIVE_TO_MESH altitude modes" width="300"/>
 
 ---
 
@@ -508,13 +578,16 @@ Add the following function below `addMarkers`:
     }
 ```
 
+<img src="images/custom_markers.png" alt="Custom markers showing a styled blue pin, Hibiscus drawable marker, and flower emoji glyph" width="300"/>
+
 ---
 
 ## 6. Highlighting History (Polygons & Extrusion)
 
 Let's highlight the Palace grounds. A flat polygon is okay, but a 3D volume is better.
 
-> **[!NOTE] Native Extrusion vs. Custom 3D Prisms**
+> [!NOTE]
+> **Native Extrusion vs. Custom 3D Prisms**
 > `PolygonOptions` supports native extrusion out of the box via `extruded = true` (paired with `AltitudeMode.RELATIVE_TO_GROUND` and a non-zero vertex `altitude`, plus optional `innerPaths` for interior holes). In this step, we also demonstrate how to construct an explicit 6-face prism (`extrudePolygon` in `Utilities.kt`) when you want individual control over top, bottom, and wall faces.
 
 ### Extrusion Algorithm
@@ -524,19 +597,8 @@ Open `Utilities.kt` to review the `extrudePolygon` helper function. We can "extr
 3.  Stitching the sides together with new polygons.
 
 ```kotlin
-// Define the base (ground) shape of Iolani Palace.
-// Uses the constant defined in HonoluluData.kt
-val palaceBaseFace = IOLANI_PALACE_GEO.windowed(2, 2).map { 
-     latLngAltitude { latitude = it[0]; longitude = it[1]; altitude = 0.0 }
-}.let { points -> points + points.first() }
-
-// Extrude!
-val extrudedPalace = extrudePolygon(palaceBaseFace, 35.0) // 35 meters tall
-```
-
-```kotlin
-// Helper function to create the 3D extrusion geometry
-private fun extrudePolygon(
+// Helper function in Utilities.kt to create the 3D extrusion geometry
+fun extrudePolygon(
     basePoints: List<LatLngAltitude>,
     extrusionHeight: Double
 ): List<List<LatLngAltitude>> {
@@ -544,8 +606,8 @@ private fun extrudePolygon(
     if (extrusionHeight <= 0) return emptyList()
 
     val baseAltitude = basePoints.first().altitude
-    
-    // 1. Create top points
+
+    // 1. Create points for the top face
     val topPoints = basePoints.map { basePoint ->
         latLngAltitude {
             latitude = basePoint.latitude
@@ -556,24 +618,25 @@ private fun extrudePolygon(
 
     val faces = mutableListOf<List<LatLngAltitude>>()
     faces.add(basePoints.toList()) // Bottom
-    faces.add(topPoints.toList().reversed()) // Top
+    faces.add(topPoints.toList().reversed()) // Top (reversed for upward-facing winding order)
 
-    // 2. Create side walls
+    // 2. Create side wall faces
     for (i in basePoints.indices) {
         val p1Base = basePoints[i]
         val p2Base = basePoints[(i + 1) % basePoints.size]
         val p1Top = topPoints[i]
         val p2Top = topPoints[(i + 1) % basePoints.size]
-        
+
         faces.add(listOf(p1Base, p2Base, p2Top, p1Top))
     }
     return faces
 }
 ```
 
-> **[!TIP] Visualizing the Extrusion Math**
+> [!TIP]
+> **Visualizing the Extrusion Math**
 > When stitching the vertical side walls, we create a single face polygon using four vertices: two from the "ground" (Base) and two directly above them (Top) at the extrusion altitude.
-> 
+>
 > ```text
 >        p1Top -------- p2Top     (Altitude: 35.0)
 >          |              |
@@ -583,55 +646,96 @@ private fun extrudePolygon(
 > ```
 > By looping this logic for every pair of points around the perimeter, we seamlessly form an unbroken 3D perimeter wall.
 
-When we add these faces to the map, we use `AltitudeMode.ABSOLUTE` to ensure the building keeps its shape perfectly.
+### Adding the Extruded Polygon to the Map
+In `MainActivity.kt`, implement `addPolygon(map: GoogleMap3D)` to extrude `IOLANI_PALACE_GEO` to 35 meters and add each face to the map using `AltitudeMode.ABSOLUTE`:
 
-<!-- TODO: Add screenshot here.
-     Subject: "Extruded Palace"
-     Description: Show the Iolani Palace with the semi-transparent gold polygon extruded upwards. 
-     Camera should be tilted to show the 3D volume, not just the top-down view.
--->
+```kotlin
+    private fun addPolygon(map: GoogleMap3D) {
+        resetMap()
+
+        // Define the base (ground) shape of Iolani Palace.
+        // Uses the constant defined in HonoluluData.kt
+        val palaceBaseFace = IOLANI_PALACE_GEO.windowed(2, 2).map {
+            latLngAltitude { latitude = it[0]; longitude = it[1]; altitude = 0.0 }
+        }.let { points -> points + points.first() }
+
+        // Extrude: Turn a 2D shape into a 3D building by duplicating the path upwards
+        // and connecting the edges.
+        val palaceCube = extrudePolygon(palaceBaseFace, 35.0) // 35 meters tall
+
+        // Add all faces (top, bottom, sides) to the map
+        palaceCube.forEach { facePoints ->
+            map.addPolygon(
+                polygonOptions {
+                    path = facePoints
+                    fillColor = Color.argb(100, 255, 215, 0) // Gold with transparency
+                    strokeColor = Color.YELLOW
+                    strokeWidth = 5.0
+                    altitudeMode = AltitudeMode.ABSOLUTE
+                }
+            ).also { face ->
+                // Remember the polygon for clean up
+                activePolygons.add(face)
+            }
+        }
+    }
+```
+
+<img src="images/extruded_palace.png" alt="Extruded 3D gold polygon highlighting Iolani Palace" width="300"/>
 
 ---
 
 ## 7. Interaction (Touching the World)
 
-A map isn't an image; it's an interface. Let's make our markers interactive.
+A map isn't an image; it's an interface. Let's make our 3D palace polygons interactive by attaching a click listener inside the `.also { face -> ... }` block in `addPolygon`:
 
 ```kotlin
-// 6.1. Tapping the Turf
-// Add click listener to each face
-palacePolygons.forEach { polygon ->
-    polygon.setClickListener {
-        lifecycleScope.launch(Dispatchers.Main) {
-            Toast.makeText(
-                this@MainActivity,
-                "The Royal Palace: A symbol of Hawaiian sovereignty.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
-}
+            ).also { face ->
+                // Remember the polygon for clean up
+                activePolygons.add(face)
+
+                // 7.1. Tapping the Turf
+                // Add click listener to each face
+                face.setClickListener {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            getString(R.string.the_royal_palace),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
 ```
+
+---
 
 ## 8. Connecting the Dots (Polylines)
 
-While markers show discrete locations, polylines show paths. Let's draw a path from Iolani Palace to Waikiki Beach.
+While markers show discrete locations, polylines show paths. Let's draw a geodesic path from Iolani Palace to Waikiki Beach.
 
-Just like Polygons, Polylines are drawn point-by-point. 
+Just like Polygons, Polylines are drawn point-by-point. Implement `setupPolylines(map: GoogleMap3D)` in `MainActivity.kt`:
 
 ```kotlin
-// Draw path to Waikiki
-activePolylines.add(map.addPolyline(
-    polylineOptions {
-        path = listOf(IOLANI_PALACE, WAIKIKI)
-        strokeWidth = 10.0
-        strokeColor = Color.BLUE
-        altitudeMode = AltitudeMode.CLAMP_TO_GROUND
-        geodesic = true
-        drawsOccludedSegments = true
+    private fun setupPolylines(map: GoogleMap3D) {
+        resetMap()
+
+        // 8. Polylines
+        // Draw path to Waikiki
+        activePolylines.add(map.addPolyline(
+            polylineOptions {
+                path = listOf(IOLANI_PALACE, WAIKIKI)
+                strokeWidth = 10.0
+                strokeColor = Color.BLUE
+                altitudeMode = AltitudeMode.CLAMP_TO_GROUND
+                geodesic = true
+                drawsOccludedSegments = true
+            }
+        ))
     }
-))
 ```
+
+<img src="images/polylines.png" alt="Blue geodesic polyline connecting Iolani Palace to Waikiki Beach" width="300"/>
 
 ---
 
@@ -640,42 +744,48 @@ activePolylines.add(map.addPolyline(
 Finally, let's have some fun. We'll load a 3D asset (a glTF file) of a Hot Air Balloon and place it over Waikiki.
 
 ### Adding a Model
-Models are just like markers, but with 3D geometry.
+Models are just like markers, but with 3D geometry. Implement `setupBalloon(map: GoogleMap3D)` in `MainActivity.kt`, attach a click listener, and add the model to `activeModels` so `resetMap()` can clean it up:
 
 ```kotlin
-val balloon = map.addModel(
-    modelOptions {
-        position = latLngAltitude {
-            latitude = WAIKIKI.latitude
-            longitude = WAIKIKI.longitude
-            altitude = 20.0 // Floating above the beach
+    private fun setupBalloon(map: GoogleMap3D) {
+        resetMap()
+
+        // Add "Balloon" Model (glTF)
+        val balloon = map.addModel(
+            modelOptions {
+                position = latLngAltitude {
+                    latitude = WAIKIKI.latitude
+                    longitude = WAIKIKI.longitude
+                    altitude = 20.0 // Float 20 meters above the beach
+                }
+                altitudeMode = AltitudeMode.ABSOLUTE
+                orientation = orientation {
+                    heading = 0.0 // North
+                    tilt = 0.0    // Upright
+                    roll = 0.0    // Level
+                }
+                url = BALLOON_MODEL_URL
+                scale = vector3D { x = BALLOON_SCALE; y = BALLOON_SCALE; z = BALLOON_SCALE }
+            }
+        )
+
+        // Add click listener
+        balloon.setClickListener {
+            lifecycleScope.launch(Dispatchers.Main) {
+                Toast.makeText(
+                    this@MainActivity,
+                    getString(R.string.clicked_the_balloon),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
-        altitudeMode = AltitudeMode.ABSOLUTE
-        orientation = orientation {
-            heading = 0.0
-            tilt = 0.0
-            roll = 0.0
-        }
-        url = BALLOON_MODEL_URL
-        scale = vector3D { x = BALLOON_SCALE; y = BALLOON_SCALE; z = BALLOON_SCALE } // Make it big!
+
+        // Track it so we can remove it later
+        activeModels.add(balloon)
     }
-)
 ```
 
-And ensuring it's clickable:
-
-```kotlin
-balloon.setClickListener {
-    lifecycleScope.launch(Dispatchers.Main) {
-        Toast.makeText(this@MainActivity, getString(R.string.clicked_the_balloon), Toast.LENGTH_SHORT).show()
-    }
-}
-```
-
-<!-- TODO: Add screenshot here.
-     Subject: "The Balloon"
-     Description: Show the 3D Balloon model floating over Waikiki.
--->
+<img src="images/balloon_model.png" alt="3D Hot Air Balloon glTF model floating over Waikiki" width="300"/>
 
 ---
 
@@ -733,10 +843,10 @@ In this example, we will attach a popover message directly to the Iolani Palace 
                 }
             }
         })
-        
+
         // Track it
         activePopovers.add(popover)
-        
+
         // 10.4. Show popover on marker click (and show immediately for demo purposes)
         palaceMarker.setClickListener {
             popover.show()
@@ -747,17 +857,13 @@ In this example, we will attach a popover message directly to the Iolani Palace 
 
 Popovers bridge the gap between the 3D world and 2D information. They are perfect for labels, detailed info windows, or even interactive menus.
 
-<!-- TODO: Add screenshot here.
-     Subject: "Popover Example"
-     Description: Show the "Welcome to Iolani Palace!" popover visible above the Iolani Palace marker.
-     Highlight the popover's clean white background and shadow.
--->
+<img src="images/popover_example.png" alt="Popover card anchored to the Iolani Palace marker" width="300"/>
 
 ---
 
 ## 11. The Scenic Tour (Animating Between Markers)
 
-Let's spread our wings and explore the whole island! In this step, we'll scatter markers across Oahu's most famous landmarks and animate the camera flying point-to-point. 
+Let's spread our wings and explore the whole island! In this step, we'll scatter markers across Oahu's most famous landmarks and animate the camera flying point-to-point.
 
 1. Verify that the `btn_tour` and `btn_clear` buttons are present in your `activity_main.xml` layout, next to the other buttons.
 2. Verify that the geographic constants for the landmarks are defined in `HonoluluData.kt`.
@@ -766,15 +872,15 @@ Let's spread our wings and explore the whole island! In this step, we'll scatter
 ```kotlin
     private suspend fun flyTour(map: GoogleMap3D) {
         val locations = listOf(
-            HONOLULU to "Honolulu",
-            DIAMOND_HEAD to "Diamond Head",
-            HANAUMA_BAY to "Hanauma Bay",
-            KOKO_HEAD to "Koko Head",
-            LANIKAI_BEACH to "Lanikai Beach",
-            MOUNT_KAALA to "Mount Ka'ala",
-            PEARL_HARBOR to "Pearl Harbor"
+            HONOLULU to getString(R.string.tour_honolulu),
+            DIAMOND_HEAD to getString(R.string.tour_diamond_head),
+            HANAUMA_BAY to getString(R.string.tour_hanauma_bay),
+            KOKO_HEAD to getString(R.string.tour_koko_head),
+            LANIKAI_BEACH to getString(R.string.tour_lanikai_beach),
+            MOUNT_KAALA to getString(R.string.tour_mount_kaala),
+            PEARL_HARBOR to getString(R.string.tour_pearl_harbor)
         )
-        
+
         // Add all markers for the tour
         resetMap()
         locations.forEach { (location, name) ->
@@ -791,26 +897,62 @@ Let's spread our wings and explore the whole island! In this step, we'll scatter
         // Fly to each location
         for ((location, _) in locations) {
             // TODO: CHALLENGE!
-            // 1. Tell the map to flyCameraTo this 'location'. 
-            //    (Hint: Use tilt = 45.0, range = 2500.0, heading = 0.0, durationInMillis = 3000L)
-            // 2. Wait for the animation to finish using awaitCameraAnimation(map)
-            // 3. Optional: Add a delay so the user can enjoy the view before flying to the next!
-            
+            // 1. Create a target Camera for this 'location' (tilt = 45.0, range = 2500.0, heading = 0.0).
+            // 2. Fly to the camera and wait using flyCameraToAndWait(map, camera, duration = 3.seconds).
+            // 3. Wait for the 3D scene tiles to load using map.awaitMapSteady(5.seconds).
+            // 4. Orbit 360 degrees around the camera using map.awaitCameraAnimation(flyAroundOptions { ... }).
+            // 5. Pause briefly using delay(1.5.seconds) before moving to the next stop!
+
         }
     }
 ```
 
+<details>
+<summary><strong>Click to view the completed <code>flyTour</code> solution</strong></summary>
+
+```kotlin
+        // Fly to each location
+        for ((location, _) in locations) {
+            val camera = camera {
+                center = location
+                tilt = 45.0
+                range = 2500.0
+                heading = 0.0
+            }
+
+            flyCameraToAndWait(
+                map,
+                camera,
+                duration = 3.seconds
+            )
+
+            // Wait for the scene to load (with a 5-second timeout so it never hangs)
+            map.awaitMapSteady(5.seconds)
+
+            map.awaitCameraAnimation(
+                flyAroundOptions {
+                    center = camera
+                    rounds = 1.0
+                    durationInMillis = 3.seconds.inWholeMilliseconds
+                }
+            )
+
+            // Pause at each location
+            delay(1.5.seconds)
+        }
+```
+
+</details>
+
 ### Stopping Animations
 
-If the tour is running and the user clicks another button, we must cancel the existing animation. Notice in the solution code we wrap `lifecycleScope.launch` in a variable `currentAnimationJob` and call `currentAnimationJob?.cancel()` before starting any new action!
-
-Wire up the new buttons in `setupButtons`:
+If the tour is running and the user clicks another button, we must cancel the existing animation. Notice in `setupButtons` we store the `lifecycleScope.launch` coroutine in `currentAnimationJob` and call `currentAnimationJob?.cancel()` before starting any new action:
 
 ```kotlin
         findViewById<Button>(R.id.btn_tour).setOnClickListener {
             currentAnimationJob?.cancel()
-            currentAnimationJob = lifecycleScope.launch { 
-                flyTour(map) 
+            currentAnimationJob = lifecycleScope.launch {
+                flyTour(map)
             }
         }
 
@@ -820,25 +962,27 @@ Wire up the new buttons in `setupButtons`:
         }
 ```
 
+<img src="images/scenic_tour.png" alt="Scenic tour flying and orbiting across Oahu landmarks" width="300"/>
+
 ---
 
 ## 12. Bonus: Jetpack Compose
 
 Prefer **Jetpack Compose** over XML? The Maps 3D SDK is View-based, but is a perfect candidate for `AndroidView`.
 
-We have included a full reference implementation in `Map3DComposeActivity.kt` (in the solution code). Here is a complete guide to recreating it.
+Open `Map3DComposeActivity.kt`, uncomment the imports at the top of the file, and follow the steps below to complete the Compose implementation.
 
 ### 1. Configure `Map3DInitConfig`
-First, define how the map should initialize using `Map3DInitConfig.create().copy(...)`.
+First, define how the map should initialize using `Map3DInitConfig.create(...)`.
 
 ```kotlin
-val map3DConfig: Map3DInitConfig = Map3DInitConfig.create().copy(
+val map3DConfig: Map3DInitConfig = Map3DInitConfig.create(
     centerLat = HONOLULU.latitude,
     centerLng = HONOLULU.longitude,
     centerAlt = 1000.0,
     heading = 0.0,
     range = 10_000_000.0, // Start from space
-    mapMode = Map3DMode.HYBRID
+    mapMode = Map3DMode.HYBRID,
 )
 ```
 
@@ -854,17 +998,16 @@ First, we need to bridge the gap between Compose and the View system using `Andr
 @Composable
 fun Map3DContainer(
     modifier: Modifier = Modifier,
-    config: Map3DInitConfig
+    config: Map3DInitConfig,
 ) {
     // State to hold the map controller
     var googleMap by remember { mutableStateOf<GoogleMap3D?>(null) }
-    
+
     Box(modifier = modifier.fillMaxSize()) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
-                // TODO: Initialize View
-                Map3DView(context, config) 
+                Map3DView(context, config)
             }
         )
     }
@@ -910,10 +1053,10 @@ update = { view ->
 To prevent memory leaks, we must pause and destroy the view when the Composable is removed from the screen.
 
 ```kotlin
-onRelease = { view -> 
+onRelease = { view ->
     googleMap = null
     view.onPause()
-    view.onDestroy() 
+    view.onDestroy()
 }
 ```
 
@@ -923,8 +1066,8 @@ Finally, let's overlay a Button to trigger our cinematic flight. We use a `Job` 
 
 ```kotlin
 // Add this state to track animations
-var animationJob by remember { mutableStateOf<Job?>(null) }
 val coroutineScope = rememberCoroutineScope()
+var animationJob by remember { mutableStateOf<Job?>(null) }
 
 // ... inside Box, after AndroidView ...
 
@@ -959,7 +1102,7 @@ Button(
                         durationInMillis = 5000L
                     }
                 )
-                
+
                 animationJob = null
             }
         }
@@ -972,8 +1115,8 @@ Button(
 }
 ```
 
-### 3. The Activity Setup
-Finally, use `setContent` to display your Composable.
+### 3. The Activity & Manifest Setup
+Finally, use `setContent` to display your Composable in `Map3DComposeActivity`, and uncomment the `<activity android:name=".Map3DComposeActivity" ... />` entry in `app/src/main/AndroidManifest.xml`:
 
 ```kotlin
 class Map3DComposeActivity : ComponentActivity() {
@@ -983,28 +1126,40 @@ class Map3DComposeActivity : ComponentActivity() {
         setContent {
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 Map3DContainer(
-                    modifier = Modifier.padding(innerPadding),
+                    modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()),
                     config = map3DConfig
                 )
             }
         }
+
+        // Hide the system bars (status bar and navigation bar) for a full-screen 3D map
+        // experience. Swiping from the screen edge reveals them transiently.
+        // Remove these lines if you prefer to keep the system bars visible at all times.
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     }
 }
 ```
 
-This pattern gives you the best of both worlds: the power of the 3D Maps SDK and the modern UI of Jetpack Compose. Check out `Map3DComposeActivity.kt` for the complete code!
+```xml
+<!-- In app/src/main/AndroidManifest.xml -->
+<activity
+    android:name=".Map3DComposeActivity"
+    android:exported="true"
+    android:label="@string/title_activity_compose" />
+```
 
-<!-- TODO: Add screenshot here.
-     Subject: "Compose Integration"
-     Description: Show the "Fly to Honolulu" Compose button overlaid on the 3D Map.
-     The visual style of the button should clearly look like a native Compose Material3 component.
--->
+This pattern gives you the best of both worlds: the power of the 3D Maps SDK and the modern UI of Jetpack Compose. Check out `Map3DComposeActivity.kt` in the `solution` project for the complete code!
+
+<img src="images/compose_integration.png" alt="Jetpack Compose Material3 Fly to Honolulu button overlaid on the 3D Map" width="300"/>
 
 ---
 
 ## Finish & Next Steps
 
-Mahalo for completing the **Aloha Explorer** codelab! You’ve gone from a empty activity to a cinematic, interactive 3D experience.
+Mahalo for completing the **Aloha Explorer** codelab! You’ve gone from an empty activity to a cinematic, interactive 3D experience.
 
 **You learned how to:**
 *   Manage the `Map3DView` lifecycle.
