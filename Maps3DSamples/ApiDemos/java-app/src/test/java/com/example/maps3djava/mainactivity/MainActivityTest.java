@@ -34,7 +34,9 @@ public class MainActivityTest {
         field.setAccessible(true);
         Map<Integer, Class<?>> samples = (Map<Integer, Class<?>>) field.get(activity);
 
-        assertThat(samples).hasSize(24);
+        assertThat(samples).hasSize(25);
+        assertThat(samples.values())
+                .contains(com.example.maps3djava.hillyroadalerts.HillyRoadAlertsActivity.class);
         assertThat(samples.values())
                 .contains(com.example.maps3djava.storelocator.StoreLocatorActivity.class);
         assertThat(samples.values())
