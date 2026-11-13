@@ -59,6 +59,7 @@ import com.example.maps3dkotlin.datavisualization.DataVisualizationActivity
 import com.example.maps3dkotlin.fieldofview.FieldOfViewActivity
 import com.example.maps3dkotlin.flightsimulator.FlightSimulatorActivity
 import com.example.maps3dkotlin.hellomap.HelloMapActivity
+import com.example.maps3dkotlin.hillyroadalerts.HillyRoadAlertsActivity
 import com.example.maps3dkotlin.mapinteractions.MapInteractionsActivity
 import com.example.maps3dkotlin.mapslocalization.MapsLocalizationActivity
 import com.example.maps3dkotlin.markers.MarkersActivity
@@ -116,6 +117,7 @@ class MainActivity : ComponentActivity() {
         Sample(R.string.feature_title_camera_restrictions, CameraRestrictionsActivity::class.java),
         Sample(R.string.feature_title_flight_simulator, FlightSimulatorActivity::class.java),
         Sample(R.string.feature_title_path_following, PathFollowingActivity::class.java),
+        Sample(R.string.feature_title_hilly_road_alerts, HillyRoadAlertsActivity::class.java),
         Sample(R.string.feature_title_path_styling, PathStylingActivity::class.java),
         Sample(R.string.feature_title_animating_models, AnimatingModelsActivity::class.java),
         Sample(R.string.feature_title_place_details, PlaceDetailsActivity::class.java),
