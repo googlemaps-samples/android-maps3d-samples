@@ -16,9 +16,6 @@
 
 package com.example.maps3d.common
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import android.view.View
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -51,7 +48,6 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -67,9 +63,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.ViewCompat
 import com.example.maps3dcommon.R
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.Map3DMode
@@ -94,23 +88,9 @@ fun rememberMap3DSessionSettings(
 ): State<Map3DSettings> {
     val view = LocalView.current
     if (!view.isInEditMode) {
-        SideEffect {
-            var ctx: Context? = view.context
-            while (ctx is ContextWrapper) {
-                if (ctx is Activity) {
-                    val window = ctx.window
-                    val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-                    insetsController.systemBarsBehavior =
-                        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                    insetsController.hide(WindowInsetsCompat.Type.systemBars())
-                    break
-                }
-                ctx = ctx.baseContext
-            }
-        }
         LaunchedEffect(Unit) {
             Map3DSettings.findMap3DView(view.rootView)?.let { mapView ->
-                Map3DSettings.applyStatusBarInsetsToMapView(mapView)
+                ViewCompat.requestApplyInsets(mapView)
             }
         }
     }
@@ -180,8 +160,8 @@ fun Map3DQuickSettingsWidget(
             }
             effectiveSettings.applyTo(googleMap3D)
             Map3DSettings.findMap3DView(view.rootView)?.let { mapView ->
-                Map3DSettings.applyStatusBarInsetsToMapView(mapView)
-                mapView.post { Map3DSettings.applyStatusBarInsetsToMapView(mapView) }
+                ViewCompat.requestApplyInsets(mapView)
+                mapView.post { ViewCompat.requestApplyInsets(mapView) }
             }
         }
     }
@@ -197,7 +177,7 @@ fun Map3DQuickSettingsWidget(
             }
             effectiveSettings.applyTo(googleMap3D)
             Map3DSettings.findMap3DView(view.rootView)?.let { mapView ->
-                Map3DSettings.applyStatusBarInsetsToMapView(mapView)
+                ViewCompat.requestApplyInsets(mapView)
             }
         }
     }

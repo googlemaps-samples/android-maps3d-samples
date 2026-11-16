@@ -25,6 +25,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioGroup
 import androidx.cardview.widget.CardView
+import androidx.core.view.ViewCompat
 import com.example.maps3d.common.Map3DQuickSettingsButton
 import com.example.maps3d.common.Map3DSettings
 import com.example.maps3d.common.Map3DUiControls
@@ -123,6 +124,7 @@ class UiControlsActivity : SampleBaseActivity() {
         // Inflate UI controls panel overlay into map container managed by SampleBaseActivity
         findViewById<ViewGroup>(R.id.map_container)?.let { container ->
             layoutInflater.inflate(R.layout.control_panel_ui_controls, container, true)
+            ViewCompat.requestApplyInsets(container)
         }
 
         findViewById<MaterialToolbar>(R.id.top_bar)?.apply {
@@ -185,7 +187,24 @@ class UiControlsActivity : SampleBaseActivity() {
             }
         }
 
+        findViewById<Map3DQuickSettingsButton?>(R.id.quick_settings_button)
+            ?.updateTopMarginForUiControls(buildCurrentUiControls())
+
         fadeHandler.postDelayed(fadeOutRunnable, 3000L)
+    }
+
+    private fun buildCurrentUiControls(): Map3DUiControls {
+        val isLeading = rgPlacement?.checkedRadioButtonId == R.id.rb_placement_leading
+        val primaryPlacement = if (isLeading) ControlPlacement.LEADING else ControlPlacement.TRAILING
+        return Map3DUiControls(
+            zoom = chipZoom?.isChecked == true,
+            tilt = chipTilt?.isChecked == true,
+            rotate = chipRotate?.isChecked == true,
+            compass = chipCompass?.isChecked == true,
+            panVertical = chipPanVertical?.isChecked == true,
+            panHorizontal = chipPanHorizontal?.isChecked == true,
+            controlsPosition = primaryPlacement,
+        )
     }
 
     private fun setAllChips(checked: Boolean) {
@@ -203,39 +222,32 @@ class UiControlsActivity : SampleBaseActivity() {
      * Applies the UI controls configuration directly to the [GoogleMap3D] instance using the SDK API.
      */
     private fun applyControlsToMap() {
+        val localUiControls = buildCurrentUiControls()
+        findViewById<Map3DQuickSettingsButton?>(R.id.quick_settings_button)
+            ?.updateTopMarginForUiControls(localUiControls)
+
         val map = googleMap3D ?: return
         val uiSettings = map.getUiControlSettings() ?: return
 
         val primaryControls = mutableListOf<Map3DControl>()
-        if (chipZoom?.isChecked == true) primaryControls.add(ZoomControl(ControlOrientation.VERTICAL))
-        if (chipTilt?.isChecked == true) primaryControls.add(TiltControl(ControlOrientation.VERTICAL))
-        if (chipRotate?.isChecked == true) primaryControls.add(RotateControl(ControlOrientation.VERTICAL))
+        if (localUiControls.zoom) primaryControls.add(ZoomControl(ControlOrientation.VERTICAL))
+        if (localUiControls.tilt) primaryControls.add(TiltControl(ControlOrientation.VERTICAL))
+        if (localUiControls.rotate) primaryControls.add(RotateControl(ControlOrientation.VERTICAL))
 
         val secondaryControls = mutableListOf<Map3DControl>()
-        if (chipPanVertical?.isChecked == true) secondaryControls.add(PanVerticalControl(ControlOrientation.VERTICAL))
-        if (chipPanHorizontal?.isChecked == true) secondaryControls.add(PanHorizontalControl(ControlOrientation.VERTICAL))
-        if (chipCompass?.isChecked == true) secondaryControls.add(CompassControl())
+        if (localUiControls.panVertical) secondaryControls.add(PanVerticalControl(ControlOrientation.VERTICAL))
+        if (localUiControls.panHorizontal) secondaryControls.add(PanHorizontalControl(ControlOrientation.VERTICAL))
+        if (localUiControls.compass) secondaryControls.add(CompassControl())
 
-        val isLeading = rgPlacement?.checkedRadioButtonId == R.id.rb_placement_leading
-        val primaryPlacement = if (isLeading) ControlPlacement.LEADING else ControlPlacement.TRAILING
-        val secondaryPlacement = if (isLeading) ControlPlacement.TRAILING else ControlPlacement.LEADING
+        val primaryPlacement = localUiControls.controlsPosition
+        val secondaryPlacement =
+            if (primaryPlacement == ControlPlacement.LEADING) ControlPlacement.TRAILING else ControlPlacement.LEADING
 
         uiSettings.setUiControlsPlacement(primaryControls, primaryPlacement)
         uiSettings.setUiControlsPlacement(secondaryControls, secondaryPlacement)
-        val localUiControls = Map3DUiControls(
-            zoom = chipZoom?.isChecked == true,
-            tilt = chipTilt?.isChecked == true,
-            rotate = chipRotate?.isChecked == true,
-            compass = chipCompass?.isChecked == true,
-            panVertical = chipPanVertical?.isChecked == true,
-            panHorizontal = chipPanHorizontal?.isChecked == true,
-            controlsPosition = primaryPlacement,
-        )
-        findViewById<Map3DQuickSettingsButton?>(R.id.quick_settings_button)
-            ?.updateTopMarginForUiControls(localUiControls)
-        Map3DSettings.applyStatusBarInsetsToMapView(map3DView)
+        ViewCompat.requestApplyInsets(map3DView)
         map3DView.post {
-            Map3DSettings.applyStatusBarInsetsToMapView(map3DView)
+            ViewCompat.requestApplyInsets(map3DView)
         }
     }
 
