@@ -72,7 +72,9 @@ To run the samples, you will need:
 
 This repository includes custom instructions (Skills) for AI coding assistants (such as **Gemini Code Assist**, **Gemini CLI**, and other agentic tools) to help generate code adhering to Maps3D best practices. 
 
-The skill is located in the `.agents/skills/android-maps3d-sdk` directory. You should install this skill into your working environment following the instructions for your specific setup. 
+The skill is located in the `.agents/skills/android-maps3d-sdk` directory. You should install this skill into your working environment following the instructions for your specific setup.
+
+To keep the skill up to date with new SDK releases, update it manually via your skill CLI (for example, `npx skills update` or `android skills add`) or by pulling the latest changes from this repository (`git pull`). The skill is intentionally offline/hermetic and never self-updates or executes remote commands during an agent turn.
 
 As a reference, you can view the [Gemini CLI documentation](https://geminicli.com/) for one way to use local skills. Please note that your specific AI agent or development environment may require different installation steps.
 

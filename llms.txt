@@ -1,0 +1,35 @@
+# Google Maps 3D SDK for Android — AI Agent Skills & Samples
+
+> Official Android sample repository and offline AI coding skill for the Google Maps 3D SDK for Android (`com.google.android.gms:play-services-maps3d`, `GoogleMap3D`, `Map3DView`, `Map3DInitConfig`) across Jetpack Compose, Kotlin Views, and Java Views. Check `SKILL.md` and `gradle/libs.versions.toml` for current SDK, Kotlin, and Android API version requirements.
+
+## Core Skill & Setup
+
+- [Android Maps 3D SDK Skill Orchestrator](.agents/skills/android-maps3d-sdk/SKILL.md): Primary Day-1/Day-2 workflow, version metadata, never-downgrade SDK checks, 2D-to-3D API translation table, and Gradle compile verification.
+- [Reference Index](.agents/skills/android-maps3d-sdk/references/index.json): Selective loading index mapping intents and SDK classes to the 8 modular references (load at most 1–2 per turn).
+- [AGENTS.md](AGENTS.md): Always-on AI routing and repository-wide Clean Architecture / MVVM guidelines.
+- [Version Catalog](gradle/libs.versions.toml): Live source of truth for `play-services-maps3d`, Kotlin, AGP, and sample dependency versions.
+- [Repository README](README.md): Overview, API key setup (`secrets.properties`), sample structure, and manual skill update instructions.
+- [Maps 3D SDK for Android Documentation](https://developers.google.com/maps/documentation/maps-3d/android-sdk): Official Google Maps Platform developer documentation.
+
+## On-Demand Reference Guides (`.agents/skills/android-maps3d-sdk/references/`)
+
+- [Jetpack Compose Setup](.agents/skills/android-maps3d-sdk/references/01a-setup-compose.md): Standalone `AndroidView` + `Map3DView` + `Map3DInitConfig` + `LifecycleEventObserver`, in-repo `:maps3d-compose`, `Map3DMode`, `MapColorScheme`, `LocaleOptions`, and `UiControlSettings`.
+- [XML Views Setup](.agents/skills/android-maps3d-sdk/references/01b-setup-xml-views.md): `<com.google.android.gms.maps3d.Map3DView>` XML `map3d:*` attributes, `DefaultLifecycleObserver`, programmatic `Map3DInitConfig`, and `TrackedMap3D`.
+- [Camera, Animations & 3D Projection](.agents/skills/android-maps3d-sdk/references/02-camera-flyto-animations.md): `Camera`, `LatLngAltitude`, `flyCameraTo`, `flyCameraAround`, `flyToAwait`/`flyAroundAwait`, `CameraRestriction`, `OnMapSteadyListener`, `StationaryCameraTracker`, and `Projection3D`.
+- [Markers, Models, Popovers & Clicks](.agents/skills/android-maps3d-sdk/references/03-markers-models-popups.md): `Marker`, `PinConfiguration`, `PinView`, `Glyph`, `ImageView`, `MarkerView`, `@UiThread` `Popover`, 3D `.glb` `Model`, and main-thread `Map3DClickEvent`.
+- [Polygons & Polylines](.agents/skills/android-maps3d-sdk/references/04-polygons-and-polylines.md): 3D `Polyline`, extruded `Polygon`, `Hole` cutouts, geodesic paths, occluded segments, and `AltitudeMode` matrix.
+- [Scenarios, Utilities & Showcase Blueprints](.agents/skills/android-maps3d-sdk/references/05-scenarios-and-utilities.md): `Scenario`, `Units`, `Utilities` (`toValidCamera`), `Validators`, `TourPlaybackController`, `PathEngine`, `RoadTerrainAnalyzer`, `PlacesUIKit3D`, and 2D-to-3D migration math.
+- [Java Interop & Construction Guide](.agents/skills/android-maps3d-sdk/references/java-interop-builders.md): Java constructors/setters, `PinConfiguration.builder()`, `MapActivity.java`, and `TrackedMap3D.java` (load only for `.java` tasks).
+- [Replit & Headless Container Gradle](.agents/skills/android-maps3d-sdk/references/replit-headless-gradle.md): `$REPL_ID` detection and ephemeral low-RAM Gradle CLI flags.
+
+## Optional
+
+- [ARCHITECTURE.md](ARCHITECTURE.md): Multi-tier Clean Architecture, MVVM, and visual testing specification.
+- [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md): Migration guide from preview releases (`0.1.x` / `0.2.x`) to GA.
+- [SAMPLE_CATALOG.md](SAMPLE_CATALOG.md): Automated catalog of samples and screenshots across Compose, Kotlin Views, and Java Views.
+- [Compose Demos README](Maps3DSamples/ComposeDemos/app/README.md): Jetpack Compose 3D map demos.
+- [Kotlin Views Demos README](Maps3DSamples/ApiDemos/kotlin-app/README.md): Kotlin XML Views 3D map demos.
+- [Java Views Demos README](Maps3DSamples/ApiDemos/java-app/README.md): Java XML Views 3D map demos.
+- [PlacesUIKit3D Showcase README](PlacesUIKit3D/README.md): Standalone Places UI Kit + Maps 3D Compose showcase.
+- [Experimental Compose Wrapper README](maps3d-compose/README.md): Reference declarative `GoogleMap3D` Compose wrapper.
+- [Snippets Catalog](snippets/CATALOG.md): Region-tagged Kotlin and Java documentation snippets.

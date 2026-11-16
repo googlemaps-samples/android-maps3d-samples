@@ -1,0 +1,170 @@
+{
+  "skill": "android-maps3d-sdk",
+  "sdk_version": "16.0.1",
+  "routing_policy": "SELECTIVE_LOADING_ONLY",
+  "max_references_per_turn": 2,
+  "references": [
+    {
+      "id": "01a-setup-compose",
+      "path": "references/01a-setup-compose.md",
+      "category": "setup",
+      "ui_framework": "jetpack-compose",
+      "languages": ["kotlin"],
+      "sdk_classes": [
+        "Map3DView",
+        "Map3DInitConfig",
+        "OnMap3DViewReadyCallback",
+        "Map3DMode",
+        "MapColorScheme",
+        "LocaleOptions",
+        "UiControlSettings",
+        "Map3DControl",
+        "CompassControl",
+        "ZoomControl",
+        "TiltControl",
+        "RotateControl",
+        "PanVerticalControl",
+        "PanHorizontalControl",
+        "MapModeControl",
+        "Spacer"
+      ],
+      "description": "Jetpack Compose setup: standalone AndroidView + Map3DView + Map3DInitConfig + LifecycleEventObserver + Modifier.fillMaxSize(), optional in-repo :maps3d-compose wrapper, Map3DMode, MapColorScheme, LocaleOptions, and UiControlSettings.",
+      "load_when": "Project uses Jetpack Compose (buildFeatures.compose = true or @Composable)."
+    },
+    {
+      "id": "01b-setup-xml-views",
+      "path": "references/01b-setup-xml-views.md",
+      "category": "setup",
+      "ui_framework": "android-views",
+      "languages": ["kotlin", "java"],
+      "sdk_classes": [
+        "Map3DView",
+        "Map3DInitConfig",
+        "OnMap3DViewReadyCallback",
+        "GoogleMap3D"
+      ],
+      "description": "XML layout (<com.google.android.gms.maps3d.Map3DView> with map3d:* attributes), DefaultLifecycleObserver / Activity lifecycle forwarding, programmatic Map3DInitConfig, and TrackedMap3D cleanup delegate.",
+      "load_when": "Project uses XML Layouts, AppCompatActivity, or Fragments without Compose."
+    },
+    {
+      "id": "02-camera-flyto-animations",
+      "path": "references/02-camera-flyto-animations.md",
+      "category": "feature",
+      "ui_framework": "any",
+      "languages": ["kotlin", "java"],
+      "sdk_classes": [
+        "Camera",
+        "LatLngAltitude",
+        "AltitudeMode",
+        "FlyToOptions",
+        "FlyAroundOptions",
+        "CameraRestriction",
+        "LatLngBounds",
+        "OnCameraAnimationEndListener",
+        "OnCameraChangedListener",
+        "OnMapReadyListener",
+        "OnMapSteadyListener"
+      ],
+      "description": "Camera positioning, flyCameraTo, flyCameraAround, stopCameraAnimation, coroutine flyToAwait/flyAroundAwait chaining, OnMapSteadyListener, CameraRestriction, LatLngBounds, StationaryCameraTracker, FieldOfView, and Projection3D.",
+      "load_when": "Positioning or animating the 3D camera, chaining fly-to/orbit tours, restricting bounds/tilt/altitude, or projecting 3D coordinates to screen pixels."
+    },
+    {
+      "id": "03-markers-models-popups",
+      "path": "references/03-markers-models-popups.md",
+      "category": "feature",
+      "ui_framework": "any",
+      "languages": ["kotlin", "java"],
+      "sdk_classes": [
+        "Marker",
+        "MarkerOptions",
+        "MarkerStyle",
+        "MarkerView",
+        "MarkerViewOptions",
+        "PinConfiguration",
+        "PinView",
+        "Glyph",
+        "ImageView",
+        "CollisionBehavior",
+        "VisibilityState",
+        "Popover",
+        "PopoverOptions",
+        "PopoverStyle",
+        "PopoverShadow",
+        "Anchorable",
+        "Model",
+        "ModelOptions",
+        "Vector3D",
+        "Orientation",
+        "Map3DClickEvent",
+        "OnMap3DClickListener",
+        "OnMarkerClickListener",
+        "OnModelClickListener"
+      ],
+      "description": "3D Markers, PinConfiguration, PinView, Glyph, ImageView, MarkerView, @UiThread Popover, 3D gLTF/GLB Models, and main-thread setMap3DClickListener (Map3DClickEvent).",
+      "load_when": "Adding markers, custom pins/glyphs, MarkerView, Popovers, 3D GLB/gLTF models, or handling map/POI/marker/model clicks."
+    },
+    {
+      "id": "04-polygons-and-polylines",
+      "path": "references/04-polygons-and-polylines.md",
+      "category": "feature",
+      "ui_framework": "any",
+      "languages": ["kotlin", "java"],
+      "sdk_classes": [
+        "Polygon",
+        "PolygonOptions",
+        "Hole",
+        "Polyline",
+        "PolylineOptions",
+        "OnPolygonClickListener",
+        "OnPolylineClickListener",
+        "AltitudeMode"
+      ],
+      "description": "3D Polylines, extruded 3D Polygons, Hole cutouts, geodesic paths, occluded segment rendering, runtime mutators, and AltitudeMode vs extruded compatibility matrix.",
+      "load_when": "Drawing 3D polylines, routes, extruded polygons, polygon holes, or occluded segment paths."
+    },
+    {
+      "id": "05-scenarios-and-utilities",
+      "path": "references/05-scenarios-and-utilities.md",
+      "category": "architecture",
+      "ui_framework": "any",
+      "languages": ["kotlin", "java"],
+      "sdk_classes": [
+        "Map3DMode",
+        "MapColorScheme",
+        "LocaleOptions",
+        "UiControlSettings",
+        "Validators",
+        "ValidatorsKt"
+      ],
+      "description": "Declarative Scenario engine, Units (Meters/km/mi/ft), camera Utilities (toValidCamera/wrapIn), RouteEngine/PathEngine, RoadTerrainAnalyzer (HillyRoadAlerts), TourPlaybackController, Places UI Kit 3D integration, and 2D-to-3D migration math.",
+      "load_when": "Building multi-stop tours, path-following simulations, terrain hazard alerts, Places 3D discovery, camera/unit utilities, or 2D-to-3D migrations."
+    },
+    {
+      "id": "java-interop-builders",
+      "path": "references/java-interop-builders.md",
+      "category": "language-interop",
+      "ui_framework": "android-views",
+      "languages": ["java"],
+      "sdk_classes": [
+        "PinConfiguration.Builder",
+        "Map3DInitConfig",
+        "PopoverOptions",
+        "PopoverStyle",
+        "PopoverShadow",
+        "Glyph"
+      ],
+      "description": "Verified 16.0.1 Java construction matrix (constructors + setters vs PinConfiguration.builder() vs fluent Popover setters), complete MapActivity.java + TrackedMap3D.java templates, and Java SAM listeners.",
+      "load_when": "ONLY when writing or refactoring Java (.java) source files."
+    },
+    {
+      "id": "replit-headless-gradle",
+      "path": "references/replit-headless-gradle.md",
+      "category": "environment",
+      "ui_framework": "any",
+      "languages": ["kotlin", "java"],
+      "sdk_classes": [],
+      "description": "$REPL_ID detection, ANDROID_HOME discovery, and ephemeral low-RAM CLI flags (-Dorg.gradle.jvmargs, -Dkotlin.daemon.jvm.options, -Dorg.gradle.daemon=false) without modifying gradle.properties.",
+      "load_when": "ONLY when $REPL_ID is set, running in a headless container/Cloud IDE, or when Gradle OOMs / lacks ANDROID_HOME."
+    }
+  ]
+}

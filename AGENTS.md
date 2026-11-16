@@ -1,3 +1,15 @@
+# Project Agent Instructions — Google Maps 3D SDK for Android
+
+- **Primary SDK:** This project uses the **Google Maps 3D SDK for Android** (`com.google.android.gms:play-services-maps3d`), NOT the 2D Maps SDK (`play-services-maps` / `maps-compose`).
+- **Mandatory Skill:** Before writing, modifying, or debugging any map, camera, marker, 3D model, polyline, polygon, popover, or click-listener code, you MUST read [.agents/skills/android-maps3d-sdk/SKILL.md](.agents/skills/android-maps3d-sdk/SKILL.md) and load **only** the 1–2 relevant files from `.agents/skills/android-maps3d-sdk/references/` (never load all references upfront).
+- **Build Verification (0 Tokens on Pass):**
+  - After modifying `build.gradle.kts`, `AndroidManifest.xml`, `secrets.properties`, or XML resources:
+    `./gradlew processDebugMainManifest processDebugResources compileDebugKotlin --console=plain -q`
+  - After modifying only `.kt` or `.java` files:
+    `./gradlew compileDebugKotlin --console=plain -q` (or `compileDebugJavaWithJavac` for Java modules)
+
+---
+
 # Android Maps 3D Samples - AI Pair Programming Guidelines & Architecture Rules
 
 You are working on the **Google Maps 3D Android Samples** repository (`android-maps3d-samples`). Apply the architecture and engineering standards defined below to guide code generation, feature development, and refactoring.
