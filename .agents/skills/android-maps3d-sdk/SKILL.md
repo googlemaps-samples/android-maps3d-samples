@@ -1,148 +1,113 @@
 ---
 name: android-maps3d-sdk
-description: Integrates the Google Maps 3D SDK into an Android application across Jetpack Compose, Kotlin Views, and Java Views. Provides procedural guidance for setup, lifecycle management, map modes (Hybrid, Satellite, Roadmap), UI controls, map localization, camera animations and restrictions, 3D projection, and 3D object manipulation (Markers, Polylines, Polygons, Models, Popovers). Use when the user wants to build immersive 3D map experiences or migrate from 2D maps.
+description: >-
+  You MUST load this skill whenever the user asks to create, style, or modify
+  any map, marker, custom marker style (PinConfiguration, Glyph, MarkerView),
+  pin, popover, camera position/animation (flyCameraTo, flyCameraAround, Camera,
+  UiControlSettings), click listener (setMap3DClickListener, Map3DClickEvent),
+  3D glTF/GLB model (addModel), polygon, or polyline—even if the prompt does NOT
+  mention "3D" or "Google Maps"—as well as whenever
+  com.google.android.gms:play-services-maps3d, GoogleMap3D, Map3DView, or
+  Map3DInitConfig is used. Only skip this skill if the user or build.gradle.kts
+  explicitly requests 2D play-services-maps or maps-compose.
 license: Apache-2.0
-compatibility: Requires an Android project and internet access. Uses play-services-maps3d version 16.0.1 or higher.
 metadata:
-  version: "1.2"
-  author: Google Maps Samples
+  author: googlemaps-samples
+  version: "2.0.0"
+  maven_artifact: "com.google.android.gms:play-services-maps3d:16.0.1"
+  secrets_plugin: "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:2.0.1"
+  min_sdk: "24"
+  min_kotlin: "2.2.0"
+  supported_compile_sdk: "35-36"
 ---
 
+# Android Maps 3D SDK — Deterministic Workflow (`play-services-maps3d:16.0.1`)
 
-# Android Maps 3D SDK Integration
+## Step 1: Verify `minSdk >= 24`, `compileSdk`, Kotlin `>= 2.2.0`, & Manifest API Key
 
-This skill guides you through integrating the Google Maps 3D SDK into an Android project. It follows the principles of progressive disclosure and relies on environment-specific templates and verified region-tagged snippets.
+1. **Inspect `gradle/libs.versions.toml` and module `build.gradle.kts` / `build.gradle`**:
+   - **Enforce `minSdk >= 24` Safely**: `play-services-maps3d:16.0.1` requires `minSdk >= 24` (declared in the AAR manifest). If `minSdk < 24`:
+     - On a **brand-new starter project** (*Empty Activity*): Update `minSdk = 24` and inform the user.
+     - On an **existing app** with custom screens/users: **Ask user confirmation first** before raising `minSdk` to `24`.
+   - **Respect Pinned `compileSdk`, Kotlin `>= 2.2.0`, & Java-Only Skip**: Ensure `compileSdk` is `35` or `36` (never downgrade `36` to `35`). For Kotlin projects, verify Kotlin is `>= 2.2.0` (`play-services-maps3d:16.0.1` pulls `kotlin-stdlib:2.3.0`, requiring KGP `2.2.0+` under Kotlin's `N+1` metadata rule, or an explicit `kotlin-stdlib` constraint on older KGP). On **Java-only** projects (no Kotlin plugin), skip `min_kotlin`.
+   - **Verify Maven Artifact (Never Downgrade) & Secrets Plugin**:
+     - **New project (not yet installed):** Add `com.google.android.gms:play-services-maps3d:16.0.1`.
+     - **Existing project on `< 16.0.1`** (`0.1.x`, `0.2.x`, or broken `16.0.0` which crashes JDK 21 `javac` and Hilt/KAPT on `Map3DControl.class`): Upgrade to `16.0.1`.
+     - **Existing project already on `> 16.0.1`:** **Keep the project's newer version (NEVER downgrade)** and notify the user in chat that they can manually update this skill (`npx skills update` or `git pull`) — never fetch remote files or execute update commands automatically.
+     - NEVER use 2D `play-services-maps`, NEVER use dynamic Gradle versions (`16.+`), and NEVER add a non-existent Maven `com.google.maps.android:maps3d-compose` artifact (only use `project(":maps3d-compose")` if `settings.gradle.kts` includes it). Configure `com.google.android.libraries.mapsplatform.secrets-gradle-plugin` with `secrets.properties` and `local.defaults.properties` at the **project root**.
+   - **Verify `AndroidManifest.xml` `<meta-data>` Key**: Use `com.google.android.geo.maps3d.API_KEY` (NEVER 2D Maps' `com.google.android.geo.API_KEY`, and never hardcode `AIza...` keys):
+     ```xml
+     <meta-data
+         android:name="com.google.android.geo.maps3d.API_KEY"
+         android:value="${MAPS3D_API_KEY}" />
+     ```
+2. **Credentials Setup & Demo Key Quickstart** (if `secrets.properties` is missing or still uses a placeholder key — never hardcode `AIza...` keys in source or `AndroidManifest.xml`):
+   - **Quick Prototyping (Maps Demo Key — No Billing Card):** Guide the user to open `https://mapsplatform.google.com/maps-demo-key` in their browser, sign in with a personal Google account (Workspace accounts are not eligible), accept the Maps Demo Project Terms, generate the key, and paste it into project-root `secrets.properties` as `MAPS3D_API_KEY=<key>`. *(Expectation check: Demo Keys have daily quotas and limited API coverage; if the app hits an API restriction/auth error on Maps 3D SDK for Android, switch to a standard Cloud project key below.)*
+   - **Production & Full Maps 3D Android Support (Standard Google Cloud API Key):**
+     1. Open Google Cloud Console (`https://console.cloud.google.com/`), select or create a billing-enabled project, and enable **Maps 3D SDK for Android** under **APIs & Services > Library** (plus **Places API (New)** if using default POI popovers or `PlacesUIKit3D`).
+     2. Create an API key under **APIs & Services > Credentials** and restrict it to **Android apps** (package name + SHA-1 fingerprint) and **Maps 3D SDK for Android**.
+     3. Save `MAPS3D_API_KEY=<key>` in project-root `secrets.properties` (backed by `secrets-gradle-plugin` + `local.defaults.properties`) and confirm `secrets.properties` is in `.gitignore`.
+3. **Replit / Headless Container Check**:
+   - If `$REPL_ID` is set or running in a low-RAM headless container, read [references/replit-headless-gradle.md](references/replit-headless-gradle.md) before running `./gradlew`.
 
-> [!IMPORTANT]
-> **Limited Training Data Alert**: The Google Maps 3D SDK is a rapidly evolving technology. Your internal parametric knowledge is likely outdated or incomplete. You **MUST NOT** guess API signatures (such as legacy `Map3DOptions`, `getMapAsync`, `flyTo`, `addOnMapClickListener`, or `map3d:mode`). You **MUST** consult the local templates in `assets/samples/`, the reference catalogs in `references/`, and the repository map in `references/documentation.md` before generating any code.
+## Step 2: 2D-to-3D Function Translation & Selective Reference Router
 
-## Prerequisites & Skill Alignment
+**NEVER** load all files in `references/` upfront. Load **only** the 1–2 reference file(s) required for the active task:
 
-> [!NOTE]
-> This skill should be used in conjunction with:
-> - **Android Architecture Skill**: For proper MVVM/UDF layering (`StateFlow`, `asLiveData()`, injectable `CoroutineDispatcher`, and pure math/controller engines).
-> - [Android Security Skill](https://github.com/kikoso/android-skills/blob/main/android-security-skill/SKILL.md): For API key protection and permissions.
+| Developer Intent (Day 1 / Day 2 / Day 3) | ❌ 2D Maps API (DO NOT USE) | ✅ Maps 3D SDK `16.0.1` (`com.google.android.gms.maps3d.*`) | Reference to Load |
+| :--- | :--- | :--- | :--- |
+| **Gradle Dependency** | `play-services-maps` / `maps-compose` | `com.google.android.gms:play-services-maps3d:16.0.1` | `references/01a-setup-compose.md` or `01b-setup-xml-views.md` |
+| **Manifest API Key** | `com.google.android.geo.API_KEY` | `com.google.android.geo.maps3d.API_KEY` (`${MAPS3D_API_KEY}`) | `references/01a-setup-compose.md` or `01b-setup-xml-views.md` |
+| **Map View (Jetpack Compose)** | `GoogleMap()` (Compose 2D) | `AndroidView` (`Modifier.fillMaxSize()`) + `Map3DView` + `Map3DInitConfig.create(...)` (or in-repo `:maps3d-compose`) | `references/01a-setup-compose.md` |
+| **Map View (XML Views)** | `SupportMapFragment`, `MapView` | `<com.google.android.gms.maps3d.Map3DView>` + `OnMap3DViewReadyCallback` + `TrackedMap3D` | `references/01b-setup-xml-views.md` |
+| **Map Mode / Theme / Locale / UI** | `googleMap.mapType`, `uiSettings` | `setMapMode(Map3DMode.*)`, `setMapColorScheme(...)`, `setLocale(LocaleOptions)`, `getUiControlSettings()` | `references/01a-setup-compose.md` or `05-scenarios-and-utilities.md` |
+| **3D Coordinates** | `LatLng(lat, lng)` | `latLngAltitude { latitude = ...; longitude = ...; altitude = ... }` | Any loaded reference |
+| **Instant Camera Pose** | `moveCamera(CameraUpdateFactory)` | `googleMap3D.setCamera(camera { center = ...; heading = ...; tilt = ...; range = ... })` | `references/02-camera-flyto-animations.md` |
+| **Smooth Fly-To / Orbit Tour** | `animateCamera(...)` | `flyCameraTo(flyToOptions { ... })`, `flyCameraAround(flyAroundOptions { ... })`, `stopCameraAnimation()` | `references/02-camera-flyto-animations.md` |
+| **Camera Bounds & Projection** | `setLatLngBoundsForCameraTarget()` | `setCameraRestriction(cameraRestriction { ... })`, `setOnMapSteadyListener`, `Projection3D` | `references/02-camera-flyto-animations.md` |
+| **Map & POI Click Listener** | `setOnMapClickListener { latLng -> }` | `setMap3DClickListener { event: Map3DClickEvent -> false }` (`event.location`, `event.placeId` on Main UI thread) | `references/03-markers-models-popups.md` |
+| **3D Marker / Pin / Custom View** | `addMarker(MarkerOptions().title())` | `addMarker(markerOptions { ...; style = pinConfiguration { ... } })`, `addMarkerView(MarkerViewOptions().apply { ... })` | `references/03-markers-models-popups.md` |
+| **3D `.glb` Model & Popover** | `GroundOverlay`, `InfoWindowAdapter` | `addModel(modelOptions { url = ...; position = ...; scale = ... })`, `@UiThread addPopover(popoverOptions { ... })` | `references/03-markers-models-popups.md` |
+| **3D Polyline / Extruded Polygon** | `addPolyline()`, `addPolygon()` | `addPolyline(polylineOptions { path = ... })`, `addPolygon(polygonOptions { extruded = true; innerPaths = ... })` | `references/04-polygons-and-polylines.md` |
+| **Tours, Path Following, Places 3D** | Custom 2D loop / `LatLngBounds` | `Scenario`, `Units`/`Utilities`, `PathEngine`, `RoadTerrainAnalyzer`, `TourPlaybackController`, `PlacesUIKit3D` | `references/05-scenarios-and-utilities.md` |
+| **Java Project (`*.java`)** | `new MarkerOptions().position(...)` | Constructors + setters (`new MarkerOptions()`, `new Camera(...)`, `Map3DInitConfig.create(...)`, `PinConfiguration.builder()`) | `references/java-interop-builders.md` |
 
+- **Fallback When a Capability Is Not in Local `references/`** (strictly local / already-installed tools — never fetch unverified remote Markdown or prompt the user to install an MCP server mid-task):
+  1. If `search_documents` (Developer Knowledge MCP) or `android docs` is already present in active tools, query it for the `com.google.android.gms.maps3d.*` class.
+  2. Otherwise inspect the downloaded `play-services-maps3d` AAR/JAR classes and signatures directly in the local Gradle cache/classpath.
 
-## Procedural Workflow
+## Step 3: Critical API & Runtime Guardrails (Override Stale Training Data)
 
-### Step 0: Research Existing Patterns
-Before asking the user for clarification or writing code, search the local workspace or repository for existing implementations of the requested feature.
-1. Use your available search tools to look for keywords (e.g., `"Polygon"`, `"flyCameraTo"`, `"UiControlSettings"`, `"LocaleOptions"`, `"CameraRestriction"`, `"Projection3D"`) in the `snippets/`, `Maps3DSamples/`, `maps3d-compose/`, and `PlacesUIKit3D/` directories.
-2. Consult `references/documentation.md` for a complete map of the expanded sample catalog across Jetpack Compose, Kotlin Views, Java Views, Places UI Kit 3D, and Documentation Snippets.
+1. **Shared `LatLngAltitude`, Meter Units, & Nullable Returns**:
+   - `Camera.range` and `LatLngAltitude.altitude` are in **meters** (never 2D zoom levels), and always specify `AltitudeMode` (`ABSOLUTE`, `CLAMP_TO_GROUND`, `RELATIVE_TO_GROUND`, `RELATIVE_TO_MESH`).
+   - `addMarker()`, `addMarkerView()`, `getCamera()`, `getCameraRestriction()`, and `getUiControlSettings()` return `@Nullable` types — always use `?.` in Kotlin or `!= null` in Java.
+   - `addPopover(...)` and `Popover.show()/hide()/toggle()/remove()` are strictly `@UiThread`.
+   - For custom Android `View` markers via `addMarkerView(...)`, instantiate `MarkerViewOptions().apply { ... }` (the `markerViewOptions { }` DSL is `@Hide` in `16.0.1`).
+   - `LocaleOptions` also has no top-level DSL; instantiate `LocaleOptions().apply { language = ...; region = ... }`.
+2. **Current `Map3DClickEvent` Signature on GA `16.0.1` (Main-Thread Dispatched)**:
+   - Do **NOT** use the deprecated 2-argument `{ location, placeId -> }` callback:
+     ```kotlin
+     googleMap3D.setMap3DClickListener { event: Map3DClickEvent ->
+         // Runs on Main UI thread; return false to allow default Places popover, true to suppress
+         false
+     }
+     ```
+   - Default POI popovers (returning `false`) require `FragmentActivity` (`AppCompatActivity`) and `com.google.android.libraries.places:places`.
+3. **Compose Sizing, `update = {}` Recomposition, `Map3DMode`, & Single-Instance Rule**:
+   - Always pass `Modifier.fillMaxSize()` (or explicit non-zero size) to `AndroidView` wrapping `Map3DView` — a `0x0` layout blocks Maps 3D auth.
+   - Always pass `Map3DMode.HYBRID` / `SATELLITE` / `ROADMAP` explicitly via `Map3DInitConfig.create(..., mapMode = Map3DMode.HYBRID)` or `Map3DView(context, Map3DMode.HYBRID)` (do NOT use the removed `0.1.0` `Map3DOptions`).
+   - **Never** call imperative methods (`addMarker`, `flyCameraTo`, `setCamera`) inside `AndroidView`'s `update = { ... }` lambda; run them inside `onMap3DViewReady` or `LaunchedEffect`.
+   - Only **one** `Map3DView` instance may be active per process; track and `.remove()` added objects before unmounting/destroying.
+   - **Zero wildcard imports** (`import com.google.android.gms.maps3d.model.*` is forbidden).
 
+## Step 4: Day-1 vs. Day-2 Compile & Verify (Mandatory — 0 Tokens on Pass)
 
-### Step 1: Determine the Environment and Features (Stack Detective)
-You MUST proactively discover the environment by inspecting the codebase before writing any code. Do NOT ask the user unless the environment is highly ambiguous.
-
-1.  **Run Search/Grep**:
-    *   Search for `androidx.compose`, `compose-compiler`, or `maps3d-compose` in `build.gradle.kts` or `libs.versions.toml` to detect **Jetpack Compose**.
-    *   Search for `com.android.application` or `com.android.library` to understand the module type.
-    *   Look for `.kt` vs `.java` files to determine the dominant **Language**.
-2.  **Identify Features**: Determine if the user needs automatic object management (cleanup) or specific 3D features based on their request:
-    *   **Core Scene & Map Modes**: `Map3DMode.HYBRID`, `Map3DMode.SATELLITE`, `Map3DMode.ROADMAP`, Cloud Map Styling (`mapId`), Map Localization (`LocaleOptions` / `setLocale`).
-    *   **Built-in UI Controls**: `UiControlSettings` (`ZoomControl`, `TiltControl`, `RotateControl`, `PanHorizontalControl`, `PanVerticalControl`, `CompassControl`, `Spacer`) placed on `LEADING`, `TRAILING`, `TOP`, or `BOTTOM` edges.
-    *   **Camera & Kinematics**: `setCamera`, `flyCameraTo`, `flyCameraAround`, `stopCameraAnimation`, `setCameraChangedListener`, `setCameraRestriction` (`CameraRestriction` + `LatLngBounds`), Field of View (FOV), Path Following, Advanced Camera Animation, and 3D-to-2D Screen Projection (`Projection3D`).
-    *   **3D Overlays & Shapes**: `Marker` (with `PinConfiguration` & `Glyph`), `Polyline` (extruded/geodesic/outlined), `Polygon` (extruded/holes via `Hole`), `Model` (glTF/GLB with `Orientation` & `Vector3D` scale), `Popover` (anchored `View` info bubbles), and Data Visualization.
-    *   **Interactivity & Places**: `setMap3DClickListener` (`Map3DClickEvent` with `location`, `placeId`, and `Boolean` consumption return) and Places UI Kit 3D integration (`PlacesUIKit3D`).
-
-Based on your discovery, follow the **Selection Logic** to retrieve boilerplate from `assets/samples/` and consult rules in `references/`.
-
-### Implementation Guidance (Selection Logic)
-1.  Identify the user's stack: (Language: Kotlin/Java, UI: Compose/Views).
-2.  Check if Lifecycle Management is required (always for 3D maps).
-3.  **Retrieve** the corresponding boilerplate from `assets/samples/` (e.g., `assets/samples/views_kotlin/MapActivity.kt.txt`).
-4.  If object tracking is needed, **retrieve** the snippet from `assets/samples/views_kotlin/snippets/`.
-5.  **Reference** the memory management and SDK rules in `references/best_practices.md` to ensure the generated code follows SDK safety guidelines.
-
-### Step 2: Base Setup
-Regardless of the environment, the following setup is required.
-
-#### 1. Dependencies (Dynamic Version Resolution)
-Before adding the dependency, you MUST identify the latest version.
-1.  Run `./gradlew :app:dependencies | grep maps3d` to check if a version is already resolved.
-2.  Or search the Google Maven repository or use available tools to find the latest version (must be **at least** `16.0.1`).
-
-Add the necessary versions and libraries to your `libs.versions.toml` file:
-
-```toml
-[versions]
-# NOTE: Verify this is the latest version of the Maps 3D SDK (must be at least "16.0.1")
-playServicesMaps3d = "16.0.1"
-lifecycleRuntimeKtx = "2.10.0"
-
-[libraries]
-play-services-maps3d = { group = "com.google.android.gms", name = "play-services-maps3d", version.ref = "playServicesMaps3d" }
-androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-```
-
-Then, add the dependencies to the app-level `build.gradle.kts` file:
-
-```kotlin
-dependencies {
-    // Google Maps 3D SDK
-    implementation(libs.play.services.maps3d)
-    // Lifecycle Runtime KTX for Coroutine interop
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-}
-```
-
-#### 2. API Key & Manifest
-Use the Secrets Gradle Plugin for Android to inject the API key securely. In app-level `build.gradle.kts`:
-
-```kotlin
-plugins {
-    alias(libs.plugins.secrets.gradle.plugin)
-}
-
-secrets {
-    propertiesFileName = "secrets.properties"
-    defaultPropertiesFileName = "local.defaults.properties"
-}
-```
-
-In `AndroidManifest.xml`, add the required permissions and reference the injected API key meta-data:
-
-```xml
-<manifest ...>
-    <!-- Required for Google Maps 3D -->
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <application ...>
-        <!-- Note the specific name for Maps 3D -->
-        <meta-data
-            android:name="com.google.android.geo.maps3d.API_KEY"
-            android:value="${MAPS3D_API_KEY}" />
-        ...
-    </application>
-</manifest>
-```
-
-### Step 3: Load Environment Template
-After determining the stack, load the corresponding files from `assets/samples/`:
-- Kotlin (Views):
-    - Layout: `assets/samples/views_kotlin/activity_main.xml` (uses `map3d:mapMode="hybrid"`)
-    - Activity: `assets/samples/views_kotlin/MapActivity.kt.txt`
-    - Snippet (Object Manager): `assets/samples/views_kotlin/snippets/object_manager_usage.kt.txt` and `assets/samples/views_kotlin/snippets/TrackedMap3D.kt.txt`
-- Kotlin + Compose: Refer to `references/catalog_compose.md` for both the declarative `GoogleMap3D` composable (`maps3d-compose`) and raw `AndroidView` + `Map3DView(context, Map3DMode.HYBRID)` patterns.
-- Java:
-    - Layout: `assets/samples/views_java/activity_main.xml` (uses `map3d:mapMode="hybrid"`)
-    - Activity: `assets/samples/views_java/MapActivity.java.txt`
-    - Snippet (Object Manager): `assets/samples/views_java/snippets/object_manager_usage.java.txt` and `assets/samples/views_java/snippets/TrackedMap3D.java.txt`
-
-
-### Step 4: Apply Best Practices
-Consult `references/best_practices.md` for detailed explanation of rules. Key rules to enforce:
-1. **Valid `mapMode` Required at Initialization**: Always specify `map3d:mapMode="hybrid"` (or `"satellite"` / `"roadmap"`) in XML or pass `Map3DMode` / `Map3DInitConfig.create(..., mapMode = ...)` when constructing `Map3DView` programmatically. Never use the legacy `map3d:mode` attribute or removed `Map3DOptions` class.
-2. **Initialization Delay & Readiness**: Wait for `setOnMapReadyListener` or introduce a short delay before initializing map elements on cold starts.
-3. **Object Management**: Use the `TrackedMap3D` delegate to clean up objects (`Marker`, `Polyline`, `Polygon`, `Model`, `Popover`, and `UiControlSettings`) on destroy to avoid cruft across singleton engine reuse.
-4. **Click Listener Contract**: `setMap3DClickListener` receives a `Map3DClickEvent` (`event.location`, `event.placeId`) and must return a `Boolean` (`true` if consumed, `false` otherwise). Object-level `setClickListener` callbacks run off the UI thread—always dispatch UI updates to the main thread.
-5. **Utilities**: Use validation utilities (`toValidCamera()`) to prevent crashes, and path utilities for smoothing/simplification (see `references/utilities_kotlin.md` or `references/utilities_java.md`).
-6. **Double-Wait Pattern**: For animations, wait for camera animation end AND map steady state (`setOnMapSteadyListener`).
-7. **Unit Conversions**: For type-safe measurements and conversions, see `references/units_kotlin.md` or `references/units_java.md` (Optional).
-8. **Secrets Security**: NEVER add `secrets.properties` to version control. NEVER add real API keys to source code or `local.defaults.properties` (see `references/secrets_enforcement.md` for Gradle enforcement snippet).
-9. **Common Operations**: Consult the language-specific catalog for verified, region-tagged reference snippets (Markers, Polylines, Polygons, Models, Popovers, Camera Animation & Restrictions, Map Localization, UI Controls):
-    *   Java: `references/catalog_java.md`
-    *   Kotlin + Views: `references/catalog_kotlin_views.md`
-    *   Jetpack Compose: `references/catalog_compose.md`
-10. **Scenario Storyboards**: For complex, multi-step workflows (e.g., Immersive Arrival, Flyover Tour, Places UI Kit Fragment Interop, Continuous Route Tracking), consult `references/scenarios.md`.
+Always pass `--console=plain -q` (emits 0 tokens of stdout on pass; prints only actionable errors to stderr on fail):
+1. **Day-1 Setup** (modified `build.gradle.kts`, `AndroidManifest.xml`, `secrets.properties`, or `res/layout/*.xml`):
+   ```bash
+   ./gradlew processDebugMainManifest processDebugResources compileDebugKotlin --console=plain -q
+   ```
+2. **Day-2 / Day-3 Code Edits** (only `.kt` or `.java` files modified):
+   ```bash
+   ./gradlew compileDebugKotlin --console=plain -q   # or compileDebugJavaWithJavac for Java modules
+   ```
