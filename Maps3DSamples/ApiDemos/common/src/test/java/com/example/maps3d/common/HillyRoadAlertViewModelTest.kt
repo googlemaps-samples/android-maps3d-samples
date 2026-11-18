@@ -197,4 +197,31 @@ class HillyRoadAlertViewModelTest {
         viewModel.advance(0.05)
         assertEquals(pausedDist, viewModel.currentState.currentDistanceMeters, 0.001)
     }
+
+    @Test
+    fun onMapReady_whenAlreadyReady_preservesRouteProgressPresetAndPausedState() {
+        viewModel.onMapReady()
+        viewModel.selectRoute(HillyRoutePreset.MOUNTAIN_PASS)
+        viewModel.seekToDistance(320.0)
+        // Simulate Activity.onPause() during configuration change (rotation)
+        viewModel.setPlaying(false)
+
+        val stateBeforeRecreation = viewModel.currentState
+        assertTrue(stateBeforeRecreation.isMapReady)
+        assertFalse(stateBeforeRecreation.isPlaying)
+        assertEquals(HillyRoutePreset.MOUNTAIN_PASS, stateBeforeRecreation.selectedPreset)
+        assertEquals(320.0, stateBeforeRecreation.currentDistanceMeters, 0.001)
+
+        // Subsequent onMapReady() from recreated Activity or Compose onMapSteady must be idempotent
+        viewModel.onMapReady()
+        val stateAfterRecreation = viewModel.currentState
+        assertTrue(stateAfterRecreation.isMapReady)
+        assertFalse(stateAfterRecreation.isPlaying)
+        assertEquals(HillyRoutePreset.MOUNTAIN_PASS, stateAfterRecreation.selectedPreset)
+        assertEquals(320.0, stateAfterRecreation.currentDistanceMeters, 0.001)
+        assertEquals(
+            stateBeforeRecreation.vehiclePosition,
+            stateAfterRecreation.vehiclePosition
+        )
+    }
 }

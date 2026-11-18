@@ -16,6 +16,7 @@
 
 package com.example.maps3dkotlin.mainactivity
 
+import com.example.maps3dkotlin.hillyroadalerts.HillyRoadAlertsActivity
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,7 +43,7 @@ class MainActivityTest {
             activityClassField.get(it) as Class<*>
         }
 
-        assertThat(sampleClasses).contains(com.example.maps3dkotlin.hillyroadalerts.HillyRoadAlertsActivity::class.java)
+        assertThat(sampleClasses).contains(HillyRoadAlertsActivity::class.java)
         assertThat(sampleClasses).contains(com.example.maps3dkotlin.storelocator.StoreLocatorActivity::class.java)
         assertThat(sampleClasses).contains(com.example.maps3dkotlin.popovers.PopoversActivity::class.java)
         assertThat(sampleClasses).contains(com.example.maps3dkotlin.mapinteractions.MapInteractionsActivity::class.java)
