@@ -162,7 +162,7 @@ public class HillyRoadAlertsActivity extends SampleBaseActivity
     }
 
     private void startRouteIfMapReady(@NonNull GoogleMap3D map) {
-        if (viewModel == null || viewModel.getCurrentState().isMapReady) {
+        if (viewModel == null) {
             return;
         }
         lastFrameTimeNanos = 0L;
