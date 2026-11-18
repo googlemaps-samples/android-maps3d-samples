@@ -18,6 +18,7 @@ package com.example.maps3djava.mainactivity;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.example.maps3djava.hillyroadalerts.HillyRoadAlertsActivity;
 import java.lang.reflect.Field;
 import java.util.Map;
 import org.junit.Test;
@@ -35,8 +36,7 @@ public class MainActivityTest {
         Map<Integer, Class<?>> samples = (Map<Integer, Class<?>>) field.get(activity);
 
         assertThat(samples).hasSize(25);
-        assertThat(samples.values())
-                .contains(com.example.maps3djava.hillyroadalerts.HillyRoadAlertsActivity.class);
+        assertThat(samples.values()).contains(HillyRoadAlertsActivity.class);
         assertThat(samples.values())
                 .contains(com.example.maps3djava.storelocator.StoreLocatorActivity.class);
         assertThat(samples.values())
