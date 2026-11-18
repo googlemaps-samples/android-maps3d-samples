@@ -152,7 +152,6 @@ class HillyRoadAlertsActivity :
     }
 
     private fun startRouteIfMapReady(map: GoogleMap3D) {
-        if (viewModel.currentState.isMapReady) return
         lastFrameTimeNanos = 0L
         viewModel.onMapReady()
         renderMapScene(map, viewModel.currentState)
