@@ -56,6 +56,7 @@ import com.example.maps3d.common.ExtremaType
 import com.example.maps3d.common.HillyRoadAlertViewModel
 import com.example.maps3d.common.Map3DQuickSettingsWidget
 import com.example.maps3d.common.Map3DSessionTheme
+import com.example.maps3d.common.TerrainExtremaPoint
 import com.example.maps3d.common.rememberMap3DSessionSettings
 import com.google.android.gms.maps3d.GoogleMap3D
 import com.google.android.gms.maps3d.model.AltitudeMode
@@ -236,75 +237,38 @@ fun HillyRoadAlertsScreen(
     val dipFormat = stringResource(CommonR.string.hilly_marker_dip_format)
     val toastFormat = stringResource(CommonR.string.hilly_marker_toast_format)
 
-    val extremaMarkerConfigs = remember(state.terrainAlert.upcomingExtrema) {
-        val upcoming = state.terrainAlert.upcomingExtrema
-        val activeIds = upcoming.map { it.id }.toSet()
-        cachedExtremaMarkerConfigs.keys.retainAll(activeIds)
-
-        upcoming.map { extremum ->
-            cachedExtremaMarkerConfigs.getOrPut(extremum.id) {
-                val isCrest = extremum.type == ExtremaType.CREST
-                val bgColor = if (isCrest) {
-                    AndroidColor.rgb(234, 67, 53) // Crest: Red-Orange (#EA4335)
-                } else {
-                    AndroidColor.rgb(2, 132, 199) // Dip: Deep Sky Blue (#0284C7)
+    val extremaMarkerConfigs = remember(
+        state.selectedPreset,
+        state.terrainAlert.upcomingExtrema,
+        crestFormat,
+        dipFormat,
+        toastFormat,
+    ) {
+        syncExtremaMarkerConfigs(
+            upcoming = state.terrainAlert.upcomingExtrema,
+            cache = cachedExtremaMarkerConfigs,
+            crestFormat = crestFormat,
+            dipFormat = dipFormat,
+            onMarkerClicked = { extremumId, labelText, fallbackDist, elevMeters ->
+                (context as? Activity)?.runOnUiThread {
+                    val liveDist = viewModel.currentState.terrainAlert.upcomingExtrema
+                        .firstOrNull { it.id == extremumId }
+                        ?.distanceAheadMeters
+                        ?: fallbackDist
+                    Toast.makeText(
+                        context,
+                        String.format(
+                            Locale.US,
+                            toastFormat,
+                            labelText,
+                            liveDist.roundToInt(),
+                            elevMeters,
+                        ),
+                        Toast.LENGTH_SHORT,
+                    ).show()
                 }
-                val borderColor = if (isCrest) {
-                    AndroidColor.rgb(254, 240, 138)
-                } else {
-                    AndroidColor.rgb(251, 188, 4) // Amber (#FBBC04)
-                }
-                val glyphText = if (isCrest) "^" else "v"
-                val signedGrade = if (isCrest) {
-                    abs(extremum.approachGradePercent)
-                } else {
-                    -abs(extremum.approachGradePercent)
-                }
-                val labelText = String.format(
-                    Locale.US,
-                    if (isCrest) crestFormat else dipFormat,
-                    signedGrade,
-                )
-                val extremumId = extremum.id
-                val fallbackDist = extremum.distanceAheadMeters
-                val elevMeters = extremum.position.altitude.roundToInt()
-                MarkerConfig(
-                    key = extremumId,
-                    position = extremum.position,
-                    altitudeMode = AltitudeMode.ABSOLUTE,
-                    label = labelText,
-                    zIndex = 8,
-                    isExtruded = true,
-                    isDrawnWhenOccluded = true,
-                    collisionBehavior = CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL,
-                    pinConfig = PinConfig(
-                        scale = 1.2f,
-                        backgroundColor = bgColor,
-                        borderColor = borderColor,
-                        glyph = GlyphConfig.Text(glyphText, AndroidColor.WHITE),
-                    ),
-                    onClick = {
-                        (context as? Activity)?.runOnUiThread {
-                            val liveDist = viewModel.currentState.terrainAlert.upcomingExtrema
-                                .firstOrNull { it.id == extremumId }
-                                ?.distanceAheadMeters
-                                ?: fallbackDist
-                            Toast.makeText(
-                                context,
-                                String.format(
-                                    Locale.US,
-                                    toastFormat,
-                                    labelText,
-                                    liveDist.roundToInt(),
-                                    elevMeters,
-                                ),
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                        }
-                    },
-                )
-            }
-        }
+            },
+        )
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -388,5 +352,75 @@ fun HillyRoadAlertsScreen(
                 .padding(12.dp)
                 .fillMaxWidth(),
         )
+    }
+}
+
+/**
+ * Synchronizes the [MarkerConfig] list for [upcoming] terrain extrema using [cache] keyed by
+ * stable extremum ID (and verifying coordinate equality), so `Map3DState.syncMarkers` reuses
+ * unchanged markers across 60fps frame ticks while evicting exited or replaced markers.
+ */
+internal fun syncExtremaMarkerConfigs(
+    upcoming: List<TerrainExtremaPoint>,
+    cache: MutableMap<String, MarkerConfig>,
+    crestFormat: String,
+    dipFormat: String,
+    onMarkerClicked: (extremumId: String, labelText: String, fallbackDist: Double, elevMeters: Int) -> Unit,
+): List<MarkerConfig> {
+    val activeIds = upcoming.map { it.id }.toSet()
+    cache.keys.retainAll(activeIds)
+
+    return upcoming.map { extremum ->
+        val existing = cache[extremum.id]
+        if (existing != null && existing.position == extremum.position) {
+            existing
+        } else {
+            val isCrest = extremum.type == ExtremaType.CREST
+            val bgColor = if (isCrest) {
+                AndroidColor.rgb(234, 67, 53) // Crest: Red-Orange (#EA4335)
+            } else {
+                AndroidColor.rgb(2, 132, 199) // Dip: Deep Sky Blue (#0284C7)
+            }
+            val borderColor = if (isCrest) {
+                AndroidColor.rgb(254, 240, 138)
+            } else {
+                AndroidColor.rgb(251, 188, 4) // Amber (#FBBC04)
+            }
+            val glyphText = if (isCrest) "^" else "v"
+            val signedGrade = if (isCrest) {
+                abs(extremum.approachGradePercent)
+            } else {
+                -abs(extremum.approachGradePercent)
+            }
+            val labelText = String.format(
+                Locale.US,
+                if (isCrest) crestFormat else dipFormat,
+                signedGrade,
+            )
+            val extremumId = extremum.id
+            val fallbackDist = extremum.distanceAheadMeters
+            val elevMeters = extremum.position.altitude.roundToInt()
+            MarkerConfig(
+                key = extremumId,
+                position = extremum.position,
+                altitudeMode = AltitudeMode.ABSOLUTE,
+                label = labelText,
+                zIndex = 8,
+                isExtruded = true,
+                isDrawnWhenOccluded = true,
+                collisionBehavior = CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL,
+                pinConfig = PinConfig(
+                    scale = 1.2f,
+                    backgroundColor = bgColor,
+                    borderColor = borderColor,
+                    glyph = GlyphConfig.Text(glyphText, AndroidColor.WHITE),
+                ),
+                onClick = {
+                    onMarkerClicked(extremumId, labelText, fallbackDist, elevMeters)
+                },
+            ).also { created ->
+                cache[extremumId] = created
+            }
+        }
     }
 }
