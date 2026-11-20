@@ -17,129 +17,70 @@
 package com.example.maps3djava.hillyroadalerts;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.maps.android.robolectric.maps3d.truth.Maps3DTruth.assertThat;
 
+import androidx.lifecycle.ViewModelProvider;
 import com.example.maps3d.common.AlertSeverity;
 import com.example.maps3d.common.HillyRoadAlertViewModel;
-import com.example.maps3d.common.HillyRoutePreset;
 import com.google.android.gms.maps3d.GoogleMap3D;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import com.google.android.gms.maps3d.Map3DView;
+import com.google.maps.android.robolectric.maps3d.Maps3DRobolectricTestRunner;
+import com.google.maps.android.robolectric.maps3d.ktx.Map3DTestHarness;
+import com.google.maps.android.robolectric.maps3d.ktx.Maps3DShadows;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
+import org.robolectric.shadows.ShadowLooper;
 
 /**
  * Robolectric unit tests for {@link HillyRoadAlertsActivity} verifying map scene synchronization
- * across initial readiness and configuration changes (Activity rotation/recreation).
+ * across initial readiness, configuration changes (Activity rotation/recreation), and teardown.
  */
-@RunWith(RobolectricTestRunner.class)
+@RunWith(Maps3DRobolectricTestRunner.class)
 public class HillyRoadAlertsActivityTest {
 
     @Test
-    public void startRouteIfMapReady_afterActivityRecreationWhenViewModelAlreadyReady_rendersSceneOnNewMap()
-            throws Exception {
+    public void onMapReady_afterActivityRecreationWhenViewModelAlreadyReady_rendersSceneOnNewMap() {
         ActivityController<HillyRoadAlertsActivity> controller =
                 Robolectric.buildActivity(HillyRoadAlertsActivity.class).setup();
-        HillyRoadAlertsActivity activity = controller.get();
+        ShadowLooper.idleMainLooper();
 
+        HillyRoadAlertsActivity initialActivity = controller.get();
+        Map3DView initialMapView = Map3DTestHarness.requireMap3DView(initialActivity);
+        GoogleMap3D initialMap = Maps3DShadows.shadowOf(initialMapView).triggerMapReady();
+        assertThat(initialMap).hasPolyline(HillyRoadAlertViewModel.BASE_ROUTE_POLYLINE_ID);
+        assertThat(initialMap).hasModel(HillyRoadAlertViewModel.VEHICLE_MODEL_ID);
+
+        // Advance simulation into the WARNING zone (250m) prior to Activity recreation
         HillyRoadAlertViewModel viewModel =
-                (HillyRoadAlertViewModel) getField(activity, "viewModel");
-
-        // Simulate state surviving a configuration change:
-        // 1. Map was previously ready and user progressed to 250m (inside the WARNING zone)
-        // 2. Old Activity's onPause() paused playback prior to recreation
-        viewModel.onMapReady();
+                new ViewModelProvider(initialActivity).get(HillyRoadAlertViewModel.class);
         viewModel.seekToDistance(250.0);
-        viewModel.setPlaying(false);
+        assertThat(viewModel.getCurrentState().terrainAlert.severity)
+                .isEqualTo(AlertSeverity.WARNING);
 
-        // Reset the Activity's per-instance rendering state to simulate a freshly recreated
-        // Activity whose new Map3DView has not yet invoked onMapReady(googleMap3D).
-        setField(activity, "renderedPreset", null);
-        setField(activity, "lastRenderedTraveledDist", -1.0);
-        setField(activity, "renderedHazardSeverity", null);
-        setField(activity, "lastRenderedVehiclePos", null);
+        // Recreate the Activity (simulating rotation): old Activity pauses & destroys,
+        // new Activity inherits the surviving ViewModel with isMapReady == true
+        controller.recreate();
+        ShadowLooper.idleMainLooper();
 
-        GoogleMap3D fakeMap = createFakeGoogleMap3D();
-        Method startMethod =
-                HillyRoadAlertsActivity.class.getDeclaredMethod(
-                        "startRouteIfMapReady", GoogleMap3D.class);
-        startMethod.setAccessible(true);
-        startMethod.invoke(activity, fakeMap);
+        // Old map overlays were cleaned up on destroy
+        assertThat(initialMap).hasNoOverlays();
+
+        // New Map3DView fires onMapReady -> recreated Activity renders the surviving scene
+        HillyRoadAlertsActivity recreatedActivity = controller.get();
+        Map3DView recreatedMapView = Map3DTestHarness.requireMap3DView(recreatedActivity);
+        GoogleMap3D recreatedMap = Maps3DShadows.shadowOf(recreatedMapView).triggerMapReady();
 
         assertThat(viewModel.getCurrentState().currentDistanceMeters).isWithin(0.001).of(250.0);
-        assertThat(getField(activity, "renderedPreset")).isEqualTo(HillyRoutePreset.ROLLER_COASTER);
-        assertThat((Double) getField(activity, "lastRenderedTraveledDist"))
-                .isWithin(0.001)
-                .of(250.0);
-        assertThat(getField(activity, "renderedHazardSeverity")).isEqualTo(AlertSeverity.WARNING);
-        assertThat(getField(activity, "lastRenderedVehiclePos"))
-                .isEqualTo(viewModel.getCurrentState().vehiclePosition);
-    }
-
-    private static GoogleMap3D createFakeGoogleMap3D() throws Exception {
-        Class<GoogleMap3D> mapClass = GoogleMap3D.class;
-        if (mapClass.isInterface()) {
-            return createInterfaceProxy(mapClass);
-        }
-        GoogleMap3D instance = allocateWithoutConstructor(mapClass);
-        for (Field field : mapClass.getDeclaredFields()) {
-            if (field.getType().isInterface()) {
-                field.setAccessible(true);
-                field.set(instance, createInterfaceProxy(field.getType()));
-            }
-        }
-        return instance;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T allocateWithoutConstructor(Class<T> clazz) throws Exception {
-        Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
-        Field unsafeField = unsafeClass.getDeclaredField("theUnsafe");
-        unsafeField.setAccessible(true);
-        Object unsafe = unsafeField.get(null);
-        Method allocateInstance = unsafeClass.getMethod("allocateInstance", Class.class);
-        return (T) allocateInstance.invoke(unsafe, clazz);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T createInterfaceProxy(Class<T> interfaceClass) {
-        return (T)
-                Proxy.newProxyInstance(
-                        interfaceClass.getClassLoader(),
-                        new Class<?>[] {interfaceClass},
-                        (proxy, method, args) -> {
-                            Class<?> returnType = method.getReturnType();
-                            if (returnType == void.class) {
-                                return null;
-                            } else if (returnType == boolean.class) {
-                                return false;
-                            } else if (returnType == int.class) {
-                                return 0;
-                            } else if (returnType == long.class) {
-                                return 0L;
-                            } else if (returnType == float.class) {
-                                return 0f;
-                            } else if (returnType == double.class) {
-                                return 0.0;
-                            } else if (returnType.isInterface()) {
-                                return createInterfaceProxy(returnType);
-                            }
-                            return null;
-                        });
-    }
-
-    private static Object getField(Object target, String name) throws Exception {
-        Field field = target.getClass().getDeclaredField(name);
-        field.setAccessible(true);
-        return field.get(target);
-    }
-
-    private static void setField(Object target, String name, Object value) throws Exception {
-        Field field = target.getClass().getDeclaredField(name);
-        field.setAccessible(true);
-        field.set(target, value);
+        assertThat(recreatedMap).hasPolyline(HillyRoadAlertViewModel.BASE_ROUTE_POLYLINE_ID);
+        assertThat(recreatedMap).hasPolyline(HillyRoadAlertViewModel.TRAVELED_ROUTE_POLYLINE_ID);
+        assertThat(recreatedMap).hasPolyline(HillyRoadAlertViewModel.HAZARD_ROUTE_POLYLINE_ID);
+        assertThat(recreatedMap).hasModel(HillyRoadAlertViewModel.VEHICLE_MODEL_ID);
+        assertThat(recreatedMap)
+                .hasModelNear(
+                        HillyRoadAlertViewModel.VEHICLE_MODEL_ID,
+                        viewModel.getCurrentState().vehiclePosition.getLatitude(),
+                        viewModel.getCurrentState().vehiclePosition.getLongitude());
     }
 }

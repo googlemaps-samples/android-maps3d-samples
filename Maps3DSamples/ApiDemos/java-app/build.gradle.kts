@@ -86,6 +86,7 @@ dependencies {
     testImplementation(libs.junit) // "junit:junit:4.13.2"
     testImplementation(libs.json) // "org.json:json:20251224"
     testImplementation(libs.robolectric) // "org.robolectric:robolectric:4.16.1"
+    testImplementation(libs.maps3d.testing.robolectric)
     testImplementation(libs.androidx.core) // "androidx.test:core:1.7.0"
     testImplementation(libs.google.truth) // "com.google.truth:truth:1.4.5"
 
