@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.19.0](https://github.com/googlemaps-samples/android-maps3d-samples/compare/v1.18.0...v1.19.0) (2026-11-24)
+
+
+### Features
+
+* **camera:** add 4-way AltitudeMode camera and marker controls across Kotlin, Java, and Compose ([#86](https://github.com/googlemaps-samples/android-maps3d-samples/issues/86)) ([8ca676a](https://github.com/googlemaps-samples/android-maps3d-samples/commit/8ca676a691d65ef3ae13e02a6afc393f099a1922))
+* default 3D map UI controls to off outside UiControlsActivity and update 16.0.1 docs/catalogs ([#89](https://github.com/googlemaps-samples/android-maps3d-samples/issues/89)) ([cb553e0](https://github.com/googlemaps-samples/android-maps3d-samples/commit/cb553e08d766d1c468ca07dc45c7aaf81b5871e5))
+* **HillyRoadAlert:** add Hilly & Undulating Road Early Alerts sample for Compose ([#103](https://github.com/googlemaps-samples/android-maps3d-samples/issues/103)) ([8f672c0](https://github.com/googlemaps-samples/android-maps3d-samples/commit/8f672c01f168de1cb0e33c8803a2eff5b290c957))
+* **HillyRoadAlert:** add Hilly & Undulating Road Early Alerts sample for Java ([#102](https://github.com/googlemaps-samples/android-maps3d-samples/issues/102)) ([7db38c6](https://github.com/googlemaps-samples/android-maps3d-samples/commit/7db38c64eea5a2fe8d5f8d131b18cb8abd1a3a04))
+* **HillyRoadAlert:** add Hilly & Undulating Road Early Alerts sample for Kotlin ([#101](https://github.com/googlemaps-samples/android-maps3d-samples/issues/101)) ([24f1c40](https://github.com/googlemaps-samples/android-maps3d-samples/commit/24f1c4082460de33735b051b6ad194335a040bb8))
+
+
+### Bug Fixes
+
+* **snippets:** correct region tag markers in marker and map init snippets ([#91](https://github.com/googlemaps-samples/android-maps3d-samples/issues/91)) ([3b4ee95](https://github.com/googlemaps-samples/android-maps3d-samples/commit/3b4ee9589ef1629701080943c874e2f8efadf3b9))
+
 ## [1.18.0](https://github.com/googlemaps-samples/android-maps3d-samples/compare/v1.17.0...v1.18.0) (2026-10-22)
 
 
