@@ -2,8 +2,12 @@ package com.example.alohaexplorer
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+// TODO: Step 12 - Uncomment imports after adding the Maps 3D SDK dependency
+// import androidx.activity.compose.setContent
 // import androidx.compose.foundation.layout.Box
 // import androidx.compose.foundation.layout.fillMaxSize
 // import androidx.compose.foundation.layout.padding
@@ -32,117 +36,56 @@ import androidx.activity.enableEdgeToEdge
 // import kotlinx.coroutines.Job
 // import kotlinx.coroutines.launch
 
-// TODO: Step 12 - Jetpack Compose
+// TODO: Step 12.1 - Configure Map3DInitConfig
 /*
-val map3DConfig: Map3DInitConfig = Map3DInitConfig.create().copy(
-    centerLat = HONOLULU.latitude,
-    centerLng = HONOLULU.longitude,
-    centerAlt = 1000.0,
-    heading = 0.0,
-    range = 10_000_000.0, // Start from space
-    mapMode = Map3DMode.HYBRID
+val map3DConfig: Map3DInitConfig = Map3DInitConfig.create(
+    // TODO: Set centerLat, centerLng, centerAlt, heading, range, and mapMode
 )
+*/
 
+/**
+ * A minimalist activity to demonstrate how to integrate [Map3DView] with Jetpack Compose.
+ */
 class Map3DComposeActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // TODO: Step 12.3 - Display Map3DContainer inside setContent with a Scaffold
+        /*
         setContent {
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 Map3DContainer(
-                    modifier = Modifier.padding(innerPadding),
+                    modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()),
                     config = map3DConfig
                 )
             }
         }
+        */
+
+        // Hide the system bars (status bar and navigation bar) for a full-screen 3D map
+        // experience. Swiping from the screen edge reveals them transiently.
+        // Remove these lines if you prefer to keep the system bars visible at all times.
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     }
 }
 
+// TODO: Step 12.2 - Implement the Map3DContainer Composable Wrapper
+/*
 @Composable
 fun Map3DContainer(
     modifier: Modifier = Modifier,
-    config: Map3DInitConfig
+    config: Map3DInitConfig,
 ) {
-    // State to hold the map controller
-    var googleMap by remember { mutableStateOf<GoogleMap3D?>(null) }
-    
-    // Animation State
-    var animationJob by remember { mutableStateOf<Job?>(null) }
-    val coroutineScope = rememberCoroutineScope()
+    // 12.2.1. State to hold the GoogleMap3D controller and active animation Job
 
     Box(modifier = modifier.fillMaxSize()) {
-        AndroidView(
-            modifier = Modifier.fillMaxSize(),
-            factory = { context ->
-                 Map3DView(context, config).apply {
-                    // Manually call onCreate and onResume. In a real app, wire this to LifecycleOwner.
-                    onCreate(null)
-                    onResume()
-                 }
-            },
-            update = { view ->
-                view.getMap3DViewAsync(
-                    object : OnMap3DViewReadyCallback {
-                        override fun onMap3DViewReady(map3D: GoogleMap3D) {
-                            googleMap = map3D
-                        }
-                        override fun onError(e: Exception) {
-                            googleMap = null
-                            throw e
-                        }
-                    }
-                )
-            },
-            onRelease = { view -> 
-                googleMap = null
-                view.onPause()
-                view.onDestroy() 
-            }
-        )
-        
-        Button(
-            // Enable only if map is ready and not currently animating
-            enabled = googleMap != null && animationJob == null,
-            onClick = {
-                animationJob?.cancel()
-                animationJob = coroutineScope.launch {
-                    val map = googleMap ?: return@launch
-                    
-                    // 1. Fly to Honolulu
-                    map.awaitCameraAnimation(
-                        flyToOptions {
-                            endCamera = camera {
-                                center = HONOLULU
-                                tilt = 45.0
-                                range = 20_000.0
-                            }
-                            durationInMillis = 2000L
-                        }
-                    )
+        // 12.2.1 - 12.2.4. Bridge Map3DView using AndroidView (factory, update, onRelease)
 
-                    // 2. Orbit
-                    map.awaitCameraAnimation(
-                        flyAroundOptions {
-                            center = camera {
-                                center = HONOLULU
-                                tilt = 45.0
-                                range = 20_000.0
-                            }
-                            rounds = 1.0
-                            durationInMillis = 5000L
-                        }
-                    )
-                    
-                    animationJob = null
-                }
-            },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 32.dp)
-        ) {
-            Text(stringResource(R.string.fly_to_honolulu))
-        }
+        // 12.2.5. Overlay a Compose Button to trigger the flight and orbit animation
     }
 }
 */
