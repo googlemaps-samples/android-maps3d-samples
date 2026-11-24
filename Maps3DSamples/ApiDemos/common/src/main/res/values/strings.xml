@@ -350,4 +350,34 @@
     <string name="store_locator_clear_filters">Clear Filters</string>
     <string name="routes_switch_to_3d">3D View</string>
     <string name="routes_switch_to_2d">2D View</string>
+
+    <!-- Hilly & Undulating (Roller-Coaster) Road Early Alerts strings -->
+    <string name="feature_title_hilly_road_alerts">Hilly &amp; Undulating Road Alerts</string>
+    <string name="hilly_road_controls_title">Terrain Lookahead Controls</string>
+    <string name="hilly_alert_title_roller_coaster">🎢 Roller-Coaster Terrain</string>
+    <string name="hilly_alert_title_blind_crest">⚠️ Blind Crest Ahead</string>
+    <string name="hilly_alert_title_steep_climb">⛰️ Steep Climb Ahead</string>
+    <string name="hilly_alert_title_steep_descent">⛰️ Steep Descent Ahead</string>
+    <string name="hilly_alert_title_clear">✅ Clear Road Profile</string>
+    <string name="hilly_alert_distance_approaching_format">In %1$d m</string>
+    <string name="hilly_alert_distance_active_format">ACTIVE — %1$d m left</string>
+    <string name="hilly_alert_distance_clear">Normal Grade</string>
+    <string name="hilly_telemetry_extrema_format" tools:ignore="PluralsCandidate">%1$d Crests / %2$d Dips</string>
+    <string name="hilly_telemetry_max_grade_format">Max Grade: +%1$.1f%% / %2$.1f%%</string>
+    <string name="hilly_sparkline_label_format">Lookahead Elevation (Next %1$d m)</string>
+    <string name="hilly_current_telemetry_format">Grade: %1$+.1f%% • %2$d / %3$d m</string>
+    <string name="hilly_jump_to_hills">Jump to Hills</string>
+    <string name="hilly_route_preset_label">Route Preset</string>
+    <string name="hilly_route_roller_coaster">Roller-Coaster</string>
+    <string name="hilly_route_mountain_pass">Mountain Pass</string>
+    <string name="hilly_route_coastal">Coastal</string>
+    <string name="hilly_lookahead_horizon_label">Lookahead Horizon</string>
+    <string name="hilly_horizon_250m" translatable="false">250m</string>
+    <string name="hilly_horizon_500m" translatable="false">500m</string>
+    <string name="hilly_horizon_750m" translatable="false">750m</string>
+    <string name="hilly_speed_label">Playback Speed</string>
+    <string name="hilly_crest_camera_preview">Crest Camera Preview</string>
+    <string name="hilly_marker_crest_format">Crest (%1$+.0f%%)</string>
+    <string name="hilly_marker_dip_format">Dip (%1$+.0f%%)</string>
+    <string name="hilly_marker_toast_format">%1$s • %2$d m ahead (%3$d m elev)</string>
 </resources>
