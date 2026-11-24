@@ -48,6 +48,10 @@
 
 
     <string name="scenarios_none" translatable="false">Pick a scenario</string>
+    <string name="scenarios_seattle_cinematic_reveal" translatable="false">Seattle: Roadmap to Hybrid Cinematic Orbit (Loop)</string>
+    <string name="scenarios_uk_shard_tower_bridge" translatable="false">UK: The Shard to Tower Bridge (Loop)</string>
+    <string name="scenarios_brazil_copacabana_ipanema" translatable="false">Brazil: Copacabana to Ipanema &amp; Arpoador (Loop)</string>
+    <string name="scenarios_scenic_world_tour" translatable="false">Scenic World Tour: Natural &amp; Cityscapes (Loop)</string>
     <string name="scenarios_tower_bridge" translatable="false">Tower Bridge</string>
     <string name="scenarios_nyc_hybrid" translatable="false">NYC hybrid</string>
     <string name="scenarios_nyc_satellite" translatable="false">NYC satellite</string>

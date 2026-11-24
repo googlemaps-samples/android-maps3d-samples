@@ -34,6 +34,7 @@ data class Scenario(
   val models: List<ModelOptions> = emptyList(), // Add models property
   val polylines: List<PolylineOptions> = emptyList(),
   val polygons: List<PolygonOptions> = emptyList(),
+  val loop: Boolean = false,
 ) {
   @Composable fun getTitle() = stringResource(titleId)
 
@@ -70,6 +71,7 @@ fun createScenario(
   models: String = "",
   polylines: String = "",
   polygon: String? = null,
+  loop: Boolean = false,
 ): Scenario {
   return Scenario(
     name = name,
@@ -80,6 +82,7 @@ fun createScenario(
     models = models.toModels(),
     polylines = polylines.toPolylines(),
     polygons = polygon?.toPolygons() ?: emptyList(),
+    loop = loop,
   )
 }
 

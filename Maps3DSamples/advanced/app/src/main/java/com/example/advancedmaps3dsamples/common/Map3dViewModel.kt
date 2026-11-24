@@ -18,6 +18,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.advancedmaps3dsamples.utils.CameraUpdate
+import com.example.advancedmaps3dsamples.utils.awaitCameraUpdate as executeCameraUpdate
 import com.example.advancedmaps3dsamples.utils.copy
 import com.example.advancedmaps3dsamples.utils.toCameraUpdate
 import com.example.advancedmaps3dsamples.utils.toHeading
@@ -68,6 +69,7 @@ abstract class Map3dViewModel : ViewModel() {
    * Consumers should use the `mapReady` flow to react to the availability of the map.
    */
   private var _googleMap3D = MutableStateFlow<GoogleMap3D?>(null)
+  val googleMap3D = _googleMap3D.asStateFlow()
 
   private val _cameraRestriction = MutableStateFlow<CameraRestriction?>(null)
   val cameraRestriction = _cameraRestriction.asStateFlow()
@@ -402,8 +404,7 @@ abstract class Map3dViewModel : ViewModel() {
   }
 
   suspend fun awaitCameraUpdate(cameraUpdate: CameraUpdate) {
-    _googleMap3D.value?.let { controller ->
-      com.example.advancedmaps3dsamples.utils.awaitCameraUpdate(controller, cameraUpdate)
-    }
+    val controller = _googleMap3D.filterNotNull().first()
+    executeCameraUpdate(controller, cameraUpdate)
   }
 }

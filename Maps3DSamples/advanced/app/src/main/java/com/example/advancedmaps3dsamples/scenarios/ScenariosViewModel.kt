@@ -80,6 +80,8 @@ class ScenariosViewModel @Inject constructor() : Map3dViewModel() {
   private val _roll = MutableStateFlow(DEFAULT_ROLL)
   val roll = _roll as StateFlow<Double>
 
+  private var currentStepIndex: Int = 0
+
   init {
     viewModelScope.launch {
       viewState
@@ -186,8 +188,33 @@ class ScenariosViewModel @Inject constructor() : Map3dViewModel() {
     setScenario(nextScenario) // Set the next scenario
   }
 
+  /**
+   * Advances to the next FlyTo stop within the current scenario, wrapping around to the first
+   * FlyTo stop if at the end. If the scenario has fewer than 2 FlyTo stops, advances to the next
+   * scenario.
+   */
+  fun nextStop() {
+    val scenario = _viewState.value.scenario ?: return
+    val steps = scenario.animationSteps
+    val flyToIndices = steps.indices.filter { steps[it] is FlyToStep }
+    if (flyToIndices.size < 2) {
+      nextScenario()
+      return
+    }
+    val nextFlyToIndex =
+      flyToIndices.firstOrNull { it > currentStepIndex } ?: flyToIndices.first()
+    val actualStartIndex =
+      if (nextFlyToIndex > 0 && steps[nextFlyToIndex - 1] is SetMapModeStep) {
+        nextFlyToIndex - 1
+      } else {
+        nextFlyToIndex
+      }
+    Log.i(TAG, "nextStop called, currentStepIndex=$currentStepIndex, jumping to $actualStartIndex")
+    playAnimation(steps, startStepIndex = actualStartIndex, showCountDown = false)
+  }
+
   private fun isMapReady(): Boolean {
-    return _viewState.value.scenario != null
+    return _viewState.value.scenario != null && googleMap3D.value != null
   }
 
   /**
@@ -195,19 +222,27 @@ class ScenariosViewModel @Inject constructor() : Map3dViewModel() {
    *
    * The function first cancels any ongoing animation jobs.
    * It then starts a countdown displayed to the user before executing the animation steps.
-   * The animation steps are executed sequentially.
-   * After the animation is finished, a delay is introduced before the "finished" state is shown.
+   * The animation steps are executed sequentially, looping back to the first [FlyToStep] if
+   * the current scenario has `loop = true`.
    *
    * @param animation The list of [AnimationStep] to play.
+   * @param startStepIndex The step index to start playback from.
+   * @param showCountDown Whether to display the 3-second countdown overlay before starting.
    */
-  private fun playAnimation(animation: List<AnimationStep>) {
+  private fun playAnimation(
+    animation: List<AnimationStep>,
+    startStepIndex: Int = 0,
+    showCountDown: Boolean = true,
+  ) {
     animationJob?.cancel()
 
     animationJob =
       viewModelScope.launch {
-        for (count in 3 downTo 1) {
-          _viewState.value = viewState.value.copy(countDown = count, countDownVisible = true)
-          delay(1.seconds)
+        if (showCountDown) {
+          for (count in 3 downTo 1) {
+            _viewState.value = viewState.value.copy(countDown = count, countDownVisible = true)
+            delay(1.seconds)
+          }
         }
 
         while (!isMapReady()) {
@@ -215,7 +250,17 @@ class ScenariosViewModel @Inject constructor() : Map3dViewModel() {
         }
 
         _viewState.value = viewState.value.copy(countDown = 0, countDownVisible = false)
-        animation.forEach { step -> step(this@ScenariosViewModel) }
+        var index = startStepIndex
+        while (index < animation.size) {
+          currentStepIndex = index
+          Log.i(TAG, "Playing step $index: ${animation[index]}")
+          animation[index](this@ScenariosViewModel)
+          index++
+          if (index >= animation.size && _viewState.value.scenario?.loop == true) {
+            val loopStartIndex = animation.indexOfFirst { it is FlyToStep || it is SetMapModeStep }
+            index = if (loopStartIndex >= 0) loopStartIndex else 0
+          }
+        }
         delay(2.seconds)
         _viewState.value = viewState.value.copy(showFinished = true)
       }
