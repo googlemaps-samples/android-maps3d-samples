@@ -69,7 +69,7 @@ class HelloMapActivity : AppCompatActivity(), OnMap3DViewReadyCallback {
         val insetsController = WindowCompat.getInsetsController(window, window.decorView)
         insetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        insetsController.hide(WindowInsetsCompat.Type.systemBars())
+        insetsController.show(WindowInsetsCompat.Type.systemBars())
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

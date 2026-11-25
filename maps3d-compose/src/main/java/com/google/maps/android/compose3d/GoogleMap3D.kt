@@ -25,6 +25,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.ViewCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -166,6 +167,10 @@ fun GoogleMap3D(
                         googleMap3D.setMapMode(mapMode)
                         googleMap3D.setCamera(initialValidCamera)
                         Map3DRegistry.setInstance(googleMap3D)
+                        ViewCompat.requestApplyInsets(map3dView)
+                        map3dView.post {
+                            ViewCompat.requestApplyInsets(map3dView)
+                        }
 
                         googleMap3D.setOnMapReadyListener {
                             googleMap3D.setOnMapReadyListener(null)

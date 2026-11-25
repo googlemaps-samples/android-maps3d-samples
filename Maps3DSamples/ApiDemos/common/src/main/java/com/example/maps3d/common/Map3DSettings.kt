@@ -18,11 +18,8 @@ package com.example.maps3d.common
 
 import android.annotation.SuppressLint
 import android.util.Log
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -216,11 +213,6 @@ data class Map3DSettings(
             return null
         }
 
-        private data class ControlMarginState(
-            val baseTopMargin: Int,
-            val appliedTopMargin: Int,
-        )
-
         /**
          * Resolves the status bar height (in pixels) for the given [view].
          */
@@ -280,116 +272,6 @@ data class Map3DSettings(
                 (statusBarTop - viewTopInWindow).coerceAtLeast(0)
             } else {
                 statusBarTop
-            }
-        }
-
-        /**
-         * Offsets top-anchored SDK UI control containers (`ControlPlacement.LEADING` and
-         * `ControlPlacement.TRAILING`) inside [mapView] so the status bar does not overlap them
-         * when [mapView] is rendered full-screen.
-         *
-         * Workaround: [Map3DView] does not yet respect window insets or expose a padding API for
-         * its internal UI control overlays on edge-to-edge screens. Tracked in
-         * https://issuetracker.google.com/issues/575850758.
-         */
-        @JvmStatic
-        @JvmOverloads
-        fun applyStatusBarInsetsToMapView(
-            mapView: ViewGroup,
-            explicitStatusBarTop: Int? = null,
-        ) {
-            // Workaround: Until Map3DView natively handles window insets or exposes map padding
-            // (https://issuetracker.google.com/issues/575850758), offset its top-aligned UI
-            // control containers when the map draws under the status bar.
-            if (explicitStatusBarTop != null) {
-                mapView.setTag(
-                    R.id.map3d_status_bar_top_tag,
-                    explicitStatusBarTop.coerceAtLeast(0),
-                )
-            }
-            val effectiveExplicitTop =
-                explicitStatusBarTop ?: (mapView.getTag(R.id.map3d_status_bar_top_tag) as? Int)
-            val statusBarOverlap = resolveStatusBarOverlapPx(mapView, effectiveExplicitTop)
-            ensureRootLayoutListener(mapView)
-            offsetTopControlContainers(mapView, statusBarOverlap, mapView)
-        }
-
-        private fun ensureRootLayoutListener(rootMapView: ViewGroup) {
-            if (rootMapView.getTag(R.id.map3d_insets_listener_tag) == true) return
-            rootMapView.setTag(R.id.map3d_insets_listener_tag, true)
-
-            rootMapView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-                val cachedTop = rootMapView.getTag(R.id.map3d_status_bar_top_tag) as? Int
-                val overlap = resolveStatusBarOverlapPx(rootMapView, cachedTop)
-                offsetTopControlContainers(rootMapView, overlap, rootMapView)
-            }
-        }
-
-        private fun ensureContainerLayoutListener(container: LinearLayout, rootMapView: ViewGroup) {
-            if (container.getTag(R.id.map3d_insets_listener_tag) == true) return
-            container.setTag(R.id.map3d_insets_listener_tag, true)
-
-            container.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-                val cachedTop = rootMapView.getTag(R.id.map3d_status_bar_top_tag) as? Int
-                val overlap = resolveStatusBarOverlapPx(rootMapView, cachedTop)
-                applyMarginToControlContainer(container, overlap)
-            }
-        }
-
-        private fun applyMarginToControlContainer(
-            container: LinearLayout,
-            statusBarOverlap: Int,
-        ) {
-            val lp = container.layoutParams as? ViewGroup.MarginLayoutParams ?: return
-            val state = container.getTag(R.id.map3d_base_top_margin_tag) as? ControlMarginState
-            val baseTopMargin = if (state == null || lp.topMargin != state.appliedTopMargin) {
-                lp.topMargin
-            } else {
-                state.baseTopMargin
-            }
-            val targetTopMargin = baseTopMargin + statusBarOverlap.coerceAtLeast(0)
-            container.setTag(
-                R.id.map3d_base_top_margin_tag,
-                ControlMarginState(baseTopMargin, targetTopMargin),
-            )
-            if (lp.topMargin != targetTopMargin) {
-                lp.topMargin = targetTopMargin
-                container.layoutParams = lp
-                container.post {
-                    if (container.isAttachedToWindow) {
-                        container.requestLayout()
-                    }
-                }
-            }
-        }
-
-        private fun offsetTopControlContainers(
-            group: ViewGroup,
-            statusBarOverlap: Int,
-            rootMapView: ViewGroup,
-        ) {
-            for (i in 0 until group.childCount) {
-                val child = group.getChildAt(i) ?: continue
-                if (child is LinearLayout) {
-                    val lp = child.layoutParams as? ViewGroup.MarginLayoutParams
-                    val isTopAligned = when (lp) {
-                        is FrameLayout.LayoutParams -> {
-                            val vGravity = lp.gravity and Gravity.VERTICAL_GRAVITY_MASK
-                            vGravity != Gravity.BOTTOM && vGravity != Gravity.CENTER_VERTICAL
-                        }
-                        null -> false
-                        else -> !child.isLaidOut || child.top <= group.height / 2
-                    }
-                    if (lp != null && isTopAligned) {
-                        ensureContainerLayoutListener(child, rootMapView)
-                        applyMarginToControlContainer(child, statusBarOverlap)
-                        // Do not recurse into individual control views inside a control container
-                        continue
-                    }
-                }
-                if (child is ViewGroup) {
-                    offsetTopControlContainers(child, statusBarOverlap, rootMapView)
-                }
             }
         }
     }
