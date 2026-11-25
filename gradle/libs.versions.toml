@@ -23,6 +23,7 @@ material = "1.14.0"
 playServicesBase = "18.11.1"
 playServicesLocation = "21.4.0"
 playServicesMaps3d = "16.0.1"
+maps3dTestingRobolectric = "1.0.0-rc03"
 places = "6.0.2"
 placesCompose = "0.3.0"
 secretsGradlePlugin = "2.0.1"
@@ -73,6 +74,7 @@ play-services-maps3d = { module = "com.google.android.gms:play-services-maps3d",
 places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
 places-compose = { module = "com.google.maps.android:places-compose", version.ref = "placesCompose" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+maps3d-testing-robolectric = { module = "com.google.maps.android:maps-testing-robolectric-maps3d", version.ref = "maps3dTestingRobolectric" }
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
 
