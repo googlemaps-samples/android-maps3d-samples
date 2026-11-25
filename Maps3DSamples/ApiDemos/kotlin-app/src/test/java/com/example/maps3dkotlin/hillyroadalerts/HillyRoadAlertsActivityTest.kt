@@ -21,8 +21,8 @@ import com.example.maps3d.common.AlertSeverity
 import com.example.maps3d.common.HillyRoadAlertViewModel
 import com.google.common.truth.Truth.assertThat
 import com.google.maps.android.robolectric.maps3d.Maps3DRobolectricTestRunner
-import com.google.maps.android.robolectric.maps3d.ktx.requireMap3DView
-import com.google.maps.android.robolectric.maps3d.ktx.shadow
+import com.google.maps.android.robolectric.maps3d.requireMap3DView
+import com.google.maps.android.robolectric.maps3d.shadow
 import com.google.maps.android.robolectric.maps3d.truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
